@@ -117,7 +117,7 @@ import { CanvasDisplaySettings } from "./CanvasDisplaySettings";
 import { useCanvasDisplaySettings } from "./useCanvasDisplaySettings";
 import { beginWallChain, appendWallChain, finishWallChain } from "@/application/drawing/wall-chain";
 import type { WallChain } from "@/application/drawing/wall-chain";
-import { defaultGridSettings } from "@/application/snapping/grid-settings";
+import { defaultGridSettings, type GridSettings } from "@/application/snapping/grid-settings";
 import {
   HatchFillFields,
   HatchPaintFields,
@@ -224,6 +224,7 @@ import { SectionDocumentWindow } from "./SectionDocumentWindow";
 import { drawingInfo } from "@/application/views/drawing-info";
 import { changeDrawingDocument } from "@/application/views/documents";
 
+const PAPER_GRID_SETTINGS: GridSettings = Object.freeze({ enabled: true, spacing: 0.001 });
 /** Tools of a layout: the last fixes by hand, no dimensions (docs/LAYOUTS.md, LZ1). */
 const LAYOUT_TOOLS: ReadonlySet<ToolId> = new Set<ToolId>(["select", "line", "text", "hatch"]);
 /** Tools of the Plankopfplaner: drawing only, nothing of the building (PK2). */
@@ -311,7 +312,9 @@ export function CadWorkspace({
   const [displaySettingsOpen, setDisplaySettingsOpen] = useState(false);
   const { wallWidth, setWallWidth, cutFill, setCutFill, showRenovation, setShowRenovation } =
     useCanvasDisplaySettings();
-  const [gridSettings, setGridSettings] = useState(defaultGridSettings);
+  const [planGridSettings, setPlanGridSettings] = useState(defaultGridSettings);
+  // Paper (layouts, Plankopf) snaps to its own, fine grid: 1 mm (docs/LAYOUTS.md).
+  const [paperGridSettings, setPaperGridSettings] = useState(PAPER_GRID_SETTINGS);
   const [ortho, setOrtho] = useState(false);
   const [hoverDwellMs, setHoverDwellMs] = useState(DEFAULT_HOVER_DWELL_MS);
   // Compact rail only (WL1); the arrangement is remembered in this browser.
@@ -329,6 +332,7 @@ export function CadWorkspace({
   const realProject = history.present;
   const space = editing.space;
   const project = space ? spaceLens(realProject, space) : realProject;
+  const gridSettings = space ? paperGridSettings : planGridSettings;
   const activeBlock =
     space?.kind === "title-block"
       ? realProject.titleBlocks?.find((t) => t.id === space.id)
@@ -3998,7 +4002,7 @@ export function CadWorkspace({
           }
           zoomSlot={setZoomSlot}
           gridSettings={gridSettings}
-          onGridSettings={setGridSettings}
+          onGridSettings={space ? setPaperGridSettings : setPlanGridSettings}
           grid={grid}
           snap={snap}
           ortho={ortho}
