@@ -15,12 +15,22 @@ type ToolRailProps = {
   onSettings?: (tool: ToolId) => void;
   /** Opens the window to arrange the tools. */
   onCustomize: () => void;
+  /** Only these tools work here (Plankopfplaner, docs/PLANKOPF.md); the others are greyed. */
+  allowed?: ReadonlySet<ToolId> | undefined;
 };
 
 /** Compact tool rail without labels (user decision 01.11.2026): name and key in the tooltip. */
-export function ToolRail({ activeTool, layout, onSelect, onSettings, onCustomize }: ToolRailProps) {
+export function ToolRail({
+  activeTool,
+  layout,
+  onSelect,
+  onSettings,
+  onCustomize,
+  allowed,
+}: ToolRailProps) {
   const button = (tool: CadTool) => {
     const active = activeTool === tool.id;
+    const blocked = !!allowed && !allowed.has(tool.id);
     return (
       <Tooltip key={tool.id} delayDuration={250}>
         <TooltipTrigger asChild>
@@ -29,6 +39,7 @@ export function ToolRail({ activeTool, layout, onSelect, onSettings, onCustomize
             size="icon"
             aria-label={`${tool.label} tool`}
             aria-pressed={active}
+            disabled={blocked}
             onClick={() => onSelect(tool.id)}
             onDoubleClick={() => onSettings?.(tool.id)}
             className={cn(

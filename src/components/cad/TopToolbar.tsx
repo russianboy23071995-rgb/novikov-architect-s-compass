@@ -73,6 +73,8 @@ type TopToolbarProps = {
   onRoomList: () => void;
   /** Element list with quantities (docs/MENGEN.md, ML2). */
   onElementList: () => void;
+  /** Opens the Plankopfplaner (docs/PLANKOPF.md). */
+  onTitleBlockPlanner: () => void;
   /** Modify menu (docs/KONTEXTMENUE.md): only Pipette and trimming, no delete or order. */
   onPipette: () => void;
   canPipette: boolean;
@@ -276,6 +278,7 @@ export function TopToolbar(props: TopToolbarProps) {
             <DropdownMenuItem onSelect={props.onLayers}>Ebenen</DropdownMenuItem>
             <DropdownMenuItem onSelect={props.onRoomList}>Raumliste</DropdownMenuItem>
             <DropdownMenuItem onSelect={props.onElementList}>Bauteilliste</DropdownMenuItem>
+            <DropdownMenuItem onSelect={props.onTitleBlockPlanner}>Plankopfplaner</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         <div className="flex items-center gap-0.5 border-r border-border pr-2">

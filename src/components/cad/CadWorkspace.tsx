@@ -189,6 +189,8 @@ import {
   tabSectionId,
   layoutTab,
   tabLayoutId,
+  titleBlockTab,
+  tabTitleBlockId,
   withCanvasTab,
   type CanvasView,
 } from "@/application/views/canvas-tabs";
@@ -209,6 +211,18 @@ import { LayoutSheetView } from "./LayoutSheetView";
 import { LayoutSettingsWindow, type LayoutDraftTarget } from "./LayoutSettingsWindow";
 import { layoutFolderTree, projectLayouts, projectMasterLayouts } from "@/domain/views/layouts";
 import { changeLayouts } from "@/application/views/layouts";
+import { titleBlockLens } from "@/application/views/title-block-space";
+import { changeTitleBlocks } from "@/application/views/title-blocks";
+
+/** Tools of the Plankopfplaner: drawing only, nothing of the building (PK2). */
+const TITLE_BLOCK_TOOLS: ReadonlySet<ToolId> = new Set<ToolId>([
+  "select",
+  "line",
+  "text",
+  "hatch",
+  "dimension",
+  "measure",
+]);
 import {
   addHeightMarks,
   removeHeightMarks,
@@ -263,6 +277,7 @@ export function CadWorkspace({
   // A layout or master layout open as a canvas tab (docs/LAYOUTS.md, LA4).
   const [activeLayoutId, setActiveLayoutId] = useState<string | null>(null);
   const [layoutWindow, setLayoutWindow] = useState<LayoutDraftTarget | null>(null);
+  const [lastTitleBlockId, setLastTitleBlockId] = useState<string | null>(null);
   // Section tool: start, then end; click 3 chooses the viewing side. Session state only.
   const [sectionStart, setSectionStart] = useState<Point | null>(null);
   const [sectionEnd, setSectionEnd] = useState<Point | null>(null);
@@ -295,8 +310,11 @@ export function CadWorkspace({
   );
   const { history, session: pendingSession } = editing;
   const layerActivation = editing.documentLayerActivation;
-  const project = history.present;
-  const autosave = useLocalAutosave(project, editing.projectLoad ?? project.id);
+  // The real project; in the Plankopfplaner the tools see the title block's lens (PK2).
+  const realProject = history.present;
+  const space = editing.space;
+  const project = space ? titleBlockLens(realProject, space.id) : realProject;
+  const autosave = useLocalAutosave(realProject, editing.projectLoad ?? realProject.id);
   const activeDocument = project.drawingDocuments?.find((d) => d.id === activeDocumentId);
   const viewContext = useMemo(
     () =>
@@ -599,6 +617,13 @@ export function CadWorkspace({
   };
 
   const selectTool = (next: ToolId) => {
+    // The Plankopfplaner draws only: building tools stay off there (PK2).
+    if (space && !TITLE_BLOCK_TOOLS.has(next)) {
+      showNotice(
+        "Im Plankopfplaner gibt es nur Zeichenwerkzeuge (Linie, Text, Schraffur, Maßkette).",
+      );
+      return;
+    }
     cancelInteraction();
     // Selecting and the dimension tool (height marks, BS2) also work in a section tab.
     if (next !== "select" && next !== "dimension") setActiveSectionId(null);
@@ -1457,7 +1482,7 @@ export function CadWorkspace({
   const saveProject = () => {
     setExportMessage("");
     try {
-      requestProjectDownload(project, browserProjectDownload);
+      requestProjectDownload(realProject, browserProjectDownload);
       setExportMessage(
         "Download angefordert · Speicherung auf dem Datenträger nicht bestätigt. Noch nicht übernommene Eingaben sind nicht enthalten.",
       );
@@ -2044,7 +2069,7 @@ export function CadWorkspace({
     setExportMessage("");
     setModelError("");
     try {
-      const content = await exportIfc(project);
+      const content = await exportIfc(realProject);
       const url = URL.createObjectURL(new Blob([content], { type: "application/x-step" }));
       const anchor = document.createElement("a");
       anchor.href = url;
@@ -2070,22 +2095,28 @@ export function CadWorkspace({
   };
 
   // Canvas tabs (docs/SCHNITT.md): a view without a tab opens one; tabs of removed sections go.
-  const sections = project.sections;
+  const sections = realProject.sections;
   const sectionIds = new Set((sections ?? []).map((s) => s.id));
   const activeSection = activeSectionId && sectionIds.has(activeSectionId) ? activeSectionId : null;
   if (activeSectionId && !activeSection) setActiveSectionId(null);
-  const layoutNames = [...projectMasterLayouts(project), ...projectLayouts(project)].map((l) => ({
+  const layoutNames = [
+    ...projectMasterLayouts(realProject),
+    ...projectLayouts(realProject),
+    ...(realProject.titleBlocks ?? []),
+  ].map((l) => ({
     id: l.id,
     name: l.name,
   }));
   const layoutIds = new Set(layoutNames.map((l) => l.id));
   const activeLayout = activeLayoutId && layoutIds.has(activeLayoutId) ? activeLayoutId : null;
   if (activeLayoutId && !activeLayout) setActiveLayoutId(null);
-  const activeView = activeLayout
-    ? layoutTab(activeLayout)
-    : activeSection
-      ? sectionTab(activeSection)
-      : canvasViewOf(mode);
+  const activeView = space
+    ? titleBlockTab(space.id)
+    : activeLayout
+      ? layoutTab(activeLayout)
+      : activeSection
+        ? sectionTab(activeSection)
+        : canvasViewOf(mode);
   const shownTabs = existingCanvasTabs(
     withCanvasTab(canvasTabs, activeView),
     sectionIds,
@@ -2094,8 +2125,25 @@ export function CadWorkspace({
   if (shownTabs.join("|") !== canvasTabs.join("|")) setCanvasTabs(shownTabs);
   function selectCanvasTab(view: CanvasView) {
     const sectionId = tabSectionId(view),
-      layoutId = tabLayoutId(view);
+      layoutId = tabLayoutId(view),
+      blockId = tabTitleBlockId(view);
     setCanvasTabs((tabs) => withCanvasTab(tabs, view));
+    if (blockId !== null) {
+      // The Plankopfplaner: the plan with the title block's sheet (docs/PLANKOPF.md, PK2).
+      cancelInteraction();
+      setActiveSectionId(null);
+      setActiveLayoutId(null);
+      setActiveDocumentId(null);
+      setSelection(null);
+      if (mode !== "2D") changeMode("2D");
+      if (!TITLE_BLOCK_TOOLS.has(tool)) setTool("select");
+      setLastTitleBlockId(blockId);
+      return dispatchEditing({
+        type: "space",
+        space: { kind: "title-block", id: blockId },
+      });
+    }
+    if (space) dispatchEditing({ type: "space", space: null });
     if (layoutId !== null) {
       cancelInteraction();
       setActiveSectionId(null);
@@ -2149,6 +2197,7 @@ export function CadWorkspace({
   function changeMode(next: ViewMode) {
     setActiveSectionId(null);
     setActiveLayoutId(null);
+    if (space) dispatchEditing({ type: "space", space: null });
     if (activeDocumentId && next === "3D") {
       showNotice("Dieses Abbild ist ein 2D-Grundriss.");
       return;
@@ -2581,13 +2630,13 @@ export function CadWorkspace({
       <RoomListPanel
         open={roomListOpen}
         onOpenChange={setRoomListOpen}
-        project={project}
+        project={realProject}
         onSelectRoom={(id) => selectElement({ kind: "room", id })}
       />
       <ElementListPanel
         open={elementListOpen}
         onOpenChange={setElementListOpen}
-        project={project}
+        project={realProject}
         onSelect={(target) => selectElement(target)}
       />
       {roomSettingsOpen && (
@@ -2739,6 +2788,27 @@ export function CadWorkspace({
             setDemandOpen(false);
             setModelError("");
             setElementListOpen(true);
+          }}
+          onTitleBlockPlanner={() => {
+            setDemandOpen(false);
+            setModelError("");
+            // The last one edited, else the first; without any, a new „Plankopf“ (PK2).
+            const blocks = realProject.titleBlocks ?? [];
+            const open = blocks.find((t) => t.id === lastTitleBlockId) ?? blocks[0] ?? null;
+            if (open) return selectCanvasTab(titleBlockTab(open.id));
+            try {
+              const id = crypto.randomUUID();
+              const next = changeTitleBlocks(realProject, realProject, {
+                kind: "create",
+                id,
+                name: "Plankopf",
+              });
+              if (space) dispatchEditing({ type: "space", space: null });
+              dispatchEditing({ type: "project", project: next });
+              selectCanvasTab(titleBlockTab(id));
+            } catch (cause) {
+              setModelError((cause as Error).message);
+            }
           }}
           layout={layout}
           navigatorOpen={navigatorOpen}
@@ -2919,7 +2989,7 @@ export function CadWorkspace({
                 <CanvasTabs
                   tabs={shownTabs}
                   active={activeView}
-                  storeyName={storeyOf(project).name}
+                  storeyName={storeyOf(realProject).name}
                   sections={sections ?? []}
                   layouts={layoutNames}
                   onSelect={selectCanvasTab}
@@ -2934,11 +3004,11 @@ export function CadWorkspace({
                 <div role="tabpanel" aria-label="Layout" className="absolute inset-0 z-30">
                   <LayoutSheetView
                     key={activeLayout}
-                    project={project}
+                    project={realProject}
                     layoutId={activeLayout}
                     onSettings={() => {
-                      const layout = projectLayouts(project).find((l) => l.id === activeLayout);
-                      const master = projectMasterLayouts(project).find(
+                      const layout = projectLayouts(realProject).find((l) => l.id === activeLayout);
+                      const master = projectMasterLayouts(realProject).find(
                         (m) => m.id === activeLayout,
                       );
                       setLayoutWindow(
@@ -2956,12 +3026,12 @@ export function CadWorkspace({
                   {layoutWindow && (
                     <LayoutSettingsWindow
                       key={(layoutWindow.id ?? "new") + layoutWindow.kind}
-                      project={project}
+                      project={realProject}
                       target={layoutWindow}
-                      folders={layoutFolderTree(project)}
+                      folders={layoutFolderTree(realProject)}
                       onApply={(action) => {
-                        changeLayouts(project, project, action);
-                        dispatchEditing({ type: "layout", base: project, action });
+                        changeLayouts(realProject, realProject, action);
+                        dispatchEditing({ type: "layout", base: realProject, action });
                       }}
                       onClose={() => setLayoutWindow(null)}
                     />
@@ -3665,6 +3735,7 @@ export function CadWorkspace({
           </section>
           <div className="absolute bottom-2 left-2 z-20" style={{ top: insets.top }}>
             <ToolRail
+              allowed={space ? TITLE_BLOCK_TOOLS : undefined}
               activeTool={tool}
               layout={toolLayout}
               onSelect={selectTool}
@@ -3757,7 +3828,7 @@ export function CadWorkspace({
                   }
                   onOpenLayout={(id) => selectCanvasTab(layoutTab(id))}
                   activeLayoutId={activeLayout}
-                  project={project}
+                  project={realProject}
                   active={
                     selectedSection
                       ? [selectedSection.id]
@@ -3770,14 +3841,15 @@ export function CadWorkspace({
                   onSelect={(id, _label, toggle) => {
                     if (id === SECTIONS_FOLDER_ID || id === ELEVATIONS_FOLDER_ID) return;
                     if (sectionIds.has(id)) return selectCanvasTab(sectionTab(id));
-                    if (project.storeys.some((s) => s.id === id)) {
+                    if (realProject.storeys.some((s) => s.id === id)) {
+                      if (space) dispatchEditing({ type: "space", space: null });
                       setActiveSectionId(null);
                       cancelInteraction();
                       setSelection(null);
                       setDemandOpen(false);
                       setTool("select");
                       setActiveDocumentId(null);
-                      dispatchEditing({ type: "working-storey", base: project, storeyId: id });
+                      dispatchEditing({ type: "working-storey", base: realProject, storeyId: id });
                       return;
                     }
                     if (activeDocumentId) return;

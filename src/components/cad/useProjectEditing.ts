@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useReducer } from "react";
+import { createEditingState } from "@/application/direct-edit/controller";
 import {
-  createEditingState,
-  editingReducer,
-  type EditingEvent,
-} from "@/application/direct-edit/controller";
+  spaceEditingReducer,
+  type SpaceEditingEvent,
+  type SpaceEditingState,
+} from "@/application/views/title-block-space";
 import { loadPatternLibrary } from "@/application/hatches/pattern-library";
 import { resolveProjectHatchPatterns } from "@/application/hatches/pattern-resolution";
 import {
@@ -27,7 +28,7 @@ function context() {
 
 /** Browser storage adapter; no library reads inside model reducers or geometry. */
 export function useProjectEditing(initial: () => Project, drawingDocumentId: string | null = null) {
-  const [state, dispatch] = useReducer(editingReducer, undefined, () => {
+  const [state, dispatch] = useReducer(spaceEditingReducer, undefined, (): SpaceEditingState => {
     const project = initial(),
       library = context();
     const resolution = resolveProjectHatchPatterns(project, project, library.patternRecords);
@@ -39,7 +40,7 @@ export function useProjectEditing(initial: () => Project, drawingDocumentId: str
     };
   });
   const send = useCallback(
-    (event: EditingEvent) => {
+    (event: SpaceEditingEvent) => {
       if (event.type === "project" && drawingDocumentId) event = { ...event, drawingDocumentId };
       dispatch(
         ["load-project", "project", "undo", "redo"].includes(event.type)
