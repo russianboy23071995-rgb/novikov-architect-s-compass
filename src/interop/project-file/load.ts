@@ -52,6 +52,7 @@ import {
   projectV46Schema,
   projectV47Schema,
   projectV48Schema,
+  projectV49Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
@@ -270,6 +271,14 @@ export function migrateProjectData(value: unknown): Project {
   if (value.schemaVersion === 36)
     return migrateProjectData(
       withColumnLayer(withoutBoundHeights({ ...projectV36Schema.parse(value), schemaVersion: 37 })),
+    );
+  // Schema 49 files carry no placed drawings; the strict v49 schema rejects smuggled ones.
+  if (value.schemaVersion === 49)
+    return validateProject(
+      withoutBoundHeights({
+        ...projectV49Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
     );
   // Schema 48 files carry no project information or layout fields for automatic texts.
   if (value.schemaVersion === 48)

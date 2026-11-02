@@ -1,4 +1,5 @@
 import { textSchema } from "../elements/text/model.ts";
+import { placedDrawingSchema } from "../elements/drawing/model.ts";
 import { dimensionSchema } from "../elements/dimension/model.ts";
 import { columnSchema } from "../elements/column/model.ts";
 import { stairSchema } from "../elements/stair/model.ts";
@@ -47,6 +48,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(s.stairs ?? []),
       ...(s.dimensions ?? []),
       ...(s.texts ?? []),
+      ...(s.drawings ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,
@@ -84,6 +86,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(s.stairs ? { stairs: s.stairs.filter((stair) => ids.has(stair.id)) } : {}),
       ...(s.dimensions ? { dimensions: s.dimensions.filter((d) => ids.has(d.id)) } : {}),
       ...(s.texts ? { texts: s.texts.filter((t) => ids.has(t.id)) } : {}),
+      ...(s.drawings ? { drawings: s.drawings.filter((d) => ids.has(d.id)) } : {}),
     },
   };
   freeze(affected);
@@ -124,6 +127,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(storeyOf(affected).stairs ?? []),
       ...(storeyOf(affected).dimensions ?? []),
       ...(storeyOf(affected).texts ?? []),
+      ...(storeyOf(affected).drawings ?? []),
       ...storeyOf(affected).lines!,
       ...storeyOf(affected).hatches,
       ...storeyOf(affected).references,
@@ -260,6 +264,15 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
               })),
             }
           : {}),
+        // Placed drawings move with their position; mask and size stay (docs/ZEICHNUNG.md).
+        ...(storeyOf(affected).drawings
+          ? {
+              drawings: storeyOf(affected).drawings!.map((d) => ({
+                ...d,
+                position: translate(d.position),
+              })),
+            }
+          : {}),
         ...(storeyOf(affected).dimensions
           ? {
               dimensions: storeyOf(affected).dimensions!.map((d) => {
@@ -293,6 +306,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
     for (const stair of storeyOf(geometry).stairs ?? []) stairSchema.parse(stair);
     for (const d of storeyOf(geometry).dimensions ?? []) dimensionSchema.parse(d);
     for (const t of storeyOf(geometry).texts ?? []) textSchema.parse(t);
+    for (const d of storeyOf(geometry).drawings ?? []) placedDrawingSchema.parse(d);
     for (const opening of storeyOf(geometry).windows)
       if (!detachedEnd || opening.wallId === movingId)
         validateWindowGeometry(opening, localWalls.get(opening.wallId)!);
@@ -327,6 +341,9 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(s.columns ? { columns: replace(s.columns, storeyOf(patch.geometry).columns ?? []) } : {}),
       ...(s.stairs ? { stairs: replace(s.stairs, storeyOf(patch.geometry).stairs ?? []) } : {}),
       ...(s.texts ? { texts: replace(s.texts, storeyOf(patch.geometry).texts ?? []) } : {}),
+      ...(s.drawings
+        ? { drawings: replace(s.drawings, storeyOf(patch.geometry).drawings ?? []) }
+        : {}),
       ...(s.dimensions
         ? { dimensions: replace(s.dimensions, storeyOf(patch.geometry).dimensions ?? []) }
         : {}),
@@ -355,6 +372,7 @@ export function prepareStoreysTranslation(source: Project, selectedIds: readonly
       ...(s.stairs ?? []),
       ...(s.dimensions ?? []),
       ...(s.texts ?? []),
+      ...(s.drawings ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,
@@ -424,6 +442,7 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
       ...(s.stairs ?? []),
       ...(s.dimensions ?? []),
       ...(s.texts ?? []),
+      ...(s.drawings ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,

@@ -110,7 +110,11 @@ export function fromSpaceLens(real: Project, space: DrawingSpace, next: Project)
       titleBlocks: real.titleBlocks!.map((t) => (t.id === space.id ? { ...t, storey: sheet } : t)),
     };
   // A layout keeps a drawing only while something is drawn on it.
-  const empty = !sheet.lines?.length && !sheet.texts?.length && !sheet.hatches.length;
+  const empty =
+    !sheet.lines?.length &&
+    !sheet.texts?.length &&
+    !sheet.hatches.length &&
+    !sheet.drawings?.length;
   const rest = (real.layoutDrawings ?? []).filter((d) => d.layoutId !== space.id);
   const drawings = empty ? rest : [...rest, { layoutId: space.id, storey: sheet }];
   const { layoutDrawings: _old, ...without } = base;

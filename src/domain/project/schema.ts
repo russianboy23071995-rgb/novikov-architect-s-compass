@@ -35,6 +35,7 @@ import {
   wallAssembliesSchema,
 } from "../elements/wall/assembly.ts";
 import { resolveStoreyLevels } from "../storeys/heights.ts";
+import { placedDrawingSchema } from "../elements/drawing/model.ts";
 import {
   layoutFolderSchema,
   layoutLibraryProblem,
@@ -673,10 +674,25 @@ export const projectV48Schema = projectV45Schema.extend({
 });
 // Built from v45 directly: one more extend level is too deep for the type checker.
 /** Schema 49: project information and layout fields for automatic texts (PLANKOPF.md, AT1). */
-const projectSchema = projectV45Schema.extend({
-  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+export const projectV49Schema = projectV45Schema.extend({
+  schemaVersion: z.literal(49),
   modelViews: z.array(anyModelViewSchema).optional(),
   layoutDrawings: z.array(layoutDrawingSchema).max(5000).optional(),
+  masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
+  layouts: z.array(layoutV49Schema).max(5000).optional(),
+  projectInfo: projectInfoSchema.optional(),
+});
+/** Schema 50: drawings placed on layouts (docs/ZEICHNUNG.md, ZW1). */
+const drawingStoreySchema = projectV43Schema.shape.storeys.element.extend({
+  drawings: z.array(placedDrawingSchema).max(500).optional(),
+});
+const layoutDrawingV50Schema = z.object({ layoutId: id, storey: drawingStoreySchema }).strict();
+// Built from v45 directly: one more extend level is too deep for the type checker.
+const projectSchema = projectV45Schema.extend({
+  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+  storeys: z.array(drawingStoreySchema).min(1),
+  modelViews: z.array(anyModelViewSchema).optional(),
+  layoutDrawings: z.array(layoutDrawingV50Schema).max(5000).optional(),
   masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
   layouts: z.array(layoutV49Schema).max(5000).optional(),
   projectInfo: projectInfoSchema.optional(),
@@ -1091,6 +1107,8 @@ export function validateProject(
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,
+      // Title block sheets (schema 43 storeys) hold no placed drawings.
+      ...((s as { drawings?: readonly { id: string }[] }).drawings ?? []),
     ]),
   ];
   for (const entity of entities) {
@@ -1100,6 +1118,13 @@ export function validateProject(
   const used = new Set<string>();
   const { storeys, groundStoreyId: _ground, ...shared } = project;
   validateRoomNumbers(storeys);
+  // Drawings lie on layouts only (ZW1). A layout's sheet seen as a storey (the drawing space
+  // of a layout tab) carries the id „sheet-<layout>“; a storey of the building never does.
+  const sheetIds = new Set(
+    [...projectLayouts(project), ...projectMasterLayouts(project)].map((l) => `sheet-${l.id}`),
+  );
+  if (storeys.some((storey) => storey.drawings?.length && !sheetIds.has(storey.id)))
+    throw new Error("Zeichnungen gehören auf ein Layout, nicht in ein Geschoss.");
   const localLevels = new Map(
     resolveStoreyLevels(storeys, project.groundStoreyId).map((s) => [s.storeyId, s.elevation]),
   );
@@ -1484,6 +1509,8 @@ function drawingSheetPatterns(
     storey.wallJoins,
     storey.wallTJunctions,
     ...(dimensions ? [] : [storey.dimensions]),
+    // Placed drawings belong on layouts, not in title blocks (ZW1).
+    ...(dimensions ? [storey.drawings] : []),
   ];
   if (building.some((list) => list?.length))
     throw new Error(
@@ -1501,8 +1528,15 @@ function drawingSheetPatterns(
     drawingDocuments: [],
   };
   const checked = validateStoreyScope(scope, scope, reuse);
-  for (const annotation of [...(storey.dimensions ?? []), ...(storey.texts ?? [])])
+  for (const annotation of [
+    ...(storey.dimensions ?? []),
+    ...(storey.texts ?? []),
+    ...(storey.drawings ?? []),
+  ])
     if (!project.layers.some((l) => l.id === annotation.layerId))
       throw new Error("Unknown layer: " + annotation.layerId);
+  for (const drawing of storey.drawings ?? [])
+    if (!project.drawingDocuments?.some((d) => d.id === drawing.documentId))
+      throw new Error("Zeichnung ohne Abbild.");
   return checked.hatchPatterns.map((p) => p.id);
 }

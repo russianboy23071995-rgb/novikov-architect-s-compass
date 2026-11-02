@@ -829,6 +829,8 @@ export function CadWorkspace({
     // Slabs and roofs: outline edited in the plan, moved as a whole (SLAB_/ROOF_ELEMENT.md).
     // Columns move as a whole too (docs/STUETZEN.md, P3).
     const area =
+      // A placed drawing moves as a whole; its size is fixed (docs/ZEICHNUNG.md).
+      selection.kind === "drawing" ||
       selection.kind === "slab" ||
       selection.kind === "roof" ||
       selection.kind === "room" ||
@@ -861,7 +863,9 @@ export function CadWorkspace({
                     ? storeyOf(project).dimensions!.find((d) => d.id === selection.id)!.points[0]!
                     : selection.kind === "text"
                       ? storeyOf(project).texts!.find((t) => t.id === selection.id)!.position
-                      : editAnchor(project, selection));
+                      : selection.kind === "drawing"
+                        ? storeyOf(project).drawings!.find((d) => d.id === selection.id)!.position
+                        : editAnchor(project, selection));
       cancelInteraction();
       try {
         const axis =
@@ -897,7 +901,11 @@ export function CadWorkspace({
         stair: ["Treppen", "die Treppe", "Treppen"],
         dimension: ["Maßketten", "die Maßkette", "Maßketten"],
         text: ["Texte", "der Text", "Texte"],
-      }[selection.kind as "slab" | "roof" | "room" | "column" | "stair" | "dimension" | "text"];
+        drawing: ["Zeichnungen", "die Zeichnung", "Zeichnungen"],
+      }[
+        selection.kind as
+          "slab" | "roof" | "room" | "column" | "stair" | "dimension" | "text" | "drawing"
+      ];
       showNotice(
         inSolid
           ? `${words[0]}umriss im Grundriss bearbeiten; in 3D wird ${words[1]} als Ganzes bewegt.`
@@ -910,7 +918,8 @@ export function CadWorkspace({
       selection.kind === "column" ||
       selection.kind === "stair" ||
       selection.kind === "dimension" ||
-      selection.kind === "text"
+      selection.kind === "text" ||
+      selection.kind === "drawing"
     )
       return;
     if (solidMove && selection.kind === "wall" && !pickedPoint.anchor) {
@@ -3431,6 +3440,8 @@ export function CadWorkspace({
                           )
                         )
                           return;
+                        // Mask edges of a placed drawing come with ZW3.
+                        if (target.kind === "drawing") return;
                         cancelInteraction();
                         setSelection(target);
                         setTool("select");

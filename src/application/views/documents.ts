@@ -149,6 +149,10 @@ export function changeDrawingDocument(
     });
   }
   if (action.kind === "delete") {
+    const placed = (current.layoutDrawings ?? []).some((d) =>
+      d.storey.drawings?.some((p) => p.documentId === target.id),
+    );
+    if (placed) throw new Error("Das Abbild liegt als Zeichnung auf einem Layout.");
     const users = (current.layouts ?? []).filter((l) => l.documentId === target.id);
     if (users.length)
       throw new Error(
