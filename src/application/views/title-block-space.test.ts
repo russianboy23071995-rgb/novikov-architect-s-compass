@@ -153,3 +153,33 @@ test("drawing on a layout and its master: own sheets, written back, removed with
   raw.layoutDrawings![0]!.storey.dimensions = [{} as never];
   assert.throws(() => validateProject(raw));
 });
+
+test("paper and margin frame of a space are snap targets with readable names", async () => {
+  const { spaceLens } = await import("./title-block-space.ts");
+  const { projectSnapReferences } = await import("../snapping/project-references.ts");
+  const { snapPointLabel } = await import("../snapping/point-label.ts");
+  const p = createStandardProject("p", "eg", "og");
+  const real = changeTitleBlocks(p, p, { kind: "create", id: "tb1", name: "Plankopf" });
+  const lens = spaceLens(real, { kind: "title-block", id: "tb1" });
+  const refs = projectSnapReferences(lens);
+  const at = (id: string, x: number, y: number) =>
+    refs.find(
+      (r) =>
+        r.entityId === id &&
+        r.feature.startsWith("vertex") &&
+        Math.abs(r.point.x - x) < 1e-9 &&
+        Math.abs(r.point.y - y) < 1e-9,
+    );
+  // A3 quer, margins 10/10/10/20 mm: the frame's lower right corner is the origin.
+  const frameCorner = at("@margin-frame", 0, 0)!;
+  assert.ok(frameCorner);
+  assert.equal(
+    snapPointLabel(lens, frameCorner.entityId, frameCorner.feature),
+    "Randrahmen · Ecke 2",
+  );
+  assert.ok(at("@paper", 0.01, -0.01), "paper corner 10 mm right and below");
+  const mid = refs.find((r) => r.entityId === "@paper" && r.kind === "midpoint")!;
+  assert.equal(snapPointLabel(lens, mid.entityId, mid.feature), "Papier · Kantenmitte");
+  // The building's plan has no sheet.
+  assert.ok(!projectSnapReferences(real).some((r) => r.entityId.startsWith("@")));
+});

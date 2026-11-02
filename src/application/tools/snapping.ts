@@ -1,4 +1,5 @@
 import { segmentKey } from "../snapping/reference-selection.ts";
+import { MARGIN_FRAME_SNAP_ID, PAPER_SNAP_ID } from "../snapping/sheet-frames.ts";
 import { completeLocalQuery } from "../snapping/local-sources.ts";
 import { DENSE_SEGMENT_LIMIT } from "../snapping/density.ts";
 import { querySnap } from "../../constraints/snapping/engine.ts";
@@ -30,7 +31,11 @@ export function createVisibleToolSourceQuery(
 ) {
   return createToolSourceQuery(getLocalSnapSources(project), policy, intersectionLimit, {
     isCurrent: () => visibility.isCurrent(project, context),
-    allowsEntity: (id) => visibility.evaluate(project, context, id).eligible,
+    // Paper and margin frame of a Plankopf or layout are no model elements (docs/LAYOUTS.md).
+    allowsEntity: (id) =>
+      id === PAPER_SNAP_ID ||
+      id === MARGIN_FRAME_SNAP_ID ||
+      visibility.evaluate(project, context, id).eligible,
   });
 }
 

@@ -28,6 +28,13 @@ export function snapPointLabel(
   // Transient points of the running drawing (docs/POLYGON_REGELN.md, Regel 3).
   if (entityId === "@drawing-start") return "Startpunkt";
   if (entityId === "@drawing-origin") return "Letzter Punkt";
+  // Sheet of a Plankopf or layout (docs/LAYOUTS.md).
+  if (entityId === "@paper" || entityId === "@margin-frame") {
+    const name = entityId === "@paper" ? "Papier" : "Randrahmen";
+    const corner = /^vertex-(\d+)$/.exec(feature);
+    if (corner) return `${name} · Ecke ${Number(corner[1]) + 1}`;
+    return feature.includes("midpoint") ? `${name} · Kantenmitte` : `${name} · Kante`;
+  }
   const storey = storeyOf(project);
   const match = ELEMENT_NAMES.find(([key]) =>
     (storey[key] ?? []).some((item: { id: string }) => item.id === entityId),
