@@ -41,3 +41,17 @@ Nachweis LA1: 1495 Tests grün (5 neu in `src/application/views/layouts.test.ts`
 Nachweis LA2: 1495 Tests grün, Typprüfung beider Projekte, Architektur, Lint, Formatierung sauber, 14-Modell-Prüfsumme unverändert. Browser: Reiter „Layouts“ zeigt „Standard A3 quer“ und die Layoutsammlung; Ordner „Entwurf“ per Rechtsklick angelegt und benannt; darin Layout „Grundriss EG“; per „In Ordner verschieben“ in die Layoutsammlung und mit Rückgängig zurück; Masterlayout „A1 quer“ angelegt; „Standard A3 quer“ nicht löschbar („1 Layout folgt“). Dabei gefunden und behoben: Ein Rechtsklick öffnete auch das Menü der Fläche dahinter, das offen blieb (ein Enter legte dort einen zweiten Ordner an).
 
 Nicht im Browser geprüft: Ziehen und Ablegen (die Testmaus löst kein HTML-Ziehen aus); es nutzt dieselben Aktionen wie „In Ordner verschieben“.
+
+## LA3 – Fenster „Neues Layout“ und Einstellungen
+
+- **Neues Layout** (Rechtsklick auf Ordner, Layout oder freie Fläche) und **Layouteinstellungen …** (Rechtsklick auf ein Layout) öffnen dasselbe Fenster:
+  - Name, Ordner (alle Ordner eingerückt),
+  - Bereich **Masterlayout**: Häkchen „Einstellungen vom Masterlayout übernehmen“ (bei neuen Layouts an) und Auswahl des Masterlayouts. Solange das Häkchen gesetzt ist, zeigen die Blattfelder die Werte des Masterlayouts und sind gesperrt; ein Hinweis sagt, dass auch dessen Zeichnung erscheint. Ohne Häkchen starten die eigenen Werte bei denen des Masterlayouts.
+  - Bereich **Blatt**: Größe (DIN A0–A5, Frei), Format (Hoch-/Querformat; Drehen tauscht Breite und Höhe, auch beim freien Format), Breite und Höhe in mm (nur beim freien Format bearbeitbar), **Randabstand** oben, rechts, unten, links in mm (Dezimalkomma erlaubt).
+  - Maßstäbliche **Blattvorschau** mit gestricheltem Randrahmen und den Maßen.
+  - „Anlegen“ bzw. „Übernehmen“; Fehler (z. B. „Die Ränder lassen auf dem Blatt keinen Platz.“) erscheinen im Fenster, das dann offen bleibt.
+- **Neues Masterlayout** und **Masterlayout-Einstellungen …** (Rechtsklick auf ein Masterlayout) nutzen dasselbe Fenster mit Name und Blatt.
+- Jede Übernahme ist ein Rückgängig-Schritt. Neue Ordner werden weiter direkt angelegt und umbenannt.
+- Code: `src/components/cad/LayoutSettingsWindow.tsx`, Anbindung in `LayoutNavigator.tsx`.
+
+Nachweis LA3: 1495 Tests grün, Typprüfung beider Projekte, Architektur, Lint, Formatierung sauber, 14-Modell-Prüfsumme unverändert. Browser: „Neues Layout“ zeigt die gesperrten Werte von „Standard A3 quer“ (420 × 297 mm, Ränder 10/10/10/20); Häkchen aus, DIN A4 Hochformat, Rand oben 15 mm, Name „Detail A4“ → angelegt; „Layouteinstellungen …“ zeigt die gespeicherten Werte (A4, hoch, 210 × 297, oben 15, links 20, ohne Master); Rand links 200 mm → Meldung „keinen Platz“; Häkchen wieder an → übernommen, das Masterlayout zeigt „1 Layout folgt“.
