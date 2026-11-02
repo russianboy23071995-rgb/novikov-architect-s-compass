@@ -2,12 +2,14 @@ import type { ScreenInsets } from "../../rendering/viewport/plan-camera.ts";
 
 /**
  * Floating glass palettes over one continuous drawing surface (user decision 31.10.2026,
- * docs/GLAS_PALETTEN.md): tool properties on top, tool rail on the left, navigator on the right.
+ * docs/GLAS_PALETTEN.md): tool properties on top across the whole width, tool rail on the left and
+ * navigator on the right, both below it (UI1).
  * The insets are the part of the stage the palettes cover; drawing fits and view controls stay
  * inside the rest.
  */
 export const PALETTE_GAP = 8;
-export const PROPERTIES_HEIGHT = 130;
+/** One row of fields across the whole width (UI1, 02.11.2026: half of the former 130 px). */
+export const PROPERTIES_HEIGHT = 65;
 export const NAVIGATOR_WIDTH = { min: 240, max: 560, initial: 320 } as const;
 
 export function clampNavigatorWidth(width: number): number {

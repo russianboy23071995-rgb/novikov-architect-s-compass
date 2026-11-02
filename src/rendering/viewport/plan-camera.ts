@@ -1,9 +1,15 @@
-import { framingSchema, type DocumentFraming } from "../../domain/views/documents.ts";
+import {
+  framingSchema,
+  MAX_FRAMING_SCALE,
+  type DocumentFraming,
+} from "../../domain/views/documents.ts";
 import type { Point2 as Point } from "../../geometry/primitives/point.ts";
 
 export type PlanCamera = { center: Point; pixelsPerMetre: number };
 export type ViewSize = { width: number; height: number };
-export const clampScale = (scale: number) => Math.max(0.1, Math.min(10000, scale));
+/** Deepest zoom: 100 000 screen pixels per metre, about 2 600 % on paper (UI1). */
+export const MAX_PLAN_SCALE = 100_000;
+export const clampScale = (scale: number) => Math.max(0.1, Math.min(MAX_PLAN_SCALE, scale));
 
 export function fitPlan(bounds: string, size: ViewSize): PlanCamera {
   const [x, y, width, height] = bounds.split(" ").map(Number) as [number, number, number, number];
@@ -62,11 +68,14 @@ export function planScaleBar(scale: number): { metres: number; pixels: number } 
   return { metres, pixels: metres * scale };
 }
 
-/** Capture the visible metric rectangle; output scale never enters camera maths. */
+/**
+ * Capture the visible metric rectangle; output scale never enters camera maths. Deeper than an
+ * Abbild keeps (UI1), the zoom is stored at its limit; centre and extents stay exact.
+ */
 export function capturePlanFraming(camera: PlanCamera, size: ViewSize): DocumentFraming {
   return framingSchema.parse({
     center: { ...camera.center },
-    pixelsPerMetre: camera.pixelsPerMetre,
+    pixelsPerMetre: Math.min(camera.pixelsPerMetre, MAX_FRAMING_SCALE),
     width: size.width / camera.pixelsPerMetre,
     height: size.height / camera.pixelsPerMetre,
   });

@@ -331,7 +331,7 @@ export function CadViewport({
       onChange={(event) => zoom(Number(event.target.value) / zoomPercent)}
     >
       <option value={String(zoomPercent)}>{Number(zoomPercent.toFixed(1))} %</option>
-      {[25, 50, 75, 100, 150, 200, 400, 500]
+      {[25, 50, 75, 100, 150, 200, 400, 500, 800, 1000, 2000]
         .filter((value) => value !== zoomPercent)
         .map((value) => (
           <option key={value} value={String(value)}>
