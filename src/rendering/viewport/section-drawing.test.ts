@@ -5,7 +5,7 @@ import { addWall } from "../../application/walls/actions.ts";
 import { addSlab } from "../../application/slabs/actions.ts";
 import { addStorey, setStoreyHeight } from "../../application/storeys/actions.ts";
 import { selectWorkingStorey } from "../../application/storeys/working-storey.ts";
-import { sectionDrawing } from "./section-drawing.ts";
+import { sectionDrawing, sectionExtent } from "./section-drawing.ts";
 import type { Section } from "../../domain/views/sections.ts";
 import { setWallAssembly } from "../../application/walls/assembly.ts";
 
@@ -151,4 +151,15 @@ test("a cut wall with a build-up is parted into its layers, outside first (WANDA
   );
   // Without a build-up nothing changes.
   assert.equal(sectionDrawing(project(), section).cuts[0]!.layers, undefined);
+});
+
+// docs/ZEICHNUNG.md, ZW4: the frame of a section placed on a layout.
+test("the extent holds the line, the parts and the storey levels with the mark margin", () => {
+  const drawing = sectionDrawing(project(), section);
+  const e = sectionExtent(drawing, 0.5);
+  assert.deepEqual(e, { minX: -0.5, maxX: 4.5, minY: -1, maxY: 3.8 });
+  // Seeing nothing: the line alone, three metres high.
+  const empty = sectionDrawing(createProject("p", "eg"), section);
+  assert.equal(empty.bounds, null);
+  assert.deepEqual(sectionExtent(empty, 0), { minX: 0, maxX: 4, minY: -1, maxY: 4 });
 });

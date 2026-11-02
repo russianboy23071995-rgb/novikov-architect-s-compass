@@ -207,6 +207,7 @@ import { sectionLookTo } from "@/domain/views/sections";
 import { SectionFields } from "./SectionFields";
 import { SectionProperties } from "./SectionProperties";
 import { SectionDrawingView } from "./SectionDrawingView";
+import { cachedSectionDrawing, sectionGraphicExtent } from "./section-graphic";
 import { LayoutSettingsWindow, type LayoutDraftTarget } from "./LayoutSettingsWindow";
 import {
   layoutFolderTree,
@@ -432,12 +433,39 @@ export function CadWorkspace({
       },
     });
   };
-  /** A plan document with a frame, ready to place (sections and elevations follow, ZW4). */
+  /**
+   * A drawing document ready to place: a plan with its saved frame, or a section or elevation
+   * that sees parts; its frame is the drawing with the storey marks, as the tab fits it (ZW4).
+   */
   const drawingSource = (documentId: string | null | undefined) => {
     const document = realProject.drawingDocuments?.find((d) => d.id === documentId);
     const view = realProject.modelViews?.find((v) => v.id === document?.modelViewId);
-    if (!document?.framing || view?.kind !== "floor-plan") return null;
-    return { document, framing: document.framing, storeyId: view.storeyId };
+    if (!document || !view) return null;
+    if (view.kind === "floor-plan") {
+      if (!document.framing) return null;
+      const content: PlacedDrawingView["content"] = {
+        kind: "plan",
+        source: documentSource(realProject, view.storeyId),
+        hiddenLayerIds: document.hiddenLayerIds,
+      };
+      return { document, framing: document.framing, content };
+    }
+    const section = realProject.sections?.find((s) => s.id === view.sectionId);
+    if (!section) return null;
+    const drawing = cachedSectionDrawing(realProject, section);
+    if (!drawing.bounds) return null;
+    const e = sectionGraphicExtent(drawing, document.denominator);
+    const framing = {
+      center: { x: (e.minX + e.maxX) / 2, y: (e.minY + e.maxY) / 2 },
+      width: e.maxX - e.minX,
+      height: e.maxY - e.minY,
+    };
+    const content: PlacedDrawingView["content"] = {
+      kind: "section",
+      drawing,
+      marks: section.heightMarks ?? [],
+    };
+    return { document, framing, content };
   };
   // Drawings on the open layout: the master's under it, then the layout's own (selectable).
   const placedDrawingViews = (() => {
@@ -455,8 +483,7 @@ export function CadWorkspace({
         position: d.position,
         center: source.framing.center,
         denominator: source.document.denominator,
-        source: documentSource(realProject, source.storeyId),
-        hiddenLayerIds: source.document.hiddenLayerIds,
+        content: source.content,
       };
     };
     return [
@@ -3726,7 +3753,8 @@ export function CadWorkspace({
                             }
                           : undefined
                       }
-                      sections={sections}
+                      // Section symbols belong to the building plan, not to a sheet (ZW4).
+                      sections={space ? undefined : sections}
                       onSectionSettings={openSectionWindow}
                       selectedSectionId={tool === "select" ? selectedSectionId : null}
                       onSectionSelect={tool === "select" ? selectSection : undefined}
