@@ -15,11 +15,14 @@ export function WallLayerGraphic({
   bands,
   pixelsPerMetre,
   lineWidth,
+  edges = false,
 }: {
   profile: readonly { x: number; y: number }[];
   bands: readonly WallLayerBand[];
   pixelsPerMetre: number;
   lineWidth: number;
+  /** Also draw the outer faces of the bands: a core carried through other layers (L09 U2). */
+  edges?: boolean;
 }) {
   const id = useId().replace(/:/g, "");
   const xs = profile.map((p) => p.x);
@@ -99,6 +102,24 @@ export function WallLayerGraphic({
           />
         ))}
       </g>
+      {/* Outer faces lie on the clip edge; drawn unclipped along the profile's own edge. */}
+      {edges &&
+        bands.length > 0 &&
+        [bands[0]!.from, bands.at(-1)!.to].map((y, i) => {
+          const on = profile.filter((p) => Math.abs(p.y - y) < 1e-9).map((p) => p.x);
+          return on.length < 2 ? null : (
+            <line
+              key={i}
+              x1={Math.min(...on)}
+              x2={Math.max(...on)}
+              y1={-y}
+              y2={-y}
+              stroke="var(--primary)"
+              strokeWidth={lineWidth * 0.5}
+              vectorEffect="non-scaling-stroke"
+            />
+          );
+        })}
     </g>
   );
 }
