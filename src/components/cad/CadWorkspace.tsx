@@ -216,7 +216,7 @@ import {
   sheetSize,
 } from "@/domain/views/layouts";
 import { changeLayouts, layoutUnderlay } from "@/application/views/layouts";
-import { spaceLens } from "@/application/views/title-block-space";
+import { spaceBackdrop, spaceLens } from "@/application/views/title-block-space";
 import { LayoutBar } from "./LayoutBar";
 import { changeTitleBlocks, titleBlockUnderlay } from "@/application/views/title-blocks";
 import { TitleBlockBar } from "./TitleBlockBar";
@@ -3224,11 +3224,7 @@ export function CadWorkspace({
                                 : // One plan camera for every storey: zoom and position stay.
                                   "plan"))
                       }
-                      backdrop={
-                        layoutSpace?.layout && layoutSpace.master
-                          ? spaceLens(realProject, { kind: "layout", id: layoutSpace.master.id })
-                          : undefined
-                      }
+                      backdrop={space ? spaceBackdrop(realProject, space) : undefined}
                       underlay={
                         activeBlock
                           ? titleBlockUnderlay(activeBlock.sheet)

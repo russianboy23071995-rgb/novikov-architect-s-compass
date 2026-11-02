@@ -108,6 +108,9 @@ export function LayoutSettingsWindow({
     fieldsOf(existing?.sheet ?? existingMaster?.sheet ?? master?.sheet ?? masters[0]!.sheet),
   );
   const [error, setError] = useState("");
+  // Title block of a master layout (docs/PLANKOPF.md, PK4); "" is none.
+  const [blockId, setBlockId] = useState(existingMaster?.titleBlockId ?? "");
+  const blocks = project.titleBlocks ?? [];
   const locked = target.kind === "layout" && follow;
   const shown = locked && master ? fieldsOf(master.sheet) : own;
   const set = (patch: Partial<SheetFields>) => setOwn((f) => ({ ...f, ...patch }));
@@ -132,9 +135,10 @@ export function LayoutSettingsWindow({
       let action: LayoutAction;
       if (target.kind === "master") {
         const sheet = sheetOf(own);
+        const titleBlockId = blockId || null;
         action = target.id
-          ? { kind: "master-settings", id, name, sheet }
-          : { kind: "create-master", id, name, sheet };
+          ? { kind: "master-settings", id, name, sheet, titleBlockId }
+          : { kind: "create-master", id, name, sheet, titleBlockId };
       } else {
         const body =
           follow && master ? { masterId: master.id } : { masterId: null, sheet: sheetOf(own) };
@@ -185,6 +189,27 @@ export function LayoutSettingsWindow({
             onChange={(e) => setName(e.target.value)}
           />
         </label>
+        {target.kind === "master" && (
+          <label>
+            Plankopf
+            <select
+              aria-label="Plankopf"
+              className={input}
+              value={blockId}
+              onChange={(e) => setBlockId(e.target.value)}
+            >
+              <option value="">Ohne</option>
+              {blocks.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
+            <span className="text-muted-foreground">
+              Sitzt rechts unten im Randrahmen und erscheint auf jedem Layout dieses Masterlayouts.
+            </span>
+          </label>
+        )}
         {target.kind === "layout" && (
           <>
             <label>

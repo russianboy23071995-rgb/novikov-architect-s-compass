@@ -61,7 +61,11 @@ export const sheetSchema = z
 export type Sheet = z.infer<typeof sheetSchema>;
 
 export const masterLayoutSchema = z.object({ id, name, sheet: sheetSchema }).strict();
-export type MasterLayout = z.infer<typeof masterLayoutSchema>;
+/** Schema 48: a master layout may carry a title block (docs/PLANKOPF.md, PK4). */
+export const masterLayoutV48Schema = masterLayoutSchema
+  .extend({ titleBlockId: id.optional() })
+  .strict();
+export type MasterLayout = z.infer<typeof masterLayoutV48Schema>;
 
 /** A folder without parent lies directly in „Layoutsammlung“; the collection itself has none. */
 export const layoutFolderSchema = z.object({ id, name, parentId: id.optional() }).strict();

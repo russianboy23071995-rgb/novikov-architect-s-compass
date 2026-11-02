@@ -43,8 +43,21 @@ export type LayoutAction =
   | { kind: "rename-layout"; id: string; name: string }
   | { kind: "move-layout"; id: string; folderId: string }
   | { kind: "delete-layout"; id: string }
-  | { kind: "create-master"; id: string; name: string; sheet: Sheet }
-  | { kind: "master-settings"; id: string; name: string; sheet: Sheet }
+  | {
+      kind: "create-master";
+      id: string;
+      name: string;
+      sheet: Sheet;
+      /** Title block on the master (PK4); null or absent: none. */
+      titleBlockId?: string | null;
+    }
+  | {
+      kind: "master-settings";
+      id: string;
+      name: string;
+      sheet: Sheet;
+      titleBlockId?: string | null;
+    }
   | { kind: "delete-master"; id: string };
 
 type Library = {
@@ -201,14 +214,35 @@ function applyLayoutAction(library: Library, action: LayoutAction): Library {
     case "create-master":
       return {
         ...library,
-        masterLayouts: [...masters, { id: action.id, name: action.name, sheet: action.sheet }],
+        masterLayouts: [
+          ...masters,
+          {
+            id: action.id,
+            name: action.name,
+            sheet: action.sheet,
+            ...(action.titleBlockId ? { titleBlockId: action.titleBlockId } : {}),
+          },
+        ],
       };
     case "master-settings": {
       const master = masterOf(library, action.id);
       return {
         ...library,
         masterLayouts: masters.map((m) =>
-          m === master ? { ...m, name: action.name, sheet: action.sheet } : m,
+          m !== master
+            ? m
+            : (() => {
+                // Absent keeps the title block (e.g. a rename), null removes it.
+                const { titleBlockId: old, ...rest } = m;
+                const titleBlockId =
+                  action.titleBlockId === undefined ? old : (action.titleBlockId ?? undefined);
+                return {
+                  ...rest,
+                  name: action.name,
+                  sheet: action.sheet,
+                  ...(titleBlockId ? { titleBlockId } : {}),
+                };
+              })(),
         ),
       };
     }
