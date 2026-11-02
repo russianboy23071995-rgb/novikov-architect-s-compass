@@ -157,7 +157,7 @@ test("the file refuses a thickness that does not match, unknown build-ups and v4
   );
   const plain = JSON.parse(serializeProject(createExampleProject()));
   const loaded = loadProjectData({ ...plain, schemaVersion: 42 });
-  assert.equal(loaded.schemaVersion, 48);
+  assert.equal(loaded.schemaVersion, 49);
   assert.throws(() => loadProjectData({ ...stored, schemaVersion: 42 }));
 });
 

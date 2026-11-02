@@ -23,7 +23,7 @@ export type LayoutAction =
   | { kind: "rename-folder"; id: string; name: string }
   | { kind: "move-folder"; id: string; parentId: string }
   | { kind: "delete-folder"; id: string }
-  | {
+  | ({
       kind: "create-layout";
       id: string;
       name: string;
@@ -31,15 +31,15 @@ export type LayoutAction =
       /** Follows this master; null keeps the own sheet. */
       masterId: string | null;
       sheet?: Sheet;
-    }
-  | {
+    } & LayoutTextFields)
+  | ({
       kind: "layout-settings";
       id: string;
       name: string;
       folderId: string;
       masterId: string | null;
       sheet?: Sheet;
-    }
+    } & LayoutTextFields)
   | { kind: "rename-layout"; id: string; name: string }
   | { kind: "move-layout"; id: string; folderId: string }
   | { kind: "delete-layout"; id: string }
@@ -59,6 +59,27 @@ export type LayoutAction =
       titleBlockId?: string | null;
     }
   | { kind: "delete-master"; id: string };
+
+/** Fields read by automatic texts (AT1). Absent keeps the value, null or "" removes it. */
+export type LayoutTextFields = {
+  planNumber?: string | null;
+  index?: string | null;
+  documentId?: string | null;
+};
+function textFields(old: Partial<Layout>, action: LayoutTextFields) {
+  const value = (next: string | null | undefined, before: string | undefined) => {
+    const v = next === undefined ? before : (next ?? "").trim();
+    return v ? v : undefined;
+  };
+  const planNumber = value(action.planNumber, old.planNumber),
+    index = value(action.index, old.index),
+    documentId = value(action.documentId, old.documentId);
+  return {
+    ...(planNumber ? { planNumber } : {}),
+    ...(index ? { index } : {}),
+    ...(documentId ? { documentId } : {}),
+  };
+}
 
 type Library = {
   layoutFolders: LayoutFolder[];
@@ -172,6 +193,7 @@ function applyLayoutAction(library: Library, action: LayoutAction): Library {
             name: action.name,
             folderId: action.folderId,
             ...layoutBody(library, action.masterId, action.sheet),
+            ...textFields({}, action),
           },
         ],
       };
@@ -187,6 +209,7 @@ function applyLayoutAction(library: Library, action: LayoutAction): Library {
                 name: action.name,
                 folderId: action.folderId,
                 ...layoutBody(library, action.masterId, action.sheet),
+                ...textFields(l, action),
               }
             : l,
         ),

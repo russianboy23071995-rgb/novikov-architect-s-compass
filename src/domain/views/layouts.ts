@@ -72,14 +72,44 @@ export const layoutFolderSchema = z.object({ id, name, parentId: id.optional() }
 export type LayoutFolder = z.infer<typeof layoutFolderSchema>;
 
 /** Exactly one of masterId (follows the master) and sheet (own settings). */
+const layoutShape = {
+  id,
+  name,
+  folderId: id,
+  masterId: id.optional(),
+  sheet: sheetSchema.optional(),
+};
+const ONE_SHEET =
+  "Ein Layout folgt entweder einem Masterlayout oder hat eigene Blatteinstellungen.";
 export const layoutSchema = z
-  .object({ id, name, folderId: id, masterId: id.optional(), sheet: sheetSchema.optional() })
+  .object(layoutShape)
   .strict()
-  .refine(
-    (l) => (l.masterId === undefined) !== (l.sheet === undefined),
-    "Ein Layout folgt entweder einem Masterlayout oder hat eigene Blatteinstellungen.",
-  );
-export type Layout = z.infer<typeof layoutSchema>;
+  .refine((l) => (l.masterId === undefined) !== (l.sheet === undefined), ONE_SHEET);
+/**
+ * Schema 49: what the title block's automatic texts read from a layout (docs/PLANKOPF.md,
+ * AT1): plan number, index and the drawing document it shows until drawings are placed.
+ */
+export const layoutV49Schema = z
+  .object({
+    ...layoutShape,
+    planNumber: z.string().trim().min(1).max(40).optional(),
+    index: z.string().trim().min(1).max(20).optional(),
+    documentId: id.optional(),
+  })
+  .strict()
+  .refine((l) => (l.masterId === undefined) !== (l.sheet === undefined), ONE_SHEET);
+export type Layout = z.infer<typeof layoutV49Schema>;
+
+/** Project information for title blocks (AT1); every field optional. */
+export const projectInfoSchema = z
+  .object({
+    name: z.string().trim().min(1).max(200).optional(),
+    client: z.string().trim().min(1).max(200).optional(),
+    address: z.string().trim().min(1).max(300).optional(),
+    author: z.string().trim().min(1).max(200).optional(),
+  })
+  .strict();
+export type ProjectInfo = z.infer<typeof projectInfoSchema>;
 
 export const LAYOUT_COLLECTION_ID = "layout-collection";
 export const LAYOUT_COLLECTION_NAME = "Layoutsammlung";
