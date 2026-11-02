@@ -212,7 +212,8 @@ import { LayoutSettingsWindow, type LayoutDraftTarget } from "./LayoutSettingsWi
 import { layoutFolderTree, projectLayouts, projectMasterLayouts } from "@/domain/views/layouts";
 import { changeLayouts } from "@/application/views/layouts";
 import { titleBlockLens } from "@/application/views/title-block-space";
-import { changeTitleBlocks } from "@/application/views/title-blocks";
+import { changeTitleBlocks, titleBlockUnderlay } from "@/application/views/title-blocks";
+import { TitleBlockBar } from "./TitleBlockBar";
 
 /** Tools of the Plankopfplaner: drawing only, nothing of the building (PK2). */
 const TITLE_BLOCK_TOOLS: ReadonlySet<ToolId> = new Set<ToolId>([
@@ -314,6 +315,7 @@ export function CadWorkspace({
   const realProject = history.present;
   const space = editing.space;
   const project = space ? titleBlockLens(realProject, space.id) : realProject;
+  const activeBlock = space ? realProject.titleBlocks?.find((t) => t.id === space.id) : undefined;
   const autosave = useLocalAutosave(realProject, editing.projectLoad ?? realProject.id);
   const activeDocument = project.drawingDocuments?.find((d) => d.id === activeDocumentId);
   const viewContext = useMemo(
@@ -2798,13 +2800,9 @@ export function CadWorkspace({
             if (open) return selectCanvasTab(titleBlockTab(open.id));
             try {
               const id = crypto.randomUUID();
-              const next = changeTitleBlocks(realProject, realProject, {
-                kind: "create",
-                id,
-                name: "Plankopf",
-              });
-              if (space) dispatchEditing({ type: "space", space: null });
-              dispatchEditing({ type: "project", project: next });
+              const action = { kind: "create" as const, id, name: "Plankopf" };
+              changeTitleBlocks(realProject, realProject, action);
+              dispatchEditing({ type: "title-block", base: realProject, action });
               selectCanvasTab(titleBlockTab(id));
             } catch (cause) {
               setModelError((cause as Error).message);
@@ -3000,6 +2998,20 @@ export function CadWorkspace({
                   }}
                 />
               </div>
+              {activeBlock && (
+                <TitleBlockBar
+                  block={activeBlock}
+                  onSheet={(sheet) => {
+                    const action = { kind: "sheet" as const, id: activeBlock.id, sheet };
+                    try {
+                      changeTitleBlocks(realProject, realProject, action);
+                      dispatchEditing({ type: "title-block", base: realProject, action });
+                    } catch (cause) {
+                      setModelError((cause as Error).message);
+                    }
+                  }}
+                />
+              )}
               {activeLayout && (
                 <div role="tabpanel" aria-label="Layout" className="absolute inset-0 z-30">
                   <LayoutSheetView
@@ -3121,8 +3133,14 @@ export function CadWorkspace({
                         ) : undefined
                       }
                       key={
-                        mode === "3D" ? "building-3d" : (activeDocumentId ?? storeyOf(project).id)
+                        mode === "3D"
+                          ? "building-3d"
+                          : (activeDocumentId ??
+                            (activeBlock
+                              ? `${activeBlock.id}:${activeBlock.sheet.format}:${activeBlock.sheet.orientation}`
+                              : storeyOf(project).id))
                       }
+                      underlay={activeBlock ? titleBlockUnderlay(activeBlock.sheet) : undefined}
                       documentFraming={activeDocument?.framing}
                       onPlanCapture={onPlanCapture}
                       viewContext={viewContext}
@@ -3827,6 +3845,11 @@ export function CadWorkspace({
                     dispatchEditing({ type: "layout", base, action })
                   }
                   onOpenLayout={(id) => selectCanvasTab(layoutTab(id))}
+                  onTitleBlockAction={(base, action) =>
+                    dispatchEditing({ type: "title-block", base, action })
+                  }
+                  onOpenTitleBlock={(id) => selectCanvasTab(titleBlockTab(id))}
+                  activeTitleBlockId={space?.id ?? null}
                   activeLayoutId={activeLayout}
                   project={realProject}
                   active={

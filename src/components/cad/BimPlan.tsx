@@ -111,7 +111,10 @@ import type { Point, Project } from "@/domain/project/schema";
 import type { Selection } from "./bim-view";
 import { linePath } from "@/lib/bim/lines";
 
+type PlanRect = { x0: number; y0: number; x1: number; y1: number };
 export type BimPlanProps = {
+  /** Paper under the Plankopfplaner at 1:1 with its margin frame (docs/PLANKOPF.md, PK3). */
+  underlay?: { paper: PlanRect; frame: PlanRect } | undefined;
   pickupScope?: object;
   /** Right-click menu (docs/KONTEXTMENUE.md): on an element or on empty canvas (null). When
    * set it replaces the former double right-click pickup, which moves into the menu. */
@@ -257,6 +260,7 @@ export type BimPlanProps = {
 };
 
 export function BimPlan({
+  underlay,
   pickupScope,
   onPickup,
   onContextMenu,
@@ -1298,6 +1302,30 @@ export function BimPlan({
               width={viewSize.width / camera.pixelsPerMetre}
               height={viewSize.height / camera.pixelsPerMetre}
               fill={`url(#${gridId})`}
+            />
+          </g>
+        )}
+        {underlay && (
+          <g aria-label="Plankopf-Unterlage" pointerEvents="none">
+            <rect
+              x={underlay.paper.x0}
+              y={-underlay.paper.y1}
+              width={underlay.paper.x1 - underlay.paper.x0}
+              height={underlay.paper.y1 - underlay.paper.y0}
+              fill="white"
+              fillOpacity={0.85}
+              stroke="#94a3b8"
+              strokeWidth={1 / camera.pixelsPerMetre}
+            />
+            <rect
+              x={underlay.frame.x0}
+              y={-underlay.frame.y1}
+              width={underlay.frame.x1 - underlay.frame.x0}
+              height={underlay.frame.y1 - underlay.frame.y0}
+              fill="none"
+              stroke="#64748b"
+              strokeDasharray={`${6 / camera.pixelsPerMetre} ${4 / camera.pixelsPerMetre}`}
+              strokeWidth={1 / camera.pixelsPerMetre}
             />
           </g>
         )}

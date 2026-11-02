@@ -130,6 +130,9 @@ function NavigatorContent({
   onLayoutAction,
   onOpenLayout,
   activeLayoutId,
+  onTitleBlockAction,
+  onOpenTitleBlock,
+  activeTitleBlockId,
   ...documents
 }: ProjectNavigatorProps) {
   const [settings, setSettings] = useState(false);
@@ -230,6 +233,9 @@ function NavigatorContent({
             onLayoutAction={onLayoutAction}
             {...(onOpenLayout ? { onOpenLayout } : {})}
             activeLayoutId={activeLayoutId ?? null}
+            {...(onTitleBlockAction ? { onTitleBlockAction } : {})}
+            {...(onOpenTitleBlock ? { onOpenTitleBlock } : {})}
+            activeTitleBlockId={activeTitleBlockId ?? null}
           />
         </ScrollArea>
       ) : tab === "documents" ? (
@@ -346,6 +352,11 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
     [],
   );
   const onOpenLayout = useCallback((id: string) => latest.current.onOpenLayout?.(id), []);
+  const onTitleBlockAction = useCallback<NonNullable<ProjectNavigatorProps["onTitleBlockAction"]>>(
+    (...args) => latest.current.onTitleBlockAction?.(...args),
+    [],
+  );
+  const onOpenTitleBlock = useCallback((id: string) => latest.current.onOpenTitleBlock?.(id), []);
   const onDocumentAction = useCallback<ProjectNavigatorProps["onDocumentAction"]>(
     (...args) => latest.current.onDocumentAction(...args),
     [],
@@ -359,6 +370,9 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
       onLayoutAction={onLayoutAction}
       onOpenLayout={onOpenLayout}
       activeLayoutId={props.activeLayoutId ?? null}
+      onTitleBlockAction={onTitleBlockAction}
+      onOpenTitleBlock={onOpenTitleBlock}
+      activeTitleBlockId={props.activeTitleBlockId ?? null}
       onDocumentVisibility={props.onDocumentVisibility}
       onRenameStorey={onRenameStorey}
       onBuildingChange={onBuildingChange}

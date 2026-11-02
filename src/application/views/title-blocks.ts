@@ -1,6 +1,6 @@
 import type { Project, TitleBlock } from "../../domain/project/schema.ts";
 import { validateLike } from "../../domain/project/owned-snapshot.ts";
-import { projectMasterLayouts, type Sheet } from "../../domain/views/layouts.ts";
+import { projectMasterLayouts, sheetSize, type Sheet } from "../../domain/views/layouts.ts";
 
 /**
  * Title block actions (Planköpfe, docs/PLANKOPF.md, PK1). Shared validated operations; IDs are
@@ -78,4 +78,25 @@ export function changeTitleBlocks(
           : { ...t, sheet: action.sheet },
     ),
   });
+}
+
+/** A rectangle in plan metres (y up). */
+export type PlanRect = { x0: number; y0: number; x1: number; y1: number };
+/**
+ * Paper underlay of the Plankopfplaner at 1:1 (docs/PLANKOPF.md, PK3), in metres. The origin
+ * is the lower right corner of the margin frame: the title block's own lower right corner.
+ */
+export function titleBlockUnderlay(sheet: Sheet): { paper: PlanRect; frame: PlanRect } {
+  const { width, height } = sheetSize(sheet);
+  const m = sheet.margins,
+    mm = (v: number) => v / 1000;
+  return {
+    paper: {
+      x0: mm(m.right - width),
+      y0: mm(-m.bottom),
+      x1: mm(m.right),
+      y1: mm(height - m.bottom),
+    },
+    frame: { x0: mm(m.left + m.right - width), y0: 0, x1: 0, y1: mm(height - m.top - m.bottom) },
+  };
 }
