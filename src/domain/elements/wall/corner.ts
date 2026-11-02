@@ -1,4 +1,4 @@
-import { assertSameWallBase } from "./heights.ts";
+import { CORNER_HEIGHT_MESSAGE, cornerHeightRule } from "./heights.ts";
 import type { Wall } from "../../project/schema.ts";
 import type { Point2 } from "../../../geometry/primitives/point.ts";
 import { intersectLines } from "../../../geometry/intersections/lines.ts";
@@ -26,7 +26,6 @@ export function deriveRightAngleCorner(first: CornerEnd, second: CornerEnd) {
 }
 
 function deriveCorner(first: CornerEnd, second: CornerEnd, rightAngleOnly: boolean) {
-  assertSameWallBase(first.wall, second.wall);
   const ends = [first, second].sort((a, b) => (a.wall.id < b.wall.id ? -1 : 1));
   if (!first.wall.id.trim() || !second.wall.id.trim() || first.wall.id === second.wall.id)
     throw new Error("Zwei unterschiedliche Wand-IDs erforderlich.");
@@ -53,8 +52,10 @@ function deriveCorner(first: CornerEnd, second: CornerEnd, rightAngleOnly: boole
   // The strict historical contract keeps equal sections. Automatic joins accept different
   // thicknesses (mitre through the face intersections) and heights (butt joint, user decision
   // 26.10.2026, docs/WALL_JUNCTIONS.md).
-  if (rightAngleOnly && (a.wall.thickness !== b.wall.thickness || a.wall.height !== b.wall.height))
+  const rule = cornerHeightRule(a.wall, b.wall);
+  if (rightAngleOnly && (a.wall.thickness !== b.wall.thickness || rule !== "mitre"))
     throw new Error("Dieser Eckanschluss benötigt gleiche Wandstärken und Höhen.");
+  if (!rule) throw new Error(CORNER_HEIGHT_MESSAGE);
   const endPoint = ({ wall, endpoint }: CornerEnd) => (endpoint === 0 ? wall.start : wall.end);
   const origin = endPoint(a);
   if (!pointsCompatible(origin, endPoint(b))) throw new Error("Kein gemeinsamer Achsendpunkt.");
@@ -81,7 +82,7 @@ function deriveCorner(first: CornerEnd, second: CornerEnd, rightAngleOnly: boole
       RIGHT_ANGLE_DOT_TOLERANCE
   )
     throw new Error("Dieser Eckanschluss benötigt einen rechten Winkel.");
-  if (a.wall.height !== b.wall.height) return buttCorner(u, v, origin);
+  if (rule !== "mitre") return buttCorner(u, v, origin, rule === "first-through");
   // Both axes point away from the node. Left of one meets right of the other.
   const left = intersectLines(u.body.corner(0, 1), u.direction, v.body.corner(0, -1), v.direction);
   const right = intersectLines(u.body.corner(0, -1), u.direction, v.body.corner(0, 1), v.direction);
@@ -128,12 +129,13 @@ function cornerContour(data: Prepared, nearRight: Point2, nearLeft: Point2, orig
   };
 }
 
-/** Different heights (user decision 26.10.2026): the taller wall runs through to the far face of
- * the lower wall, which butts against the inner face of the taller wall. A mitre would show a
- * sloped cut above the lower wall. The seam is the end of the lower wall on that inner face.
+/** Different heights or feet (user decisions 26.10. and 02.11.2026): the wall covering the
+ * other's height runs through to the far face of the other wall, which butts against its inner
+ * face. A mitre would show a sloped cut beyond the shorter wall. The seam is the end of the
+ * butting wall on that inner face.
  */
-function buttCorner(u: Prepared, v: Prepared, origin: Point2) {
-  const [through, butt] = u.end.wall.height > v.end.wall.height ? [u, v] : [v, u];
+function buttCorner(u: Prepared, v: Prepared, origin: Point2, uThrough: boolean) {
+  const [through, butt] = uThrough ? [u, v] : [v, u];
   const offset = (data: Prepared, side: -1 | 1, toward: Point2) => {
     const p = data.body.corner(0, side);
     return (p.x - data.start.x) * toward.x + (p.y - data.start.y) * toward.y;

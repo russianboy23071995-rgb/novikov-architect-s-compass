@@ -42,3 +42,24 @@ Die strenge rechtwinklige Ecke für die Einzel-/IFC-Abnahme (`deriveRightAngleCo
 - Schräge T-Anschlüsse, Mehrfachknoten und gemeinsames Ändern von Wandgruppen bleiben eigene Aufträge.
 - Der IFC-Export schreibt weiterhin keine Anschlussbeziehungen (IfcRelConnectsPathElements); die Wandkörper tragen die zugeschnittenen Konturen. Archicad-Abnahme der T-Anschlüsse steht weiterhin aus.
 - Bei einer Ecke mit unterschiedlicher Höhe steht die Gehrungsfläche nicht mehr zur Verfügung; die Fuge liegt auf der Innenfläche der höheren Wand.
+
+## L09 U1 – unterschiedliche Fußhöhen (02.11.2026)
+
+Änderungskarte L09 mit den Empfehlungen freigegeben. Bisher verlangten Ecke und T-Anschluss gleiche Fußhöhen („Wandanschlüsse benötigen gleiche Fußhöhen“). Jetzt gilt:
+
+| Fall                                                        | Jetzt                                                                                                                                          |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ecke, gleicher Fuß und gleiche Höhe                         | Gehrung wie bisher                                                                                                                             |
+| Ecke, eine Wand überdeckt die andere in der Höhe ganz       | Stumpfstoß: die überdeckende Wand läuft bis zur Außenfläche der anderen, die andere stößt an ihre Innenfläche (wie bisher bei ungleicher Höhe) |
+| Ecke, Höhen überschneiden sich nur teilweise oder gar nicht | abgelehnt: „Eckanschluss: Eine Wand muss die andere in der Höhe ganz überdecken.“; beim Zeichnen kein automatischer Anschluss                  |
+| T-Anschluss mit unterschiedlichem Fuß                       | erlaubt, solange sich die Wände in der Höhe überschneiden; die Nebenwand endet an der Hauptwand                                                |
+| T-Anschluss ohne gemeinsame Höhe                            | abgelehnt: „Wandanschlüsse benötigen Wände, die sich in der Höhe überschneiden.“                                                               |
+
+- Code: `cornerHeightRule` und `assertWallsOverlapVertically` in `src/domain/elements/wall/heights.ts`; `corner.ts` wählt die durchlaufende Wand nach Überdeckung statt nach Höhe; `connections.ts` verbindet beim Zeichnen nur Paare, die eine Ecke bilden können. Ein Anschlussknoten zählt die Wandenden an beiden Fußhöhen (`connections.ts`, `prepared-translation.ts`), sodass die Mehrfachanschluss-Prüfung auch über zwei Fußhöhen greift.
+- Grundriss, 3D, IFC und Mengen folgen ohne eigene Änderung, weil sie aus denselben Konturen rechnen.
+
+Nachweis U1: 1488 Tests grün (neu: Ecke mit Sockelwand gleich dem Stumpfstoß einer niedrigeren Wand, vertauschte Rollen, Teilüberdeckung abgelehnt, automatische Verbindung beim Zeichnen, 3D-Körper von 0 bis 2,8 m; angepasst: T mit anderem Fuß erlaubt, ohne gemeinsame Höhe abgelehnt), Typprüfung beider Projekte, Architektur, Lint, Formatierung sauber, 14-Modell-Prüfsumme unverändert (`e42aa36e…`), `benchmarks/junction-equality.ts` gegen main: 5 von 5 Modellen (Beispiel, Schulmodelle s/l/x, gebundene Höhen) mit identischen Konturen und Körpern.
+
+Browser (Startprojekt): Wand mit mittiger Achse an das linke Ende von wall-1 gezeichnet → Gehrung (Konturen ±0,18). Neue Wand auf 2,0 m Höhe und 0,5 m Z-Versatz → Stumpfstoß: wall-1 läuft bis −0,18, die neue Wand beginnt an der Innenfläche +0,18. Z-Versatz 1,0 (1,0–3,0 m gegen 0–2,8 m) → Meldung „Eine Wand muss die andere in der Höhe ganz überdecken“. Eine Wand mit Achslage Außen am rechten Ende wurde als T-Anschluss erkannt; Z-Versatz 0,5 angenommen, Z-Versatz 3 (keine gemeinsame Höhe) → Meldung „… in der Höhe überschneiden“. 3D im Browser nicht eigens angesehen; der Körper ist durch den Test belegt.
+
+Grenze: Nach einer abgelehnten Eingabe zeigt das Feld „Z-Versatz“ weiter den eingegebenen Wert, bis die Wand neu gewählt wird (bestehendes Verhalten des Eingabefelds).

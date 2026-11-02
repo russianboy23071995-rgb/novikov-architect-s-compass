@@ -13,13 +13,36 @@ export function wallHeights(
   if (!Number.isFinite(top) || top <= bottom) throw new Error("Ungültige Wandhöhen.");
   return { bottom, top };
 }
-export function assertSameWallBase(
-  a: { baseOffset?: number | undefined },
-  b: { baseOffset?: number | undefined },
-) {
-  if (wallBase(a) !== wallBase(b))
-    throw new Error("Wandanschlüsse benötigen gleiche Fußhöhen. Verbindung zuerst lösen.");
+type WallRange = { baseOffset?: number | undefined; height: number };
+const HEIGHT_TOLERANCE = 1e-9; // Metres; base plus height is a sum and may differ in the last bit.
+
+/** Joined walls must share some height (docs/WALL_JUNCTIONS.md, L09 U1); feet may differ. */
+export function assertWallsOverlapVertically(a: WallRange, b: WallRange) {
+  const [x, y] = [wallHeights(a), wallHeights(b)];
+  if (Math.min(x.top, y.top) - Math.max(x.bottom, y.bottom) <= HEIGHT_TOLERANCE)
+    throw new Error(
+      "Wandanschlüsse benötigen Wände, die sich in der Höhe überschneiden. Verbindung zuerst lösen.",
+    );
 }
+
+/**
+ * Corner rule by height (L09 U1): equal feet and heights mitre; otherwise the wall that covers
+ * the other's whole height runs through (butt joint). Partly overlapping walls form no corner.
+ */
+export function cornerHeightRule(
+  a: WallRange,
+  b: WallRange,
+): "mitre" | "first-through" | "second-through" | null {
+  if (wallBase(a) === wallBase(b) && a.height === b.height) return "mitre";
+  const [x, y] = [wallHeights(a), wallHeights(b)];
+  const covers = (p: typeof x, q: typeof x) =>
+    p.bottom <= q.bottom + HEIGHT_TOLERANCE && p.top >= q.top - HEIGHT_TOLERANCE;
+  if (covers(x, y)) return "first-through";
+  if (covers(y, x)) return "second-through";
+  return null;
+}
+export const CORNER_HEIGHT_MESSAGE =
+  "Eckanschluss: Eine Wand muss die andere in der Höhe ganz überdecken. Verbindung zuerst lösen.";
 
 export type WallTopRule =
   Readonly<{ kind: "fixed"; height: number }> | Readonly<{ kind: "storey"; topOffset: number }>;

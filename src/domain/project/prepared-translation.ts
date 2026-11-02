@@ -7,7 +7,7 @@ import { wallDependencyClosure } from "../elements/wall/dependency-closure.ts";
 import { prepareProjectSnapshot } from "./prepared-snapshot.ts";
 import { wallBase } from "../elements/wall/heights.ts";
 import { storeyOf } from "../storeys/access.ts";
-import { validateProject, type Project, type Point } from "./schema.ts";
+import { validateProject, type Project, type Point, type Wall } from "./schema.ts";
 import type { GeometryPreview, ModelGeometry } from "./geometry-scope.ts";
 import { validateLineGeometry, validateWindowGeometry } from "./geometry-validation.ts";
 import { doorOpening } from "../elements/door/model.ts";
@@ -102,14 +102,15 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       const key = pointKey(p, wallBase(wall));
       counts.set(key, (counts.get(key) ?? 0) + 1);
     }
-  const fixedJoinedNodes = new Set(
-    retainedJoins
-      .filter((j) => !ids.has(j.first.wallId))
-      .map((j) => {
-        const wall = byWall.get(j.first.wallId)!;
-        return pointKey(j.first.endpoint === 0 ? wall.start : wall.end, wallBase(wall));
-      }),
-  );
+  // A join node: its point at the foot heights of both walls, which may differ (L09 U1).
+  const joinNodeKeys = (join: (typeof s.wallJoins)[number], wallOf: (id: string) => Wall) => {
+    const first = wallOf(join.first.wallId),
+      p = join.first.endpoint === 0 ? first.start : first.end;
+    return [...new Set([first, wallOf(join.second.wallId)].map((w) => pointKey(p, wallBase(w))))];
+  };
+  const fixedJoinedNodes = retainedJoins
+    .filter((j) => !ids.has(j.first.wallId))
+    .map((j) => joinNodeKeys(j, (id) => byWall.get(id)!));
   const assets = new Map(affected.assets.map((a) => [a.id, a]));
   const replacedIds = Object.freeze(
     [
@@ -183,8 +184,9 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       }
     const countAt = (key: string) => (counts.get(key) ?? 0) + (changedCounts.get(key) ?? 0);
     // Spatial dependency: a moving, previously unrelated endpoint may occupy a fixed join.
-    for (const key of changedCounts.keys())
-      if (fixedJoinedNodes.has(key) && countAt(key) !== 2)
+    const nodeCount = (keys: readonly string[]) => keys.reduce((n, k) => n + countAt(k), 0);
+    for (const keys of fixedJoinedNodes)
+      if (keys.some((k) => changedCounts.has(k)) && nodeCount(keys) !== 2)
         throw new Error("Mehrfachanschluss noch nicht unterstützt.");
     const geometry: ModelGeometry = {
       assets: affected.assets,
@@ -277,12 +279,9 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       },
     };
     const localWalls = new Map(storeyOf(geometry).walls.map((w) => [w.id, w]));
-    for (const join of localJoins) {
-      const wall = localWalls.get(join.first.wallId)!;
-      const p = join.first.endpoint === 0 ? wall.start : wall.end;
-      if (countAt(pointKey(p, wallBase(wall))) !== 2)
+    for (const join of localJoins)
+      if (nodeCount(joinNodeKeys(join, (id) => localWalls.get(id)!)) !== 2)
         throw new Error("Mehrfachanschluss noch nicht unterstützt.");
-    }
     for (const wall of storeyOf(geometry).walls)
       if (!detachedEnd || wall.id === movingId) wallBody(wall);
     for (const line of storeyOf(geometry).lines!) validateLineGeometry(line);
