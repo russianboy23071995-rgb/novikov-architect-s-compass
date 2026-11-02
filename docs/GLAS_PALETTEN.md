@@ -10,3 +10,14 @@ Nutzervorgabe: Navigator, Werkzeugeigenschaften und Werkzeugkasten sollen den mi
 - Testlauf: Die Testliste stand in der Befehlszeile von `npm test` und überschritt mit den neuen Tests die Windows-Grenze von 8191 Zeichen. Sie steht jetzt in `package.json` unter `testFiles`, `npm test` startet `scripts/run-tests.mjs` (AGENTS.md angepasst).
 
 Nachweis: 1385 Tests grün (3 neu), Typprüfung/Lint/Architektur sauber, 14-Modell-Hash unverändert (`089f79e4…97017b3`). Browser-Abnahme: Wand unter dem Navigator schimmert durch, Einpassen mittig im freien Bereich, Navigatorbreite ziehen und merken, Werkzeugkasten einklappen, Navigator schließen/öffnen, Vollbild, 3D, zwei Ansichten.
+
+## UI1 – Zoom, Leisten, schwarze Beschriftungen (02.11.2026)
+
+Nutzerauftrag: Zoom im Layoutbuch endete bei 264 %. Werkzeugleiste und Navigator liegen auf gleicher Höhe unter der Werkzeugeigenschaften-Leiste; diese verliert die Hälfte ihrer Höhe und geht komplett von links nach rechts durch; alle Inhalte in einer Zeile, sonst seitlich scrollbar. Alle Beschriftungen schwarz statt grau.
+
+- **Zoom:** Grenze 100 000 statt 10 000 Bildschirmpixel pro Meter (`MAX_PLAN_SCALE`). Auf dem Papier (100 % = 3 780 px/m) reicht das bis etwa 2 646 %, im Grundriss bis 100 000 %. Die Zoom-Auswahl bietet zusätzlich 800, 1 000 und 2 000 %. Ein Abbild speichert seinen Zoom weiter höchstens mit 10 000 px/m (`MAX_FRAMING_SCALE`, kein Schemawechsel); Mitte und Ausschnittgröße bleiben exakt.
+- **Werkzeugeigenschaften:** über die volle Breite, 65 statt 130 px hoch, eine Zeile. Was nicht passt, scrollt seitlich, auch mit dem Mausrad. Felder, die anderswo umbrechen (`flex-wrap`) oder in Rastern stehen, bleiben hier in der Zeile.
+- **Werkzeugleiste und Navigator** beginnen beide unter der Werkzeugeigenschaften-Leiste und reichen bis unten.
+- **Beschriftungen schwarz:** Der gemeinsame Grauton der Oberfläche (`--muted-foreground`) ist jetzt das Schwarz der Schrift. Hilfslinien in der Zeichnung (Papierrand, Randrahmen) bleiben grau.
+
+Nachweis UI1: 1520 Tests grün (neu: Zoom bis 2 000 % auf Papier und Stopp an der Grenze, Abbild-Ausschnitt bei tiefem Zoom; Palettenmaße mit 65 px). Typprüfung, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert. Browser: Werkzeugeigenschaften einzeilig bei Wand (seitlich scrollbar), Schraffur, Maßkette, Text und ausgewählter Wand; Werkzeugleiste und Navigator oben bündig; Masterlayout auf 2 000 %, mit dem Mausrad bis 2 645,8 %. Gefunden und behoben: Beim Öffnen eines Layouts über 10 000 px/m stürzte die Ansicht ab, weil der Abbild-Ausschnitt nur 10 000 px/m speichern darf; jetzt begrenzt nur dieser gespeicherte Wert.

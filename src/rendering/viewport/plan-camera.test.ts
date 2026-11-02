@@ -9,6 +9,7 @@ import {
   zoomPlan,
   panPlan,
   planScaleBar,
+  MAX_PLAN_SCALE,
 } from "./plan-camera.ts";
 const size = { width: 800, height: 400 };
 const camera = { center: { x: 3, y: 2 }, pixelsPerMetre: 100 };
@@ -38,7 +39,7 @@ test("wheel zoom retains model point under cursor including scale limits", () =>
     const a = screenToPlan(camera, size, anchor),
       b = screenToPlan(zoomed, size, anchor);
     assert.ok(Math.abs(a.x - b.x) < 1e-9 && Math.abs(a.y - b.y) < 1e-9);
-    assert.ok(zoomed.pixelsPerMetre >= 0.1 && zoomed.pixelsPerMetre <= 10000);
+    assert.ok(zoomed.pixelsPerMetre >= 0.1 && zoomed.pixelsPerMetre <= MAX_PLAN_SCALE);
   }
   assert.deepEqual(camera, { center: { x: 3, y: 2 }, pixelsPerMetre: 100 });
 });
@@ -49,7 +50,7 @@ test("pan preserves scale and moves geometry with pointer; model space remains e
   assert.deepEqual(zoomPlan(camera, size, 2).center, camera.center);
 });
 test("scale bar denotes the actual metre span at each zoom", () => {
-  for (const scale of [0.1, 3, 25, 100, 234, 10000]) {
+  for (const scale of [0.1, 3, 25, 100, 234, 10000, MAX_PLAN_SCALE]) {
     const bar = planScaleBar(scale);
     assert.ok(bar.pixels <= 100.000001 && bar.pixels >= 20);
     assert.equal(bar.pixels, bar.metres * scale);
@@ -82,4 +83,16 @@ test("fitting between palettes puts the bounds into the free part of the surface
   assert.deepEqual(screen(bottomRight), { x: 1100, y: 650 });
   const plain = fitPlanInset("0 -5 10 5", size, { left: 0, top: 0, right: 0, bottom: 0 });
   assert.deepEqual(plain, fitPlan("0 -5 10 5", size));
+});
+
+// docs/GLAS_PALETTEN.md, UI1: on paper (3 780 px/m at 100 %) zoom reaches beyond 2 000 %.
+test("zoom reaches 2 000 % of paper and stops at the deepest scale", () => {
+  const paper = 96 / 0.0254;
+  const deep = zoomPlan({ center: { x: 0, y: 0 }, pixelsPerMetre: paper }, size, 20);
+  assert.ok(Math.abs(deep.pixelsPerMetre / paper - 20) < 1e-9);
+  assert.equal(zoomPlan(deep, size, 100).pixelsPerMetre, MAX_PLAN_SCALE);
+  // An Abbild taken that deep keeps its exact extents and the zoom it can store.
+  const framing = capturePlanFraming(deep, size);
+  assert.equal(framing.pixelsPerMetre, 10000);
+  assert.ok(Math.abs(framing.width - size.width / deep.pixelsPerMetre) < 1e-12);
 });

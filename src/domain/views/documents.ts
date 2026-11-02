@@ -29,12 +29,14 @@ export const drawingDocumentV17Schema = z
   })
   .strict();
 
+/** Zoom an Abbild keeps at most; the view itself zooms deeper (UI1). */
+export const MAX_FRAMING_SCALE = 10000;
 export const framingSchema = z
   .object({
     center: z.object({ x: z.number().finite(), y: z.number().finite() }).strict(),
     width: z.number().finite().positive(),
     height: z.number().finite().positive(),
-    pixelsPerMetre: z.number().finite().min(0.1).max(10000),
+    pixelsPerMetre: z.number().finite().min(0.1).max(MAX_FRAMING_SCALE),
   })
   .strict()
   .superRefine((v, ctx) => {

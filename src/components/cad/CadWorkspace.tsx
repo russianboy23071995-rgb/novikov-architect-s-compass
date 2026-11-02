@@ -3857,11 +3857,18 @@ export function CadWorkspace({
             ref={propertiesRef}
             tabIndex={-1}
             aria-label="Werkzeugeigenschaften"
-            className="glass-panel-strong absolute left-2 top-2 z-20 overflow-auto rounded-lg px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            style={{ height: PROPERTIES_HEIGHT, right: insets.right || PALETTE_GAP }}
+            // One row across the whole width; what does not fit scrolls sideways, also with the
+            // mouse wheel (UI1). Fields that wrap or stack elsewhere stay in the row here.
+            className="glass-panel-strong absolute left-2 right-2 top-2 z-20 flex items-center gap-4 overflow-x-auto overflow-y-hidden whitespace-nowrap rounded-lg px-3 py-1 outline-none focus-visible:ring-2 focus-visible:ring-primary [&_.flex-wrap]:flex-nowrap [&_.grid]:auto-cols-max [&_.grid]:grid-flow-col [&>*]:shrink-0"
+            style={{ height: PROPERTIES_HEIGHT }}
+            onWheel={(event) => {
+              const bar = event.currentTarget;
+              if (event.deltaX || !event.deltaY || bar.scrollWidth <= bar.clientWidth) return;
+              bar.scrollLeft += event.deltaY;
+            }}
           >
             <>
-              <div className="mb-1 flex items-center gap-3">
+              <div className="flex shrink-0 items-center gap-3">
                 <h2 className="text-xs font-semibold">Werkzeugeigenschaften</h2>
                 {tool === "select" && selection?.kind === "wall" && (
                   <Button
@@ -4057,8 +4064,8 @@ export function CadWorkspace({
           )}
           {navigatorShown && (
             <div
-              className="absolute bottom-2 right-2 top-2 z-20 flex flex-col gap-2"
-              style={{ width: navigatorWidth }}
+              className="absolute bottom-2 right-2 z-20 flex flex-col gap-2"
+              style={{ width: navigatorWidth, top: insets.top }}
             >
               <div
                 role="separator"
