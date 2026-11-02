@@ -6,6 +6,7 @@ import {
   Grid2x2,
   RulerDimensionLine,
   Type,
+  Frame,
 } from "lucide-react";
 import type { CadTool, ToolId } from "./cad-types";
 import {
@@ -43,6 +44,8 @@ export const RAIL_TOOLS: Partial<Record<ToolId, CadTool>> = {
   hatch: { id: "hatch", label: "Schraffur", shortcut: "H", icon: PaintBucket },
   dimension: { id: "dimension", label: "Maßkette", shortcut: "", icon: RulerDimensionLine },
   text: { id: "text", label: "Text", shortcut: "", icon: Type },
+  // Places a drawing document on a layout (docs/ZEICHNUNG.md, ZW2).
+  drawing: { id: "drawing", label: "Zeichnung", shortcut: "", icon: Frame },
   section: { id: "section", label: "Schnitt", shortcut: "", icon: SectionIcon },
   // Elevation: the section line object seen from outside (docs/ANSICHTEN.md, A1).
   elevation: { id: "elevation", label: "Ansicht", shortcut: "", icon: ElevationIcon },

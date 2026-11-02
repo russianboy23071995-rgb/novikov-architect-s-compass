@@ -10,6 +10,7 @@ import { segmentIntersectionReferences } from "../../constraints/snapping/segmen
 import type { SnapSegment } from "../../constraints/snapping/segment-references.ts";
 import { createDerivedCache } from "../../domain/project/derived-cache.ts";
 import { columnOutline } from "../../domain/elements/column/model.ts";
+import { maskOnPaper } from "../../domain/elements/drawing/model.ts";
 import { MARGIN_FRAME_SNAP_ID, PAPER_SNAP_ID, rectCorners, sheetFrames } from "./sheet-frames.ts";
 
 // Project snapshots are immutable. Weak keys release discarded projects; the undo history
@@ -105,6 +106,8 @@ export function projectSnapParts(project: Project): readonly (readonly SnapPart[
     // Column centre; corners and edge midpoints of a rectangle, four rim points of a circle
     // (docs/STUETZEN.md, P3).
     (storey.columns ?? []).map((column) => remembered(owned, column, columnPart)),
+    // Mask corners and edge midpoints of a drawing on a layout (docs/ZEICHNUNG.md, ZW2).
+    (storey.drawings ?? []).map((d) => remembered(owned, d, drawingPart)),
     // Paper and margin frame of a Plankopf or layout: corners, edge midpoints and, through
     // the corner directions, the edges themselves (docs/LAYOUTS.md).
     sheetParts(project),
@@ -266,6 +269,10 @@ function linePart(line: NonNullable<Project["storeys"][number]["lines"]>[number]
   ]);
 }
 
+function drawingPart(drawing: Parameters<typeof maskOnPaper>[0] & { id: string }): Part {
+  return hatchPart({ id: drawing.id, points: maskOnPaper(drawing) });
+}
+
 const sheetPartCache = new WeakMap<Project, Part[]>();
 function sheetParts(project: Project): Part[] {
   const sheet = sheetFrames(project);
@@ -279,6 +286,7 @@ function sheetParts(project: Project): Part[] {
       // Master drawing and title block under a layout: their corners and lines snap.
       ...(under?.lines ?? []).map(linePart),
       ...(under?.hatches ?? []).map(hatchPart),
+      ...(under?.drawings ?? []).map(drawingPart),
     ];
     sheetPartCache.set(project, parts);
   }

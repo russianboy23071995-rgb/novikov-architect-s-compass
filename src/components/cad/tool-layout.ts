@@ -15,7 +15,7 @@ export type ToolLayout = Record<ToolGroupId, ToolId[]>;
 
 export const DEFAULT_TOOL_LAYOUT: ToolLayout = {
   "3d": ["wall", "column", "stair", "window", "door", "slab", "roof", "room"],
-  "2d": ["line", "hatch", "text"],
+  "2d": ["line", "hatch", "text", "drawing"],
   doc: ["dimension", "section", "elevation"],
 };
 
