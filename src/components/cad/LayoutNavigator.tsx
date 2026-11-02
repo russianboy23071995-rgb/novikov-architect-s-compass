@@ -32,6 +32,8 @@ export type LayoutNavigation = {
   onTitleBlockAction?: (base: Project, action: TitleBlockAction) => void;
   onOpenTitleBlock?: (id: string) => void;
   activeTitleBlockId?: string | null;
+  /** Opens the sheet and exports it as PDF (docs/PDF_EXPORT.md). */
+  onExportPdf?: (kind: "layout" | "block", id: string) => void;
 };
 
 type Kind = "folder" | "layout" | "master" | "block";
@@ -59,6 +61,7 @@ export function LayoutNavigator({
   onTitleBlockAction,
   onOpenTitleBlock,
   activeTitleBlockId = null,
+  onExportPdf,
 }: LayoutNavigation & { project: Project }) {
   const folders = projectLayoutFolders(project),
     layouts = projectLayouts(project),
@@ -311,6 +314,16 @@ export function LayoutNavigator({
           </div>
         </ContextMenuTrigger>
         <ContextMenuContent onCloseAutoFocus={menuClosed}>
+          {kind !== "folder" && onExportPdf && (
+            <>
+              <ContextMenuItem
+                onSelect={() => onExportPdf(kind === "block" ? "block" : "layout", id)}
+              >
+                Als PDF exportieren
+              </ContextMenuItem>
+              <ContextMenuSeparator />
+            </>
+          )}
           {menu}
           {!fixed && (
             <>
