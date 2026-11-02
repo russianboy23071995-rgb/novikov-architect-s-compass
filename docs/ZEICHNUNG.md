@@ -80,6 +80,26 @@ Browser: Raum 10 × 6 m mit 0,3-m-Wänden (2,8 m hoch), Schnitt A-A quer durch, 
 
 Grenzen:
 
-- Der Ausschnitt eines Schnitts wächst mit dem Modell. Wird das Gebäude höher, verschiebt sich die Zeichnung auf dem Papier um die halbe Höhenänderung nach unten, und die gespeicherte Maske schneidet oben ab. Ein fester Ausschnitt für Schnitte wäre ein eigener Schritt.
+- Der Ausschnitt eines Schnitts wuchs mit dem Modell; seit ZW5 bleibt er fest.
 - Gefangen werden wie beim Grundriss nur Ecken und Kanten der Maske, nicht die Linien im Schnitt.
 - Ausgeblendete Ebenen des Abbilds gelten für Schnitte nicht; der Schnitt-Tab kennt sie ebenfalls nicht.
+
+## ZW5 – Fester Ausschnitt für Schnitte und Ansichten
+
+Nutzerentscheidung 02.11.2026: Der Ausschnitt soll fest bleiben, wenn das Modell wächst.
+
+- **Fest:** Ein Schnitt- oder Ansichts-Abbild bekommt seinen Ausschnitt (ganze Schnittzeichnung mit Geschosskoten) und speichert ihn im Abbild. Das passiert, wenn es mit „Als Abbild sichern …“ angelegt wird oder im Werkzeug „Zeichnung“ zum ersten Mal gewählt wird. Ältere Abbilder ohne gespeicherten Ausschnitt bekommen ihn beim Wählen im Werkzeug; das ist ein eigener Rückgängig-Schritt.
+- **Wirkung:** Die Zeichnung folgt weiter dem Modell, ihr Ausschnitt nicht. Wird das Gebäude höher, bleibt die Zeichnung auf dem Papier stehen; was über den Ausschnitt hinausgeht, schneidet die Maske ab.
+- **Neu einpassen:** „Ausschnitt neu einpassen“ in der Leiste bzw. im Fenster einer gewählten Schnitt-Zeichnung übernimmt die aktuelle Größe. Alle platzierten Zeichnungen dieses Abbilds behalten ihren Beschnitt an den neuen Rändern. Passt ein Beschnitt nicht mehr (Maske kleiner als 5 × 5 mm), zeigt die Zeichnung den ganzen neuen Ausschnitt. Ein Rückgängig-Schritt.
+- **Code:** Abbildaktion `framing` und `framing` bei `create-section` in `src/application/views/documents.ts`; `sectionFraming` in `src/components/cad/section-graphic.ts`; Bedienung in `CadWorkspace.tsx` und `DrawingFields.tsx`. Das Projektformat ändert sich nicht: Abbilder konnten schon einen Ausschnitt tragen.
+
+Nachweis ZW5: 1524 Tests grün (neu: Neu-Einpassen behält den Beschnitt an den neuen Rändern, zu großer Beschnitt fällt auf den ganzen Ausschnitt zurück, Rückgängig; Schnitt-Abbild speichert den Ausschnitt beim Anlegen). Typprüfung, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert.
+
+Browser: Testprojekt aus ZW4 mit älterem Schnitt-Abbild ohne Ausschnitt, Schnitt A-A 1:100 aufs Layout.
+
+- Vorher: Fußboden bei 145 mm, Wandoberkante bei 173 mm, Maske 135–185 mm (Papierkoordinaten von unten)
+- Wand im Grundriss auf 5 m erhöht: Fußboden bleibt bei **145 mm**, Wand reicht bis 195 mm und wird an der Maske (185 mm) abgeschnitten
+- „Ausschnitt neu einpassen“: Ausschnitt 140 × 70 mm statt 140 × 50 mm, die Wand liegt ganz in der Maske
+- Strg+Z: wieder 140 × 50 mm, Fußboden bei 145 mm
+
+Grenzen: Beim Neu-Einpassen wird die Zeichnung wieder auf die Mitte des neuen Ausschnitts gesetzt, sie springt auf dem Papier also um die halbe Größenänderung. Ändert man den Maßstab eines Schnitt-Abbilds, bleibt der Ausschnitt in Metern gleich; der Rand für die Koten passt dann erst nach „Neu einpassen“ zum neuen Maßstab. Den Knopf „Ausschnitt neu einpassen“ habe ich im Test per Skript gedrückt, weil er rechts außerhalb der sichtbaren Leiste lag.

@@ -2,6 +2,13 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import type { DocumentFraming } from "../../domain/views/documents.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { validateLike } from "../../domain/project/owned-snapshot.ts";
+import {
+  frameMask,
+  maskCrop,
+  maskFromCrop,
+  maskProblem,
+  type DrawingMask,
+} from "../../domain/elements/drawing/model.ts";
 import type { DocumentIdentity } from "../../domain/views/scale.ts";
 import { projectScaleContext } from "./project-scale.ts";
 export type DocumentAction =
@@ -24,6 +31,14 @@ export type DocumentAction =
       name: string;
       denominator: number;
       folderId?: string;
+      /** Fixed frame of the drawing (docs/ZEICHNUNG.md, ZW5). */
+      framing?: DocumentFraming;
+    }
+  | {
+      /** Fixes or refits the frame, e.g. of a section as it is placed (ZW5). */
+      kind: "framing";
+      id: string;
+      framing: DocumentFraming;
     }
   | { kind: "create-folder"; id: string; name: string }
   | { kind: "rename-folder"; id: string; name: string }
@@ -100,6 +115,7 @@ export function changeDrawingDocument(
           modelViewId: source.id,
           denominator: action.denominator,
           hiddenLayerIds: [],
+          ...(action.framing ? { framing: action.framing } : {}),
           ...(action.folderId ? { folderId: action.folderId } : {}),
         },
       ],
@@ -164,6 +180,39 @@ export function changeDrawingDocument(
       ...current,
       drawingDocuments: documents.filter((d) => d.id !== target.id),
     });
+  if (action.kind === "framing") {
+    // Placed drawings of the document keep their crop at the new frame's edges; a crop that no
+    // longer fits, or a drawing without a known old frame that sticks out, shows the whole frame.
+    const before = target.framing ? frameMask(target.framing, target.denominator) : null;
+    const limit = frameMask(action.framing, target.denominator);
+    const refit = (mask: DrawingMask) => {
+      const next = before ? maskFromCrop(limit, maskCrop(mask, before)) : mask;
+      return maskProblem(next, limit) ? { ...limit } : next;
+    };
+    return validateLike(current, {
+      ...current,
+      drawingDocuments: documents.map((d) =>
+        d.id === target.id ? { ...d, framing: action.framing } : d,
+      ),
+      ...(current.layoutDrawings
+        ? {
+            layoutDrawings: current.layoutDrawings.map((sheet) =>
+              sheet.storey.drawings?.some((p) => p.documentId === target.id)
+                ? {
+                    ...sheet,
+                    storey: {
+                      ...sheet.storey,
+                      drawings: sheet.storey.drawings.map((p) =>
+                        p.documentId === target.id ? { ...p, mask: refit(p.mask) } : p,
+                      ),
+                    },
+                  }
+                : sheet,
+            ),
+          }
+        : {}),
+    });
+  }
   if (action.kind !== "rename" && action.kind !== "scale")
     throw new Error("Unbekannte Abbildaktion.");
   return validateLike(current, {

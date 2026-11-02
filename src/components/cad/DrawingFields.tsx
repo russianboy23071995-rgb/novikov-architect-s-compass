@@ -106,6 +106,7 @@ export function DrawingElementFields({
   limit,
   onChange,
   inline = false,
+  onRefit,
 }: {
   document: string;
   layers: readonly Layer[];
@@ -116,6 +117,8 @@ export function DrawingElementFields({
   onChange: (change: { mask?: DrawingMask; layerId?: string }) => void;
   /** In the one-row tool properties bar (UI1): side by side instead of stacked. */
   inline?: boolean;
+  /** Section or elevation: fits its fixed frame to the model now (ZW5). */
+  onRefit?: (() => void) | undefined;
 }) {
   const crop = maskCrop(mask, limit);
   const [drafts, setDrafts] = useState<Partial<Record<MaskEdge, string>>>({});
@@ -182,6 +185,16 @@ export function DrawingElementFields({
       >
         Maske zurücksetzen
       </button>
+      {onRefit && (
+        <button
+          type="button"
+          className="self-start rounded border px-2 py-1 hover:bg-muted"
+          title="Der Ausschnitt des Schnitts bleibt fest, bis er neu eingepasst wird."
+          onClick={onRefit}
+        >
+          Ausschnitt neu einpassen
+        </button>
+      )}
       {error && (
         <p role="alert" className="text-destructive">
           {error}
