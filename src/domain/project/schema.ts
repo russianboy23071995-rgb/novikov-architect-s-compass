@@ -42,6 +42,7 @@ import {
   projectLayouts,
   projectMasterLayouts,
   masterLayoutSchema,
+  masterLayoutV48Schema,
   sheetSchema,
 } from "../views/layouts.ts";
 import {
@@ -655,11 +656,19 @@ const layoutDrawingSchema = z
   .object({ layoutId: id, storey: projectV43Schema.shape.storeys.element })
   .strict();
 export type LayoutDrawing = z.infer<typeof layoutDrawingSchema>;
+/** Schema 47 as stored before master layouts could carry a title block. */
+export const projectV47Schema = projectV45Schema.extend({
+  schemaVersion: z.literal(47),
+  modelViews: z.array(anyModelViewSchema).optional(),
+  layoutDrawings: z.array(layoutDrawingSchema).max(5000).optional(),
+});
 // Built from v45 directly: one more extend level is too deep for the type checker.
+/** Schema 48: a master layout may carry a title block (docs/PLANKOPF.md, PK4). */
 const projectSchema = projectV45Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   modelViews: z.array(anyModelViewSchema).optional(),
   layoutDrawings: z.array(layoutDrawingSchema).max(5000).optional(),
+  masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
 });
 type SingleProject = z.infer<typeof projectV23Schema>;
 export function validateProjectV18(value: unknown) {
@@ -1156,6 +1165,10 @@ export function validateProject(
     );
   }
   validateWallAssemblies(project);
+  // A master layout's title block exists (PK4).
+  for (const master of project.masterLayouts ?? [])
+    if (master.titleBlockId && !project.titleBlocks?.some((t) => t.id === master.titleBlockId))
+      throw new Error(`Masterlayout ${master.name}: Plankopf fehlt.`);
   const layoutProblem = layoutLibraryProblem(project);
   if (layoutProblem) throw new Error(layoutProblem);
   return { ...project, hatchPatterns: project.hatchPatterns.filter((p) => used.has(p.id)) };

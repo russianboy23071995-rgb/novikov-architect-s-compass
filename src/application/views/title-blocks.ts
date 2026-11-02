@@ -62,6 +62,11 @@ export function changeTitleBlocks(
   }
   const block = titleBlockOf(current, action.id);
   if (action.kind === "delete") {
+    const users = (current.masterLayouts ?? []).filter((m) => m.titleBlockId === block.id);
+    if (users.length)
+      throw new Error(
+        `Der Plankopf wird von Masterlayout ${users.map((m) => `„${m.name}“`).join(", ")} verwendet.`,
+      );
     const rest = blocks.filter((t) => t !== block);
     const { titleBlocks: _all, ...without } = current;
     return validateLike(current, rest.length ? { ...current, titleBlocks: rest } : without);

@@ -6,7 +6,12 @@ import { editingReducer, type EditingEvent, type EditingState } from "../direct-
 import { emptyTitleBlockStorey, titleBlockOf, titleBlockUnderlay } from "./title-blocks.ts";
 import { layoutUnderlay } from "./layouts.ts";
 import { setSheetFrames, type SheetFrames } from "../snapping/sheet-frames.ts";
-import { layoutSheet, projectLayouts, projectMasterLayouts } from "../../domain/views/layouts.ts";
+import {
+  layoutSheet,
+  projectLayouts,
+  projectMasterLayouts,
+  sheetSize,
+} from "../../domain/views/layouts.ts";
 
 /**
  * Drawing spaces (docs/PLANKOPF.md, PK2; docs/LAYOUTS.md, LZ1): a title block or a layout
@@ -50,15 +55,21 @@ export function spaceLens(real: Project, space: DrawingSpace): Project {
     ...shared
   } = real;
   // Identity stays stable per real project, so base checks of the tools keep working.
+  // The lens has no title blocks, so master layouts point at none there (PK4).
   const lens = createProjectSnapshot({
     ...shared,
+    ...(shared.masterLayouts
+      ? {
+          masterLayouts: shared.masterLayouts.map(({ titleBlockId: _block, ...master }) => master),
+        }
+      : {}),
     storeys: [sheet],
     groundStoreyId: sheet.id,
     workingViews: [{ kind: "working-plan", storeyId: sheet.id, denominator: 1 }],
   });
   if (!byKey) lenses.set(real, (byKey = new Map()));
   byKey.set(key(space), lens);
-  setSheetFrames(lens, spaceFrames(real, space));
+  setSheetFrames(lens, { ...spaceFrames(real, space), backdrop: spaceBackdrop(real, space) });
   return lens;
 }
 export const titleBlockLens = (real: Project, id: string) =>
@@ -77,6 +88,8 @@ export function fromSpaceLens(real: Project, space: DrawingSpace, next: Project)
     drawingDocuments: _documents,
     titleBlocks: _blocks,
     layoutDrawings: _drawings,
+    // Master layouts change only by project steps; the real ones keep their title blocks.
+    masterLayouts: _masters,
     hatchPatterns,
     ...shared
   } = next;
@@ -166,4 +179,78 @@ function spaceFrames(real: Project, space: DrawingSpace): SheetFrames {
     ? layoutSheet(real, layout)
     : projectMasterLayouts(real).find((m) => m.id === space.id)!.sheet;
   return layoutUnderlay(sheet);
+}
+
+/** Ids of drawn-under elements: never model elements, never pickable (docs/PLANKOPF.md). */
+const BACKDROP_PREFIX = "@bg:";
+const backdrops = new WeakMap<Project, Map<string, Project | null>>();
+
+/**
+ * What lies under a layout's own drawing (docs/LAYOUTS.md, LZ2; docs/PLANKOPF.md, PK4): the
+ * drawing of its master layout and the master's title block, its lower right corner on the
+ * lower right corner of the margin frame. A master layout shows its title block under its
+ * own drawing. Undefined for title blocks and layouts without a master.
+ */
+export function spaceBackdrop(real: Project, space: DrawingSpace): Project | undefined {
+  if (space.kind !== "layout") return undefined;
+  let byId = backdrops.get(real);
+  if (byId?.has(space.id)) return byId.get(space.id) ?? undefined;
+  const result = buildBackdrop(real, space.id);
+  if (!byId) backdrops.set(real, (byId = new Map()));
+  byId.set(space.id, result);
+  return result ?? undefined;
+}
+
+function buildBackdrop(real: Project, id: string): Project | null {
+  const masters = projectMasterLayouts(real);
+  const layout = projectLayouts(real).find((l) => l.id === id);
+  const master = layout
+    ? masters.find((m) => m.id === layout.masterId)
+    : masters.find((m) => m.id === id);
+  if (!master) return null;
+  const block = master.titleBlockId
+    ? real.titleBlocks?.find((t) => t.id === master.titleBlockId)
+    : undefined;
+  // A layout sees its master's drawing; the master itself draws that sheet on top.
+  const base = layout ? spaceSheet(real, { kind: "layout", id: master.id }) : null;
+  if (!block && !base?.lines?.length && !base?.texts?.length && !base?.hatches.length) return null;
+  const { width, height: _h } = sheetSize(master.sheet);
+  const shift = {
+    x: (width - master.sheet.margins.right) / 1000,
+    y: master.sheet.margins.bottom / 1000,
+  };
+  const moved = (p: { x: number; y: number }, d: { x: number; y: number }) => ({
+    x: p.x + d.x,
+    y: p.y + d.y,
+  });
+  const none = { x: 0, y: 0 };
+  type Sheet = Project["storeys"][number];
+  const copy = (sheet: Sheet | null | undefined, d: { x: number; y: number }, tag: string) => ({
+    lines: (sheet?.lines ?? []).map((l) => ({
+      ...l,
+      id: `${BACKDROP_PREFIX}${tag}${l.id}`,
+      points: l.points.map((p) => moved(p, d)),
+    })),
+    texts: (sheet?.texts ?? []).map((t) => ({
+      ...t,
+      id: `${BACKDROP_PREFIX}${tag}${t.id}`,
+      position: moved(t.position, d),
+    })),
+    hatches: (sheet?.hatches ?? []).map((h) => ({
+      ...h,
+      id: `${BACKDROP_PREFIX}${tag}${h.id}`,
+      points: h.points.map((p) => moved(p, d)),
+      ...(h.pattern ? { pattern: { ...h.pattern, origin: moved(h.pattern.origin, d) } } : {}),
+    })),
+  });
+  const own = copy(base, none, "m:");
+  const head = copy(block?.storey, shift, "t:");
+  const storey: Sheet = {
+    ...emptyTitleBlockStorey(`${BACKDROP_PREFIX}${id}`, master.name),
+    lines: [...own.lines, ...head.lines],
+    texts: [...own.texts, ...head.texts],
+    hatches: [...own.hatches, ...head.hatches],
+  };
+  // Drawing only: the shared settings (layers, pens, patterns) of the real project.
+  return { ...real, storeys: [storey], groundStoreyId: storey.id };
 }

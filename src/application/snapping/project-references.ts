@@ -272,9 +272,13 @@ function sheetParts(project: Project): Part[] {
   if (!sheet) return [];
   let parts = sheetPartCache.get(project);
   if (!parts) {
+    const under = sheet.backdrop ? storeyOf(sheet.backdrop) : null;
     parts = [
       hatchPart({ id: PAPER_SNAP_ID, points: rectCorners(sheet.paper) }),
       hatchPart({ id: MARGIN_FRAME_SNAP_ID, points: rectCorners(sheet.frame) }),
+      // Master drawing and title block under a layout: their corners and lines snap.
+      ...(under?.lines ?? []).map(linePart),
+      ...(under?.hatches ?? []).map(hatchPart),
     ];
     sheetPartCache.set(project, parts);
   }

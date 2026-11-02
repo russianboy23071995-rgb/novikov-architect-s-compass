@@ -183,3 +183,64 @@ test("paper and margin frame of a space are snap targets with readable names", a
   // The building's plan has no sheet.
   assert.ok(!projectSnapReferences(real).some((r) => r.entityId.startsWith("@")));
 });
+
+// docs/PLANKOPF.md, PK4: the master layout's title block on every following layout.
+test("a master layout's title block lies at the margin frame's lower right corner of each sheet", async () => {
+  const { changeLayouts } = await import("./layouts.ts");
+  const { DEFAULT_MASTER_ID, LAYOUT_COLLECTION_ID, DEFAULT_MASTER_LAYOUTS } =
+    await import("../../domain/views/layouts.ts");
+  const { spaceBackdrop, spaceLens } = await import("./title-block-space.ts");
+  const { projectSnapReferences } = await import("../snapping/project-references.ts");
+  const { serializeProject } = await import("../../lib/bim/model.ts");
+  const { loadProjectData } = await import("../../interop/project-file/load.ts");
+  // A title block with one line ending in its reference point (0, 0).
+  let state: SpaceEditingState = setup();
+  const lens = titleBlockLens(state.history.present, "tb1");
+  state = spaceEditingReducer(state, {
+    type: "project",
+    project: createDrawing(lens, lens, "frame", frame),
+  });
+  let p = state.history.present;
+  p = changeLayouts(p, p, {
+    kind: "master-settings",
+    id: DEFAULT_MASTER_ID,
+    name: "Standard A3 quer",
+    sheet: DEFAULT_MASTER_LAYOUTS[0]!.sheet,
+    titleBlockId: "tb1",
+  });
+  p = changeLayouts(p, p, {
+    kind: "create-layout",
+    id: "l1",
+    name: "Grundriss EG",
+    folderId: LAYOUT_COLLECTION_ID,
+    masterId: DEFAULT_MASTER_ID,
+  });
+  // A3 quer 420 × 297 mm, margins right and bottom 10 mm: the reference point is (0,41 | 0,01).
+  for (const id of ["l1", DEFAULT_MASTER_ID]) {
+    const under = spaceBackdrop(p, { kind: "layout", id })!;
+    const line = storeyOf(under).lines!.find((l) => l.id === "@bg:t:frame")!;
+    assert.ok(
+      Math.abs(line.points[1]!.x - 0.41) < 1e-12 && Math.abs(line.points[1]!.y - 0.01) < 1e-12,
+    );
+  }
+  // Its points snap on the layout; it is no element of the layout's own sheet.
+  const layoutLens = spaceLens(p, { kind: "layout", id: "l1" });
+  assert.ok(projectSnapReferences(layoutLens).some((r) => r.entityId === "@bg:t:frame"));
+  assert.equal(storeyOf(layoutLens).lines, undefined);
+  // A used title block stays; without the master's reference it can go.
+  assert.throws(
+    () => changeTitleBlocks(p, p, { kind: "delete", id: "tb1" }),
+    /Masterlayout „Standard A3 quer“/,
+  );
+  // Renaming keeps the title block (absent = unchanged), null removes it.
+  const renamed = changeLayouts(p, p, {
+    kind: "master-settings",
+    id: DEFAULT_MASTER_ID,
+    name: "A3 quer",
+    sheet: DEFAULT_MASTER_LAYOUTS[0]!.sheet,
+  });
+  assert.equal(renamed.masterLayouts![0]!.titleBlockId, "tb1");
+  assert.deepEqual(loadProjectData(JSON.parse(serializeProject(p))).masterLayouts, p.masterLayouts);
+  // Schema 47 master layouts carry no title block.
+  assert.throws(() => loadProjectData({ ...JSON.parse(serializeProject(p)), schemaVersion: 47 }));
+});

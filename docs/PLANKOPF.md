@@ -50,3 +50,16 @@ Nachweis PK3: 1503 Tests grün (neu: Lage der Unterlage A3 quer zum Bezugspunkt)
 - Der **Rasterfang** steht wie im Grundriss auf 0,1 m; für Plankopf-Maße empfiehlt sich ein feineres Raster (unten in der Statusleiste) oder die Eingabe von Länge/Winkel.
 - Eingaben in m (0,18 = 18 cm), Maßstab fest 1:1.
 - Noch offen: automatische Texte (nächster Schritt), der Plankopf im Masterlayout/Layout.
+
+## PK4 – Plankopf im Masterlayout
+
+Entscheidungen (Empfehlungen übernommen): Ein verwendeter Plankopf ist nicht löschbar; Layouts ohne Masterlayout bekommen vorerst keinen Plankopf; Lage fest an der rechten unteren Ecke des Randrahmens.
+
+- **Projektdatei Schema 48.** Ein Masterlayout kann einen Plankopf tragen (`titleBlockId`). Dateien mit Schema 47 werden übernommen; ein Plankopf-Verweis in einer Datei mit Schema 47 wird abgelehnt. Der Verweis muss auf einen vorhandenen Plankopf zeigen.
+- **Auswahl:** Fenster „Masterlayout-Einstellungen“ (bzw. „Neues Masterlayout“) mit dem Feld **Plankopf** („Ohne“ oder einer der Planköpfe). Umbenennen eines Masterlayouts behält den Plankopf.
+- **Darstellung:** Der Plankopf erscheint im **Masterlayout** unter dessen eigener Zeichnung und in **jedem Layout, das dem Masterlayout folgt**, zusammen mit der Masterzeichnung, jeweils unter der eigenen Zeichnung. Seine rechte untere Ecke (der Bezugspunkt im Plankopfplaner) liegt auf der rechten unteren Ecke des Randrahmens. Er ist nicht anwählbar; Änderungen im Plankopfplaner erscheinen sofort auf allen Blättern. Maßketten eines Plankopfs werden auf dem Blatt (noch) nicht mitgezeigt.
+- **Fang:** Die Rasterengine fängt Ecken, Endpunkte und Kanten des Plankopfs und der Masterzeichnung auf dem Blatt.
+- **Löschen:** Ein Plankopf, den ein Masterlayout verwendet, lässt sich nicht löschen („Der Plankopf wird von Masterlayout „…“ verwendet.“).
+- Code: `masterLayoutV48Schema` in `src/domain/views/layouts.ts`, Prüfung und Schema 48 in `src/domain/project/schema.ts`, Migration in `load.ts`, `titleBlockId` in den Layout-Aktionen, Löschsperre in `title-blocks.ts`, `spaceBackdrop` in `src/application/views/title-block-space.ts` (Masterzeichnung und verschobener Plankopf, Ids mit „@bg:“), Fang über `sheet-frames.ts`/`project-references.ts`, Feld in `LayoutSettingsWindow.tsx`, Anbindung in `CadWorkspace.tsx`.
+
+Nachweis PK4: 1509 Tests grün (neu: Plankopflinie im Layout und im Masterlayout um (0,41 | 0,01) m verschoben bei A3 quer, fangbar, nicht im eigenen Blatt; Löschsperre; Umbenennen behält den Plankopf; Dateirundlauf; Schema 47 lehnt den Verweis ab), Typprüfung, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert. Browser: im Plankopfplaner eine Linie von der Randrahmen-Ecke gezeichnet; im Masterlayout „Standard A3 quer“ als Plankopf gewählt → die Linie sitzt an der rechten unteren Ecke des Randrahmens; neues Layout → Linie ebenfalls da, „Endpunkt“ wird gefangen.
