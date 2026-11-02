@@ -70,3 +70,12 @@ Nachweis LA4: 1496 Tests grün (neu: Layout-Tabs in `canvas-tabs.test.ts`, Ordne
 ## Stand L13
 
 LA1–LA4 erledigt: leere Layouts mit Masterlayouts, Ordnern, Blatteinstellungen und eigenem Tab. Offen für die nächsten Schritte: Zeichnen im Masterlayout (Plankopf, Plankopfplaner mit automatischen Texten), Platzieren von Abbildern/Zeichnungen auf Layouts, maßhaltiger PDF-Export und Druck (L14).
+
+## Nacharbeiten nach Rückmeldung (02.11.2026)
+
+- **Hintergrund des Layout-Tabs** deckend grau wie eine Arbeitsfläche; vorher war die Fläche nur zu 68 % deckend, sodass beim Herauszoomen der Grundriss durchschien.
+- **Neu angelegt = sofort geöffnet:** Ein neues Layout oder Masterlayout öffnet nach „Anlegen“ direkt als Tab, ein neuer Plankopf direkt im Plankopfplaner.
+- **Geschoss im Navigator** schließt Layout-, Schnitt- und Plankopf-Ansicht und zeigt den Grundriss dieses Geschosses (vorher blieb das Layout stehen, ein Weg zurück fehlte). Die anderen Tabs bleiben offen.
+- **Eine Grundriss-Kamera für alle Geschosse:** Zoom und Lage bleiben beim Wechsel EG ↔ OG gleich (vorher wurde die Ansicht je Geschoss neu eingepasst). Abbilder behalten ihren gespeicherten Ausschnitt, der Plankopfplaner seine Unterlage.
+
+Nachweis: 1506 Tests grün, Typprüfung, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert. Browser: Neues Layout → „Anlegen“ öffnet den Tab, graue Arbeitsfläche ohne Grundriss; Gebäudestruktur → Erdgeschoss zeigt den Grundriss, Tab „Layout“ bleibt offen; Grundriss auf 360,7 % gezoomt, Wechsel ins 1. Obergeschoss: weiterhin 360,7 %.

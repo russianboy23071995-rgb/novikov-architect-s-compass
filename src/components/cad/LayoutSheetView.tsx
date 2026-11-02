@@ -56,7 +56,11 @@ export function LayoutSheetView({
   const kind = layout ? "Layout" : "Masterlayout";
   const name = layout?.name ?? master!.name;
   return (
-    <div className="flex h-full flex-col bg-muted">
+    // An opaque grey work surface: nothing of the plan shows behind the sheet.
+    <div
+      className="flex h-full flex-col"
+      style={{ background: "color-mix(in oklab, var(--workspace) 82%, black)" }}
+    >
       <div className="flex items-center gap-3 px-3 pb-1 pt-12 text-xs text-muted-foreground">
         <span className="font-semibold text-foreground">
           {kind} {name}

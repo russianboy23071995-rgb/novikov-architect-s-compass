@@ -3181,7 +3181,8 @@ export function CadWorkspace({
                           : (activeDocumentId ??
                             (activeBlock
                               ? `${activeBlock.id}:${activeBlock.sheet.format}:${activeBlock.sheet.orientation}`
-                              : storeyOf(project).id))
+                              : // One plan camera for every storey: zoom and position stay.
+                                "plan"))
                       }
                       underlay={activeBlock ? titleBlockUnderlay(activeBlock.sheet) : undefined}
                       documentFraming={activeDocument?.framing}
@@ -3913,8 +3914,11 @@ export function CadWorkspace({
                     if (id === SECTIONS_FOLDER_ID || id === ELEVATIONS_FOLDER_ID) return;
                     if (sectionIds.has(id)) return selectCanvasTab(sectionTab(id));
                     if (realProject.storeys.some((s) => s.id === id)) {
+                      // A storey always shows its plan: layout, section or Plankopf tab close.
                       if (space) dispatchEditing({ type: "space", space: null });
                       setActiveSectionId(null);
+                      setActiveLayoutId(null);
+                      setSectionDocumentId(null);
                       cancelInteraction();
                       setSelection(null);
                       setDemandOpen(false);
