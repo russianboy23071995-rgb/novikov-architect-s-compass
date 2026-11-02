@@ -1,4 +1,5 @@
 import { stairGeometry, stairLayout, stairOutline } from "../../domain/elements/stair/model.ts";
+import { maskOnPaper } from "../../domain/elements/drawing/model.ts";
 import { textBox } from "../../domain/elements/text/model.ts";
 import { planDenominator } from "../../domain/views/scale.ts";
 import { dimensionLayout } from "../../domain/elements/dimension/model.ts";
@@ -58,6 +59,8 @@ const PLAN_SHAPES: {
     closed: boolean;
   };
 } = {
+  // A placed drawing (docs/ZEICHNUNG.md): its mask on the paper.
+  drawing: (d) => ({ points: maskOnPaper(d), closed: true }),
   reference: (r, { project }) => ({
     points: imageReferenceCorners(
       r,
@@ -93,6 +96,7 @@ const PLAN_SHAPES: {
 /** Short caption per kind for hints: the user-facing number or mark where one exists. */
 const PLAN_CAPTIONS: { [K in ElementKind]: (element: ElementOf<K>) => string | undefined } = {
   reference: () => undefined,
+  drawing: () => undefined,
   wall: () => undefined,
   window: (w) => w.mark,
   door: (d) => d.mark,
@@ -139,6 +143,8 @@ const PICK_RANK: Record<ElementKind, number> = {
   roof: 4,
   slab: 5,
   room: 6,
+  // Under the layout's own lines and texts, which stay pickable on top of it.
+  drawing: 6,
   reference: 7,
 };
 

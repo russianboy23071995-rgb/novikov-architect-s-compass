@@ -20,6 +20,8 @@ export const ELEMENT_KINDS = {
   line: { list: "lines", label: "Linie" },
   hatch: { list: "hatches", label: "Schraffur" },
   reference: { list: "references", label: "Referenzbild" },
+  // Drawings placed on layouts (docs/ZEICHNUNG.md); never in a storey of the building.
+  drawing: { list: "drawings", label: "Zeichnung" },
 } as const satisfies Record<string, { list: keyof Storey; label: string }>;
 export type ElementKind = keyof typeof ELEMENT_KINDS;
 type ListOf<K extends ElementKind> = NonNullable<Storey[(typeof ELEMENT_KINDS)[K]["list"]]>;
