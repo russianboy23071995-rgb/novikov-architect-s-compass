@@ -29,3 +29,31 @@ Nachweis ZW1: 1513 Tests grün (neu `src/application/drawings/actions.test.ts`: 
 Nachweis ZW2: 1514 Tests grün (neu: Zeichnung des Masterlayouts unter dem Layout und fangbar, eigene Maskenecken fangen; Werkzeugleiste mit „Zeichnung“), Typprüfung, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert. Browser: Abbild „Grundriss 1:100“ angelegt, Layout A3 angelegt, Werkzeug gewählt, Vorschau folgt dem Mauszeiger, Klick platziert (3-m-Wand ≈ 30 mm auf dem Papier), Auswahl blau gestrichelt, „Element frei bewegen“ versetzt die Zeichnung, Layout-Einstellungen zeigen danach „Abbild: Grundriss · 1:100“, im Grundriss wird das Werkzeug mit Hinweis abgelehnt. Behoben während der Abnahme: Der Fokusrahmen des Browsers füllte bei der ausgewählten Maske die ganze Ansicht orange (jetzt `outline-none` wie bei den übrigen wählbaren Formen).
 
 Grenzen: Ziehen mit der Maus verschiebt nicht direkt, sondern wie bei allen Elementen über das Bedarfsmenü. Maskengriffe folgen mit ZW3, Schnitte und Ansichten mit ZW4.
+
+## ZW3 – Bearbeiten und Maskengriffe
+
+- **Randgriffe:** Eine ausgewählte Zeichnung zeigt in der Mitte jedes Maskenrands einen Griff (links, rechts, unten, oben). Ziehen verschiebt nur diesen Rand senkrecht zu ihm, mit Vorschau und Fang der Rasterengine. Lage und Maßstab bleiben, Loslassen ist ein Rückgängig-Schritt, Escape bricht das Ziehen ab.
+- **Grenzen:** Die Maske bleibt mindestens 5 × 5 mm groß und reicht höchstens bis zum Ausschnitt des Abbilds („Die Maske braucht mindestens 5 × 5 mm.“ / „… höchstens bis zum Ausschnitt des Abbilds.“).
+- **Fenster „Zeichnung“** (Doppelklick auf die Zeichnung oder Rechtsklick „Werkzeugeinstellungen…“) und dieselben Felder in der Werkzeugeigenschaften-Leiste, dort einzeilig (UI1):
+  - Abbild mit Name und Maßstab (nur Anzeige)
+  - Ebene
+  - Beschnitt links/rechts/unten/oben in mm vom Rand des Ausschnitts, eintippbar (Enter oder Verlassen des Felds)
+  - Angabe „Ausschnitt … × … mm von … × … mm“
+  - „Maske zurücksetzen“ auf den vollen Ausschnitt
+- **Vorgabenfenster des Werkzeugs** (Doppelklick auf den Werkzeugknopf, AGENTS.md): Abbild und Ebene für neue Zeichnungen, dieselben Felder wie in der Leiste. Damit hat „Zeichnung“ das in ZW2 fehlende Einstellungsfenster.
+- Code: `domain/elements/drawing/model.ts` (`MASK_EDGES`, `MIN_MASK`, `maskEdgeGrip`, `dragMaskEdge`, `maskProblem`, `maskCrop`, `maskFromCrop`), `application/drawings/actions.ts` (`setDrawing` ersetzt `setDrawingMask`), Griffe in `BimPlan.tsx` (`onDrawingMask`), `DrawingFields.tsx`, Vorgaben in `useToolDefaults.ts`, Anbindung in `CadWorkspace.tsx`.
+
+Nachweis ZW3: 1521 Tests grün (neu: Rand ziehen mit Grenze am Ausschnitt und 5 mm Abstand, Beschnitt hin und zurück, Griffmitte, Änderung im Layoutblatt mit Rückgängig, Ablehnung über den Ausschnitt und unter 5 mm). Typprüfung, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert.
+
+Browser:
+- Vorgabenfenster öffnet sich; Abbild dort gewählt = Abbild in der Leiste
+- Zeichnung platziert und ausgewählt, vier Griffe
+- rechten Rand gezogen (22,8 mm Beschnitt), oberen Rand gezogen (12,7 mm)
+- 10 mm links eingetippt: übernommen
+- 500 mm rechts: abgelehnt mit Meldung, Werte bleiben
+- „Maske zurücksetzen“ → 0/0/0/0, Strg+Z → wieder 115,7 × 38,3 mm von 125,7 × 51 mm
+- Doppelklick öffnet „Zeichnung – Einstellungen“ mit denselben Werten
+
+Behoben: Die Abbild-Wahl im Werkzeug sprang zurück, weil die Vorgaben das Abbild gegen den Zeichenraum des Layouts prüften, der keine Abbilder kennt.
+
+Nicht im Browser geprüft: Escape während des Ziehens (der Testbrowser zieht in einem Zug) und das Einrasten eines Rands an einem Fangpunkt; beides läuft über dieselben Wege wie bei den Griffen der Schnittlinie.

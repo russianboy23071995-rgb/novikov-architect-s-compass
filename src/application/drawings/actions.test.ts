@@ -10,7 +10,13 @@ import { maskOnPaper } from "../../domain/elements/drawing/model.ts";
 import { validateProject } from "../../domain/project/schema.ts";
 import { serializeProject } from "../../lib/bim/model.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
-import { placeDrawing, setDrawingMask } from "./actions.ts";
+import { placeDrawing, setDrawing } from "./actions.ts";
+import {
+  dragMaskEdge,
+  maskCrop,
+  maskEdgeGrip,
+  maskFromCrop,
+} from "../../domain/elements/drawing/model.ts";
 
 // docs/ZEICHNUNG.md, ZW1.
 const framing = { center: { x: 2, y: 1 }, width: 12, height: 8, pixelsPerMetre: 50 };
@@ -73,13 +79,16 @@ test("a placed drawing: size from frame and scale, on the layout's sheet, undoab
   raw.storeys[0]!.drawings = [placed!];
   assert.throws(() => validateProject(raw), /gehören auf ein Layout|Duplicate ID/);
   // The mask changes, the size of the drawing does not (ZW3 uses this).
-  const masked = setDrawingMask(spaceLens(real, { kind: "layout", id: "l1" }), "z1", {
-    x0: -0.03,
-    y0: -0.04,
-    x1: 0.06,
-    y1: 0.02,
-  });
-  assert.throws(() => setDrawingMask(masked, "z1", { x0: 0.01, y0: 0, x1: 0.01, y1: 0.02 }));
+  const full = { x0: -0.06, y0: -0.04, x1: 0.06, y1: 0.04 };
+  const masked = setDrawing(
+    spaceLens(real, { kind: "layout", id: "l1" }),
+    "z1",
+    { mask: { x0: -0.03, y0: -0.04, x1: 0.06, y1: 0.02 } },
+    full,
+  );
+  assert.throws(() =>
+    setDrawing(masked, "z1", { mask: { x0: 0.01, y0: 0, x1: 0.01, y1: 0.02 } }, full),
+  );
   state = spaceEditingReducer(state, { type: "undo" });
   assert.equal(state.history.present.layoutDrawings, undefined);
   // Schema 49 files carry no placed drawings.
@@ -122,4 +131,56 @@ test("drawings of the master layout show and snap under its layouts; own mask co
     spaceLens(real, { kind: "layout", id: DEFAULT_MASTER_ID }),
   );
   assert.ok(masterRefs.some((r) => r.entityId === "zm"));
+});
+
+// docs/ZEICHNUNG.md, ZW3: the mask is cropped at its four edges, inside the document frame.
+test("mask edges drag inside the frame, keep 5 mm, and map to crops from the frame", () => {
+  const full = { x0: -0.06, y0: -0.04, x1: 0.06, y1: 0.04 };
+  // The left edge follows the pointer, but never past the frame or within 5 mm of the right edge.
+  assert.equal(dragMaskEdge(full, "left", -0.02, full).x0, -0.02);
+  assert.equal(dragMaskEdge(full, "left", -0.5, full).x0, -0.06);
+  assert.ok(Math.abs(dragMaskEdge(full, "left", 0.3, full).x0 - 0.055) < 1e-12);
+  assert.equal(dragMaskEdge(full, "top", 0.5, full).y1, 0.04);
+  assert.equal(dragMaskEdge(full, "bottom", 0, full).y0, 0);
+  const mask = dragMaskEdge(dragMaskEdge(full, "right", 0.03, full), "top", 0.01, full);
+  const crop = maskCrop(mask, full);
+  assert.ok(Math.abs(crop.right - 0.03) < 1e-12 && Math.abs(crop.top - 0.03) < 1e-12);
+  const back = maskFromCrop(full, crop);
+  for (const k of ["x0", "x1", "y0", "y1"] as const) assert.ok(Math.abs(back[k] - mask[k]) < 1e-12);
+  // Grips sit in the middle of each edge on the paper.
+  const grip = maskEdgeGrip({ position: { x: 0.2, y: 0.1 }, mask: full }, "bottom");
+  assert.ok(Math.abs(grip.x - 0.2) < 1e-12 && Math.abs(grip.y - 0.06) < 1e-12);
+  // On the layout: one undo step; a mask beyond the frame or too small is refused.
+  let state = spaceEditingReducer(createEditingState(project()), {
+    type: "space",
+    space: { kind: "layout", id: "l1" },
+  });
+  const lens = () => spaceLens(state.history.present, { kind: "layout", id: "l1" });
+  state = spaceEditingReducer(state, {
+    type: "project",
+    project: placeDrawing(lens(), {
+      id: "z1",
+      documentId: "d1",
+      position: { x: 0.2, y: 0.1 },
+      frame: framing,
+      denominator: 100,
+    }),
+  });
+  state = spaceEditingReducer(state, {
+    type: "project",
+    project: setDrawing(lens(), "z1", { mask }, full),
+  });
+  const placed = () => state.history.present.layoutDrawings![0]!.storey.drawings![0]!;
+  assert.deepEqual(placed().mask, mask);
+  assert.deepEqual(placed().position, { x: 0.2, y: 0.1 });
+  assert.throws(
+    () => setDrawing(lens(), "z1", { mask: { ...full, x1: 0.07 } }, full),
+    /höchstens bis zum Ausschnitt/,
+  );
+  assert.throws(
+    () => setDrawing(lens(), "z1", { mask: { ...full, x1: -0.058 } }, full),
+    /5 × 5 mm/,
+  );
+  state = spaceEditingReducer(state, { type: "undo" });
+  assert.deepEqual(placed().mask, full);
 });

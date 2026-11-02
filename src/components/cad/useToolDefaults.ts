@@ -10,6 +10,7 @@ import { defaultDimensionLayerId } from "@/application/dimensions/actions";
 import { defaultTextLayerId } from "@/application/texts/actions";
 import { TEXT_DEFAULTS } from "@/domain/elements/text/model";
 import type { TextDefaults } from "./TextFields";
+import type { DrawingDefaults } from "./DrawingFields";
 import type { DimensionDefaults } from "./DimensionToolFields";
 import { columnToolDefaults, type ColumnDefaults } from "@/application/columns/defaults";
 import { stairToolDefaults, type StairDefaults } from "@/application/stairs/defaults";
@@ -103,6 +104,22 @@ export function useToolDefaults(project: Project) {
     ...line,
     layerId: project.layers.some((l) => l.id === line.layerId)
       ? line.layerId
+      : project.defaultLayerIds.line,
+  };
+  const [drawingState, setDrawingState] = useState<{
+    projectId: string;
+    values: DrawingDefaults;
+  } | null>(null);
+  const drawing =
+    drawingState?.projectId === project.id
+      ? drawingState.values
+      : { documentId: null, layerId: project.defaultLayerIds.line };
+  // The tool runs on a layout's lens, which holds no documents: the workspace checks the
+  // document against the real project when placing.
+  const drawingDefaults: DrawingDefaults = {
+    documentId: drawing.documentId,
+    layerId: project.layers.some((l) => l.id === drawing.layerId)
+      ? drawing.layerId
       : project.defaultLayerIds.line,
   };
   const [windowState, setWindowState] = useState<{
@@ -279,6 +296,10 @@ export function useToolDefaults(project: Project) {
     line: lineDefaults,
     setLine(values: LineDefaults) {
       setLineState({ projectId: project.id, values });
+    },
+    drawing: drawingDefaults,
+    setDrawing(values: DrawingDefaults) {
+      setDrawingState({ projectId: project.id, values });
     },
     window: windowDefaults,
     door: doorDefaults,
