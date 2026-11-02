@@ -15,6 +15,16 @@ export type DocumentAction =
       folderId?: string;
       hiddenLayerIds?: string[];
     }
+  | {
+      /** Document of a section or elevation (docs/ABBILDER.md, AB1). */
+      kind: "create-section";
+      id: string;
+      modelViewId: string;
+      sectionId: string;
+      name: string;
+      denominator: number;
+      folderId?: string;
+    }
   | { kind: "create-folder"; id: string; name: string }
   | { kind: "rename-folder"; id: string; name: string }
   | { kind: "rename"; id: string; name: string }
@@ -65,6 +75,34 @@ export function changeDrawingDocument(
     return validateLike(current, {
       ...current,
       documentFolders: current.documentFolders.filter((f) => f.id !== action.id),
+    });
+  }
+  if (action.kind === "create-section") {
+    if (!current.sections?.some((s) => s.id === action.sectionId))
+      throw new Error("Der Schnitt bzw. die Ansicht existiert nicht mehr.");
+    // One model view per section, shared by all its documents.
+    const existing = current.modelViews?.find(
+      (v) => v.kind === "section" && v.sectionId === action.sectionId,
+    );
+    const source = existing ?? {
+      id: action.modelViewId,
+      kind: "section" as const,
+      sectionId: action.sectionId,
+    };
+    return validateLike(current, {
+      ...current,
+      modelViews: existing ? current.modelViews : [...(current.modelViews ?? []), source],
+      drawingDocuments: [
+        ...documents,
+        {
+          id: action.id,
+          name: action.name,
+          modelViewId: source.id,
+          denominator: action.denominator,
+          hiddenLayerIds: [],
+          ...(action.folderId ? { folderId: action.folderId } : {}),
+        },
+      ],
     });
   }
   if (action.kind === "create") {

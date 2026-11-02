@@ -7,6 +7,18 @@ export const modelViewSchema = z
     storeyId: id,
   })
   .strict();
+/**
+ * Schema 46: a section or elevation as the source of a drawing document (docs/ABBILDER.md,
+ * AB1). Whether it is a section or an elevation comes from the section itself.
+ */
+export const sectionModelViewSchema = z
+  .object({ id, kind: z.literal("section"), sectionId: id })
+  .strict();
+export const anyModelViewSchema = z.discriminatedUnion("kind", [
+  modelViewSchema,
+  sectionModelViewSchema,
+]);
+export type ModelView = z.infer<typeof anyModelViewSchema>;
 export const drawingDocumentV17Schema = z
   .object({
     id,

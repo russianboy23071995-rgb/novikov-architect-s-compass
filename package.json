@@ -145,6 +145,7 @@
     "src/application/views/layouts.test.ts",
     "src/application/views/title-blocks.test.ts",
     "src/application/views/title-block-space.test.ts",
+    "src/application/views/drawing-info.test.ts",
     "src/application/views/canvas-tabs.test.ts",
     "src/application/sections/actions.test.ts",
     "src/rendering/viewport/section-drawing.test.ts",

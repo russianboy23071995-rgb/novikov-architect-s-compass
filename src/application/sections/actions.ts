@@ -84,8 +84,21 @@ export function removeSection(project: Project, sectionId: string): Project {
   const sections = project.sections ?? [];
   if (!sections.some((s) => s.id === sectionId))
     throw new Error(`Unbekannter Schnitt: ${sectionId}`);
+  // A section with drawing documents stays until they are deleted (docs/ABBILDER.md, AB1).
+  const views = (project.modelViews ?? []).filter(
+    (v) => v.kind === "section" && v.sectionId === sectionId,
+  );
+  const used = (project.drawingDocuments ?? []).filter((d) =>
+    views.some((v) => v.id === d.modelViewId),
+  ).length;
+  if (used)
+    throw new Error(
+      `Wird von ${used} Abbild${used === 1 ? "" : "ern"} verwendet. Bitte zuerst die Abbilder löschen.`,
+    );
+  const rest = (project.modelViews ?? []).filter((v) => !views.includes(v));
+  const { modelViews: _views, ...without } = project;
   return validateLike(project, {
-    ...project,
+    ...(rest.length ? { ...without, modelViews: rest } : without),
     sections: sections.filter((s) => s.id !== sectionId),
   });
 }
