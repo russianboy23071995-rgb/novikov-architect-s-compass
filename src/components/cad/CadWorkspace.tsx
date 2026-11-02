@@ -207,7 +207,7 @@ import { sectionLookTo } from "@/domain/views/sections";
 import { SectionFields } from "./SectionFields";
 import { SectionProperties } from "./SectionProperties";
 import { SectionDrawingView } from "./SectionDrawingView";
-import { cachedSectionDrawing, sectionGraphicExtent } from "./section-graphic";
+import { cachedSectionDrawing, sectionFraming } from "./section-graphic";
 import { LayoutSettingsWindow, type LayoutDraftTarget } from "./LayoutSettingsWindow";
 import {
   layoutFolderTree,
@@ -404,6 +404,15 @@ export function CadWorkspace({
         onChange={(change) =>
           dispatchEditing({ type: "project", project: setDrawing(project, id, change, limit) })
         }
+        onRefit={
+          "section" in source
+            ? () =>
+                fitSectionFrame(
+                  source.document.id,
+                  `Ausschnitt von „${source.document.name}“ neu eingepasst`,
+                )
+            : undefined
+        }
       />
     );
   };
@@ -435,7 +444,8 @@ export function CadWorkspace({
   };
   /**
    * A drawing document ready to place: a plan with its saved frame, or a section or elevation
-   * that sees parts; its frame is the drawing with the storey marks, as the tab fits it (ZW4).
+   * (ZW4). A section keeps the frame it got when it was saved or first chosen (ZW5); one from
+   * before ZW5 still follows the model until it is fixed.
    */
   const drawingSource = (documentId: string | null | undefined) => {
     const document = realProject.drawingDocuments?.find((d) => d.id === documentId);
@@ -452,20 +462,28 @@ export function CadWorkspace({
     }
     const section = realProject.sections?.find((s) => s.id === view.sectionId);
     if (!section) return null;
-    const drawing = cachedSectionDrawing(realProject, section);
-    if (!drawing.bounds) return null;
-    const e = sectionGraphicExtent(drawing, document.denominator);
-    const framing = {
-      center: { x: (e.minX + e.maxX) / 2, y: (e.minY + e.maxY) / 2 },
-      width: e.maxX - e.minX,
-      height: e.maxY - e.minY,
-    };
+    const framing = document.framing ?? sectionFraming(realProject, section, document.denominator);
+    if (!framing) return null;
     const content: PlacedDrawingView["content"] = {
       kind: "section",
-      drawing,
+      drawing: cachedSectionDrawing(realProject, section),
       marks: section.heightMarks ?? [],
     };
-    return { document, framing, content };
+    return { document, framing, content, section };
+  };
+  /** Fixes (or refits) the frame of a section document to its drawing now (ZW5). */
+  const fitSectionFrame = (documentId: string, notice?: string) => {
+    const source = drawingSource(documentId);
+    if (!source || !("section" in source)) return;
+    if (!notice && source.document.framing) return;
+    const framing = sectionFraming(realProject, source.section, source.document.denominator);
+    if (!framing) return setModelError("Der Schnitt sieht keine Bauteile.");
+    dispatchEditing({
+      type: "document",
+      base: realProject,
+      action: { kind: "framing", id: documentId, framing },
+    });
+    if (notice) showNotice(notice);
   };
   // Drawings on the open layout: the master's under it, then the layout's own (selectable).
   const placedDrawingViews = (() => {
@@ -1448,7 +1466,11 @@ export function CadWorkspace({
         }))}
         layers={project.layers}
         value={toolDefaults.drawing}
-        onChange={toolDefaults.setDrawing}
+        onChange={(value) => {
+          toolDefaults.setDrawing(value);
+          // A section chosen for placing keeps its frame from now on (ZW5).
+          if (value.documentId) fitSectionFrame(value.documentId);
+        }}
       />
     ) : owner === "line" ? (
       <section aria-label="Linienwerkzeug" className="flex flex-wrap items-end gap-3">
@@ -3315,7 +3337,16 @@ export function CadWorkspace({
                   project={realProject}
                   sectionId={sectionDocumentWindow}
                   denominator={planDenominator(realProject)}
-                  onApply={(action) => {
+                  onApply={(request) => {
+                    // The document keeps the section's frame as it is saved (ZW5).
+                    const section = realProject.sections?.find(
+                      (s) => s.id === sectionDocumentWindow,
+                    );
+                    const framing =
+                      request.kind === "create-section" && section
+                        ? sectionFraming(realProject, section, request.denominator)
+                        : null;
+                    const action = framing ? { ...request, framing } : request;
                     changeDrawingDocument(realProject, realProject, action);
                     dispatchEditing({ type: "document", base: realProject, action });
                     if (action.kind === "create-section") setSectionDocumentId(action.id);

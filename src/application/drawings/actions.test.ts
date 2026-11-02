@@ -184,3 +184,84 @@ test("mask edges drag inside the frame, keep 5 mm, and map to crops from the fra
   state = spaceEditingReducer(state, { type: "undo" });
   assert.deepEqual(placed().mask, full);
 });
+
+// docs/ZEICHNUNG.md, ZW5: a fixed frame; refitting keeps the crop of placed drawings.
+test("refitting a document frame keeps the crop of its placed drawings at the new edges", () => {
+  let state = spaceEditingReducer(createEditingState(project()), {
+    type: "space",
+    space: { kind: "layout", id: "l1" },
+  });
+  const lens = () => spaceLens(state.history.present, { kind: "layout", id: "l1" });
+  state = spaceEditingReducer(state, {
+    type: "project",
+    project: placeDrawing(lens(), {
+      id: "z1",
+      documentId: "d1",
+      position: { x: 0.2, y: 0.1 },
+      frame: framing,
+      denominator: 100,
+    }),
+  });
+  // 10 mm cropped on the left of the 120 × 80 mm frame.
+  const full = { x0: -0.06, y0: -0.04, x1: 0.06, y1: 0.04 };
+  state = spaceEditingReducer(state, {
+    type: "project",
+    project: setDrawing(lens(), "z1", { mask: { ...full, x0: -0.05 } }, full),
+  });
+  const placed = () => state.history.present.layoutDrawings![0]!.storey.drawings![0]!;
+  const near = (a: object, b: object) =>
+    Object.entries(a).every(([k, v]) => Math.abs(v - (b as Record<string, number>)[k]!) < 1e-12);
+  // The model grew: the frame becomes 2 m higher (20 mm on paper).
+  const real = state.history.present;
+  state = spaceEditingReducer(state, {
+    type: "document",
+    base: real,
+    action: { kind: "framing", id: "d1", framing: { ...framing, height: 10 } },
+  });
+  assert.equal(state.error, "");
+  assert.deepEqual(state.history.present.drawingDocuments![0]!.framing!.height, 10);
+  assert.ok(near(placed().mask, { x0: -0.05, y0: -0.05, x1: 0.06, y1: 0.05 }));
+  assert.deepEqual(placed().position, { x: 0.2, y: 0.1 });
+  // A crop wider than the new frame cannot stay: the drawing shows the whole frame.
+  const now = state.history.present;
+  state = spaceEditingReducer(state, {
+    type: "document",
+    base: now,
+    action: { kind: "framing", id: "d1", framing: { ...framing, width: 1 } },
+  });
+  assert.ok(near(placed().mask, { x0: -0.005, y0: -0.04, x1: 0.005, y1: 0.04 }));
+  state = spaceEditingReducer(state, { type: "undo" });
+  assert.ok(near(placed().mask, { x0: -0.05, y0: -0.05, x1: 0.06, y1: 0.05 }));
+});
+
+test("a section document keeps the frame it is saved with", () => {
+  const base = project();
+  const p = changeDrawingDocument(base, base, {
+    kind: "create-folder",
+    id: "f",
+    name: "F",
+  });
+  const withSection = {
+    ...p,
+    sections: [
+      {
+        id: "s",
+        name: "Schnitt A-A",
+        mark: "A",
+        start: { x: 0, y: 0 },
+        end: { x: 4, y: 0 },
+        look: "left" as const,
+      },
+    ],
+  };
+  const saved = changeDrawingDocument(withSection, withSection, {
+    kind: "create-section",
+    id: "ds",
+    modelViewId: "vs",
+    sectionId: "s",
+    name: "Schnitt A-A",
+    denominator: 50,
+    framing,
+  });
+  assert.deepEqual(saved.drawingDocuments!.find((d) => d.id === "ds")!.framing, framing);
+});
