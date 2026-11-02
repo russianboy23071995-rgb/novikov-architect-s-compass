@@ -39,6 +39,8 @@ import {
   layoutFolderSchema,
   layoutLibraryProblem,
   layoutSchema,
+  projectLayouts,
+  projectMasterLayouts,
   masterLayoutSchema,
   sheetSchema,
 } from "../views/layouts.ts";
@@ -641,9 +643,23 @@ export const projectV45Schema = projectV44Schema.extend({
   titleBlocks: z.array(titleBlockSchema).max(200).optional(),
 });
 /** Schema 46: drawing documents of sections and elevations (docs/ABBILDER.md, AB1). */
+export const projectV46Schema = projectV45Schema.extend({
+  schemaVersion: z.literal(46),
+  modelViews: z.array(anyModelViewSchema).optional(),
+});
+/**
+ * Schema 47: what is drawn on a layout or master layout (docs/LAYOUTS.md, LZ1), a storey
+ * shaped sheet in paper size at 1:1 like a title block. Absent: nothing drawn.
+ */
+const layoutDrawingSchema = z
+  .object({ layoutId: id, storey: projectV43Schema.shape.storeys.element })
+  .strict();
+export type LayoutDrawing = z.infer<typeof layoutDrawingSchema>;
+// Built from v45 directly: one more extend level is too deep for the type checker.
 const projectSchema = projectV45Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   modelViews: z.array(anyModelViewSchema).optional(),
+  layoutDrawings: z.array(layoutDrawingSchema).max(5000).optional(),
 });
 type SingleProject = z.infer<typeof projectV23Schema>;
 export function validateProjectV18(value: unknown) {
@@ -1036,7 +1052,11 @@ export function validateProject(
     ...(project.layoutFolders ?? []),
     ...(project.layouts ?? []),
     ...(project.masterLayouts ?? []),
-    ...[...project.storeys, ...(project.titleBlocks ?? []).map((t) => t.storey)].flatMap((s) => [
+    ...[
+      ...project.storeys,
+      ...(project.titleBlocks ?? []).map((t) => t.storey),
+      ...(project.layoutDrawings ?? []).map((d) => d.storey),
+    ].flatMap((s) => [
       s,
       ...s.walls,
       ...s.windows,
@@ -1110,39 +1130,30 @@ export function validateProject(
     );
   }
   for (const block of project.titleBlocks ?? []) {
-    const storey = block.storey;
-    if (storey.id !== block.id)
+    if (block.storey.id !== block.id)
       throw new Error(`Plankopf ${block.name}: Zeichenblatt passt nicht.`);
-    // Only drawing elements: nothing of the building, no image references.
-    const building = [
-      storey.walls,
-      storey.windows,
-      storey.doors,
-      storey.slabs,
-      storey.roofs,
-      storey.rooms,
-      storey.columns,
-      storey.stairs,
-      storey.references,
-      storey.wallJoins,
-      storey.wallTJunctions,
-    ];
-    if (building.some((list) => list?.length))
-      throw new Error(`Plankopf ${block.name}: nur Linien, Texte, Schraffuren und Maßketten.`);
-    const blockScope: SingleProject = {
-      ...shared,
-      schemaVersion: 23,
-      groundDatum: 0,
-      storey,
-      workingViews: [],
-      modelViews: [],
-      drawingDocuments: [],
-    };
-    const scope = validateStoreyScope(blockScope, blockScope, reuse);
-    for (const annotation of [...(storey.dimensions ?? []), ...(storey.texts ?? [])])
-      if (!project.layers.some((l) => l.id === annotation.layerId))
-        throw new Error("Unknown layer: " + annotation.layerId);
-    scope.hatchPatterns.forEach((p) => used.add(p.id));
+    drawingSheetPatterns(
+      project,
+      shared,
+      block.storey,
+      `Plankopf ${block.name}`,
+      true,
+      reuse,
+    ).forEach((id) => used.add(id));
+  }
+  // Layout drawings (LZ1): one sheet per layout or master layout, no dimension chains.
+  const sheetOwners = new Set([
+    ...projectLayouts(project).map((l) => l.id),
+    ...projectMasterLayouts(project).map((m) => m.id),
+  ]);
+  const drawn = new Set<string>();
+  for (const drawing of project.layoutDrawings ?? []) {
+    if (!sheetOwners.has(drawing.layoutId) || drawn.has(drawing.layoutId))
+      throw new Error("Zeichnung ohne Layout oder doppelt.");
+    drawn.add(drawing.layoutId);
+    drawingSheetPatterns(project, shared, drawing.storey, "Layoutzeichnung", false, reuse).forEach(
+      (id) => used.add(id),
+    );
   }
   validateWallAssemblies(project);
   const layoutProblem = layoutLibraryProblem(project);
@@ -1418,4 +1429,52 @@ function floorPlanViews(project: { modelViews?: readonly ModelView[] | undefined
   return (project.modelViews ?? []).filter(
     (v): v is Extract<ModelView, { kind: "floor-plan" }> => v.kind === "floor-plan",
   );
+}
+
+/**
+ * A drawing sheet outside the building (title block, layout): only drawing elements, checked
+ * like a storey. Returns the hatch patterns it uses.
+ */
+function drawingSheetPatterns(
+  project: Project,
+  shared: Omit<Project, "storeys" | "groundStoreyId">,
+  storey: Project["storeys"][number],
+  label: string,
+  dimensions: boolean,
+  reuse?: WallSolidReuse,
+): string[] {
+  const building = [
+    storey.walls,
+    storey.windows,
+    storey.doors,
+    storey.slabs,
+    storey.roofs,
+    storey.rooms,
+    storey.columns,
+    storey.stairs,
+    storey.references,
+    storey.wallJoins,
+    storey.wallTJunctions,
+    ...(dimensions ? [] : [storey.dimensions]),
+  ];
+  if (building.some((list) => list?.length))
+    throw new Error(
+      dimensions
+        ? `${label}: nur Linien, Texte, Schraffuren und Maßketten.`
+        : `${label}: nur Linien, Texte und Schraffuren.`,
+    );
+  const scope: SingleProject = {
+    ...shared,
+    schemaVersion: 23,
+    groundDatum: 0,
+    storey,
+    workingViews: [],
+    modelViews: [],
+    drawingDocuments: [],
+  };
+  const checked = validateStoreyScope(scope, scope, reuse);
+  for (const annotation of [...(storey.dimensions ?? []), ...(storey.texts ?? [])])
+    if (!project.layers.some((l) => l.id === annotation.layerId))
+      throw new Error("Unknown layer: " + annotation.layerId);
+  return checked.hatchPatterns.map((p) => p.id);
 }

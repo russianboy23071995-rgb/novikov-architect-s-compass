@@ -8,6 +8,7 @@ import {
   type Layout,
   type LayoutFolder,
   type MasterLayout,
+  sheetSize,
   type Sheet,
 } from "../../domain/views/layouts.ts";
 
@@ -98,7 +99,15 @@ export function changeLayouts(base: Project, current: Project, action: LayoutAct
     masterLayouts: [...projectMasterLayouts(current)],
   };
   const next = applyLayoutAction(library, action);
-  return validateLike(current, { ...current, ...next });
+  // A deleted layout or master layout takes its drawing along (LZ1).
+  const owners = new Set([...next.layouts, ...next.masterLayouts].map((o) => o.id));
+  const drawings = (current.layoutDrawings ?? []).filter((d) => owners.has(d.layoutId));
+  const { layoutDrawings: _all, ...without } = current;
+  return validateLike(current, {
+    ...without,
+    ...next,
+    ...(drawings.length ? { layoutDrawings: drawings } : {}),
+  });
 }
 
 function applyLayoutAction(library: Library, action: LayoutAction): Library {
@@ -213,4 +222,25 @@ function applyLayoutAction(library: Library, action: LayoutAction): Library {
       return { ...library, masterLayouts: masters.filter((m) => m !== master) };
     }
   }
+}
+
+export type PaperRect = { x0: number; y0: number; x1: number; y1: number };
+
+/**
+ * Paper of a layout at 1:1 in plan metres (docs/LAYOUTS.md, LZ1): the lower left paper corner
+ * is the origin, so coordinates read like paper measures.
+ */
+export function layoutUnderlay(sheet: Sheet): {
+  paper: PaperRect;
+  frame: PaperRect;
+  surface: true;
+} {
+  const { width, height } = sheetSize(sheet);
+  const m = sheet.margins,
+    mm = (v: number) => v / 1000;
+  return {
+    paper: { x0: 0, y0: 0, x1: mm(width), y1: mm(height) },
+    frame: { x0: mm(m.left), y0: mm(m.bottom), x1: mm(width - m.right), y1: mm(height - m.top) },
+    surface: true,
+  };
 }

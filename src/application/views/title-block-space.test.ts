@@ -6,6 +6,7 @@ import { createEditingState } from "../direct-edit/controller.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { workingPlanScale } from "../../domain/views/scale.ts";
+import { validateProject } from "../../domain/project/schema.ts";
 import { changeTitleBlocks } from "./title-blocks.ts";
 import {
   spaceEditingReducer,
@@ -93,4 +94,62 @@ test("deleting the title block (e.g. by undo of its creation) closes the space",
   assert.throws(() =>
     spaceEditingReducer(state, { type: "space", space: { kind: "title-block", id: "tb1" } }),
   );
+});
+
+// docs/LAYOUTS.md, LZ1: layouts and master layouts are drawing spaces as well.
+test("drawing on a layout and its master: own sheets, written back, removed with the layout", async () => {
+  const { changeLayouts } = await import("./layouts.ts");
+  const { DEFAULT_MASTER_ID, LAYOUT_COLLECTION_ID } = await import("../../domain/views/layouts.ts");
+  const { spaceLens, layoutSheetId } = await import("./title-block-space.ts");
+  const p = createStandardProject("p", "eg", "og");
+  const real = changeLayouts(p, p, {
+    kind: "create-layout",
+    id: "l1",
+    name: "Grundriss EG",
+    folderId: LAYOUT_COLLECTION_ID,
+    masterId: DEFAULT_MASTER_ID,
+  });
+  let state: SpaceEditingState = spaceEditingReducer(createEditingState(real), {
+    type: "space",
+    space: { kind: "layout", id: "l1" },
+  });
+  const lens = spaceLens(real, { kind: "layout", id: "l1" });
+  assert.equal(storeyOf(lens).id, layoutSheetId("l1"));
+  state = spaceEditingReducer(state, {
+    type: "project",
+    project: createDrawing(lens, lens, "note", frame),
+  });
+  assert.equal(state.error, "");
+  const drawn = state.history.present;
+  assert.deepEqual(
+    drawn.layoutDrawings!.map((d) => [d.layoutId, d.storey.lines!.length]),
+    [["l1", 1]],
+  );
+  assert.ok(
+    drawn.storeys.every((s) => !s.lines?.length),
+    "the building stays untouched",
+  );
+  // The master layout has its own sheet.
+  state = spaceEditingReducer(state, {
+    type: "space",
+    space: { kind: "layout", id: DEFAULT_MASTER_ID },
+  });
+  const masterLens = spaceLens(state.history.present, { kind: "layout", id: DEFAULT_MASTER_ID });
+  assert.equal(storeyOf(masterLens).lines, undefined);
+  state = spaceEditingReducer(state, {
+    type: "project",
+    project: createDrawing(masterLens, masterLens, "head", frame),
+  });
+  assert.equal(state.history.present.layoutDrawings!.length, 2);
+  // Undo removes the master's line; an empty sheet leaves no drawing behind.
+  state = spaceEditingReducer(state, { type: "undo" });
+  assert.equal(state.history.present.layoutDrawings!.length, 1);
+  // Deleting the layout takes its drawing along and closes nothing else.
+  const now = state.history.present;
+  const deleted = changeLayouts(now, now, { kind: "delete-layout", id: "l1" });
+  assert.equal(deleted.layoutDrawings, undefined);
+  // No dimension chains on a layout sheet.
+  const raw = structuredClone(drawn);
+  raw.layoutDrawings![0]!.storey.dimensions = [{} as never];
+  assert.throws(() => validateProject(raw));
 });

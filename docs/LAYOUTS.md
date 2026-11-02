@@ -79,3 +79,18 @@ LA1–LA4 erledigt: leere Layouts mit Masterlayouts, Ordnern, Blatteinstellungen
 - **Eine Grundriss-Kamera für alle Geschosse:** Zoom und Lage bleiben beim Wechsel EG ↔ OG gleich (vorher wurde die Ansicht je Geschoss neu eingepasst). Abbilder behalten ihren gespeicherten Ausschnitt, der Plankopfplaner seine Unterlage.
 
 Nachweis: 1506 Tests grün, Typprüfung, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert. Browser: Neues Layout → „Anlegen“ öffnet den Tab, graue Arbeitsfläche ohne Grundriss; Gebäudestruktur → Erdgeschoss zeigt den Grundriss, Tab „Layout“ bleibt offen; Grundriss auf 360,7 % gezoomt, Wechsel ins 1. Obergeschoss: weiterhin 360,7 %.
+
+## LZ1 – Zeichnen in Layouts und Masterlayouts
+
+Nutzerwunsch 02.11.2026: In allen Layouts zeichnen und schreiben – Linien, Polylinien, Texte, Schraffuren –, um vor dem Export letzte Dinge von Hand zu korrigieren; keine Maßketten, nichts vermessen. Entscheidungen: Nullpunkt in der linken unteren Papierecke, kein Raster im Layout.
+
+- **Projektdatei Schema 47.** Neu (optional): `layoutDrawings`, je Layout bzw. Masterlayout ein Zeichenblatt in Geschossform (`layoutId`, `storey`; die Blatt-ID ist `sheet-<Layout-ID>`). Nur **Linien, Texte, Schraffuren**; Maßketten und alles vom Gebäude werden abgelehnt. Ein Layout ohne Zeichnung hat keinen Eintrag; wird alles gelöscht, verschwindet der Eintrag wieder. Mit dem Layout bzw. Masterlayout wird seine Zeichnung gelöscht. Dateien mit Schema 46 werden übernommen.
+- **Layout-Tab = Zeichenfläche:** Ein Layout oder Masterlayout öffnet als Zeichenraum mit derselben Umleitung wie der Plankopfplaner (`spaceLens`, `fromSpaceLens`, Raumart `layout`): Papier in echter Größe (1:1) mit Randrahmen auf grauer Arbeitsfläche, ohne Raster; die Ansicht passt sich auf das Blatt ein (auch nach Änderung von Größe/Format). Jeder Schritt ist ein Rückgängig-Schritt im Projekt; das Gebäude bleibt unberührt.
+- **Werkzeuge im Layout:** Auswahl, Linie (auch Polylinie), Text, Schraffur. Maßkette, Messen und alle Gebäudewerkzeuge sind ausgegraut; ein Tastenkürzel bringt „Im Layout gibt es nur Linie, Text und Schraffur.“
+- **Leiste im Tab:** „Layout Name · DIN A3 quer · 420 × 297 mm · Ränder … · folgt Masterlayout … · Einstellungen …“ (Fenster aus LA3).
+- Die bisherige reine Blattansicht (`LayoutSheetView`) entfällt.
+- Code: `layoutDrawings` in `src/domain/project/schema.ts` (gemeinsame Blattprüfung `drawingSheetPatterns` für Planköpfe und Layouts), `src/application/views/title-block-space.ts` (Räume `title-block` und `layout`), `layoutUnderlay` in `src/application/views/layouts.ts`, `src/components/cad/LayoutBar.tsx`, Arbeitsfläche in `BimPlan.tsx`, Anbindung in `CadWorkspace.tsx`.
+
+Nachweis LZ1: 1507 Tests grün (neu: Linie im Layout und im Masterlayout je auf eigenem Blatt, Rückgängig, leeres Blatt ohne Eintrag, Löschen des Layouts nimmt die Zeichnung mit, keine Maßketten), Typprüfung beider Projekte, Architektur, Lint, Formatierung sauber, 14-Modell-Prüfsumme unverändert. Browser: neues Layout öffnet als Zeichenfläche (graue Fläche, A3-Papier, 1:1, Maßkette ausgegraut); Linie und Text „Hinweis: Maße am Bau prüfen“ gezeichnet; im Grundriss nicht sichtbar, zurück im Layout wieder da.
+
+Offen (LZ2): Die Zeichnung des Masterlayouts erscheint noch nicht in den Layouts, die ihm folgen.

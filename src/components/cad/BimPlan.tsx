@@ -114,7 +114,7 @@ import { linePath } from "@/lib/bim/lines";
 type PlanRect = { x0: number; y0: number; x1: number; y1: number };
 export type BimPlanProps = {
   /** Paper under the Plankopfplaner at 1:1 with its margin frame (docs/PLANKOPF.md, PK3). */
-  underlay?: { paper: PlanRect; frame: PlanRect } | undefined;
+  underlay?: { paper: PlanRect; frame: PlanRect; surface?: boolean } | undefined;
   pickupScope?: object;
   /** Right-click menu (docs/KONTEXTMENUE.md): on an element or on empty canvas (null). When
    * set it replaces the former double right-click pickup, which moves into the menu. */
@@ -1306,14 +1306,24 @@ export function BimPlan({
           </g>
         )}
         {underlay && (
-          <g aria-label="Plankopf-Unterlage" pointerEvents="none">
+          <g aria-label="Papierunterlage" pointerEvents="none">
+            {underlay.surface && (
+              // Layouts: a grey work surface around the paper (docs/LAYOUTS.md, LZ1).
+              <rect
+                x={camera.center.x - viewSize.width / camera.pixelsPerMetre / 2}
+                y={-camera.center.y - viewSize.height / camera.pixelsPerMetre / 2}
+                width={viewSize.width / camera.pixelsPerMetre}
+                height={viewSize.height / camera.pixelsPerMetre}
+                fill="color-mix(in oklab, var(--workspace) 82%, black)"
+              />
+            )}
             <rect
               x={underlay.paper.x0}
               y={-underlay.paper.y1}
               width={underlay.paper.x1 - underlay.paper.x0}
               height={underlay.paper.y1 - underlay.paper.y0}
               fill="white"
-              fillOpacity={0.85}
+              fillOpacity={underlay.surface ? 1 : 0.85}
               stroke="#94a3b8"
               strokeWidth={1 / camera.pixelsPerMetre}
             />
