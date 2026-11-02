@@ -94,3 +94,10 @@ Nutzerwunsch 02.11.2026: In allen Layouts zeichnen und schreiben – Linien, Pol
 Nachweis LZ1: 1507 Tests grün (neu: Linie im Layout und im Masterlayout je auf eigenem Blatt, Rückgängig, leeres Blatt ohne Eintrag, Löschen des Layouts nimmt die Zeichnung mit, keine Maßketten), Typprüfung beider Projekte, Architektur, Lint, Formatierung sauber, 14-Modell-Prüfsumme unverändert. Browser: neues Layout öffnet als Zeichenfläche (graue Fläche, A3-Papier, 1:1, Maßkette ausgegraut); Linie und Text „Hinweis: Maße am Bau prüfen“ gezeichnet; im Grundriss nicht sichtbar, zurück im Layout wieder da.
 
 Offen (LZ2): Die Zeichnung des Masterlayouts erscheint noch nicht in den Layouts, die ihm folgen.
+
+## LZ2 – Zeichnung des Masterlayouts in den Layouts
+
+- Ein Layout, das einem Masterlayout folgt, zeigt dessen Zeichnung **unter** seiner eigenen, auf dem Papier und über dem Randrahmen. Sie ist nicht anwählbar, nicht verschiebbar und kein Fangziel; geändert wird sie nur im Masterlayout und erscheint dann sofort in allen folgenden Layouts. Ein Layout ohne Masterlayout zeigt nur seine eigene Zeichnung. So kommt später auch der Plankopf über das Masterlayout auf jedes Blatt.
+- Umsetzung: `backdrop` in `BimPlan.tsx` zeichnet die Szene des Masterlayout-Blatts (über `spaceLens`) mit denselben Bausteinen wie die eigene Zeichnung, aber ohne Klickfläche (`pointer-events: none`, keine Auswahlformen); Anbindung in `CadWorkspace.tsx`.
+
+Nachweis LZ2: 1507 Tests grün, Typprüfung beider Projekte, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert. Browser: im Masterlayout „Standard A3 quer“ eine 0,20-m-Linie gezeichnet; neues Layout angelegt (folgt dem Master, öffnet sofort): die Linie erscheint in der Gruppe „Masterlayout-Zeichnung“ ohne Klickfläche, ein Klick darauf wählt nichts aus.
