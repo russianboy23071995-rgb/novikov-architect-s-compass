@@ -21,3 +21,15 @@ Reihenfolge: AB1 Datenmodell → AB2 Oberfläche.
 - Öffnen eines Schnitt-Abbilds aus dem Navigator öffnet vorerst den Tab seines Schnitts (vollständig mit AB2).
 
 Nachweis AB1: 1506 Tests grün (3 neu in `src/application/views/drawing-info.test.ts`: Grundriss-, Schnitt- und Ansichts-Abbild mit Name und Maßstab, gemeinsame Modellansicht, Pflichtangaben, Dateirundlauf; Löschsperre und Aufräumen; Schema 45 → 46), Typprüfung beider Projekte, Architektur, Lint, Formatierung sauber, 14-Modell-Prüfsumme unverändert (`e42aa36e…`). Browser: nur Startprüfung (App lädt mit Schema 46 ohne Fehler); weitere Browser-Schritte abgebrochen, weil während der Tests in der Browser-Ansicht geklickt wurde.
+
+## AB2 – Oberfläche
+
+- **Schnitt- bzw. Ansichts-Tab:** Schaltfläche **„Als Abbild sichern …“**. Das Fenster fragt **Zeichnungsname** (Vorgabe: Name des Schnitts, z. B. „Schnitt A-A“), **Maßstab** (Vorgabe: aktueller Projektmaßstab, Eingabe „1:50“ oder „50“) und **Ordner** (Vorgabe: Abbildsammlung). Nach dem Sichern zeigt der Tab das neue Abbild.
+- **Reiter „Abbilder“:** „Hinzufügen“ bzw. „Neues Abbild“ legt bei offenem Schnitt- oder Ansichts-Tab dessen Abbild an (gleiches Fenster), sonst wie bisher ein Grundriss-Abbild. Die Art ist am Symbol erkennbar (Schere: Schnitt, Gebäude: Ansicht, Blatt: Grundriss); der Tooltip nennt Art und Maßstab („Schnitt · 1:50“).
+- **Öffnen** (Doppelklick oder Enter) eines Schnitt-/Ansichts-Abbilds öffnet den Tab seines Schnitts im **gespeicherten Maßstab**: Kopfzeile „Abbild Name · 1:50 · Schnitt A-A“; Höhenkoten und Beschriftungen haben die Papiergröße dieses Maßstabs. Wird derselbe Schnitt über die Gebäudestruktur geöffnet, zeigt er wieder den Projektmaßstab.
+- **Abbildeinstellungen** (Name, Maßstab, Ordner) gelten für alle Arten; ein geänderter Maßstab wirkt sofort im offenen Tab und im Baum.
+- Code: `src/components/cad/SectionDocumentWindow.tsx`, `SectionDrawingView.tsx` (`document`, `onSaveDocument`), `DocumentNavigator.tsx` (Symbole, Anlegen aus dem Schnitt-Tab), Anbindung in `ProjectNavigator.tsx` und `CadWorkspace.tsx`.
+
+Nachweis AB2: 1506 Tests grün, Typprüfung beider Projekte, Architektur, Lint, Formatierung sauber, 14-Modell-Prüfsumme unverändert. Browser: Schnitt A-A über die Wand gelegt und als Tab geöffnet; „Als Abbild sichern …“ zeigt „Schnitt A-A“, 1:100, Abbildsammlung; mit 1:50 gesichert → Kopfzeile „Abbild Schnitt A-A · 1:50“, Höhenkoten kleiner; im Reiter „Abbilder“ mit Schnitt-Symbol und „Schnitt · 1:50“; aus dem Grundriss per Doppelklick geöffnet → Schnitt-Tab mit dem Abbild; Abbildeinstellungen → 1:20 → Kopfzeile und Baum zeigen 1:20.
+
+Grenzen: Der Reiter „Ebenensichtbarkeit“ der Abbildeinstellungen wirkt bei Schnitt-/Ansichts-Abbildern noch nicht (Entscheidung 3). Der Ausschnitt wird nicht gespeichert (Entscheidung 4). Das geöffnete Schnitt-Abbild ist im Baum nicht eigens markiert.

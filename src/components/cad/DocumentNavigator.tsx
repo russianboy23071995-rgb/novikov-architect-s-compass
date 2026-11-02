@@ -1,6 +1,7 @@
 import { DocumentLayerDraft } from "./DocumentLayerDraft";
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, ChevronRight, File, Folder, Plus } from "lucide-react";
+import { Building, ChevronDown, ChevronRight, File, Folder, Plus, Scissors } from "lucide-react";
+import { drawingInfo } from "@/application/views/drawing-info";
 import type { Project } from "@/domain/project/schema";
 import type { DocumentFraming } from "@/domain/views/documents";
 import {
@@ -24,6 +25,9 @@ import { DocumentSettingsSections } from "./DocumentSettingsSections";
 import { FloatingPanel } from "./FloatingPanel";
 
 export type DocumentNavigation = {
+  /** The section tab open on the canvas: „Neues Abbild“ then saves it (docs/ABBILDER.md). */
+  activeSectionId?: string | null | undefined;
+  onCreateSectionDocument?: ((sectionId: string) => void) | undefined;
   activeDocumentId: string | null;
   getPlanCapture: () => DocumentFraming | null;
   onOpenDocument: (id: string | null) => void;
@@ -43,6 +47,8 @@ export function DocumentNavigator({
   onOpenDocument,
   onDocumentAction,
   onDocumentVisibility,
+  activeSectionId = null,
+  onCreateSectionDocument,
 }: DocumentNavigation & { project: Project }) {
   const [draft, setDraft] = useState<{
     id?: string;
@@ -98,6 +104,9 @@ export function DocumentNavigator({
   };
   const beginCreate = (kind: "document" | "folder", folderId = "") => {
     setError("");
+    // With a section or elevation open, its drawing document is created (AB2).
+    if (kind === "document" && activeSectionId && onCreateSectionDocument)
+      return onCreateSectionDocument(activeSectionId);
     if (kind === "folder") {
       try {
         const id = crypto.randomUUID();
@@ -131,6 +140,20 @@ export function DocumentNavigator({
       <ContextMenuItem onSelect={() => beginCreate("folder")}>Neuer Ordner</ContextMenuItem>
     </>
   );
+  const kindOf = (id: string) => {
+    try {
+      return drawingInfo(project, id).kind;
+    } catch {
+      return null;
+    }
+  };
+  const kindLabelOf = (id: string) => {
+    try {
+      return drawingInfo(project, id).kindLabel;
+    } catch {
+      return "Abbild";
+    }
+  };
   const row = (id: string, name: string, folder: boolean, depth: number, scale?: number) => {
     const open = !closed.includes(id);
     const apply = (action: DocumentAction) => {
@@ -191,7 +214,7 @@ export function DocumentNavigator({
             title={
               folder
                 ? "Ordner öffnen · F2 oder Rechtsklick: umbenennen"
-                : `1:${scale} · Doppelklick: öffnen · F2: umbenennen`
+                : `${kindLabelOf(id)} · 1:${scale} · Doppelklick: öffnen · F2: umbenennen`
             }
             className={`${dropFolder === id ? "ring-1 ring-primary bg-primary/15 " : ""}flex h-7 items-center gap-1.5 rounded-sm pr-2 text-[13px] hover:bg-accent ${selected === id || activeDocumentId === id ? "bg-primary/12 text-primary" : "text-muted-foreground"}`}
             style={{ paddingLeft: 6 + depth * 13 }}
@@ -225,6 +248,10 @@ export function DocumentNavigator({
             )}
             {folder ? (
               <Folder className="size-3.5 shrink-0" />
+            ) : kindOf(id) === "section" ? (
+              <Scissors aria-label="Schnitt" className="size-3.5 shrink-0" />
+            ) : kindOf(id) === "elevation" ? (
+              <Building aria-label="Ansicht" className="size-3.5 shrink-0" />
             ) : (
               <File className="size-3.5 shrink-0" />
             )}

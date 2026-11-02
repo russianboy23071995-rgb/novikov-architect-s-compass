@@ -351,6 +351,10 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
     (...args) => latest.current.onLayoutAction(...args),
     [],
   );
+  const onCreateSectionDocument = useCallback(
+    (id: string) => latest.current.onCreateSectionDocument?.(id),
+    [],
+  );
   const onOpenLayout = useCallback((id: string) => latest.current.onOpenLayout?.(id), []);
   const onTitleBlockAction = useCallback<NonNullable<ProjectNavigatorProps["onTitleBlockAction"]>>(
     (...args) => latest.current.onTitleBlockAction?.(...args),
@@ -365,6 +369,8 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
     <StableNavigator
       getPlanCapture={props.getPlanCapture}
       activeDocumentId={props.activeDocumentId}
+      activeSectionId={props.activeSectionId ?? null}
+      onCreateSectionDocument={onCreateSectionDocument}
       onOpenDocument={onOpenDocument}
       onDocumentAction={onDocumentAction}
       onLayoutAction={onLayoutAction}
