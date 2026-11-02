@@ -221,6 +221,8 @@ import { LayoutBar } from "./LayoutBar";
 import { changeTitleBlocks, titleBlockUnderlay } from "@/application/views/title-blocks";
 import { TitleBlockBar } from "./TitleBlockBar";
 import { SectionDocumentWindow } from "./SectionDocumentWindow";
+import { ProjectInfoWindow } from "./ProjectInfoWindow";
+import { setProjectInfo } from "@/application/views/auto-texts";
 import { drawingInfo } from "@/application/views/drawing-info";
 import { changeDrawingDocument } from "@/application/views/documents";
 
@@ -290,6 +292,7 @@ export function CadWorkspace({
   // A layout or master layout open as a canvas tab (docs/LAYOUTS.md, LA4).
   const [activeLayoutId, setActiveLayoutId] = useState<string | null>(null);
   const [layoutWindow, setLayoutWindow] = useState<LayoutDraftTarget | null>(null);
+  const [projectInfoOpen, setProjectInfoOpen] = useState(false);
   const [lastTitleBlockId, setLastTitleBlockId] = useState<string | null>(null);
   // A section or elevation document open in its section tab (docs/ABBILDER.md, AB2).
   const [sectionDocumentId, setSectionDocumentId] = useState<string | null>(null);
@@ -2675,8 +2678,19 @@ export function CadWorkspace({
           onSettings={toolDefaults.setText}
           layers={project.layers}
           denominator={planDenominator(project)}
+          autoTexts={!!space}
           onCommit={commitText}
           onCancel={() => setTextDraft(null)}
+        />
+      )}
+      {projectInfoOpen && (
+        <ProjectInfoWindow
+          project={realProject}
+          onApply={(info) => {
+            setProjectInfo(realProject, realProject, info);
+            dispatchEditing({ type: "project-info", base: realProject, info });
+          }}
+          onClose={() => setProjectInfoOpen(false)}
         />
       )}
       {contextMenu && (
@@ -2854,6 +2868,11 @@ export function CadWorkspace({
             setDemandOpen(false);
             setModelError("");
             setElementListOpen(true);
+          }}
+          onProjectInfo={() => {
+            setDemandOpen(false);
+            setModelError("");
+            setProjectInfoOpen(true);
           }}
           onTitleBlockPlanner={() => {
             setDemandOpen(false);

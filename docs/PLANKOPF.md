@@ -85,3 +85,12 @@ Ein Text im Plankopfplaner enthält Platzhalter in geschweiften Klammern, z. B. 
 - Die Zeichenräume (Plankopf, Layout) blenden Abbild- und Plankopfverweise aus und schreiben Layouts und Masterlayouts nie zurück; die ändern sich nur über Projektschritte.
 
 Nachweis AT1: 1511 Tests grün (2 neu in `src/application/views/auto-texts.test.ts`: alle Gruppen mit Werten, leere und sichtbare fehlende Werte, unbekannte Klammern, Datum; Felder behalten/ändern/leeren, Löschsperre des Abbilds, Dateirundlauf, Schema 48 → 49), Typprüfung, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert. Noch keine Oberfläche (AT2, AT3).
+
+## AT2 – Eingabe
+
+- **Texteditor auf Papier** (Plankopfplaner, Layout, Masterlayout): Auswahl **„Automatischer Text einfügen …“** mit allen Platzhaltern nach Gruppen (Zeichnung, Layout, Projekt, Datum); der Platzhalter kommt an die Schreibmarke, z. B. „Projekt: {Projektname}“. Im Grundriss gibt es die Auswahl nicht.
+- **Organisation → Projektinformationen:** Projektname, Bauherr, Projektadresse, Planverfasser, je mit ihrem Platzhalter; „Übernehmen“ ist ein Rückgängig-Schritt (Ereignis `project-info`, wirkt immer auf das echte Projekt, auch aus einem Zeichenraum).
+- **Layoutfenster:** Bereich „Plankopf-Angaben“ mit Plannummer, Index und **Abbild** (liefert Zeichnungsname und Maßstab; Liste aller Abbilder mit Maßstab).
+- Code: `TextEditorOverlay.tsx` (`autoTexts`), `src/components/cad/ProjectInfoWindow.tsx`, Menü in `TopToolbar.tsx`, Felder in `LayoutSettingsWindow.tsx`, Ereignis in `controller.ts`, Anbindung in `CadWorkspace.tsx`.
+
+Nachweis AT2: 1511 Tests grün, Typprüfung, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert. Browser: Projektinformationen „Haus am See“ übernommen; im Plankopfplaner Text „Projekt: “ getippt, „Projektname“ aus der Auswahl eingefügt → „Projekt: {Projektname}“ gesetzt. Die Layoutfelder werden mit AT3 im Browser geprüft.
