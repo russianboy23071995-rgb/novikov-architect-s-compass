@@ -43,7 +43,9 @@ import {
   sheetSchema,
 } from "../views/layouts.ts";
 import {
+  anyModelViewSchema,
   modelViewSchema,
+  type ModelView,
   drawingDocumentSchema,
   drawingDocumentV17Schema,
   documentFolderSchema,
@@ -634,9 +636,14 @@ const titleBlockSchema = z
   })
   .strict();
 export type TitleBlock = z.infer<typeof titleBlockSchema>;
-const projectSchema = projectV44Schema.extend({
-  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+export const projectV45Schema = projectV44Schema.extend({
+  schemaVersion: z.literal(45),
   titleBlocks: z.array(titleBlockSchema).max(200).optional(),
+});
+/** Schema 46: drawing documents of sections and elevations (docs/ABBILDER.md, AB1). */
+const projectSchema = projectV45Schema.extend({
+  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+  modelViews: z.array(anyModelViewSchema).optional(),
 });
 type SingleProject = z.infer<typeof projectV23Schema>;
 export function validateProjectV18(value: unknown) {
@@ -998,11 +1005,24 @@ export function validateProject(
   const storeyIds = new Set(project.storeys.map((s) => s.id));
   if (project.workingStoreyId && !storeyIds.has(project.workingStoreyId))
     throw new Error("Unbekanntes Arbeitsgeschoss.");
-  for (const view of [...(project.workingViews ?? []), ...(project.modelViews ?? [])])
+  for (const view of [...(project.workingViews ?? []), ...floorPlanViews(project)])
     if (!storeyIds.has(view.storeyId)) throw new Error("Unbekanntes Geschoss im Ansichtskontext.");
+  const sectionIds = new Set((project.sections ?? []).map((s) => s.id));
+  for (const view of project.modelViews ?? [])
+    if (view.kind === "section" && !sectionIds.has(view.sectionId))
+      throw new Error("Der Schnitt bzw. die Ansicht eines Abbilds fehlt.");
   for (const doc of project.drawingDocuments ?? []) {
-    if (!project.modelViews?.some((v) => v.id === doc.modelViewId))
-      throw new Error("Unbekannte Modellansicht im Abbild.");
+    const view = project.modelViews?.find((v) => v.id === doc.modelViewId);
+    if (!view) throw new Error("Unbekannte Modellansicht im Abbild.");
+    // A section document is checked here; plan documents with their storey below.
+    if (view.kind !== "section") continue;
+    if (doc.folderId && !project.documentFolders?.some((f) => f.id === doc.folderId))
+      throw new Error("Unbekannter Abbildordner.");
+    if (
+      new Set(doc.hiddenLayerIds).size !== doc.hiddenLayerIds.length ||
+      doc.hiddenLayerIds.some((id) => !project.layers.some((l) => l.id === id))
+    )
+      throw new Error("Ungültige Ebenensichtbarkeit im Abbild.");
   }
   const ids = new Set<string>();
   const entities = [
@@ -1054,7 +1074,7 @@ export function validateProject(
     }
     const elevation = localLevels.get(storey.id);
     for (const wall of storey.walls) wallHeights(wall, elevation ?? 0);
-    const modelViews = project.modelViews?.filter((v) => v.storeyId === storey.id);
+    const modelViews = floorPlanViews(project).filter((v) => v.storeyId === storey.id);
     const scopeInput: SingleProject = {
       ...shared,
       schemaVersion: 23,
@@ -1391,4 +1411,11 @@ function validateGeometry(
     if (!wall) throw new Error(`Unknown wall: ${opening.wallId}`);
     validateWindowGeometry(opening, wall);
   }
+}
+
+/** Plan views only; section views have no storey (docs/ABBILDER.md). */
+function floorPlanViews(project: { modelViews?: readonly ModelView[] | undefined }) {
+  return (project.modelViews ?? []).filter(
+    (v): v is Extract<ModelView, { kind: "floor-plan" }> => v.kind === "floor-plan",
+  );
 }

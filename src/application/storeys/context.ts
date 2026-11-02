@@ -26,7 +26,12 @@ export function resolveViewStorey(project: Project, binding: ViewIdentity) {
     : undefined;
   if (document && (!source || source.kind !== "floor-plan"))
     throw new Error("Die Modellansicht des Abbilds fehlt.");
-  const storeyId = binding.kind === "working-plan" ? binding.storeyId : source!.storeyId;
+  const storeyId =
+    binding.kind === "working-plan"
+      ? binding.storeyId
+      : source?.kind === "floor-plan"
+        ? source.storeyId
+        : "";
   const storey = project.storeys.find((s) => s.id === storeyId);
   if (!storey) throw new Error("Unbekanntes Geschoss im Ansichtskontext.");
   return Object.freeze({

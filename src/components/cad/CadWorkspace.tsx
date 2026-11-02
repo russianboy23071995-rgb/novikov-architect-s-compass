@@ -2156,6 +2156,12 @@ export function CadWorkspace({
     cancelInteraction();
     setActiveSectionId(sectionId);
   }
+  /** A section or elevation document opens the tab of its section (docs/ABBILDER.md). */
+  const openSectionDocument = (documentId: string) => {
+    const doc = realProject.drawingDocuments?.find((d) => d.id === documentId);
+    const view = realProject.modelViews?.find((v) => v.id === doc?.modelViewId);
+    if (view?.kind === "section") selectCanvasTab(sectionTab(view.sectionId));
+  };
   const openSectionWindow = (id: string) => {
     cancelInteraction();
     setModelError("");
@@ -3805,27 +3811,30 @@ export function CadWorkspace({
                   getPlanCapture={getPlanCapture}
                   activeDocumentId={activeDocumentId}
                   onOpenDocument={(id) => {
+                    if (space && id) dispatchEditing({ type: "space", space: null });
                     cancelInteraction();
                     setSelection(null);
                     setDemandOpen(false);
                     setTool("select");
                     setMode("2D");
-                    const doc = project.drawingDocuments?.find((d) => d.id === id);
-                    const source = project.modelViews?.find((v) => v.id === doc?.modelViewId);
+                    const doc = realProject.drawingDocuments?.find((d) => d.id === id);
+                    const source = realProject.modelViews?.find((v) => v.id === doc?.modelViewId);
                     if (!source) return;
+                    // A section or elevation document opens in its tab (docs/ABBILDER.md).
+                    if (source.kind === "section") return openSectionDocument(doc!.id);
                     try {
-                      selectWorkingStorey(project, project, source.storeyId);
+                      selectWorkingStorey(realProject, realProject, source.storeyId);
                     } catch {
                       dispatchEditing({
                         type: "working-storey",
-                        base: project,
+                        base: realProject,
                         storeyId: source.storeyId,
                       });
                       return;
                     }
                     dispatchEditing({
                       type: "working-storey",
-                      base: project,
+                      base: realProject,
                       storeyId: source.storeyId,
                     });
                     setActiveDocumentId(id);
