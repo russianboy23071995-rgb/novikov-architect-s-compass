@@ -3681,6 +3681,9 @@ export function CadWorkspace({
                   onDocumentAction={(base, action) =>
                     dispatchEditing({ type: "document", base, action })
                   }
+                  onLayoutAction={(base, action) =>
+                    dispatchEditing({ type: "layout", base, action })
+                  }
                   project={project}
                   active={
                     selectedSection

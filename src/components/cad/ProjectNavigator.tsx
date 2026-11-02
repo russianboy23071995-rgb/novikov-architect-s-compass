@@ -3,6 +3,7 @@ import type { BuildingChange } from "@/application/storeys/actions";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { BuildingSettings } from "./BuildingSettings";
 import { DocumentNavigator, type DocumentNavigation } from "./DocumentNavigator";
+import { LayoutNavigator, type LayoutNavigation } from "./LayoutNavigator";
 import { memo, useCallback, useMemo, useRef, useState } from "react";
 import {
   Box,
@@ -105,17 +106,18 @@ function TreeItem({
   );
 }
 
-type ProjectNavigatorProps = DocumentNavigation & {
-  project: Project;
-  onRenameStorey: (base: Project, name: string) => void;
-  onBuildingChange: (base: Project, change: BuildingChange) => void;
+type ProjectNavigatorProps = DocumentNavigation &
+  LayoutNavigation & {
+    project: Project;
+    onRenameStorey: (base: Project, name: string) => void;
+    onBuildingChange: (base: Project, change: BuildingChange) => void;
 
-  active: readonly string[];
-  onSelect: (id: string, label: string, toggle?: boolean) => void;
-  /** Double click on a section entry opens its window (docs/SCHNITT.md, SC2). */
-  onSectionSettings: (id: string) => void;
-  onClose: () => void;
-};
+    active: readonly string[];
+    onSelect: (id: string, label: string, toggle?: boolean) => void;
+    /** Double click on a section entry opens its window (docs/SCHNITT.md, SC2). */
+    onSectionSettings: (id: string) => void;
+    onClose: () => void;
+  };
 
 function NavigatorContent({
   active,
@@ -125,11 +127,14 @@ function NavigatorContent({
   onRenameStorey,
   onBuildingChange,
   onSectionSettings,
+  onLayoutAction,
+  onOpenLayout,
+  activeLayoutId,
   ...documents
 }: ProjectNavigatorProps) {
   const [settings, setSettings] = useState(false);
   const [rename, setRename] = useState<{ base: Project; name: string } | null>(null);
-  const [tab, setTab] = useState<"model" | "documents">("model");
+  const [tab, setTab] = useState<"model" | "documents" | "layouts">("model");
   // The navigator represents project/storey structure, never individual geometry.
   // Its row count is independent of the number of elements in the storey.
   const modelTree = useMemo(
@@ -188,6 +193,7 @@ function NavigatorContent({
           aria-selected={tab === "model"}
           variant="ghost"
           size="sm"
+          className="h-8 min-w-0 flex-[1.4] px-1 text-[11.5px]"
           onClick={() => {
             setTab("model");
             documents.onOpenDocument(null);
@@ -200,12 +206,33 @@ function NavigatorContent({
           aria-selected={tab === "documents"}
           variant="ghost"
           size="sm"
+          className="h-8 min-w-0 flex-1 px-1 text-[11.5px]"
           onClick={() => setTab("documents")}
         >
           Abbilder
         </Button>
+        <Button
+          role="tab"
+          aria-selected={tab === "layouts"}
+          variant="ghost"
+          size="sm"
+          className="h-8 min-w-0 flex-1 px-1 text-[11.5px]"
+          onClick={() => setTab("layouts")}
+        >
+          Layouts
+        </Button>
       </div>
-      {tab === "documents" ? (
+      {tab === "layouts" ? (
+        <ScrollArea className="min-h-0 flex-1">
+          <LayoutNavigator
+            key={project.id}
+            project={project}
+            onLayoutAction={onLayoutAction}
+            {...(onOpenLayout ? { onOpenLayout } : {})}
+            activeLayoutId={activeLayoutId ?? null}
+          />
+        </ScrollArea>
+      ) : tab === "documents" ? (
         <ScrollArea className="min-h-0 flex-1">
           <DocumentNavigator key={project.id} project={project} {...documents} />
         </ScrollArea>
@@ -314,6 +341,11 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
     (id) => latest.current.onOpenDocument(id),
     [],
   );
+  const onLayoutAction = useCallback<ProjectNavigatorProps["onLayoutAction"]>(
+    (...args) => latest.current.onLayoutAction(...args),
+    [],
+  );
+  const onOpenLayout = useCallback((id: string) => latest.current.onOpenLayout?.(id), []);
   const onDocumentAction = useCallback<ProjectNavigatorProps["onDocumentAction"]>(
     (...args) => latest.current.onDocumentAction(...args),
     [],
@@ -324,6 +356,9 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
       activeDocumentId={props.activeDocumentId}
       onOpenDocument={onOpenDocument}
       onDocumentAction={onDocumentAction}
+      onLayoutAction={onLayoutAction}
+      onOpenLayout={onOpenLayout}
+      activeLayoutId={props.activeLayoutId ?? null}
       onDocumentVisibility={props.onDocumentVisibility}
       onRenameStorey={onRenameStorey}
       onBuildingChange={onBuildingChange}

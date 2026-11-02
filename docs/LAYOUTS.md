@@ -23,3 +23,21 @@ Reihenfolge: LA1 Datenmodell → LA2 Navigator-Reiter → LA3 Fenster „Neues L
 - Code: `src/domain/views/layouts.ts` (Schema, Vorgaben, Blattgröße, Regeln), `src/application/views/layouts.ts` (Aktionen), Prüfung in `src/domain/project/schema.ts`, Migration in `src/interop/project-file/load.ts`.
 
 Nachweis LA1: 1495 Tests grün (5 neu in `src/application/views/layouts.test.ts`: Vorgaben ohne Dateiänderung, A3 quer 420 × 297 mm, verschachtelte Ordner, Schleifen und nicht leere Ordner abgelehnt, eigenes Blatt und freies Format, Masterwechsel, Master in Benutzung, Schema 43 → 44 und geschmuggelte Layouts), Typprüfung beider Projekte, Architektur, Lint, Formatierung sauber, 14-Modell-Prüfsumme unverändert (`e42aa36e…`). Im Browser noch nichts zu sehen; die App startet nach dem Neuladen fehlerfrei mit Schema 44.
+
+## LA2 – Navigator-Reiter „Layouts“
+
+- Dritter Reiter im Navigator neben „Gebäudestruktur“ und „Abbilder“. Die drei Reiter teilen sich die Breite (Gebäudestruktur etwas breiter), damit nichts seitlich hinausragt.
+- Oben der feste Bereich **Masterlayouts**, darunter **Layoutsammlung** mit Ordnern beliebiger Tiefe und den Layouts.
+- **Rechtsklick**
+  - auf die Layoutsammlung, einen Ordner oder die freie Fläche: „Neues Layout“, „Neuer Ordner“ (im angeklickten Ordner, sonst in der Layoutsammlung); bei eigenen Ordnern zusätzlich „In Ordner verschieben“, „Ordner löschen“ (nur leer) und „Umbenennen“.
+  - auf ein Layout: „Neues Layout“ und „Neuer Ordner“ im selben Ordner, „In Ordner verschieben“ (alle Ordner eingerückt), „Layout löschen“, „Umbenennen“.
+  - auf die Masterlayouts: „Neues Masterlayout“, „Masterlayout löschen“ (gesperrt, solange Layouts ihm folgen, mit Anzahl), „Umbenennen“.
+- Neue Einträge heißen „Layout“, „Layout 2“ …, „Masterlayout“ … bzw. „Neuer Ordner“; der Name ist sofort zum Überschreiben markiert. Ein neues Layout folgt dem ersten Masterlayout; ein neues Masterlayout übernimmt dessen Blatt. Das Fenster mit Größe, Format und Rändern folgt mit LA3.
+- **F2** benennt um, **Enter** öffnet bzw. klappt Ordner auf und zu. Layouts und eigene Ordner lassen sich auf einen Ordner **ziehen**. Die Layoutsammlung bleibt fest.
+- Ein Rechtsklick auf eine Zeile öffnet nur ihr eigenes Menü (nicht zusätzlich das der umgebenden Fläche).
+- Jede Änderung ist ein Rückgängig-Schritt (Ereignis `layout` im Bearbeitungsablauf, `changeLayouts`). Fehler erscheinen als Meldung unter dem Baum.
+- Code: `src/components/cad/LayoutNavigator.tsx`, Reiter in `ProjectNavigator.tsx`, Anbindung in `CadWorkspace.tsx` und `src/application/direct-edit/controller.ts`.
+
+Nachweis LA2: 1495 Tests grün, Typprüfung beider Projekte, Architektur, Lint, Formatierung sauber, 14-Modell-Prüfsumme unverändert. Browser: Reiter „Layouts“ zeigt „Standard A3 quer“ und die Layoutsammlung; Ordner „Entwurf“ per Rechtsklick angelegt und benannt; darin Layout „Grundriss EG“; per „In Ordner verschieben“ in die Layoutsammlung und mit Rückgängig zurück; Masterlayout „A1 quer“ angelegt; „Standard A3 quer“ nicht löschbar („1 Layout folgt“). Dabei gefunden und behoben: Ein Rechtsklick öffnete auch das Menü der Fläche dahinter, das offen blieb (ein Enter legte dort einen zweiten Ordner an).
+
+Nicht im Browser geprüft: Ziehen und Ablegen (die Testmaus löst kein HTML-Ziehen aus); es nutzt dieselben Aktionen wie „In Ordner verschieben“.
