@@ -207,17 +207,25 @@ import { sectionLookTo } from "@/domain/views/sections";
 import { SectionFields } from "./SectionFields";
 import { SectionProperties } from "./SectionProperties";
 import { SectionDrawingView } from "./SectionDrawingView";
-import { LayoutSheetView } from "./LayoutSheetView";
 import { LayoutSettingsWindow, type LayoutDraftTarget } from "./LayoutSettingsWindow";
-import { layoutFolderTree, projectLayouts, projectMasterLayouts } from "@/domain/views/layouts";
-import { changeLayouts } from "@/application/views/layouts";
-import { titleBlockLens } from "@/application/views/title-block-space";
+import {
+  layoutFolderTree,
+  layoutSheet,
+  projectLayouts,
+  projectMasterLayouts,
+  sheetSize,
+} from "@/domain/views/layouts";
+import { changeLayouts, layoutUnderlay } from "@/application/views/layouts";
+import { spaceLens } from "@/application/views/title-block-space";
+import { LayoutBar } from "./LayoutBar";
 import { changeTitleBlocks, titleBlockUnderlay } from "@/application/views/title-blocks";
 import { TitleBlockBar } from "./TitleBlockBar";
 import { SectionDocumentWindow } from "./SectionDocumentWindow";
 import { drawingInfo } from "@/application/views/drawing-info";
 import { changeDrawingDocument } from "@/application/views/documents";
 
+/** Tools of a layout: the last fixes by hand, no dimensions (docs/LAYOUTS.md, LZ1). */
+const LAYOUT_TOOLS: ReadonlySet<ToolId> = new Set<ToolId>(["select", "line", "text", "hatch"]);
 /** Tools of the Plankopfplaner: drawing only, nothing of the building (PK2). */
 const TITLE_BLOCK_TOOLS: ReadonlySet<ToolId> = new Set<ToolId>([
   "select",
@@ -320,8 +328,27 @@ export function CadWorkspace({
   // The real project; in the Plankopfplaner the tools see the title block's lens (PK2).
   const realProject = history.present;
   const space = editing.space;
-  const project = space ? titleBlockLens(realProject, space.id) : realProject;
-  const activeBlock = space ? realProject.titleBlocks?.find((t) => t.id === space.id) : undefined;
+  const project = space ? spaceLens(realProject, space) : realProject;
+  const activeBlock =
+    space?.kind === "title-block"
+      ? realProject.titleBlocks?.find((t) => t.id === space.id)
+      : undefined;
+  // A layout or master layout drawn on (docs/LAYOUTS.md, LZ1), with the sheet it uses.
+  const layoutSpace = (() => {
+    if (space?.kind !== "layout") return null;
+    const layout = projectLayouts(realProject).find((l) => l.id === space.id);
+    const master = projectMasterLayouts(realProject).find((m) => m.id === space.id);
+    if (!layout && !master) return null;
+    return {
+      id: space.id,
+      layout,
+      master: layout
+        ? projectMasterLayouts(realProject).find((m) => m.id === layout.masterId)
+        : master,
+      sheet: layout ? layoutSheet(realProject, layout) : master!.sheet,
+    };
+  })();
+  const spaceTools = space ? (space.kind === "layout" ? LAYOUT_TOOLS : TITLE_BLOCK_TOOLS) : null;
   const autosave = useLocalAutosave(realProject, editing.projectLoad ?? realProject.id);
   const activeDocument = project.drawingDocuments?.find((d) => d.id === activeDocumentId);
   const viewContext = useMemo(
@@ -626,9 +653,11 @@ export function CadWorkspace({
 
   const selectTool = (next: ToolId) => {
     // The Plankopfplaner draws only: building tools stay off there (PK2).
-    if (space && !TITLE_BLOCK_TOOLS.has(next)) {
+    if (spaceTools && !spaceTools.has(next)) {
       showNotice(
-        "Im Plankopfplaner gibt es nur Zeichenwerkzeuge (Linie, Text, Schraffur, Maßkette).",
+        space?.kind === "layout"
+          ? "Im Layout gibt es nur Linie, Text und Schraffur."
+          : "Im Plankopfplaner gibt es nur Zeichenwerkzeuge (Linie, Text, Schraffur, Maßkette).",
       );
       return;
     }
@@ -2124,8 +2153,8 @@ export function CadWorkspace({
   const layoutIds = new Set(layoutNames.map((l) => l.id));
   const activeLayout = activeLayoutId && layoutIds.has(activeLayoutId) ? activeLayoutId : null;
   if (activeLayoutId && !activeLayout) setActiveLayoutId(null);
-  const activeView = space
-    ? titleBlockTab(space.id)
+  const activeView = activeBlock
+    ? titleBlockTab(activeBlock.id)
     : activeLayout
       ? layoutTab(activeLayout)
       : activeSection
@@ -2160,9 +2189,15 @@ export function CadWorkspace({
     }
     if (space) dispatchEditing({ type: "space", space: null });
     if (layoutId !== null) {
+      // Layouts are drawn on with the plan tools (docs/LAYOUTS.md, LZ1).
       cancelInteraction();
       setActiveSectionId(null);
-      return setActiveLayoutId(layoutId);
+      setActiveDocumentId(null);
+      setSelection(null);
+      if (mode !== "2D") changeMode("2D");
+      if (!LAYOUT_TOOLS.has(tool)) setTool("select");
+      setActiveLayoutId(layoutId);
+      return dispatchEditing({ type: "space", space: { kind: "layout", id: layoutId } });
     }
     setActiveLayoutId(null);
     if (sectionId === null) return changeMode(canvasModeOf(view as "plan" | "3d"));
@@ -3046,43 +3081,38 @@ export function CadWorkspace({
                   onClose={() => setSectionDocumentWindow(null)}
                 />
               )}
-              {activeLayout && (
-                <div role="tabpanel" aria-label="Layout" className="absolute inset-0 z-30">
-                  <LayoutSheetView
-                    key={activeLayout}
-                    project={realProject}
-                    layoutId={activeLayout}
-                    onSettings={() => {
-                      const layout = projectLayouts(realProject).find((l) => l.id === activeLayout);
-                      const master = projectMasterLayouts(realProject).find(
-                        (m) => m.id === activeLayout,
-                      );
-                      setLayoutWindow(
-                        layout
-                          ? {
-                              kind: "layout",
-                              id: layout.id,
-                              folderId: layout.folderId,
-                              name: layout.name,
-                            }
-                          : { kind: "master", id: master!.id, name: master!.name },
-                      );
-                    }}
-                  />
-                  {layoutWindow && (
-                    <LayoutSettingsWindow
-                      key={(layoutWindow.id ?? "new") + layoutWindow.kind}
-                      project={realProject}
-                      target={layoutWindow}
-                      folders={layoutFolderTree(realProject)}
-                      onApply={(action) => {
-                        changeLayouts(realProject, realProject, action);
-                        dispatchEditing({ type: "layout", base: realProject, action });
-                      }}
-                      onClose={() => setLayoutWindow(null)}
-                    />
-                  )}
-                </div>
+              {layoutSpace && (
+                <LayoutBar
+                  name={(layoutSpace.layout ?? layoutSpace.master)!.name}
+                  kind={layoutSpace.layout ? "Layout" : "Masterlayout"}
+                  sheet={layoutSpace.sheet}
+                  master={layoutSpace.layout ? (layoutSpace.master?.name ?? null) : undefined}
+                  onSettings={() =>
+                    setLayoutWindow(
+                      layoutSpace.layout
+                        ? {
+                            kind: "layout",
+                            id: layoutSpace.layout.id,
+                            folderId: layoutSpace.layout.folderId,
+                            name: layoutSpace.layout.name,
+                          }
+                        : { kind: "master", id: layoutSpace.id, name: layoutSpace.master!.name },
+                    )
+                  }
+                />
+              )}
+              {layoutWindow && (
+                <LayoutSettingsWindow
+                  key={(layoutWindow.id ?? "new") + layoutWindow.kind}
+                  project={realProject}
+                  target={layoutWindow}
+                  folders={layoutFolderTree(realProject)}
+                  onApply={(action) => {
+                    changeLayouts(realProject, realProject, action);
+                    dispatchEditing({ type: "layout", base: realProject, action });
+                  }}
+                  onClose={() => setLayoutWindow(null)}
+                />
               )}
               {activeSection &&
                 (() => {
@@ -3181,10 +3211,18 @@ export function CadWorkspace({
                           : (activeDocumentId ??
                             (activeBlock
                               ? `${activeBlock.id}:${activeBlock.sheet.format}:${activeBlock.sheet.orientation}`
-                              : // One plan camera for every storey: zoom and position stay.
-                                "plan"))
+                              : layoutSpace
+                                ? `layout:${layoutSpace.id}:${JSON.stringify(sheetSize(layoutSpace.sheet))}`
+                                : // One plan camera for every storey: zoom and position stay.
+                                  "plan"))
                       }
-                      underlay={activeBlock ? titleBlockUnderlay(activeBlock.sheet) : undefined}
+                      underlay={
+                        activeBlock
+                          ? titleBlockUnderlay(activeBlock.sheet)
+                          : layoutSpace
+                            ? layoutUnderlay(layoutSpace.sheet)
+                            : undefined
+                      }
                       documentFraming={activeDocument?.framing}
                       onPlanCapture={onPlanCapture}
                       viewContext={viewContext}
@@ -3534,7 +3572,7 @@ export function CadWorkspace({
                         : {})}
                       layout={layout}
                       mode={mode}
-                      grid={grid}
+                      grid={grid && !layoutSpace}
                       active={activeViewport}
                       onActive={setActiveViewport}
                     />
@@ -3797,7 +3835,7 @@ export function CadWorkspace({
           </section>
           <div className="absolute bottom-2 left-2 z-20" style={{ top: insets.top }}>
             <ToolRail
-              allowed={space ? TITLE_BLOCK_TOOLS : undefined}
+              allowed={spaceTools ?? undefined}
               activeTool={tool}
               layout={toolLayout}
               onSelect={selectTool}
