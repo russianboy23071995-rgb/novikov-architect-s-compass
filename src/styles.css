@@ -412,3 +412,63 @@ input {
     height: 42%;
   }
 }
+
+/*
+ * Scroll bars (UI2, 02.11.2026): 4 px, no arrows, no track, a pale thumb that shows only while
+ * the pointer is over the scrolling part and turns stronger when grabbed. Chromium and Safari
+ * use the ::-webkit-scrollbar rules (setting scrollbar-width there would switch them off);
+ * Firefox gets the closest standard form.
+ */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-button {
+  display: none;
+}
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  background: transparent;
+}
+:hover::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--foreground) 22%, transparent);
+}
+::-webkit-scrollbar-thumb:active {
+  background: color-mix(in oklab, var(--foreground) 50%, transparent);
+}
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  :hover {
+    scrollbar-color: color-mix(in oklab, var(--foreground) 22%, transparent) transparent;
+  }
+}
+/* No bar at all: the part scrolls by wheel, touchpad or dragging and fades at the edge. */
+.scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+/* The tool properties bar fades out on the side where more content waits (UI2). */
+.edge-fade[data-more="right"] {
+  mask-image: linear-gradient(to right, black calc(100% - 28px), transparent);
+}
+.edge-fade[data-more="left"] {
+  mask-image: linear-gradient(to left, black calc(100% - 28px), transparent);
+}
+.edge-fade[data-more="both"] {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 28px,
+    black calc(100% - 28px),
+    transparent
+  );
+}

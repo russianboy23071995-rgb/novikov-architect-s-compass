@@ -634,6 +634,25 @@ export function CadWorkspace({
     anchor: null,
   });
   const propertiesRef = useRef<HTMLElement>(null);
+  // The one-row properties bar (UI2): which side has more to scroll to, and a drag in progress.
+  const propertiesRow = useRef<HTMLDivElement>(null);
+  const rowDrag = useRef<{ id: number; x: number; left: number } | null>(null);
+  const [propertiesMore, setPropertiesMore] = useState<"none" | "left" | "right" | "both">("none");
+  const measurePropertiesRow = (row: HTMLElement) => {
+    const left = row.scrollLeft > 1,
+      right = row.scrollLeft + row.clientWidth < row.scrollWidth - 1;
+    const next = left && right ? "both" : left ? "left" : right ? "right" : "none";
+    setPropertiesMore((current) => (current === next ? current : next));
+  };
+  // Contents change with every tool and selection: measure after each render and on resize.
+  useEffect(() => {
+    if (propertiesRow.current) measurePropertiesRow(propertiesRow.current);
+  });
+  useEffect(() => {
+    const measure = () => propertiesRow.current && measurePropertiesRow(propertiesRow.current);
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
   const [demandPosition, setDemandPosition] = useState<Point>({ x: 160, y: 180 });
   const lastPointer = useRef<Point>({ x: 144, y: 164 });
 
@@ -3909,168 +3928,199 @@ export function CadWorkspace({
             ref={propertiesRef}
             tabIndex={-1}
             aria-label="Werkzeugeigenschaften"
-            // One row across the whole width; what does not fit scrolls sideways, also with the
-            // mouse wheel (UI1). Fields that wrap or stack elsewhere stay in the row here.
-            className="glass-panel-strong absolute left-2 right-2 top-2 z-20 flex items-center gap-4 overflow-x-auto overflow-y-hidden whitespace-nowrap rounded-lg px-3 py-1 outline-none focus-visible:ring-2 focus-visible:ring-primary [&_.flex-wrap]:flex-nowrap [&_.grid]:auto-cols-max [&_.grid]:grid-flow-col [&>*]:shrink-0"
+            className="glass-panel-strong absolute left-2 right-2 top-2 z-20 overflow-hidden rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-primary"
             style={{ height: PROPERTIES_HEIGHT }}
-            onWheel={(event) => {
-              const bar = event.currentTarget;
-              if (event.deltaX || !event.deltaY || bar.scrollWidth <= bar.clientWidth) return;
-              bar.scrollLeft += event.deltaY;
-            }}
           >
-            <>
-              <div className="flex shrink-0 items-center gap-3">
-                <h2 className="text-xs font-semibold">Werkzeugeigenschaften</h2>
-                {tool === "select" && selection?.kind === "wall" && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={referenceSelection.selecting}
-                    onClick={() => {
-                      cancelInteraction();
-                      setDemandOpen(false);
-                      setCornerWall(selection.id);
+            {/* One row across the whole width (UI1); what does not fit scrolls sideways by wheel,
+                touchpad or dragging a free spot, without a visible bar, and fades out on the side
+                where more waits (UI2). Fields that wrap or stack elsewhere stay in the row. */}
+            <div
+              ref={propertiesRow}
+              data-more={propertiesMore}
+              className="edge-fade scrollbar-none flex h-full items-center gap-4 overflow-x-auto overflow-y-hidden whitespace-nowrap px-3 py-1 [&_.flex-wrap]:flex-nowrap [&_.grid]:auto-cols-max [&_.grid]:grid-flow-col [&>*]:shrink-0"
+              onScroll={(event) => measurePropertiesRow(event.currentTarget)}
+              onWheel={(event) => {
+                const row = event.currentTarget;
+                if (event.deltaX || !event.deltaY || row.scrollWidth <= row.clientWidth) return;
+                row.scrollLeft += event.deltaY;
+              }}
+              onPointerDown={(event) => {
+                // Dragging a free spot (not a field or button) scrolls the row.
+                if (
+                  event.button !== 0 ||
+                  (event.target as Element).closest(
+                    "input,select,textarea,button,label,a,[role=button]",
+                  )
+                )
+                  return;
+                rowDrag.current = {
+                  id: event.pointerId,
+                  x: event.clientX,
+                  left: event.currentTarget.scrollLeft,
+                };
+                event.currentTarget.setPointerCapture(event.pointerId);
+              }}
+              onPointerMove={(event) => {
+                const drag = rowDrag.current;
+                if (drag?.id === event.pointerId)
+                  event.currentTarget.scrollLeft = drag.left - (event.clientX - drag.x);
+              }}
+              onPointerUp={() => (rowDrag.current = null)}
+              onPointerCancel={() => (rowDrag.current = null)}
+            >
+              <>
+                <div className="flex shrink-0 items-center gap-3">
+                  <h2 className="text-xs font-semibold">Werkzeugeigenschaften</h2>
+                  {tool === "select" && selection?.kind === "wall" && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={referenceSelection.selecting}
+                      onClick={() => {
+                        cancelInteraction();
+                        setDemandOpen(false);
+                        setCornerWall(selection.id);
+                      }}
+                    >
+                      Wandanschluss vorschauen
+                    </Button>
+                  )}
+                  {tool === "select" && (
+                    <LayerProperties
+                      key={`layer:${propertyFormKey(project, selection)}`}
+                      project={project}
+                      selection={selection}
+                      disabled={referenceSelection.selecting}
+                      onAssign={(base, target, layerId) => {
+                        if (referenceSelection.selecting) return;
+                        dispatchEditing({
+                          type: "assign-layer",
+                          base,
+                          target,
+                          selection: currentSelection.current,
+                          layerId,
+                        });
+                        setDemandOpen(false);
+                        setModelError("");
+                      }}
+                    />
+                  )}
+                </div>
+                {imageTool.active || imageTool.busy || imageTool.error ? (
+                  <div className="flex items-center gap-3 text-xs">
+                    <label>
+                      Bildbreite (m)
+                      <input
+                        aria-label="Bildbreite (m)"
+                        className="ml-2 w-24 rounded border bg-background p-1"
+                        value={imageTool.width}
+                        onChange={(e) => imageTool.setWidth(e.target.value)}
+                      />
+                    </label>
+                    <span>
+                      {imageTool.busy
+                        ? "Bild wird geprüft…"
+                        : imageTool.error || "Obere linke Ecke anklicken · Esc: Abbruch"}
+                    </span>
+                    <Button size="sm" onClick={imageTool.cancel}>
+                      Bildimport abbrechen
+                    </Button>
+                  </div>
+                ) : tool === "measure" ? (
+                  <div className="flex items-center gap-3 text-xs">
+                    <label>
+                      Messart{" "}
+                      <select
+                        aria-label="Messart"
+                        value={measurementMode}
+                        onChange={(e) => setMeasurementMode(e.target.value as MeasurementMode)}
+                        className="rounded border bg-background p-1"
+                      >
+                        <option value="distance">Strecke</option>
+                        <option value="area">Fläche</option>
+                        <option value="angle">Winkel</option>
+                      </select>
+                    </label>
+                    <span role="status">
+                      {measurementMode === "angle"
+                        ? "Schenkelpunkt → Scheitel → Schenkelpunkt · Esc: Beenden"
+                        : measurementMode === "area"
+                          ? "Punkte setzen · Doppelklick schließt · Danach Klick für neue Messung · Esc: Beenden"
+                          : "Zwei Punkte anklicken · Danach Klick für neue Messung · Esc: Beenden"}
+                    </span>
+                    <Button size="sm" variant="ghost" onClick={measurement.reset}>
+                      Neue Messung
+                    </Button>
+                    {measurement.error && <span role="alert">{measurement.error}</span>}
+                  </div>
+                ) : tool === "drawing" ? (
+                  toolFields("drawing")
+                ) : tool === "wall" ||
+                  tool === "column" ||
+                  tool === "stair" ||
+                  tool === "section" ||
+                  tool === "elevation" ||
+                  tool === "dimension" ||
+                  tool === "text" ||
+                  tool === "window" ||
+                  tool === "door" ? (
+                  toolFields(tool)
+                ) : tool === "room" && mode === "2D" ? (
+                  <RoomToolFields
+                    construction={roomConstruction}
+                    onConstruction={(next) => {
+                      setPathPoints([]);
+                      setRoomConstruction(next);
                     }}
-                  >
-                    Wandanschluss vorschauen
-                  </Button>
-                )}
-                {tool === "select" && (
-                  <LayerProperties
-                    key={`layer:${propertyFormKey(project, selection)}`}
-                    project={project}
-                    selection={selection}
-                    disabled={referenceSelection.selecting}
-                    onAssign={(base, target, layerId) => {
-                      if (referenceSelection.selecting) return;
-                      dispatchEditing({
-                        type: "assign-layer",
-                        base,
-                        target,
-                        selection: currentSelection.current,
-                        layerId,
-                      });
-                      setDemandOpen(false);
-                      setModelError("");
+                    value={toolDefaults.room}
+                    onChange={toolDefaults.setRoom}
+                    layers={project.layers}
+                    nextNumber={nextProjectRoomNumber(project)}
+                    onOpenSettings={() => {
+                      setSettingsWindow({ mode: "tool", tool: "room", section: "height-lines" });
                     }}
                   />
+                ) : tool === "roof" && mode === "2D" ? (
+                  <RoofToolFields
+                    construction={hatchConstruction}
+                    onConstruction={(construction) => {
+                      setPathPoints([]);
+                      setHatchConstruction(construction);
+                    }}
+                    value={toolDefaults.roof}
+                    onChange={toolDefaults.setRoof}
+                    layers={project.layers}
+                    phase={roofPhase ?? "line"}
+                  />
+                ) : (tool === "slab" || tool === "hatch" || tool === "line") && mode === "2D" ? (
+                  toolFields(tool)
+                ) : selection?.kind === "drawing" && selections.length === 1 ? (
+                  drawingElementFields(selection.id, true)
+                ) : selections.length > 1 ? (
+                  <p className="p-3 text-xs text-muted-foreground" role="status">
+                    {selections.length} Elemente ausgewählt.{" "}
+                    {mode === "3D"
+                      ? "Gemeinsam bewegen: im Grundriss, direkt in 3D oder per Modellbefehl."
+                      : "Im Elementmenü „Auswahl frei bewegen“ wählen, dann Ursprung und Ziel anklicken."}
+                  </p>
+                ) : (
+                  <BimInspector
+                    key={propertyFormKey(project, selection)}
+                    project={project}
+                    selection={selection}
+                    onChange={changeProject}
+                    onWallOffset={(base, wallId, offset) =>
+                      dispatchEditing({
+                        type: "wall-offset",
+                        base,
+                        selection,
+                        request: { projectId: base.id, wallId, offset },
+                      })
+                    }
+                  />
                 )}
-              </div>
-              {imageTool.active || imageTool.busy || imageTool.error ? (
-                <div className="flex items-center gap-3 text-xs">
-                  <label>
-                    Bildbreite (m)
-                    <input
-                      aria-label="Bildbreite (m)"
-                      className="ml-2 w-24 rounded border bg-background p-1"
-                      value={imageTool.width}
-                      onChange={(e) => imageTool.setWidth(e.target.value)}
-                    />
-                  </label>
-                  <span>
-                    {imageTool.busy
-                      ? "Bild wird geprüft…"
-                      : imageTool.error || "Obere linke Ecke anklicken · Esc: Abbruch"}
-                  </span>
-                  <Button size="sm" onClick={imageTool.cancel}>
-                    Bildimport abbrechen
-                  </Button>
-                </div>
-              ) : tool === "measure" ? (
-                <div className="flex items-center gap-3 text-xs">
-                  <label>
-                    Messart{" "}
-                    <select
-                      aria-label="Messart"
-                      value={measurementMode}
-                      onChange={(e) => setMeasurementMode(e.target.value as MeasurementMode)}
-                      className="rounded border bg-background p-1"
-                    >
-                      <option value="distance">Strecke</option>
-                      <option value="area">Fläche</option>
-                      <option value="angle">Winkel</option>
-                    </select>
-                  </label>
-                  <span role="status">
-                    {measurementMode === "angle"
-                      ? "Schenkelpunkt → Scheitel → Schenkelpunkt · Esc: Beenden"
-                      : measurementMode === "area"
-                        ? "Punkte setzen · Doppelklick schließt · Danach Klick für neue Messung · Esc: Beenden"
-                        : "Zwei Punkte anklicken · Danach Klick für neue Messung · Esc: Beenden"}
-                  </span>
-                  <Button size="sm" variant="ghost" onClick={measurement.reset}>
-                    Neue Messung
-                  </Button>
-                  {measurement.error && <span role="alert">{measurement.error}</span>}
-                </div>
-              ) : tool === "drawing" ? (
-                toolFields("drawing")
-              ) : tool === "wall" ||
-                tool === "column" ||
-                tool === "stair" ||
-                tool === "section" ||
-                tool === "elevation" ||
-                tool === "dimension" ||
-                tool === "text" ||
-                tool === "window" ||
-                tool === "door" ? (
-                toolFields(tool)
-              ) : tool === "room" && mode === "2D" ? (
-                <RoomToolFields
-                  construction={roomConstruction}
-                  onConstruction={(next) => {
-                    setPathPoints([]);
-                    setRoomConstruction(next);
-                  }}
-                  value={toolDefaults.room}
-                  onChange={toolDefaults.setRoom}
-                  layers={project.layers}
-                  nextNumber={nextProjectRoomNumber(project)}
-                  onOpenSettings={() => {
-                    setSettingsWindow({ mode: "tool", tool: "room", section: "height-lines" });
-                  }}
-                />
-              ) : tool === "roof" && mode === "2D" ? (
-                <RoofToolFields
-                  construction={hatchConstruction}
-                  onConstruction={(construction) => {
-                    setPathPoints([]);
-                    setHatchConstruction(construction);
-                  }}
-                  value={toolDefaults.roof}
-                  onChange={toolDefaults.setRoof}
-                  layers={project.layers}
-                  phase={roofPhase ?? "line"}
-                />
-              ) : (tool === "slab" || tool === "hatch" || tool === "line") && mode === "2D" ? (
-                toolFields(tool)
-              ) : selection?.kind === "drawing" && selections.length === 1 ? (
-                drawingElementFields(selection.id, true)
-              ) : selections.length > 1 ? (
-                <p className="p-3 text-xs text-muted-foreground" role="status">
-                  {selections.length} Elemente ausgewählt.{" "}
-                  {mode === "3D"
-                    ? "Gemeinsam bewegen: im Grundriss, direkt in 3D oder per Modellbefehl."
-                    : "Im Elementmenü „Auswahl frei bewegen“ wählen, dann Ursprung und Ziel anklicken."}
-                </p>
-              ) : (
-                <BimInspector
-                  key={propertyFormKey(project, selection)}
-                  project={project}
-                  selection={selection}
-                  onChange={changeProject}
-                  onWallOffset={(base, wallId, offset) =>
-                    dispatchEditing({
-                      type: "wall-offset",
-                      base,
-                      selection,
-                      request: { projectId: base.id, wallId, offset },
-                    })
-                  }
-                />
-              )}
-            </>
+              </>
+            </div>
           </section>
           <div className="absolute bottom-2 left-2 z-20" style={{ top: insets.top }}>
             <ToolRail
