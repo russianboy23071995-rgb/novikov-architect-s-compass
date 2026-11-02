@@ -7,6 +7,7 @@ import { setStoreyHeight, type SetStoreyHeight } from "../storeys/actions.ts";
 import { renameStorey, type RenameStorey } from "../storeys/actions.ts";
 import { activateDrawnLayers } from "../views/drawing-layer-activation.ts";
 import { changeDrawingDocument, type DocumentAction } from "../views/documents.ts";
+import { changeLayouts, type LayoutAction } from "../views/layouts.ts";
 import type { LayerVisibilityScope } from "../layers/visibility.ts";
 import { changeProjectScale } from "../views/project-scale.ts";
 import type { WorkingPlanIdentity } from "../../domain/views/scale.ts";
@@ -68,6 +69,7 @@ type ModelEditingEvent =
   | { type: "set-storey-height"; base: Project; request: SetStoreyHeight }
   | { type: "rename-storey"; base: Project; request: RenameStorey }
   | { type: "document"; base: Project; action: DocumentAction }
+  | { type: "layout"; base: Project; action: LayoutAction }
   | { type: "view-scale"; view: WorkingPlanIdentity; denominator: number }
   | { type: "begin"; target: EditTarget; action: EditAction; index: number | null; anchor?: Point }
   | {
@@ -200,6 +202,16 @@ function reduceModelEdit(state: EditingState, event: ModelEditingEvent): Editing
           history: commitProject(
             state.history,
             changeDrawingDocument(event.base, state.history.present, event.action),
+          ),
+          session: null,
+          error: "",
+        };
+      case "layout":
+        return {
+          ...state,
+          history: commitProject(
+            state.history,
+            changeLayouts(event.base, state.history.present, event.action),
           ),
           session: null,
           error: "",
