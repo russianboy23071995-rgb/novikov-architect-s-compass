@@ -36,6 +36,12 @@ import {
 } from "../elements/wall/assembly.ts";
 import { resolveStoreyLevels } from "../storeys/heights.ts";
 import {
+  layoutFolderSchema,
+  layoutLibraryProblem,
+  layoutSchema,
+  masterLayoutSchema,
+} from "../views/layouts.ts";
+import {
   modelViewSchema,
   drawingDocumentSchema,
   drawingDocumentV17Schema,
@@ -585,8 +591,8 @@ export const projectV42Schema = projectV41Schema.extend({
     .min(1),
 });
 /** Schema 43: materials, wall assemblies and walls referencing them (docs/WANDAUFBAU.md). */
-const projectSchema = projectV42Schema.extend({
-  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+export const projectV43Schema = projectV42Schema.extend({
+  schemaVersion: z.literal(43),
   materials: materialsSchema.optional(),
   wallAssemblies: wallAssembliesSchema.optional(),
   storeys: z
@@ -605,6 +611,13 @@ const projectSchema = projectV42Schema.extend({
       }),
     )
     .min(1),
+});
+/** Schema 44: layouts, layout folders and master layouts (docs/LAYOUTS.md, L13). */
+const projectSchema = projectV43Schema.extend({
+  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+  layoutFolders: z.array(layoutFolderSchema).max(2000).optional(),
+  layouts: z.array(layoutSchema).max(5000).optional(),
+  masterLayouts: z.array(masterLayoutSchema).max(500).optional(),
 });
 type SingleProject = z.infer<typeof projectV23Schema>;
 export function validateProjectV18(value: unknown) {
@@ -981,6 +994,9 @@ export function validateProject(
     ...(project.drawingDocuments ?? []),
     ...(project.documentFolders ?? []),
     ...(project.sections ?? []),
+    ...(project.layoutFolders ?? []),
+    ...(project.layouts ?? []),
+    ...(project.masterLayouts ?? []),
     ...project.storeys.flatMap((s) => [
       s,
       ...s.walls,
@@ -1055,6 +1071,8 @@ export function validateProject(
     );
   }
   validateWallAssemblies(project);
+  const layoutProblem = layoutLibraryProblem(project);
+  if (layoutProblem) throw new Error(layoutProblem);
   return { ...project, hatchPatterns: project.hatchPatterns.filter((p) => used.has(p.id)) };
 }
 
