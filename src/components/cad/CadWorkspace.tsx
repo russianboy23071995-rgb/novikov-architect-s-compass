@@ -218,6 +218,7 @@ import {
 import { changeLayouts, layoutUnderlay } from "@/application/views/layouts";
 import { spaceBackdrop, spaceLens } from "@/application/views/title-block-space";
 import { LayoutBar } from "./LayoutBar";
+import type { PdfRequest } from "./CadViewport";
 import type { PlacedDrawingView } from "./BimPlan";
 import { placeDrawing } from "@/application/drawings/actions";
 import { documentSource } from "@/application/drawings/sources";
@@ -303,6 +304,8 @@ export function CadWorkspace({
   const [activeLayoutId, setActiveLayoutId] = useState<string | null>(null);
   const [layoutWindow, setLayoutWindow] = useState<LayoutDraftTarget | null>(null);
   const [projectInfoOpen, setProjectInfoOpen] = useState(false);
+  // PDF export of a layout, master layout or Plankopf (docs/PDF_EXPORT.md, PDF1).
+  const [pdfRequest, setPdfRequest] = useState<(PdfRequest & { target: string }) | null>(null);
   // Drawing document the tool „Zeichnung“ places (docs/ZEICHNUNG.md, ZW2).
   const [drawingDocumentId, setDrawingDocumentId] = useState<string | null>(null);
   const [lastTitleBlockId, setLastTitleBlockId] = useState<string | null>(null);
@@ -383,6 +386,32 @@ export function CadWorkspace({
             ? `layout:${layoutSpace.id}:${JSON.stringify(sheetSize(layoutSpace.sheet))}`
             : // One plan camera for every storey: zoom and position stay.
               "plan"));
+  /** Opens the sheet (if needed) and exports it as PDF; the open view draws it at 100 %. */
+  const exportPdf = (kind: "layout" | "block", id: string) => {
+    const name =
+      kind === "block"
+        ? realProject.titleBlocks?.find((t) => t.id === id)?.name
+        : (
+            projectLayouts(realProject).find((l) => l.id === id) ??
+            projectMasterLayouts(realProject).find((m) => m.id === id)
+          )?.name;
+    if (!name) return;
+    const target = `${kind === "block" ? "title-block" : "layout"}:${id}`;
+    if (!space || `${space.kind}:${space.id}` !== target)
+      selectCanvasTab(kind === "block" ? titleBlockTab(id) : layoutTab(id));
+    setPdfRequest({
+      id: Date.now(),
+      target,
+      filename: `${name.replace(/[\\/:*?"<>|]+/g, "-").trim() || "Blatt"}.pdf`,
+      onDone: (result) => {
+        setPdfRequest(null);
+        if (result.ok) {
+          setModelError("");
+          showNotice(result.message);
+        } else setModelError(result.message);
+      },
+    });
+  };
   /** A plan document with a frame, ready to place (sections and elevations follow, ZW4). */
   const drawingSource = (documentId: string | null | undefined) => {
     const document = realProject.drawingDocuments?.find((d) => d.id === documentId);
@@ -3186,6 +3215,7 @@ export function CadWorkspace({
               {activeBlock && (
                 <TitleBlockBar
                   block={activeBlock}
+                  onPdf={() => exportPdf("block", activeBlock.id)}
                   onSheet={(sheet) => {
                     const action = { kind: "sheet" as const, id: activeBlock.id, sheet };
                     try {
@@ -3212,6 +3242,7 @@ export function CadWorkspace({
               )}
               {layoutSpace && (
                 <LayoutBar
+                  onPdf={() => exportPdf("layout", layoutSpace.id)}
                   name={(layoutSpace.layout ?? layoutSpace.master)!.name}
                   kind={layoutSpace.layout ? "Layout" : "Masterlayout"}
                   sheet={layoutSpace.sheet}
@@ -3336,6 +3367,11 @@ export function CadWorkspace({
                       }
                       key={viewKey}
                       cameraKey={viewKey}
+                      pdfRequest={
+                        pdfRequest && space && pdfRequest.target === `${space.kind}:${space.id}`
+                          ? pdfRequest
+                          : null
+                      }
                       backdrop={space ? spaceBackdrop(realProject, space) : undefined}
                       underlay={
                         activeBlock
@@ -4101,6 +4137,7 @@ export function CadWorkspace({
                     dispatchEditing({ type: "title-block", base, action })
                   }
                   onOpenTitleBlock={(id) => selectCanvasTab(titleBlockTab(id))}
+                  onExportPdf={exportPdf}
                   activeTitleBlockId={space?.id ?? null}
                   activeLayoutId={activeLayout}
                   project={realProject}

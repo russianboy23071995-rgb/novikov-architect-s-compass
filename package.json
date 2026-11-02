@@ -93,6 +93,8 @@
   "testFiles": [
     "benchmarks/bound-height-workflow.test.ts",
     "src/interop/images/resource-pool.test.ts",
+    "src/interop/pdf/pdf-writer.test.ts",
+    "src/interop/pdf/svg-path.test.ts",
     "src/application/selection/z-interaction.test.ts",
     "src/rendering/viewport/axis-target.test.ts",
     "benchmarks/s1.test.ts",
