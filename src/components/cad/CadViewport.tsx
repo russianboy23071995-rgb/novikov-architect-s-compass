@@ -21,6 +21,15 @@ import { cn } from "@/lib/utils";
 import type { ViewMode, ViewportLayout } from "./cad-types";
 import { BimPlan } from "./BimPlan";
 import type { BimPlanProps } from "./BimPlan";
+import { captureSheet } from "@/interop/pdf/svg-capture";
+import { writePdf } from "@/interop/pdf/pdf-writer";
+
+/** A request to export the open sheet as PDF (docs/PDF_EXPORT.md, PDF1); `id` makes it new. */
+export type PdfRequest = {
+  id: number;
+  filename: string;
+  onDone: (result: { ok: boolean; message: string }) => void;
+};
 
 /** CSS pixels per metre of paper at the browser's reference 96 dpi. */
 const PAPER_PIXELS_PER_METRE = 96 / 0.0254;
@@ -36,6 +45,8 @@ type CadViewportProps = BimPlanProps & {
   safe?: ScreenInsets | undefined;
   /** The view's own camera for this session (KA1); without a key every opening fits anew. */
   cameraKey?: string | undefined;
+  /** Export of the sheet as PDF; only the active view of a paper sheet takes it. */
+  pdfRequest?: PdfRequest | null | undefined;
   index: number;
   mode: ViewMode;
   grid: boolean;
@@ -88,6 +99,7 @@ export function CadViewport({
   startupNotice,
   safe,
   cameraKey,
+  pdfRequest,
   index,
   mode,
   grid,
@@ -167,6 +179,108 @@ export function CadViewport({
     return () => observer.disconnect();
   }, []);
   const plan = planCamera ?? fitPlan(initialBounds.current, size);
+  // PDF export (PDF1): the sheet is drawn once more, unseen, at 100 % and without aids, so every
+  // width the plan draws in screen pixels comes out as at 100 % zoom.
+  const [pdfJob, setPdfJob] = useState<PdfRequest | null>(null);
+  const exportBox = useRef<HTMLDivElement>(null);
+  const takenPdf = useRef<number | null>(null);
+  useEffect(() => {
+    if (!pdfRequest || takenPdf.current === pdfRequest.id || !active || is3D) return;
+    takenPdf.current = pdfRequest.id;
+    if (!model.underlay)
+      return pdfRequest.onDone({ ok: false, message: "PDF gibt es für Layouts und Planköpfe." });
+    setPdfJob(pdfRequest);
+  }, [pdfRequest, active, is3D, model.underlay]);
+  useEffect(() => {
+    if (!pdfJob || !model.underlay) return;
+    const paper = model.underlay.paper;
+    // The sheet is in the DOM once React committed it; a timer (not an animation frame) also
+    // runs in a background tab.
+    const timer = window.setTimeout(() => {
+      {
+        const svg = exportBox.current?.querySelector("svg");
+        try {
+          if (!svg) throw new Error("Das Blatt ließ sich nicht zeichnen.");
+          const { page, skippedImages } = captureSheet(svg, paper);
+          const bytes = writePdf(page);
+          const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+          const anchor = document.createElement("a");
+          anchor.href = url;
+          anchor.download = pdfJob.filename;
+          document.body.appendChild(anchor);
+          anchor.click();
+          anchor.remove();
+          window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+          pdfJob.onDone({
+            ok: true,
+            message:
+              `PDF „${pdfJob.filename}“ angefordert · ${Math.round((paper.x1 - paper.x0) * 1000)} × ${Math.round((paper.y1 - paper.y0) * 1000)} mm` +
+              (skippedImages ? ` · ${skippedImages} Bildreferenz(en) noch nicht im PDF` : ""),
+          });
+        } catch (error) {
+          pdfJob.onDone({
+            ok: false,
+            message: error instanceof Error ? error.message : "PDF nicht möglich.",
+          });
+        } finally {
+          setPdfJob(null);
+        }
+      }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [pdfJob, model.underlay]);
+  const pdfSheet =
+    pdfJob && model.underlay
+      ? (() => {
+          const p = model.underlay.paper;
+          // Drafts, previews and selection are on-screen aids: the sheet is drawn without them.
+          const {
+            cornerPreview: _corner,
+            drawingPreview: _preview,
+            textPreview: _text,
+            stairDraft: _stair,
+            sectionDraft: _section,
+            dimensionDraft: _dimension,
+            editSession: _edit,
+            tracing: _tracing,
+            selectionAnchor: _anchor,
+            referenceSelection: _references,
+            referenceScope: _scope,
+            draftContour: _contour,
+            draftFill: _fill,
+            ...sheet
+          } = model;
+          const width = (p.x1 - p.x0) * PAPER_PIXELS_PER_METRE,
+            height = (p.y1 - p.y0) * PAPER_PIXELS_PER_METRE;
+          return (
+            <div
+              ref={exportBox}
+              aria-hidden
+              className="pointer-events-none fixed"
+              style={{ left: -100000, top: 0, width, height }}
+            >
+              <BimPlan
+                {...sheet}
+                selection={null}
+                selections={[]}
+                selectedSectionId={null}
+                drawing={false}
+                start={null}
+                draftPoints={[]}
+                interactive={false}
+                camera={{
+                  center: { x: (p.x0 + p.x1) / 2, y: (p.y0 + p.y1) / 2 },
+                  pixelsPerMetre: PAPER_PIXELS_PER_METRE,
+                }}
+                viewSize={{ width, height }}
+                onCamera={() => {}}
+                pan={false}
+                grid={false}
+              />
+            </div>
+          );
+        })()
+      : null;
   useEffect(() => {
     // Never publish a framing based on the temporary pre-measurement size.
     if (active && (is3D || planCamera))
@@ -217,7 +331,7 @@ export function CadViewport({
       onChange={(event) => zoom(Number(event.target.value) / zoomPercent)}
     >
       <option value={String(zoomPercent)}>{Number(zoomPercent.toFixed(1))} %</option>
-      {[25, 50, 75, 100, 150, 200, 400, 500]
+      {[25, 50, 75, 100, 150, 200, 400, 500, 800, 1000, 2000]
         .filter((value) => value !== zoomPercent)
         .map((value) => (
           <option key={value} value={String(value)}>
@@ -249,6 +363,7 @@ export function CadViewport({
       aria-label={`${label} viewport`}
     >
       {/* No background grid behind the 3D view (user decision 01.11.2026); the plan keeps its grid. */}
+      {pdfSheet}
       <div ref={surface} className="absolute" style={fullBleed ? { inset: 0 } : margined}>
         {is3D ? (
           <BimSolidView
@@ -357,8 +472,10 @@ export function ViewportManager({
   startupNotice,
   safe,
   cameraKey,
+  pdfRequest,
   ...model
 }: BimPlanProps & {
+  pdfRequest?: PdfRequest | null | undefined;
   /** Names the view whose cameras are kept (KA1); one per split pane. */
   cameraKey?: string | undefined;
   startupNotice?: React.ReactNode;
@@ -392,6 +509,7 @@ export function ViewportManager({
           safe={layout === "single" ? safe : undefined}
           documentFraming={documentFraming}
           cameraKey={cameraKey && `${cameraKey}#${index}`}
+          pdfRequest={pdfRequest}
           {...model}
           index={index}
           mode={mode}

@@ -1412,7 +1412,8 @@ export function BimPlan({
     >
       <g>
         {grid && (
-          <g pointerEvents="none">
+          // Drawing aids never reach the PDF (docs/PDF_EXPORT.md).
+          <g pointerEvents="none" data-export="skip">
             <defs>
               <pattern id={gridId} width={gridStep} height={gridStep} patternUnits="userSpaceOnUse">
                 <path
@@ -1434,7 +1435,7 @@ export function BimPlan({
           </g>
         )}
         {underlay && (
-          <g aria-label="Papierunterlage" pointerEvents="none">
+          <g aria-label="Papierunterlage" pointerEvents="none" data-export="skip">
             {underlay.surface && (
               // Layouts: a grey work surface around the paper (docs/LAYOUTS.md, LZ1).
               <rect
@@ -1539,6 +1540,7 @@ export function BimPlan({
               </g>
               {/* The mask: a light frame on screen; only the layout's own drawings pick. */}
               <polygon
+                data-export="skip"
                 {...(view.selectable ? selectProps("drawing", view.id) : { pointerEvents: "none" })}
                 className="outline-none"
                 points={points}

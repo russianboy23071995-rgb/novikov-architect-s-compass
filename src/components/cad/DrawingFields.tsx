@@ -105,6 +105,7 @@ export function DrawingElementFields({
   mask,
   limit,
   onChange,
+  inline = false,
 }: {
   document: string;
   layers: readonly Layer[];
@@ -113,6 +114,8 @@ export function DrawingElementFields({
   limit: DrawingMask;
   /** Applies the change; throws with a message when it is refused. */
   onChange: (change: { mask?: DrawingMask; layerId?: string }) => void;
+  /** In the one-row tool properties bar (UI1): side by side instead of stacked. */
+  inline?: boolean;
 }) {
   const crop = maskCrop(mask, limit);
   const [drafts, setDrafts] = useState<Partial<Record<MaskEdge, string>>>({});
@@ -134,7 +137,7 @@ export function DrawingElementFields({
     apply({ mask: maskFromCrop(limit, { ...crop, [edge]: value / 1000 }) });
   };
   return (
-    <section className="flex flex-col gap-2 text-xs">
+    <section className={inline ? "flex items-end gap-3 text-xs" : "flex flex-col gap-2 text-xs"}>
       <p>
         Abbild <span className="font-medium">{document}</span>
       </p>
@@ -144,14 +147,18 @@ export function DrawingElementFields({
         value={layerId}
         onChange={(next) => apply({ layerId: next })}
       />
-      <div className="grid grid-cols-2 gap-2">
+      <div className={inline ? "flex items-end gap-2" : "grid grid-cols-2 gap-2"}>
         {MASK_EDGES.map((edge) => (
           <label key={edge}>
             {EDGE_LABELS[edge]}
             <input
               aria-label={EDGE_LABELS[edge]}
               inputMode="decimal"
-              className="block w-full rounded border bg-background p-1"
+              className={
+                inline
+                  ? "block w-20 rounded border bg-background p-1"
+                  : "block w-full rounded border bg-background p-1"
+              }
               value={drafts[edge] ?? mm(crop[edge])}
               onChange={(e) => setDrafts({ ...drafts, [edge]: e.target.value })}
               onBlur={() => commit(edge)}

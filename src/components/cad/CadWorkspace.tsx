@@ -218,6 +218,7 @@ import {
 import { changeLayouts, layoutUnderlay } from "@/application/views/layouts";
 import { spaceBackdrop, spaceLens } from "@/application/views/title-block-space";
 import { LayoutBar } from "./LayoutBar";
+import type { PdfRequest } from "./CadViewport";
 import type { PlacedDrawingView } from "./BimPlan";
 import { placeDrawing, setDrawing } from "@/application/drawings/actions";
 import { DrawingElementFields, DrawingToolFields } from "./DrawingFields";
@@ -304,6 +305,8 @@ export function CadWorkspace({
   const [activeLayoutId, setActiveLayoutId] = useState<string | null>(null);
   const [layoutWindow, setLayoutWindow] = useState<LayoutDraftTarget | null>(null);
   const [projectInfoOpen, setProjectInfoOpen] = useState(false);
+  // PDF export of a layout, master layout or Plankopf (docs/PDF_EXPORT.md, PDF1).
+  const [pdfRequest, setPdfRequest] = useState<(PdfRequest & { target: string }) | null>(null);
   const [lastTitleBlockId, setLastTitleBlockId] = useState<string | null>(null);
   // A section or elevation document open in its section tab (docs/ABBILDER.md, AB2).
   const [sectionDocumentId, setSectionDocumentId] = useState<string | null>(null);
@@ -383,7 +386,7 @@ export function CadWorkspace({
             : // One plan camera for every storey: zoom and position stay.
               "plan"));
   /** Fields of one placed drawing (ZW3): bar and settings window share them. */
-  const drawingElementFields = (id: string) => {
+  const drawingElementFields = (id: string, inline = false) => {
     const placed = storeyOf(project).drawings?.find((d) => d.id === id);
     const source = placed && drawingSource(placed.documentId);
     if (!placed || !source) return null;
@@ -396,11 +399,38 @@ export function CadWorkspace({
         layerId={placed.layerId}
         mask={placed.mask}
         limit={limit}
+        inline={inline}
         onChange={(change) =>
           dispatchEditing({ type: "project", project: setDrawing(project, id, change, limit) })
         }
       />
     );
+  };
+  /** Opens the sheet (if needed) and exports it as PDF; the open view draws it at 100 %. */
+  const exportPdf = (kind: "layout" | "block", id: string) => {
+    const name =
+      kind === "block"
+        ? realProject.titleBlocks?.find((t) => t.id === id)?.name
+        : (
+            projectLayouts(realProject).find((l) => l.id === id) ??
+            projectMasterLayouts(realProject).find((m) => m.id === id)
+          )?.name;
+    if (!name) return;
+    const target = `${kind === "block" ? "title-block" : "layout"}:${id}`;
+    if (!space || `${space.kind}:${space.id}` !== target)
+      selectCanvasTab(kind === "block" ? titleBlockTab(id) : layoutTab(id));
+    setPdfRequest({
+      id: Date.now(),
+      target,
+      filename: `${name.replace(/[\\/:*?"<>|]+/g, "-").trim() || "Blatt"}.pdf`,
+      onDone: (result) => {
+        setPdfRequest(null);
+        if (result.ok) {
+          setModelError("");
+          showNotice(result.message);
+        } else setModelError(result.message);
+      },
+    });
   };
   /** A plan document with a frame, ready to place (sections and elevations follow, ZW4). */
   const drawingSource = (documentId: string | null | undefined) => {
@@ -3222,6 +3252,7 @@ export function CadWorkspace({
               {activeBlock && (
                 <TitleBlockBar
                   block={activeBlock}
+                  onPdf={() => exportPdf("block", activeBlock.id)}
                   onSheet={(sheet) => {
                     const action = { kind: "sheet" as const, id: activeBlock.id, sheet };
                     try {
@@ -3248,6 +3279,7 @@ export function CadWorkspace({
               )}
               {layoutSpace && (
                 <LayoutBar
+                  onPdf={() => exportPdf("layout", layoutSpace.id)}
                   name={(layoutSpace.layout ?? layoutSpace.master)!.name}
                   kind={layoutSpace.layout ? "Layout" : "Masterlayout"}
                   sheet={layoutSpace.sheet}
@@ -3372,6 +3404,11 @@ export function CadWorkspace({
                       }
                       key={viewKey}
                       cameraKey={viewKey}
+                      pdfRequest={
+                        pdfRequest && space && pdfRequest.target === `${space.kind}:${space.id}`
+                          ? pdfRequest
+                          : null
+                      }
                       backdrop={space ? spaceBackdrop(realProject, space) : undefined}
                       underlay={
                         activeBlock
@@ -3872,11 +3909,18 @@ export function CadWorkspace({
             ref={propertiesRef}
             tabIndex={-1}
             aria-label="Werkzeugeigenschaften"
-            className="glass-panel-strong absolute left-2 top-2 z-20 overflow-auto rounded-lg px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            style={{ height: PROPERTIES_HEIGHT, right: insets.right || PALETTE_GAP }}
+            // One row across the whole width; what does not fit scrolls sideways, also with the
+            // mouse wheel (UI1). Fields that wrap or stack elsewhere stay in the row here.
+            className="glass-panel-strong absolute left-2 right-2 top-2 z-20 flex items-center gap-4 overflow-x-auto overflow-y-hidden whitespace-nowrap rounded-lg px-3 py-1 outline-none focus-visible:ring-2 focus-visible:ring-primary [&_.flex-wrap]:flex-nowrap [&_.grid]:auto-cols-max [&_.grid]:grid-flow-col [&>*]:shrink-0"
+            style={{ height: PROPERTIES_HEIGHT }}
+            onWheel={(event) => {
+              const bar = event.currentTarget;
+              if (event.deltaX || !event.deltaY || bar.scrollWidth <= bar.clientWidth) return;
+              bar.scrollLeft += event.deltaY;
+            }}
           >
             <>
-              <div className="mb-1 flex items-center gap-3">
+              <div className="flex shrink-0 items-center gap-3">
                 <h2 className="text-xs font-semibold">Werkzeugeigenschaften</h2>
                 {tool === "select" && selection?.kind === "wall" && (
                   <Button
@@ -4002,7 +4046,7 @@ export function CadWorkspace({
               ) : (tool === "slab" || tool === "hatch" || tool === "line") && mode === "2D" ? (
                 toolFields(tool)
               ) : selection?.kind === "drawing" && selections.length === 1 ? (
-                drawingElementFields(selection.id)
+                drawingElementFields(selection.id, true)
               ) : selections.length > 1 ? (
                 <p className="p-3 text-xs text-muted-foreground" role="status">
                   {selections.length} Elemente ausgewählt.{" "}
@@ -4051,8 +4095,8 @@ export function CadWorkspace({
           )}
           {navigatorShown && (
             <div
-              className="absolute bottom-2 right-2 top-2 z-20 flex flex-col gap-2"
-              style={{ width: navigatorWidth }}
+              className="absolute bottom-2 right-2 z-20 flex flex-col gap-2"
+              style={{ width: navigatorWidth, top: insets.top }}
             >
               <div
                 role="separator"
@@ -4131,6 +4175,7 @@ export function CadWorkspace({
                     dispatchEditing({ type: "title-block", base, action })
                   }
                   onOpenTitleBlock={(id) => selectCanvasTab(titleBlockTab(id))}
+                  onExportPdf={exportPdf}
                   activeTitleBlockId={space?.id ?? null}
                   activeLayoutId={activeLayout}
                   project={realProject}

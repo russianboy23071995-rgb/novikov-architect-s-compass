@@ -6,15 +6,15 @@ import { clampNavigatorWidth, NAVIGATOR_WIDTH, paletteInsets } from "./palette-l
 test("palettes cover the top, the rail on the left and the navigator on the right", () => {
   assert.deepEqual(
     paletteInsets({ rail: true, railCollapsed: false, navigator: true, navigatorWidth: 320 }),
-    { left: 92, top: 146, right: 336, bottom: 0 },
+    { left: 92, top: 81, right: 336, bottom: 0 },
   );
   assert.deepEqual(
     paletteInsets({ rail: true, railCollapsed: true, navigator: false, navigatorWidth: 320 }),
-    { left: 64, top: 146, right: 0, bottom: 0 },
+    { left: 64, top: 81, right: 0, bottom: 0 },
   );
   assert.deepEqual(
     paletteInsets({ rail: false, railCollapsed: false, navigator: false, navigatorWidth: 320 }),
-    { left: 0, top: 146, right: 0, bottom: 0 },
+    { left: 0, top: 81, right: 0, bottom: 0 },
   );
 });
 
