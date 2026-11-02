@@ -214,6 +214,9 @@ import { changeLayouts } from "@/application/views/layouts";
 import { titleBlockLens } from "@/application/views/title-block-space";
 import { changeTitleBlocks, titleBlockUnderlay } from "@/application/views/title-blocks";
 import { TitleBlockBar } from "./TitleBlockBar";
+import { SectionDocumentWindow } from "./SectionDocumentWindow";
+import { drawingInfo } from "@/application/views/drawing-info";
+import { changeDrawingDocument } from "@/application/views/documents";
 
 /** Tools of the Plankopfplaner: drawing only, nothing of the building (PK2). */
 const TITLE_BLOCK_TOOLS: ReadonlySet<ToolId> = new Set<ToolId>([
@@ -279,6 +282,9 @@ export function CadWorkspace({
   const [activeLayoutId, setActiveLayoutId] = useState<string | null>(null);
   const [layoutWindow, setLayoutWindow] = useState<LayoutDraftTarget | null>(null);
   const [lastTitleBlockId, setLastTitleBlockId] = useState<string | null>(null);
+  // A section or elevation document open in its section tab (docs/ABBILDER.md, AB2).
+  const [sectionDocumentId, setSectionDocumentId] = useState<string | null>(null);
+  const [sectionDocumentWindow, setSectionDocumentWindow] = useState<string | null>(null);
   // Section tool: start, then end; click 3 chooses the viewing side. Session state only.
   const [sectionStart, setSectionStart] = useState<Point | null>(null);
   const [sectionEnd, setSectionEnd] = useState<Point | null>(null);
@@ -2098,6 +2104,12 @@ export function CadWorkspace({
 
   // Canvas tabs (docs/SCHNITT.md): a view without a tab opens one; tabs of removed sections go.
   const sections = realProject.sections;
+  // The open section document, only while it still shows the active section.
+  const shownSectionDocument = (() => {
+    const doc = realProject.drawingDocuments?.find((d) => d.id === sectionDocumentId);
+    const view = realProject.modelViews?.find((v) => v.id === doc?.modelViewId);
+    return doc && view?.kind === "section" && view.sectionId === activeSectionId ? doc : null;
+  })();
   const sectionIds = new Set((sections ?? []).map((s) => s.id));
   const activeSection = activeSectionId && sectionIds.has(activeSectionId) ? activeSectionId : null;
   if (activeSectionId && !activeSection) setActiveSectionId(null);
@@ -2130,6 +2142,7 @@ export function CadWorkspace({
       layoutId = tabLayoutId(view),
       blockId = tabTitleBlockId(view);
     setCanvasTabs((tabs) => withCanvasTab(tabs, view));
+    setSectionDocumentId(null);
     if (blockId !== null) {
       // The Plankopfplaner: the plan with the title block's sheet (docs/PLANKOPF.md, PK2).
       cancelInteraction();
@@ -2160,7 +2173,9 @@ export function CadWorkspace({
   const openSectionDocument = (documentId: string) => {
     const doc = realProject.drawingDocuments?.find((d) => d.id === documentId);
     const view = realProject.modelViews?.find((v) => v.id === doc?.modelViewId);
-    if (view?.kind === "section") selectCanvasTab(sectionTab(view.sectionId));
+    if (view?.kind !== "section") return;
+    selectCanvasTab(sectionTab(view.sectionId));
+    setSectionDocumentId(documentId);
   };
   const openSectionWindow = (id: string) => {
     cancelInteraction();
@@ -3018,6 +3033,19 @@ export function CadWorkspace({
                   }}
                 />
               )}
+              {sectionDocumentWindow && (
+                <SectionDocumentWindow
+                  project={realProject}
+                  sectionId={sectionDocumentWindow}
+                  denominator={planDenominator(realProject)}
+                  onApply={(action) => {
+                    changeDrawingDocument(realProject, realProject, action);
+                    dispatchEditing({ type: "document", base: realProject, action });
+                    if (action.kind === "create-section") setSectionDocumentId(action.id);
+                  }}
+                  onClose={() => setSectionDocumentWindow(null)}
+                />
+              )}
               {activeLayout && (
                 <div role="tabpanel" aria-label="Layout" className="absolute inset-0 z-30">
                   <LayoutSheetView
@@ -3070,7 +3098,16 @@ export function CadWorkspace({
                         project={project}
                         section={section}
                         cutFill={cutFill}
-                        denominator={planDenominator(project)}
+                        denominator={shownSectionDocument?.denominator ?? planDenominator(project)}
+                        document={
+                          shownSectionDocument
+                            ? {
+                                name: shownSectionDocument.name,
+                                scale: drawingInfo(realProject, shownSectionDocument.id).scale,
+                              }
+                            : null
+                        }
+                        onSaveDocument={() => setSectionDocumentWindow(section.id)}
                         onSettings={() => openSectionWindow(section.id)}
                         heightTool={
                           tool === "dimension" && toolDefaults.dimension.orientation === "height"
@@ -3810,6 +3847,8 @@ export function CadWorkspace({
                   }
                   getPlanCapture={getPlanCapture}
                   activeDocumentId={activeDocumentId}
+                  activeSectionId={activeSection}
+                  onCreateSectionDocument={(id) => setSectionDocumentWindow(id)}
                   onOpenDocument={(id) => {
                     if (space && id) dispatchEditing({ type: "space", space: null });
                     cancelInteraction();

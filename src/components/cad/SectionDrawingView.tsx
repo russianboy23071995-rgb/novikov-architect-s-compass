@@ -48,7 +48,13 @@ export function SectionDrawingView({
   onAddHeightMarks,
   onUpdateHeightMarks,
   onRemoveHeightMarks,
+  document,
+  onSaveDocument,
 }: {
+  /** The drawing document shown, with its drawing name and scale (docs/ABBILDER.md, AB2). */
+  document?: { name: string; scale: string } | null | undefined;
+  /** „Als Abbild sichern …“: a drawing document of this section. */
+  onSaveDocument?: (() => void) | undefined;
   project: Project;
   section: Section;
   cutFill: CutFill;
@@ -149,8 +155,19 @@ export function SectionDrawingView({
   return (
     <div className="absolute inset-0 flex flex-col bg-workspace">
       <div className="flex items-center gap-2 px-3 pb-1 pt-12 text-xs text-muted-foreground">
-        <span className="font-medium text-foreground">{section.name}</span>
-        <span>Kennung {section.mark}</span>
+        {document ? (
+          <>
+            <span className="font-medium text-foreground">Abbild {document.name}</span>
+            <span>
+              {document.scale} · {section.name}
+            </span>
+          </>
+        ) : (
+          <>
+            <span className="font-medium text-foreground">{section.name}</span>
+            <span>Kennung {section.mark}</span>
+          </>
+        )}
         <span>· aus dem Modell erzeugt, folgt jeder Änderung</span>
         <Button size="sm" variant="ghost" className="h-6 px-2" onClick={() => setBox(null)}>
           Einpassen
@@ -158,6 +175,11 @@ export function SectionDrawingView({
         <Button size="sm" variant="ghost" className="h-6 px-2" onClick={onSettings}>
           Schnitt-Fenster
         </Button>
+        {onSaveDocument && (
+          <Button size="sm" variant="ghost" className="h-6 px-2" onClick={onSaveDocument}>
+            Als Abbild sichern …
+          </Button>
+        )}
         {selectedMarks && !drawingMarks && (
           <span role="group" aria-label="Gewählte Höhenkoten" className="flex items-center gap-2">
             <span className="text-foreground">Höhenkoten ({selectedMarks.points.length})</span>
