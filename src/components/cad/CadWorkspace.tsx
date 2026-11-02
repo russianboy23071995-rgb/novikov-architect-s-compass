@@ -3216,6 +3216,11 @@ export function CadWorkspace({
                                 : // One plan camera for every storey: zoom and position stay.
                                   "plan"))
                       }
+                      backdrop={
+                        layoutSpace?.layout && layoutSpace.master
+                          ? spaceLens(realProject, { kind: "layout", id: layoutSpace.master.id })
+                          : undefined
+                      }
                       underlay={
                         activeBlock
                           ? titleBlockUnderlay(activeBlock.sheet)

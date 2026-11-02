@@ -112,9 +112,14 @@ import type { Selection } from "./bim-view";
 import { linePath } from "@/lib/bim/lines";
 
 type PlanRect = { x0: number; y0: number; x1: number; y1: number };
+const NOTHING_SELECTED: ReadonlySet<string> = new Set();
+const ALLOW_ALL = () => true;
+const PICK_NOTHING = () => false;
 export type BimPlanProps = {
   /** Paper under the Plankopfplaner at 1:1 with its margin frame (docs/PLANKOPF.md, PK3). */
   underlay?: { paper: PlanRect; frame: PlanRect; surface?: boolean } | undefined;
+  /** Drawn under the plan, never pickable: a master layout's drawing in a layout (LZ2). */
+  backdrop?: Project | undefined;
   pickupScope?: object;
   /** Right-click menu (docs/KONTEXTMENUE.md): on an element or on empty canvas (null). When
    * set it replaces the former double right-click pickup, which moves into the menu. */
@@ -261,6 +266,7 @@ export type BimPlanProps = {
 
 export function BimPlan({
   underlay,
+  backdrop,
   pickupScope,
   onPickup,
   onContextMenu,
@@ -725,6 +731,15 @@ export function BimPlan({
         ? derivePlanScene(geometryPreview.geometry, allowsShown, project.hatchPatterns, library)
         : null,
     [geometryPreview, allowsShown, project.hatchPatterns, library],
+  );
+  const backdropScene = useMemo(
+    () =>
+      backdrop ? derivePlanScene(backdrop, () => true, backdrop.hatchPatterns, library) : null,
+    [backdrop, library],
+  );
+  const backdropRuns = useMemo(
+    () => (backdropScene ? planSceneRuns(backdropScene, []) : []),
+    [backdropScene],
   );
   const sceneRuns = useMemo(
     () => planSceneRuns(scene, placement?.geometryPreview?.replacedIds ?? []),
@@ -1337,6 +1352,29 @@ export function BimPlan({
               strokeDasharray={`${6 / camera.pixelsPerMetre} ${4 / camera.pixelsPerMetre}`}
               strokeWidth={1 / camera.pixelsPerMetre}
             />
+          </g>
+        )}
+        {backdropScene && (
+          <g aria-label="Masterlayout-Zeichnung" pointerEvents="none">
+            {backdropRuns.map((run) => (
+              <PlanSceneRun
+                scaleContext={scaleContext}
+                key={`backdrop:${run.kind}:${run.ids[0]}`}
+                {...run}
+                scene={backdropScene}
+                selectedIds={NOTHING_SELECTED}
+                drawing={false}
+                placement={false}
+                pixelsPerMetre={camera.pixelsPerMetre}
+                wallOutlineWidth={wallOutlineWidth}
+                cutFill={cutFill}
+                showRenovation={showRenovation}
+                cornerGeometry={undefined}
+                allowsShown={ALLOW_ALL}
+                canPick={PICK_NOTHING}
+                handlers={sceneHandlers}
+              />
+            ))}
           </g>
         )}
         {tracing && (
