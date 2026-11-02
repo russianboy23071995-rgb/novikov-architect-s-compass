@@ -113,3 +113,13 @@ Rückmeldung: Beim Verschieben von Text im Layout musste Snap aus, weil der Fang
 - Code: `CadViewport.tsx` (Papier-Zoom, Anzeige), `CadWorkspace.tsx` (getrennte Raster-Einstellungen).
 
 Nachweis: 1507 Tests grün, Typprüfung, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert. Browser: Masterlayout A3 quer öffnet eingepasst mit 65 %, „Papier 1:1“, Raster 0,001 m; bei 100 % misst das Papier 1587 × 1123 Bildschirmpunkte = 420 × 297 mm bei 96 dpi; Linienanfang rastet auf Millimeter ein (0,142 / −0,176 m).
+
+## Gummiband und Fang am Blatt (02.11.2026)
+
+Rückmeldung: Beim Zeichnen im Plankopf entstand nach dem ersten Klick eine sehr breite, gestrichelte Linie; außerdem sollen Ecken von Papier und Randrahmen im Plankopf und im Layoutbuch gefangen werden, um einen eigenen Rahmen zu ziehen. Entscheidungen (Empfehlungen übernommen): dünn und durchgezogen; Ecken, Kantenmitten und Kanten.
+
+- **Gummiband:** Die Linie vom letzten Punkt zur Maus und die schon gesetzten Vorschausegmente hatten eine feste Breite von 25 mm und Striche von 100/50 mm in Modellgröße – im Grundriss (1:100) unauffällig, auf Papier (1:1) ein breiter Balken. Jetzt sind sie überall eine dünne, durchgezogene Linie mit 1,5 Bildschirmpunkten (Linie, Polylinie, Schraffur, Decke, Dach, Raum).
+- **Fang am Blatt:** Im Plankopfplaner und in Layouts/Masterlayouts fängt der Fang die vier Ecken des Papiers und des Randrahmens („Papier · Ecke n“, „Randrahmen · Ecke n“), die Kantenmitten und – über die Kantenrichtungen der Ecken – Punkte entlang der Kanten. Im Grundriss gibt es diese Punkte nicht.
+- Code: `BimPlan.tsx` (Gummiband), `src/application/snapping/sheet-frames.ts` (Blatt je Zeichenraum), `projectSnapParts` in `project-references.ts`, Beschriftung in `point-label.ts`, Zulassung in `src/application/tools/snapping.ts`, Anmeldung in `spaceLens`.
+
+Nachweis: 1508 Tests grün (neu: Ecken von Papier und Randrahmen als Fangpunkte mit Beschriftung, keine im Grundriss), Typprüfung, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert. Browser (Plankopfplaner, A3): nach dem ersten Klick nur noch eine dünne Linie zur Maus; Fang „Randrahmen · Ecke 2“ und „Papier · Ecke 2“, Kantenmitte als „Mittelpunkt“. Dabei gefunden und behoben: Der Fang ließ nur Punkte sichtbarer Modellelemente zu und verwarf deshalb die Blattpunkte.

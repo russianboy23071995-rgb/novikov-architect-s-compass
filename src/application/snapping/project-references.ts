@@ -10,6 +10,7 @@ import { segmentIntersectionReferences } from "../../constraints/snapping/segmen
 import type { SnapSegment } from "../../constraints/snapping/segment-references.ts";
 import { createDerivedCache } from "../../domain/project/derived-cache.ts";
 import { columnOutline } from "../../domain/elements/column/model.ts";
+import { MARGIN_FRAME_SNAP_ID, PAPER_SNAP_ID, rectCorners, sheetFrames } from "./sheet-frames.ts";
 
 // Project snapshots are immutable. Weak keys release discarded projects; the undo history
 // drops the entries of the steps it keeps (domain/project/derived-cache.ts).
@@ -104,6 +105,9 @@ export function projectSnapParts(project: Project): readonly (readonly SnapPart[
     // Column centre; corners and edge midpoints of a rectangle, four rim points of a circle
     // (docs/STUETZEN.md, P3).
     (storey.columns ?? []).map((column) => remembered(owned, column, columnPart)),
+    // Paper and margin frame of a Plankopf or layout: corners, edge midpoints and, through
+    // the corner directions, the edges themselves (docs/LAYOUTS.md).
+    sheetParts(project),
   ];
 }
 
@@ -260,4 +264,19 @@ function linePart(line: NonNullable<Project["storeys"][number]["lines"]>[number]
         midpoint(line.id, `segment-${index}-midpoint`, line.points[index]!, point),
       ),
   ]);
+}
+
+const sheetPartCache = new WeakMap<Project, Part[]>();
+function sheetParts(project: Project): Part[] {
+  const sheet = sheetFrames(project);
+  if (!sheet) return [];
+  let parts = sheetPartCache.get(project);
+  if (!parts) {
+    parts = [
+      hatchPart({ id: PAPER_SNAP_ID, points: rectCorners(sheet.paper) }),
+      hatchPart({ id: MARGIN_FRAME_SNAP_ID, points: rectCorners(sheet.frame) }),
+    ];
+    sheetPartCache.set(project, parts);
+  }
+  return parts;
 }

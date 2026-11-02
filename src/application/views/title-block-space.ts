@@ -3,8 +3,10 @@ import { createProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { commitProject, createHistory } from "../history/project-history.ts";
 import { editingReducer, type EditingEvent, type EditingState } from "../direct-edit/controller.ts";
-import { emptyTitleBlockStorey, titleBlockOf } from "./title-blocks.ts";
-import { projectLayouts, projectMasterLayouts } from "../../domain/views/layouts.ts";
+import { emptyTitleBlockStorey, titleBlockOf, titleBlockUnderlay } from "./title-blocks.ts";
+import { layoutUnderlay } from "./layouts.ts";
+import { setSheetFrames, type SheetFrames } from "../snapping/sheet-frames.ts";
+import { layoutSheet, projectLayouts, projectMasterLayouts } from "../../domain/views/layouts.ts";
 
 /**
  * Drawing spaces (docs/PLANKOPF.md, PK2; docs/LAYOUTS.md, LZ1): a title block or a layout
@@ -56,6 +58,7 @@ export function spaceLens(real: Project, space: DrawingSpace): Project {
   });
   if (!byKey) lenses.set(real, (byKey = new Map()));
   byKey.set(key(space), lens);
+  setSheetFrames(lens, spaceFrames(real, space));
   return lens;
 }
 export const titleBlockLens = (real: Project, id: string) =>
@@ -153,4 +156,14 @@ export function spaceEditingReducer(
 function withoutSpace(state: SpaceEditingState): SpaceEditingState {
   const { space: _space, ...rest } = state;
   return rest;
+}
+
+/** Paper and margin frame of a space, for snapping (the same rectangles as its underlay). */
+function spaceFrames(real: Project, space: DrawingSpace): SheetFrames {
+  if (space.kind === "title-block") return titleBlockUnderlay(titleBlockOf(real, space.id).sheet);
+  const layout = projectLayouts(real).find((l) => l.id === space.id);
+  const sheet = layout
+    ? layoutSheet(real, layout)
+    : projectMasterLayouts(real).find((m) => m.id === space.id)!.sheet;
+  return layoutUnderlay(sheet);
 }

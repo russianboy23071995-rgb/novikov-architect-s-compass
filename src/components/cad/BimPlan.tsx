@@ -1952,11 +1952,13 @@ export function BimPlan({
           </g>
         )}
         {drawing && draftPoints.length > 0 && (
+          // Thin in screen pixels at every scale: at 1:1 on paper a model width was a 25 mm band.
           <polyline
             points={draftPoints.map((p) => `${p.x},${-p.y}`).join(" ")}
             fill="none"
             stroke="var(--primary)"
-            strokeWidth={0.025}
+            strokeWidth={1.5}
+            vectorEffect="non-scaling-stroke"
             pointerEvents="none"
           />
         )}
@@ -2072,8 +2074,8 @@ export function BimPlan({
                 x2={resolvedHover.point.x}
                 y2={-resolvedHover.point.y}
                 stroke="var(--primary)"
-                strokeWidth={0.025}
-                strokeDasharray="0.1 0.05"
+                strokeWidth={1.5}
+                vectorEffect="non-scaling-stroke"
               />
             )}
           </g>
