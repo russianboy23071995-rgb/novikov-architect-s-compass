@@ -222,6 +222,22 @@ export function sectionDrawing(project: Project, section: Section): SectionDrawi
 }
 
 /**
+ * Extent of a section drawing with its storey marks beside the border (BS1): `margin` on both
+ * sides, 1 m above and below. The section tab fits it; on a layout it is the Abbild's frame
+ * (docs/ZEICHNUNG.md, ZW4). Drawing coordinates, y = height.
+ */
+export function sectionExtent(drawing: SectionDrawing, margin: number) {
+  const b = drawing.bounds ?? { minX: 0, maxX: drawing.width, minY: 0, maxY: 3 };
+  const levels = drawing.levels.map((l) => l.elevation);
+  return {
+    minX: Math.min(b.minX, 0) - margin,
+    maxX: Math.max(b.maxX, drawing.width) + margin,
+    minY: Math.min(b.minY, ...levels) - 1,
+    maxY: Math.max(b.maxY, ...levels) + 1,
+  };
+}
+
+/**
  * Cut walls with a build-up get their layers as strips (docs/WANDAUFBAU.md, SA3). Across the
  * drawing x the distance from the wall's body centre plane grows linearly; each layer face is
  * where it reaches the face's offset. A line parallel to the wall stays in one layer.

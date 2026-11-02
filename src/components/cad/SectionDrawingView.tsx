@@ -9,22 +9,12 @@ import {
 } from "@/rendering/viewport/section-snap";
 import { sectionDrawing, type SectionPoint } from "@/rendering/viewport/section-drawing";
 import { Button } from "@/components/ui/button";
-import { cutPaint, type CutFill } from "./cut-fill";
+import type { CutFill } from "./cut-fill";
 import { HeightMark } from "./HeightMark";
-import { SectionLayerGraphic } from "./SectionLayerGraphic";
+import { SectionGraphic } from "./SectionGraphic";
+import { MARK_PAPER, sectionGraphicExtent } from "./section-graphic";
 
 type Box = { x: number; y: number; w: number; h: number };
-
-const svgPoints = (points: readonly SectionPoint[]) =>
-  points.map((p) => `${p.x},${-p.y}`).join(" ");
-const loopPath = (loops: readonly SectionPoint[][]) =>
-  loops.map((loop) => `M${svgPoints(loop).replaceAll(" ", " L")} Z`).join(" ");
-/** Line weights of cut outlines: building parts heavy, frames medium, glass thin. */
-const stroke = { part: 1.75, frame: 1.1, glass: 0.6 } as const;
-/** Storey marks outside the border (BS1): triangle 2,5 mm on paper like the section symbol. */
-const MARK_PAPER = 0.0025;
-/** Hatch spacing of cut layers: 1,5 mm on paper. */
-const HATCH_PAPER = 0.0015;
 
 /**
  * Section drawing in its canvas tab (docs/SCHNITT.md, SC3): derived from the model on every
@@ -70,14 +60,8 @@ export function SectionDrawingView({
 }) {
   const drawing = useMemo(() => sectionDrawing(project, section), [project, section]);
   const fit = useMemo((): Box => {
-    const b = drawing.bounds ?? { minX: 0, maxX: drawing.width, minY: 0, maxY: 3 };
-    const margin = MARK_PAPER * denominator * 8;
-    const minX = Math.min(b.minX, 0) - margin,
-      maxX = Math.max(b.maxX, drawing.width) + margin;
-    const levels = drawing.levels.map((l) => l.elevation);
-    const minY = Math.min(b.minY, ...levels) - 1,
-      maxY = Math.max(b.maxY, ...levels) + 1;
-    return { x: minX, y: -maxY, w: maxX - minX, h: maxY - minY };
+    const e = sectionGraphicExtent(drawing, denominator);
+    return { x: e.minX, y: -e.maxY, w: e.maxX - e.minX, h: e.maxY - e.minY };
   }, [drawing, denominator]);
   const [box, setBox] = useState<Box | null>(null);
   const view = box ?? fit;
@@ -89,7 +73,6 @@ export function SectionDrawingView({
     const p = new DOMPoint(clientX, clientY).matrixTransform(m.inverse());
     return { x: p.x, y: p.y };
   };
-  const paint = cutPaint(cutFill);
   const corners = useMemo(() => sectionCorners(drawing), [drawing]);
   const levels = useMemo(() => drawing.levels.map((l) => l.elevation), [drawing]);
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -282,127 +265,7 @@ export function SectionDrawingView({
           }}
           onPointerLeave={() => setHover(null)}
         >
-          <g aria-label="Ansicht">
-            {drawing.views.map((v, i) => (
-              <g key={i}>
-                <polygon points={svgPoints(v.points)} fill="var(--background)" />
-                {v.edges.map(([a, b], j) => (
-                  <line
-                    key={j}
-                    x1={a.x}
-                    y1={-a.y}
-                    x2={b.x}
-                    y2={-b.y}
-                    stroke="var(--foreground)"
-                    strokeWidth={0.75}
-                    vectorEffect="non-scaling-stroke"
-                  />
-                ))}
-                {v.marks?.segments.map(([a, b], j) => (
-                  <line
-                    key={`m${j}`}
-                    x1={a.x}
-                    y1={-a.y}
-                    x2={b.x}
-                    y2={-b.y}
-                    stroke="var(--foreground)"
-                    strokeWidth={0.6}
-                    strokeDasharray={v.marks!.dashed ? "6 4" : undefined}
-                    vectorEffect="non-scaling-stroke"
-                  />
-                ))}
-              </g>
-            ))}
-          </g>
-          <g aria-label="Geschosse">
-            {drawing.levels.map((level) => (
-              <g key={level.storeyId}>
-                <line
-                  x1={0}
-                  y1={-level.elevation}
-                  x2={drawing.width}
-                  y2={-level.elevation}
-                  stroke="var(--muted-foreground)"
-                  strokeWidth={0.75}
-                  strokeDasharray="8 4"
-                  vectorEffect="non-scaling-stroke"
-                />
-                <HeightMark
-                  x={-markGap}
-                  z={level.elevation}
-                  side="left"
-                  kind="shell"
-                  size={mark}
-                  name={level.name}
-                  reach={0}
-                />
-                <HeightMark
-                  x={drawing.width + markGap}
-                  z={level.elevation}
-                  side="right"
-                  kind="shell"
-                  size={mark}
-                  name={level.name}
-                  reach={drawing.width}
-                />
-              </g>
-            ))}
-          </g>
-          <g aria-label="Geschnittene Bauteile">
-            {drawing.cuts.map((cut) => (
-              <g key={cut.id}>
-                {cut.layers && cut.loops.length > 0 && (
-                  <SectionLayerGraphic
-                    clip={loopPath(cut.loops)}
-                    layers={cut.layers}
-                    bottom={Math.min(...cut.loops.flat().map((p) => p.y))}
-                    top={Math.max(...cut.loops.flat().map((p) => p.y))}
-                    hatch={HATCH_PAPER * denominator}
-                  />
-                )}
-                {cut.loops.length > 0 && (
-                  <path
-                    d={loopPath(cut.loops)}
-                    fillRule="evenodd"
-                    // Building parts in the cut fill; window and door frames and glass are
-                    // outlines over the background (docs/FENSTER_TUEREN.md, FT2).
-                    // Walls with a build-up show their layers below (docs/WANDAUFBAU.md, SA3).
-                    fill={
-                      cut.layers ? "none" : cut.kind === "part" ? paint.fill : "var(--background)"
-                    }
-                    fillOpacity={cut.kind === "part" ? paint.fillOpacity : 1}
-                    stroke="var(--foreground)"
-                    strokeWidth={stroke[cut.kind]}
-                    vectorEffect="non-scaling-stroke"
-                  />
-                )}
-                {cut.open.map((piece, i) => (
-                  <polyline
-                    key={i}
-                    points={svgPoints(piece)}
-                    fill="none"
-                    stroke="var(--foreground)"
-                    strokeWidth={stroke[cut.kind]}
-                    vectorEffect="non-scaling-stroke"
-                  />
-                ))}
-              </g>
-            ))}
-          </g>
-          <g aria-label="Rand">
-            {[0, drawing.width].map((x) => (
-              <line
-                key={x}
-                x1={x}
-                y1={fit.y + 0.5}
-                x2={x}
-                y2={fit.y + fit.h - 0.5}
-                stroke="var(--foreground)"
-                strokeWidth={0.75}
-                vectorEffect="non-scaling-stroke"
-              />
-            ))}
-          </g>
+          <SectionGraphic drawing={drawing} cutFill={cutFill} denominator={denominator} />
           <g aria-label="Höhenkoten">
             {marks.map((set) => {
               const x = moveX?.id === set.id ? moveX.x : set.x;

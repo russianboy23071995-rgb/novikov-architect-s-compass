@@ -68,7 +68,7 @@ export function DrawingToolFields({
           {documents.map((d) => (
             <option key={d.id} value={d.id} disabled={!d.placeable}>
               {d.label}
-              {d.placeable ? "" : " (folgt)"}
+              {d.placeable ? "" : " (ohne Ausschnitt)"}
             </option>
           ))}
         </select>

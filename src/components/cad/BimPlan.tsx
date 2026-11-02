@@ -1,5 +1,8 @@
 import type { DimensionStyle } from "./DimensionStyleFields";
 import { TextGraphic } from "./TextGraphic";
+import { SectionGraphic } from "./SectionGraphic";
+import type { SectionDrawing } from "@/rendering/viewport/section-drawing";
+import type { SectionHeightMarks } from "@/domain/views/sections";
 import type { PlanText } from "@/domain/elements/text/model";
 import { DimensionGraphic } from "./DimensionGraphic";
 import { StairPlanGraphic } from "./StairPlanGraphic";
@@ -122,10 +125,11 @@ import { linePath } from "@/lib/bim/lines";
 
 type PlanRect = { x0: number; y0: number; x1: number; y1: number };
 /**
- * A placed drawing as the plan draws it: the document's plan (`source`, its storey as the
- * working storey) scaled by 1/denominator, its frame centre on `position`, cropped to the
- * `mask` (relative to `position`). Only the layout's own drawings are `selectable`; their mask
- * edges drag within `limit`, the document's whole frame (ZW3).
+ * A placed drawing as the plan draws it: the document's content scaled by 1/denominator, its
+ * frame centre on `position`, cropped to the `mask` (relative to `position`). Only the
+ * layout's own drawings are `selectable`; their mask edges drag within `limit`, the
+ * document's whole frame (ZW3). Content: a plan (`source`, its storey as the working storey)
+ * or a section or elevation in drawing coordinates, x along the line, y = height (ZW4).
  */
 export type PlacedDrawingView = {
   id: string;
@@ -136,12 +140,17 @@ export type PlacedDrawingView = {
   position: Point;
   center: Point;
   denominator: number;
-  source: Project;
-  hiddenLayerIds: readonly string[];
+  content: PlacedPlan | PlacedSection;
+};
+type PlacedPlan = { kind: "plan"; source: Project; hiddenLayerIds: readonly string[] };
+type PlacedSection = {
+  kind: "section";
+  drawing: SectionDrawing;
+  marks: readonly SectionHeightMarks[];
 };
 const placedScenes = new WeakMap<Project, Map<string, ReturnType<typeof derivePlanScene>>>();
 /** The plan scene of a drawing document, kept per source project and hidden layers. */
-function placedScene(view: PlacedDrawingView) {
+function placedScene(view: PlacedPlan) {
   let byKey = placedScenes.get(view.source);
   if (!byKey) placedScenes.set(view.source, (byKey = new Map()));
   const key = [...view.hiddenLayerIds].sort().join("|");
@@ -1492,7 +1501,7 @@ export function BimPlan({
           </g>
         )}
         {placedDrawings?.map((view) => {
-          const scene = placedScene(view);
+          const content = view.content;
           const clipId = `${gridId}-zw-${view.id.replace(/[^a-zA-Z0-9-]/g, "")}`;
           const mask = maskPreview?.id === view.id ? maskPreview.mask : view.mask;
           const points = maskOnPaper({ position: view.position, mask })
@@ -1510,32 +1519,41 @@ export function BimPlan({
                 <g
                   transform={`translate(${view.position.x} ${-view.position.y}) scale(${1 / view.denominator}) translate(${-view.center.x} ${view.center.y})`}
                 >
-                  {planSceneRuns(scene, []).map((run) => (
-                    <PlanSceneRun
-                      scaleContext={{
-                        view: {
-                          kind: "drawing-document",
-                          projectId: view.source.id,
-                          documentId: view.documentId,
-                        },
-                        denominator: view.denominator,
-                      }}
-                      key={`zw:${run.kind}:${run.ids[0]}`}
-                      {...run}
-                      scene={scene}
-                      selectedIds={NOTHING_SELECTED}
-                      drawing={false}
-                      placement={false}
-                      pixelsPerMetre={camera.pixelsPerMetre / view.denominator}
-                      wallOutlineWidth={wallOutlineWidth}
+                  {content.kind === "section" ? (
+                    <SectionGraphic
+                      drawing={content.drawing}
                       cutFill={cutFill}
-                      showRenovation={showRenovation}
-                      cornerGeometry={undefined}
-                      allowsShown={ALLOW_ALL}
-                      canPick={PICK_NOTHING}
-                      handlers={sceneHandlers}
+                      denominator={view.denominator}
+                      marks={content.marks}
                     />
-                  ))}
+                  ) : (
+                    planSceneRuns(placedScene(content), []).map((run) => (
+                      <PlanSceneRun
+                        scaleContext={{
+                          view: {
+                            kind: "drawing-document",
+                            projectId: content.source.id,
+                            documentId: view.documentId,
+                          },
+                          denominator: view.denominator,
+                        }}
+                        key={`zw:${run.kind}:${run.ids[0]}`}
+                        {...run}
+                        scene={placedScene(content)}
+                        selectedIds={NOTHING_SELECTED}
+                        drawing={false}
+                        placement={false}
+                        pixelsPerMetre={camera.pixelsPerMetre / view.denominator}
+                        wallOutlineWidth={wallOutlineWidth}
+                        cutFill={cutFill}
+                        showRenovation={showRenovation}
+                        cornerGeometry={undefined}
+                        allowsShown={ALLOW_ALL}
+                        canPick={PICK_NOTHING}
+                        handlers={sceneHandlers}
+                      />
+                    ))
+                  )}
                 </g>
               </g>
               {/* The mask: a light frame on screen; only the layout's own drawings pick. */}
