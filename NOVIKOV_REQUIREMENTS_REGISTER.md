@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 01.11.2026, main `10625c0` nach PR573 (ML2+ML3, Bauteilliste), main `99dc966` nach PR572 (ML1, Mengenabfrage), main `214dd92` nach PR571 (L38, Lint-Warnungen), main `ee113f8` nach PR570 (SA4, Wandaufbau im IFC), main `2b6f96a` nach PR569 (SA3, Schichten im Schnitt), main `0f39c1e` nach PR568 (SA2, Schichten im Grundriss), main `28562d3` nach PR567 (SA1, Wandaufbau-Datenmodell), main `ca554c3` nach PR566 (TR4, Treppe ziehen), main `0405ea9` nach PR565 (G2, IFC-Mengen), main `0a291ca` nach PR564 (BS2, Höhenkoten), main `b71107b` nach PR563 (BS1, Rand und Geschosskoten), main `bbd1ce3` nach PR562 (U2, Canvas aufgeräumt), main `0260a3d` nach PR561 (S4-Nacharbeit, Pausenfang), main `92bc4ce` nach PR560 (U1, Oberfläche entschlackt), main `933be24` nach PR559 (E1, Ecken anklicken), main `d7ece9b` nach PR558 (S4, Transparenzpause), main `39fe3e4` nach PR557 (S3, Längen-Hilfslinie), main `80b0713` nach PR556 (S2, Ansichtssymbol und Symbolgröße), main `47bde33` nach PR555 (S1, 3D-Raster und Anwählbarkeit), main `e85e4aa` nach PR554 (Fensterflügel FL4, IFC, docs/FENSTER_TUEREN.md), main `a76744f` nach PR553 (Fensterflügel FL3, Öffnungssymbole, docs/FENSTER_TUEREN.md), main `b8433d1` nach PR552 (Fensterflügel FL2, Flügelkörper, docs/FENSTER_TUEREN.md), main `bd80015` nach PR551 (Fensterflügel FL1, Teilungen und Öffnungsarten, docs/FENSTER_TUEREN.md), main `4bea234` nach PR550 (Ansichten A1, docs/ANSICHTEN.md), main `a964126` nach PR549 (Fenster/Türen R1, Seite per Klick beim Platzieren, docs/FENSTER_TUEREN.md), main `8eabd68` nach PR548 (Fenster/Türen G1, Oberflächenstile und durchsichtiges Glas, docs/FENSTER_TUEREN.md), main `f76e429` nach PR547 (Fenster/Türen FT4, Elementkörper und Laibung im IFC, docs/FENSTER_TUEREN.md), main `fdd82d1` nach PR546 (Fenster/Türen FT3, Grundrisssymbol, docs/FENSTER_TUEREN.md), main `082af26` nach PR545 (Fenster/Türen FT2, Körper in 3D und Schnitt, docs/FENSTER_TUEREN.md), main `b4823e3` nach PR544 (Fenster/Türen FT1, Elemente in den Öffnungen, Schema 42, docs/FENSTER_TUEREN.md), main `ff0053f` nach PR543 (Werkzeugleiste WL2, eigene Piktogramme, docs/WERKZEUGLEISTE.md), main `8fdd5f4` nach PR542 (Werkzeugleiste WL1, Rubriken und eigene Anordnung, docs/WERKZEUGLEISTE.md), main `e8da0fb` nach PR541 (Schnitt SC5, Schnittlinie im Grundriss bearbeiten, docs/SCHNITT.md), main `be4a7a3` nach PR540 (Schnitt SC4, Symbolgröße, geschlossene Schnittumrisse, docs/SCHNITT.md), main `8d8eb16` nach PR539 (Schnitt SC3, Schnittzeichnung aus dem Modell, docs/SCHNITT.md), main `4f3f936` nach PR538 (Schnitt SC2, Werkzeug Schnitt, Schema 41, docs/SCHNITT.md), main `214df0c` nach PR537 (Schnitt SC1, Canvas-Tabs und Ordner „Schnitte“, docs/SCHNITT.md), PR536 (Treppe TR3, L/U mit Podest, docs/TREPPE.md), PR535 (Treppe TR2, Werkzeug und Grundriss), PR534 (Treppe TR1, Schema 40), PR533 (Maßketten-Darstellung), PR532 (Text-Eingabefeld), PR531 (Text T2) und PR530 (Text T1, Schema 39, docs/TEXT.md), PR529 (Maßkette bearbeiten, Fensterfang) und PR528 (Maßkette, Schema 38, docs/MASSKETTE.md), PR527 (Stützen P3), PR526 (Stützen P2) und PR525 (Stützen P1, Schema 37, docs/STUETZEN.md), PR524 (Glas-Paletten, docs/GLAS_PALETTEN.md), PR523 (Bauzustand-Nacharbeit, Canvas weiß), PR522 (Prüfdatei Bauzustand) und PR521 (S2 Bauzustand, Schema 36, docs/BAUZUSTAND.md; PR520 S1 Schnittfarbe, docs/SCHNITTDARSTELLUNG.md; davor PR519 Hilfsfenster, docs/HILFSFENSTER.md). PR447–PR573 (mit PR453; PR462 über PR463) in main integriert; die unten als „noch nicht gemergt“ geführten Einträge bis einschließlich schräge Ecke an einer T-Hauptwand sind damit integriert; PR470: T-Anschluss automatisch in jedem Winkel außer parallel (docs/OBLIQUE_T_JUNCTIONS.md). Browser-Vergleich 3D/Autosicherung (26.10.2026, nur Messung): 3D-Summe bei l unverändert, Umschalten schneller, Sicherungsprüfungen nach Bearbeitungen weiter offen (docs/performance/RECOVERY_STATUS.md). PR471: Sicherungsprüfungen zugeordnet, eigene/geprüfte Revisionen nicht erneut geprüft (docs/performance/RECOVERY_CHECKS.md). PR472: Picking-Index je Geschoss (docs/performance/PICKING_PER_STOREY.md). PR473: Versatz-Befehl ohne Serialisieren, lib/bim/commands.ts entfernt (docs/performance/OFFSET_COMMAND.md). 3D-Darstellung beim Türziehen (27.10.2026, nur Messung): Zeichnen und Grafikkarte kein Engpass; Ausreißer bei l durch Fangen an einzelnen Mauspositionen (docs/performance/DRAG_RENDERING_3D.md). PR474: Sichtbarkeitsprüfung beim Fangen mit Index, Ausreißer behoben (docs/performance/SNAP_VISIBILITY_INDEX.md). PR475: Autosicherung prüft nur geänderte Bilder, Wiederherstellen weiter vollständig (docs/performance/AUTOSAVE_IMAGE_CHECKS.md). PR476: Autosicherung prüft das Modell nicht mehrfach (docs/performance/AUTOSAVE_MODEL_CHECKS.md). PR477: IFC-Abnahme der T-Anschlüsse; Archicad-Import vom Nutzer am 27.10.2026 bestätigt, offen nur Fenstermaße im IFC (RB 0,00 x 0,00; docs/T_IFC_ACCEPTANCE.md). PR478: normaler IFC-Export wieder mit regulärer Dateibeschreibung. AUD14-Abgleich 27.10.2026: 01/02 erfüllt, 03–07 teilweise mit benannten Blockern (docs/AUD14_ABGLEICH.md). PR479: kleine AUD14-07-Reste behoben (Umlaute mit Kodierungsprüfung, Testliste, §9-Tabelle). PR480: Schullauf mit Z, IFC-Export, Inhaltsvergleich, Kalt/Warm (docs/acceptance/SCHOOL_RUN.md). PR481: Z-/XY-Übernehmen ohne erneute Gesamtprüfung eigener Stände (docs/performance/OWNED_MOVE_CONFIRMATION.md). PR482: schnellerer Start der Gruppenbewegung, Ecken je Geschoss und Rasterindex (docs/performance/MOVE_START_ORIGIN.md; AUD14-05). PR483: Undo/Redo mit Wiederverwendung von Geschossteil und Wandfuß-Fangquellen (docs/performance/UNDO_STOREY_REUSE.md; AUD14-03/04). PR484: Geschosskörper (`buildSolid`/`buildPreviewSolid`) ohne Verhaltensänderung aus lib/bim/geometry.ts nach rendering/viewport/storey-solid.ts (Stufe B0, docs/plans/WALLWISE_REBUILD_CHANGE_MAP.md). PR485: Ersatzzeichen in „Bewegung nicht möglich.“ repariert; Kodierungsprüfung erkennt auch „ï¿½“ und U+FFFD. PR486: Decke als Bauteil Teil A (Schema 29, N47; docs/SLAB_ELEMENT.md). PR487–489: Decken Teil B (3D, IfcSlab, Bearbeiten). PR490: Wandhöhe an Geschoss gebunden mit Zusatzhöhe (Schema 30, Decken Teil C1). PR491: Übersichten zählen Türen und Decken. PR492: Arbeitsweise, Browser-Start, Wiederaufnahme-Anleitung. PR493: Bearbeitungssitzung aus lib/bim. PR494: Deckenumriss im Grundriss bearbeiten. PR495: Polygon-Regeln A – Standardgeschosse EG/1. OG je 3,00 m, Decke als Konturlinie (docs/POLYGON_REGELN.md). PR496: Polygon-Regeln B – Schließen per Klick auf den Startpunkt, gemeinsamer Baustein. PR497: Polygon-Regeln C – Ecke anklicken bewegt, Ecke auf Ecke löscht. PR498: Polygon-Regeln D – Fangpunkte benannt („Decke · Ecke 3“). PR499: Decken C3 Variante A – Wand und Decke ohne Flimmern; Zielbild Materialvorrang. PR500: Sicherungshinweis dezent unten links (docs/SICHERUNGSHINWEIS.md). PR501: drei IFC-Testvarianten für Fenster-/Türmaße in Archicad (docs/T_IFC_ACCEPTANCE.md). PR502: Dach D1 – Modell, Geometrie, Schema 31 (N61, docs/ROOF_ELEMENT.md). PR503: Dach D2 – 3D-Körper und Auswahl. PR504: Dach D3 – Werkzeug, Vorgaben, Eigenschaften, Bearbeitung. PR505: Dach D4 – Grundriss mit 1-m-Schnitt. PR506: Dach D5 – Übersichten, IFC IfcRoof/IfcSlab ROOF, Archicad-Prüfdatei. PR507: Raum R1 – Modell, Nummern, optionaler Fußbodenaufbau, Schema 32 (docs/ROOM_ELEMENT.md). PR508: Raum R2 – Werkzeug, Klick zwischen Wänden, Raumstempel, Eigenschaften, Bearbeitung. PR509: Raum R3 – lichte Höhe, Höhenlinien, Fläche je Höhenzone, Schema 33. PR510: Raum R3b – Höhenlinien mit Farbe, Linienart, Unter- und Oberkante, Schema 34. PR511: Tab-Auswahl bei übereinanderliegenden Elementen (docs/TAB_AUSWAHL.md). PR512: Raum R4 – Raumliste mit CSV, IfcSpace. PR513: K1 – Rechtsklickmenü, Modify-Menü, Zwischenablage (docs/KONTEXTMENUE.md). PR514: K2 – Darstellungsreihenfolge (docs/DARSTELLUNGSREIHENFOLGE.md). PR515: L04b Teil 1 – Wände an Dachflächen trimmen, Schema 35 (docs/TRIMMEN_L04B.md). PR516: L04b Teil 2 – Trimmen mit Bestätigung, IFC als B-rep. PR517: E1 – Einstellungsfenster per Doppelklick (docs/EINSTELLUNGSFENSTER.md). PR518: E2 – alle Werkzeuge, ein Fenster zur Zeit, neue Werkzeugreihenfolge. PR318 geschlossen (überholt durch PR371). Keine offenen PRs; einziger Folgeauftrag Masterplan §9.
+Geprüfte Code-Basis: 02.11.2026, main `eaae513` nach PR574 (L09 U1, Fußhöhen an Anschlüssen), main `10625c0` nach PR573 (ML2+ML3, Bauteilliste), main `99dc966` nach PR572 (ML1, Mengenabfrage), main `214dd92` nach PR571 (L38, Lint-Warnungen), main `ee113f8` nach PR570 (SA4, Wandaufbau im IFC), main `2b6f96a` nach PR569 (SA3, Schichten im Schnitt), main `0f39c1e` nach PR568 (SA2, Schichten im Grundriss), main `28562d3` nach PR567 (SA1, Wandaufbau-Datenmodell), main `ca554c3` nach PR566 (TR4, Treppe ziehen), main `0405ea9` nach PR565 (G2, IFC-Mengen), main `0a291ca` nach PR564 (BS2, Höhenkoten), main `b71107b` nach PR563 (BS1, Rand und Geschosskoten), main `bbd1ce3` nach PR562 (U2, Canvas aufgeräumt), main `0260a3d` nach PR561 (S4-Nacharbeit, Pausenfang), main `92bc4ce` nach PR560 (U1, Oberfläche entschlackt), main `933be24` nach PR559 (E1, Ecken anklicken), main `d7ece9b` nach PR558 (S4, Transparenzpause), main `39fe3e4` nach PR557 (S3, Längen-Hilfslinie), main `80b0713` nach PR556 (S2, Ansichtssymbol und Symbolgröße), main `47bde33` nach PR555 (S1, 3D-Raster und Anwählbarkeit), main `e85e4aa` nach PR554 (Fensterflügel FL4, IFC, docs/FENSTER_TUEREN.md), main `a76744f` nach PR553 (Fensterflügel FL3, Öffnungssymbole, docs/FENSTER_TUEREN.md), main `b8433d1` nach PR552 (Fensterflügel FL2, Flügelkörper, docs/FENSTER_TUEREN.md), main `bd80015` nach PR551 (Fensterflügel FL1, Teilungen und Öffnungsarten, docs/FENSTER_TUEREN.md), main `4bea234` nach PR550 (Ansichten A1, docs/ANSICHTEN.md), main `a964126` nach PR549 (Fenster/Türen R1, Seite per Klick beim Platzieren, docs/FENSTER_TUEREN.md), main `8eabd68` nach PR548 (Fenster/Türen G1, Oberflächenstile und durchsichtiges Glas, docs/FENSTER_TUEREN.md), main `f76e429` nach PR547 (Fenster/Türen FT4, Elementkörper und Laibung im IFC, docs/FENSTER_TUEREN.md), main `fdd82d1` nach PR546 (Fenster/Türen FT3, Grundrisssymbol, docs/FENSTER_TUEREN.md), main `082af26` nach PR545 (Fenster/Türen FT2, Körper in 3D und Schnitt, docs/FENSTER_TUEREN.md), main `b4823e3` nach PR544 (Fenster/Türen FT1, Elemente in den Öffnungen, Schema 42, docs/FENSTER_TUEREN.md), main `ff0053f` nach PR543 (Werkzeugleiste WL2, eigene Piktogramme, docs/WERKZEUGLEISTE.md), main `8fdd5f4` nach PR542 (Werkzeugleiste WL1, Rubriken und eigene Anordnung, docs/WERKZEUGLEISTE.md), main `e8da0fb` nach PR541 (Schnitt SC5, Schnittlinie im Grundriss bearbeiten, docs/SCHNITT.md), main `be4a7a3` nach PR540 (Schnitt SC4, Symbolgröße, geschlossene Schnittumrisse, docs/SCHNITT.md), main `8d8eb16` nach PR539 (Schnitt SC3, Schnittzeichnung aus dem Modell, docs/SCHNITT.md), main `4f3f936` nach PR538 (Schnitt SC2, Werkzeug Schnitt, Schema 41, docs/SCHNITT.md), main `214df0c` nach PR537 (Schnitt SC1, Canvas-Tabs und Ordner „Schnitte“, docs/SCHNITT.md), PR536 (Treppe TR3, L/U mit Podest, docs/TREPPE.md), PR535 (Treppe TR2, Werkzeug und Grundriss), PR534 (Treppe TR1, Schema 40), PR533 (Maßketten-Darstellung), PR532 (Text-Eingabefeld), PR531 (Text T2) und PR530 (Text T1, Schema 39, docs/TEXT.md), PR529 (Maßkette bearbeiten, Fensterfang) und PR528 (Maßkette, Schema 38, docs/MASSKETTE.md), PR527 (Stützen P3), PR526 (Stützen P2) und PR525 (Stützen P1, Schema 37, docs/STUETZEN.md), PR524 (Glas-Paletten, docs/GLAS_PALETTEN.md), PR523 (Bauzustand-Nacharbeit, Canvas weiß), PR522 (Prüfdatei Bauzustand) und PR521 (S2 Bauzustand, Schema 36, docs/BAUZUSTAND.md; PR520 S1 Schnittfarbe, docs/SCHNITTDARSTELLUNG.md; davor PR519 Hilfsfenster, docs/HILFSFENSTER.md). PR447–PR574 (mit PR453; PR462 über PR463) in main integriert; die unten als „noch nicht gemergt“ geführten Einträge bis einschließlich schräge Ecke an einer T-Hauptwand sind damit integriert; PR470: T-Anschluss automatisch in jedem Winkel außer parallel (docs/OBLIQUE_T_JUNCTIONS.md). Browser-Vergleich 3D/Autosicherung (26.10.2026, nur Messung): 3D-Summe bei l unverändert, Umschalten schneller, Sicherungsprüfungen nach Bearbeitungen weiter offen (docs/performance/RECOVERY_STATUS.md). PR471: Sicherungsprüfungen zugeordnet, eigene/geprüfte Revisionen nicht erneut geprüft (docs/performance/RECOVERY_CHECKS.md). PR472: Picking-Index je Geschoss (docs/performance/PICKING_PER_STOREY.md). PR473: Versatz-Befehl ohne Serialisieren, lib/bim/commands.ts entfernt (docs/performance/OFFSET_COMMAND.md). 3D-Darstellung beim Türziehen (27.10.2026, nur Messung): Zeichnen und Grafikkarte kein Engpass; Ausreißer bei l durch Fangen an einzelnen Mauspositionen (docs/performance/DRAG_RENDERING_3D.md). PR474: Sichtbarkeitsprüfung beim Fangen mit Index, Ausreißer behoben (docs/performance/SNAP_VISIBILITY_INDEX.md). PR475: Autosicherung prüft nur geänderte Bilder, Wiederherstellen weiter vollständig (docs/performance/AUTOSAVE_IMAGE_CHECKS.md). PR476: Autosicherung prüft das Modell nicht mehrfach (docs/performance/AUTOSAVE_MODEL_CHECKS.md). PR477: IFC-Abnahme der T-Anschlüsse; Archicad-Import vom Nutzer am 27.10.2026 bestätigt, offen nur Fenstermaße im IFC (RB 0,00 x 0,00; docs/T_IFC_ACCEPTANCE.md). PR478: normaler IFC-Export wieder mit regulärer Dateibeschreibung. AUD14-Abgleich 27.10.2026: 01/02 erfüllt, 03–07 teilweise mit benannten Blockern (docs/AUD14_ABGLEICH.md). PR479: kleine AUD14-07-Reste behoben (Umlaute mit Kodierungsprüfung, Testliste, §9-Tabelle). PR480: Schullauf mit Z, IFC-Export, Inhaltsvergleich, Kalt/Warm (docs/acceptance/SCHOOL_RUN.md). PR481: Z-/XY-Übernehmen ohne erneute Gesamtprüfung eigener Stände (docs/performance/OWNED_MOVE_CONFIRMATION.md). PR482: schnellerer Start der Gruppenbewegung, Ecken je Geschoss und Rasterindex (docs/performance/MOVE_START_ORIGIN.md; AUD14-05). PR483: Undo/Redo mit Wiederverwendung von Geschossteil und Wandfuß-Fangquellen (docs/performance/UNDO_STOREY_REUSE.md; AUD14-03/04). PR484: Geschosskörper (`buildSolid`/`buildPreviewSolid`) ohne Verhaltensänderung aus lib/bim/geometry.ts nach rendering/viewport/storey-solid.ts (Stufe B0, docs/plans/WALLWISE_REBUILD_CHANGE_MAP.md). PR485: Ersatzzeichen in „Bewegung nicht möglich.“ repariert; Kodierungsprüfung erkennt auch „ï¿½“ und U+FFFD. PR486: Decke als Bauteil Teil A (Schema 29, N47; docs/SLAB_ELEMENT.md). PR487–489: Decken Teil B (3D, IfcSlab, Bearbeiten). PR490: Wandhöhe an Geschoss gebunden mit Zusatzhöhe (Schema 30, Decken Teil C1). PR491: Übersichten zählen Türen und Decken. PR492: Arbeitsweise, Browser-Start, Wiederaufnahme-Anleitung. PR493: Bearbeitungssitzung aus lib/bim. PR494: Deckenumriss im Grundriss bearbeiten. PR495: Polygon-Regeln A – Standardgeschosse EG/1. OG je 3,00 m, Decke als Konturlinie (docs/POLYGON_REGELN.md). PR496: Polygon-Regeln B – Schließen per Klick auf den Startpunkt, gemeinsamer Baustein. PR497: Polygon-Regeln C – Ecke anklicken bewegt, Ecke auf Ecke löscht. PR498: Polygon-Regeln D – Fangpunkte benannt („Decke · Ecke 3“). PR499: Decken C3 Variante A – Wand und Decke ohne Flimmern; Zielbild Materialvorrang. PR500: Sicherungshinweis dezent unten links (docs/SICHERUNGSHINWEIS.md). PR501: drei IFC-Testvarianten für Fenster-/Türmaße in Archicad (docs/T_IFC_ACCEPTANCE.md). PR502: Dach D1 – Modell, Geometrie, Schema 31 (N61, docs/ROOF_ELEMENT.md). PR503: Dach D2 – 3D-Körper und Auswahl. PR504: Dach D3 – Werkzeug, Vorgaben, Eigenschaften, Bearbeitung. PR505: Dach D4 – Grundriss mit 1-m-Schnitt. PR506: Dach D5 – Übersichten, IFC IfcRoof/IfcSlab ROOF, Archicad-Prüfdatei. PR507: Raum R1 – Modell, Nummern, optionaler Fußbodenaufbau, Schema 32 (docs/ROOM_ELEMENT.md). PR508: Raum R2 – Werkzeug, Klick zwischen Wänden, Raumstempel, Eigenschaften, Bearbeitung. PR509: Raum R3 – lichte Höhe, Höhenlinien, Fläche je Höhenzone, Schema 33. PR510: Raum R3b – Höhenlinien mit Farbe, Linienart, Unter- und Oberkante, Schema 34. PR511: Tab-Auswahl bei übereinanderliegenden Elementen (docs/TAB_AUSWAHL.md). PR512: Raum R4 – Raumliste mit CSV, IfcSpace. PR513: K1 – Rechtsklickmenü, Modify-Menü, Zwischenablage (docs/KONTEXTMENUE.md). PR514: K2 – Darstellungsreihenfolge (docs/DARSTELLUNGSREIHENFOLGE.md). PR515: L04b Teil 1 – Wände an Dachflächen trimmen, Schema 35 (docs/TRIMMEN_L04B.md). PR516: L04b Teil 2 – Trimmen mit Bestätigung, IFC als B-rep. PR517: E1 – Einstellungsfenster per Doppelklick (docs/EINSTELLUNGSFENSTER.md). PR518: E2 – alle Werkzeuge, ein Fenster zur Zeit, neue Werkzeugreihenfolge. PR318 geschlossen (überholt durch PR371). Keine offenen PRs; einziger Folgeauftrag Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -22,7 +22,6 @@ Für einen Auftrag nur seine Kennungen/Detailkapsel lesen; nicht das ganze Regis
 
 Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Scope/Host, gemeinsame typisierte Action/Query, deterministische Fachprüfung, gültige Vorschau/Abbruch, atomarer Commit/Undo, betroffene 2D/3D-Ableitungen, Migration/Dateirundlauf und einschlägiger Export. Kein Elementtyp gilt allein wegen eines Toolbar-Eintrags als implementiert. Die folgenden Statusmeldungen gelten nur für den genannten Umfang.
 
-
 ### N01 – Gemeinsames BIM-Modell für komplexe geometrische Entwürfe
 
 - **Stand:** Teilweise: ein autoritatives Mehrgeschossmodell mit Wänden/Fenstern, relativen Höhen und optionaler Wandoberkantenbindung; Räume/Decken/Dächer und vollständiger autonomer Entwurf bleiben offen. Aktueller Prüf-/Reststatus: Masterplan §9.
@@ -30,7 +29,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Architekturvertrag; Stage 1
 - **Abnahme/Abhängigkeiten:** Neue Elementverträge, robuste Geometrie, Migration; keine Leistungszusage für Großprojekte. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N02 – PDF-Pläne, 3D-Modelle, IFC und DXF exportieren
 
@@ -40,7 +38,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** N05/N59 für Pläne, N36 für Bericht; 3D-Format und DXF-Inhalte offen. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N03 – Darstellung von 2D/3D ändern, Farbe oder Schraffur
 
 - **Stand:** Teilweise: Linien-/Schraffurstile und Anzeigeeinstellungen; allgemeine 2D/3D-Overrides je Bauteil fehlen.
@@ -48,7 +45,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Guide-F17/F23/F24
 - **Abnahme/Abhängigkeiten:** N16/N39/N40, Trennung Material vs Darstellung und Dokument-Scope. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N04 – Maßstab von Canvas, Grundriss, Schnitt und Ansicht
 
@@ -58,7 +54,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** N05/N57; Modellmetres, Bildschirmzoom, Papiermaßstab getrennt. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N05 – Schnitt- und Ansichtswerkzeuge erzeugen 2D-Ableitungen
 
 - **Stand:** In Arbeit (Nutzerauftrag 01.11.2026, docs/SCHNITT.md): SC1 Canvas-Tabs und Navigatorordner „Schnitte“ in main (PR537); SC2 Werkzeug „Schnitt“ mit Name, Kennung, Blickseite, Schema 41, Einträgen im Navigator und Schnitt-Tab in main (PR538); SC3 Schnittzeichnung aus dem Gebäudekörper im Schnitt-Tab in main (PR539); SC4 Symbolgröße in mm Papier/m Modell und geschlossene Schnittumrisse am Linienende in main (PR540); SC5 Schnittlinie auswählen, verschieben, verlängern, kürzen in main (PR541). Ansichten A1 in main (PR550). Offen: Tiefenbegrenzung, Bemaßung und Ablage als Abbild/Layout.
@@ -66,7 +61,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Gespräch gemeinsame Ansichten; neu konkretisiert
 - **Abnahme/Abhängigkeiten:** N21/N47 für erweiterte Geometrie; Feature-ID-Zuordnung, Schnittdefinition. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N06 – Abgeleitete 2D-Dokumente bearbeiten
 
@@ -76,7 +70,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** N05/N57, Annotation-Scope, Modus Modellaktion vs Dekoration. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N07 – Fang in 3D und Hilfsflächen für X/Y/Z
 
 - **Stand:** Teilweise: z=0-Wand-Fußpunkte, gemeinsame Inferenz und Wandbearbeitung; freie XYZ-Ebenen fehlen.
@@ -84,7 +77,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Guide-F14; F13_HILFLINIENSYSTEM
 - **Abnahme/Abhängigkeiten:** Explizite Arbeitsebene, Bildschirmabstand, N29 und Capability-Kontext. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N08 – Hochwertige Raster und Hilfslinien auf Bedarf
 
@@ -94,7 +86,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** Rekursive Kandidatenabfragen beseitigen; Mittelpunkt, echte Segmentschnitte, allgemeine Guides, Hysterese fehlen. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N09 – Bewegliches On-Demand-Menü bei Elementauswahl
 
 - **Stand:** Vorhanden für aktuelle unterstützte Typen: bewegliches Auswahlmenü; weitere Capability-Adapter nötig.
@@ -102,7 +93,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Guide-F05/F08; C03
 - **Abnahme/Abhängigkeiten:** Neue Typen nur mit geprüften Aktionen; Menüposition und Tastatur erhalten. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N10 – Gesamtes Element bewegen
 
@@ -112,7 +102,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** Neue Typen/N29 benötigen Capability- und Kontextverträge; kein 3D-Move bisher. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N11 – Punkt einfügen oder vorhandenen Punkt verschieben
 
 - **Stand:** Teilweise: bestehende Wandenden/2D-Vertices; Topologieänderungen nur im zulässigen Typumfang.
@@ -120,7 +109,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Guide-F06
 - **Abnahme/Abhängigkeiten:** N08, stabile Feature-Bezüge; gerade Wand nicht beliebig knicken. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N12 – Linie knicken oder Polygon um weiteren Eckpunkt erweitern
 
@@ -130,7 +118,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** N11, line→polyline-Regel, Nullsegmente und Selbstschnitte behandeln. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N13 – Ganze Polygonkante versetzen und Fläche verbreitern
 
 - **Stand:** Teilweise: konvexe 2D-Konturkante/Offset über gemeinsame Geometrie; allgemeine konkave/Aussparungsfälle prüfen.
@@ -138,7 +125,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Guide-F09
 - **Abnahme/Abhängigkeiten:** Gültige Polygonkontur, N08/N39, Nachbarkanten/Aussparungen. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N14 – Letzte Menüaktion bei kompatibler Geometrie vormerken
 
@@ -148,7 +134,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** N09/N11; nur Modus vorwählen, keine automatische Modelländerung. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N15 – Maßstab in unterer Leiste ändern
 
 - **Stand:** Vorhanden: Selector neben Zoom, Presets/freies S, persistenter Arbeitskontext; Drucknachweis separat.
@@ -156,7 +141,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Guide-F10
 - **Abnahme/Abhängigkeiten:** N04; Ausgabe 1:n gesondert, keine Modellskalierung. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N16 – Alle Elementtypen einer Organisationsebene zuordnen
 
@@ -166,7 +150,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** Migration aller vorhandenen Typen; künftige Annotationen und Möbel einbeziehen. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N17 – Ebenen einzeln, alle oder als Ausnahmeauswahl schalten
 
 - **Stand:** Vorhanden für aktuelle BIM-Arbeitsansichten: gemeinsame Eligibility und gespeicherter Filter; Abbildfilter in PR238.
@@ -174,7 +157,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Guide-F28/F29
 - **Abnahme/Abhängigkeiten:** N16; Filter gemeinsam für Rendering/Picking/Snap, Exportumfang getrennt. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N18 – AI und Sprache als zentraler Bedienzugang
 
@@ -184,7 +166,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** Für jede neue geprüfte Aktion typisierter Adaptervertrag; Transkriptqualität separat. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N19 – Wände, Türen, Fenster, Decken, Dächer per Sprache/Text
 
 - **Stand:** Geplant: vollständige Bauteilerzeugung über Sprache/AI; nur vorhandene geprüfte Aktionen dürfen angeboten werden.
@@ -192,7 +173,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Gespräch BIM/AI; neu konkretisiert
 - **Abnahme/Abhängigkeiten:** N18 und jeweils vorhandener Typ/Host/Geschoss, kein erfundener Zieldatensatz. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N20 – Bemaßung per Sprache/Text
 
@@ -202,7 +182,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** N46 zuerst, dann geprüfte Intents/Feature-Kontext. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N21 – Geschosse im Navigator frei erstellen und Höhen definieren
 
 - **Stand:** Teilweise: aktuelles Schema26 mit mehreren benennbaren Geschossen, relativen Höhen, Navigator-/Arbeitsgeschosswahl und gemeinsamer Aktion samt Undo/Migration; nur aufgelöste Höhen können aktiv bearbeitet werden. Geschossanlage ist vorhanden, aber vollständige Bearbeitung aller künftigen Bauteile, schwierige Bindungs-/Einfügefälle und schwere Großprojekt-/Release-Abnahme bleiben offen. Nachweis: PR300–317, PR381–384; aktueller Reststatus Masterplan §9.
@@ -210,7 +189,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Gespräch mehrere Geschosse
 - **Abnahme/Abhängigkeiten:** Migration Schema 1, Namen/Höhen/Bezüge, N16; 2D/3D/IFC-Rundlauf. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N22 – Wände, Stützen und andere Bauteile kennen Geschosshöhen
 
@@ -221,7 +199,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Erweiterung (Nutzervision 27.10.2026, geplant):** Wände über mehrere Geschosse (z. B. EG bis 3. OG, 9 m, Fensterfronten über Geschosse), gestapelte Wände als optisch eine Wand, Decken dazwischen, Dachtrimmung auch über zwei Geschosse, Gast-Anzeige im Grundriss anderer Geschosse (Schnitt ≈ 1 m über Geschossboden). Architekturregel: geschossübergreifende Einflüsse als ausdrückliche Bauteileingaben auflösen (Masterplan A08, docs/plans/WALLWISE_REBUILD_CHANGE_MAP.md Abschnitt 2a).
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N23 – Deutsch als erste Programmsprache
 
 - **Stand:** Teilweise: deutsche Befehle/Teile der UI, vollständige deutsche Bedienung noch prüfen.
@@ -229,7 +206,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Gespräch deutsche Bedienung; neu explizit
 - **Abnahme/Abhängigkeiten:** Lokalisierung aller UI-/Fehlermeldungen; nicht mit TypeScript als Programmiersprache verwechseln. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N24 – Modelllängen in Metern
 
@@ -239,7 +215,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** Alle neuen Eingaben/Importe normieren; Stift-mm/Papiermaße bleiben Darstellungseinheiten. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N25 – Ausschließlich 2D-Elemente und importierte PDF-Dateien proportional per Messlinie skalieren
 
 - **Stand:** Teilweise: PNG/JPEG-Zweipunktkalibrierung vorhanden; PDF und allgemeine Scale2D-Aktion offen. BIM verboten.
@@ -247,7 +222,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Guide-F11/F12/F13, neue Einschränkung
 - **Abnahme/Abhängigkeiten:** N16/N08, echte 2D-/PDF-Typen; Application-Guard vor Vorschau/Commit, BIM auch im Grundriss verbieten. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N26 – Boolesche Operationen für komplexe 3D-Modelle
 
@@ -257,7 +231,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** Separater Machbarkeitsnachweis, Toleranzen, N27, abgeleitete Meshes nicht autoritativ. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N27 – Wände schneiden und aussparen
 
 - **Stand:** Teilweise: echte rechteckige Fensteröffnungen; freie Wandcuts/Abhängigkeiten fehlen.
@@ -265,7 +238,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Gespräch Öffnungen
 - **Abnahme/Abhängigkeiten:** N26 für freie Körperoperationen; Host-Abhängigkeit, Invalidierung, IFC. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N28 – Hochgeladene PDFs in 2D-Elemente zerlegen
 
@@ -275,7 +247,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** Vektor/Raster unterscheiden, N25, Assets/Einheiten/Importbericht, keine automatische BIM-Erkennung behaupten. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N29 – Modell im Grundriss, Schnitt, Ansicht und 3D bearbeiten
 
 - **Stand:** Teilweise: gleiches Modell in 2D/3D und begrenzte Wandbearbeitung z=0; Schnitt/Ansicht noch fehlt.
@@ -283,7 +254,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Architekturvertrag; Gespräch
 - **Abnahme/Abhängigkeiten:** N05/N07, Treffer→stabile IDs/zulässige Features, gemeinsame Aktionen. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N30 – Wände/Fenster verschieben und Elemente löschen
 
@@ -293,7 +263,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** N10; Löschregeln für Hosts/Öffnungen/Annotationen, atomare History. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N31 – Räume in geschlossenen oder teiloffenen Wandbereichen
 
 - **Stand:** Teilweise (R1/R2, 29.10.2026): Raummodell Schema 32 (Umriss, Name, Nummer, optionaler Fußbodenaufbau), Werkzeug Raum mit Leiste und Einstellungsfenster, Raum per Klick zwischen Wänden (PR508; freistehende Wände im Raum noch nicht ausgespart), virtuelle Grenzen per Polygon; Höhen folgen in R3 (docs/ROOM_ELEMENT.md). Live-Flächenmessung ersetzt es nicht.
@@ -301,7 +270,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Guide-F18
 - **Abnahme/Abhängigkeiten:** N16/N39, manuelle geschlossene/virtuelle Grenzen; später N44 für Ableitung. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N32 – Raumname, Kennung ab R-001 und Fläche
 
@@ -311,7 +279,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** N31; stabile interne ID getrennt von R-001, Nummerierungsbereich festlegen. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N33 – Lichte Raumhöhen und konfigurierbare Höhenlinien
 
 - **Stand:** Umgesetzt (R3, PR509, 29.10.2026): exaktes Höhenfeld je Raum aus Decken und Dächern des eigenen Geschosses, Höhenlinien je Raum (Standard 1,00/2,00 m), seit PR510 je Linie mit Farbe, Linienart, Unter- und Oberkante (OK Fußboden/Rohfußboden; Unterseite/Außenkante Dachhaut) sowie Fläche ab Linie und Anteil (docs/ROOM_ELEMENT.md). Quellen anderer Geschosse und WoFlV-Faktoren (N35) offen.
@@ -319,7 +286,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Guide-F20/F22
 - **Abnahme/Abhängigkeiten:** N31/N34, definierte obere/untere Flächen; zwei Messpunkte sind kein Höhenfeld. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N34 – Messbezug Fußbodenoberkante und Dachunterkante
 
@@ -329,7 +295,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** N21/N47 und Dach oder explizite manuelle Flächen; fehlende Quelle sichtbar melden. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N35 – Wohnfläche mit Nischen, Schornstein- und Vorwandabzügen
 
 - **Stand:** Geplant: versionierter WoFlV-Regelservice, Abzüge/Korrekturen, unabhängige Fachprüfung.
@@ -337,7 +302,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Guide-F01/F02/F22
 - **Abnahme/Abhängigkeiten:** N31–N34; amtliche WoFlV erst vor Umsetzung prüfen, Korrekturen/Rundung versionieren. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N36 – Berichtsvorlage und PDF mit nachvollziehbarem Rechenweg
 
@@ -347,7 +311,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** N35/N37, unabhängige Berichtsdaten ohne zweite Berechnung, Renderprüfung. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N37 – Geschossanzahl, Raumzahl, Name und Adresse im Bericht
 
 - **Stand:** Geplant: Berichtskopf/Adresse und aus Scope abgeleitete Zählungen.
@@ -355,7 +318,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Guide-F04
 - **Abnahme/Abhängigkeiten:** N21/N32/N36; Zählungen aus gewähltem Umfang. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N38 – Räume standardmäßig auf Ebene Raum
 
@@ -365,7 +327,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** N16/N31; bisherige zwölf Guide-Ebenen nicht ersetzen. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N39 – Rechtecke/Polygone für Gestaltung und Schraffur
 
 - **Stand:** Teilweise: validierte 2D-Schraffurkonturen und vier Erstellungsmodi; allgemeine Aussparungen separat.
@@ -373,7 +334,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Guide-F15/F16/F23
 - **Abnahme/Abhängigkeiten:** N16, Polygonvalidierung/Aussparungen, Annotation-Scope. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N40 – Optionale Farbe/Kontur, Deckkraft, Muster wie Mauerwerk
 
@@ -383,7 +343,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** N39, Papier-/Modellgrößen der Muster und Stil-Scope. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N41 – Wanddicke und geschossabhängige oder alternative Höhe
 
 - **Stand:** Teilweise: feste Wandhöhe/-stärke und Körperoffset; Geschosshöhenbindung fehlt.
@@ -391,7 +350,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Stage 1; Gespräch
 - **Abnahme/Abhängigkeiten:** N21/N22; Moduswechsel und Öffnungen atomar validieren. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N42 – Monolithische oder mehrschichtige Wand, eigene Schichten
 
@@ -401,7 +359,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** N41/N45; AssemblyLayer getrennt von Layer; Summe statt widersprüchlicher Dicken. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N43 – Einzelwand oder fortlaufende Wände mit Doppelklickabschluss
 
 - **Stand:** Vorhanden im unterstützten Umfang: Wandkette mit Abschluss und einem Undo; ungültige Fortsetzung ablehnen.
@@ -409,7 +366,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** C04 erweitert; Gespräch Wandzeichnen
 - **Abnahme/Abhängigkeiten:** N08/N44; Undo pro Segment oder Kette offen, Abbruch/Nullsegmente definieren. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N44 – Saubere Wandanschlüsse an Ecken und T-Verbindungen
 
@@ -419,7 +375,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** N45 umgesetzt; Eckgriff korrigiert; explizites Verbinden, automatisches Lösen bei Einzelwandbewegung; N42/Endzonen offen. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N45 – Verschiebbare Hauptachse im Wandaufbau
 
 - **Stand:** Vorhanden im definierten Umfang: fixe Zeichenachse, Körperoffset, 2D/3D-Achsanzeige; Legacykonversion separat.
@@ -427,7 +382,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Neu
 - **Abnahme/Abhängigkeiten:** Nutzerentscheidung physische Lage vs Zeichenachse; N42, Fenster-/Join-Abhängigkeiten. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N46 – Wände, Fenster und andere Elemente bemaßen, Maßketten
 
@@ -437,7 +391,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** N16, stabile Feature-Referenzen, Annotation-Scope, ungültige Referenzen. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N47 – Decken mit Schichten, Material, Darstellung, Höhe/Stärke
 
 - **Stand:** Teilweise (PR486, 28.10.2026): Deckenmodell Schema 29 mit Umriss, Stärke, Versatz OK; Lage OK = Rohfußboden des Geschosses darüber, Stärke nach unten (Nutzerentscheidung); Werkzeug, Eigenschaften, Grundriss, Löschen. Teil B (PR487–489): 3D-Körper/Auswahl, IfcSlab FLOOR, Verschieben, Befehle, Fang. Wandbindung auf Geschosshöhen umgesetzt (PR490, Teil C1). Umrissbearbeitung im Grundriss umgesetzt (PR494). Grundriss nur Konturlinie, in neuen Projekten sofort in 3D (PR495). Punkte löschen über Ecke auf Ecke (PR497). Archicad-Abnahme bestätigt (29.10.2026, Decken auf richtigen Höhen). C3 Variante A (PR499): saubere Darstellung bei gleichem Vorrang. Offen: Umrissgriffe in 3D, Vorrang per Material (C3 B/C), Schichtaufbau/Material, Durchbrüche (N48). Nachweis docs/SLAB_ELEMENT.md.
@@ -445,7 +398,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Gespräch Geschosse/Decken
 - **Abnahme/Abhängigkeiten:** N16/N21/N22/N39/N42; Stärke/Höhenlage, 2D/3D/IFC. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N48 – Deckendurchbrüche einfügen
 
@@ -455,7 +407,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** N47, gültiges Öffnungsprofil/Host, Rand-/Überschneidungsregeln. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N49 – Text mit Hochstellung, Farbe, Größe, Schrift und Hervorhebung
 
 - **Stand:** Geplant: gespeichertes Textwerkzeug mit Formatierung und Modell-/Papiergröße.
@@ -463,7 +414,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Neu
 - **Abnahme/Abhängigkeiten:** N16; Annotation-Scope, Font/Einheiten/Export, eigene Aktion plus AI-Vertrag. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N50 – Text mit farbiger Umrandung und Hintergrund
 
@@ -473,7 +423,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** N49, Scope und Farbe/Deckkraft, keine BIM-Geometrie. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N51 – Elemente nach Typ oder Eigenschaften filtern
 
 - **Stand:** Geplant: strukturierte Typ-/Eigenschaftsfilter; Ebenensichtbarkeit ist eine andere Funktion.
@@ -481,7 +430,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Neu
 - **Abnahme/Abhängigkeiten:** N16/N17 und zentrale Capabilities; sichtbare/gefilterte Ziele eindeutig. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N52 – Pipette für Farbauswahl im Filter
 
@@ -491,7 +439,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** N51/N03; gespeicherte vs dargestellte Farbe vor Umsetzung unterscheiden. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N53 – Eine Eigenschaftenleiste für Werkzeugvorgaben und Auswahl
 
 - **Stand:** Teilweise: obere gemeinsame Eigenschaften, Tooldefaults und Pickup; umfassende Capability-UI für neue Typen offen.
@@ -499,7 +446,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Guide-F08/F16/F17; C03
 - **Abnahme/Abhängigkeiten:** Neue geprüfte Aktionen/Typen, keine zweiten Modellparameter in UI. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N54 – E bewegen, Strg+E kopieren/bewegen, D drehen, Strg+D drehen
 
@@ -509,7 +455,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** N10, Kopier-/Rotationsaktionen; D/Strg+D offen, Texteingaben/Browserkonflikte abfangen. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N55 – Rotation mit Kreis als Fang-/Bedienhilfe
 
 - **Stand:** Geplant: RotateSession/Pivot/Rotationshilfe und gemeinsame geprüfte Rotation.
@@ -517,7 +462,6 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Altzuordnung:** Neu
 - **Abnahme/Abhängigkeiten:** N54, Pivot/Feature-Kontext, echte Rotation über gemeinsame Aktion. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N56 – Navigator für Geschosse, Schnitte, Ansichten und 3D
 
@@ -527,10 +471,7 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Abnahme/Abhängigkeiten:** N21/N05; benannte 3D-Views, keine Inhaltskopien. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 N56 UI-Ergänzung 10.10.2026 (PR241): Wiederverwendbare Einstellungsansicht mit linker Tabspalte zunächst für Abbilder. Allgemein enthält Stammdaten, Ebenensichtbarkeit zeigt aktive und alle vorhandenen Ebenen des Abbilds, Tab2–5 sind Platzhalter. Buttons 28 px hoch/12 px Schrift, Fenster weiterhin verschiebbar ohne Abdunklung. Anzeige der Sichtbarkeit verwendet live den Abbildfilter, Bearbeitung bleibt beim Ebenenumschalter. Browserabnahme und technische Prüfungen im Masterplan.
-
-
 
 Abbildaufnahme-Präzisierung (10.10.2026, PR241): Die Anwendung ergänzt beim Start/Öffnen einen leeren Ordner „Abbilder“, wenn keine Ordner existieren; strikte Altdateiparser bleiben unverändert, IDs kollisionsfrei. Hinzufügen startet ausschließlich Abbildanlage; Ordneranlage bleibt eigener Rechtsklickbefehl. Zusammenfassung: Name, Maßstab, vorausgewählter vorhandener Ordner und zum Start erfasste aktive Ebenen; keine Typauswahl/Zoomanzeige. Erstellung erst beim Bestätigen, unveränderte Snapshot-Prüfung schützt vor veraltetem Entwurf. Canvas erhält eine 700-ms-Hervorhebung (reduced-motion berücksichtigt). Browser bestätigt Standardordner, Zusammenfassung und Erstellen im Zielordner. 812 Tests, Typecheck, fokussiertes Lint und Build bestanden. Bestehende Projekte werden beim Öffnen nur um den fehlenden Ordner ergänzt, vorhandene Ordner bleiben erhalten.
 
@@ -550,7 +491,6 @@ Canvas-Hinweis PR241 – korrigierte Nutzerregel (10.10.2026): Neue Ebenen bleib
 - **Abnahme/Abhängigkeiten:** N05/N16/N17; Quelle ModelView-ID, Overrides/Invalidierung/Migration. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N58 – Ausschnitte und zusätzliche Gestaltung/Text in Abbildern
 
 - **Stand:** Teilweise vorhanden: Startansicht/Zoom in PR238, ohne Modellbeschnitt. Nutzerkorrektur 10.10.2026: Linien und Schraffuren aus Abbildern gehören zur gemeinsamen Geschosszeichnung. Zuschnitt erst im Layoutbuch; Texte und weitere Annotationstypen bleiben geplant.
@@ -559,7 +499,6 @@ Canvas-Hinweis PR241 – korrigierte Nutzerregel (10.10.2026): Neue Ebenen bleib
 - **Abnahme/Abhängigkeiten:** N57/N39/N49; Dokumentaktionen getrennt von Modellaktionen. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
-
 ### N59 – Abbilder in Master-/Exportlayouts mit A4/A3/A2 und Plankopf
 
 - **Stand:** Geplant: Papierlayout/Master/Plankopf, Formate A4/A3/A2 etc., Placement und Export.
@@ -567,7 +506,6 @@ Canvas-Hinweis PR241 – korrigierte Nutzerregel (10.10.2026): Neue Ebenen bleib
 - **Altzuordnung:** Neu; Guide-F03 betrifft anderen Bericht
 - **Abnahme/Abhängigkeiten:** N57/N58/N04; A4/A3/A2, Placement/Einheiten, Template-Abhängigkeiten. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
-
 
 ### N60 – Bildschirm teilen, Fenster aktivieren und Inhalt zuweisen
 
@@ -593,87 +531,83 @@ Canvas-Hinweis PR241 – korrigierte Nutzerregel (10.10.2026): Neue Ebenen bleib
 - **Abnahme/Abhängigkeiten:** N61, N26/N27, N42/N47 (Schichten), L02.
 - **Quelle:** Nutzerauftrag Dachwerkzeug 29.10.2026.
 
-
 ## 2. Guide-F01–F29 – Kennungen erhalten
 
 Ein Mapping ist keine Fertigmeldung. Status/Abnahme folgen den referenzierten N-Anforderungen.
 
-| Kennung | Ursprünglicher Wunsch | Weitergeführt unter |
-| --- | --- | --- |
-| Guide-F01 | Automatische Wohnflächenberechnung und sichtbarer Rechenweg | N35 |
-| Guide-F02 | Türnischen, Schornsteinabzüge und Vorbauwände berücksichtigen | N35 |
-| Guide-F03 | Wohnflächenbericht nach Vorlage als PDF | N36 |
-| Guide-F04 | Name, Adresse, Geschossanzahl und Raumzahl im Bericht | N37 |
-| Guide-F05 | On-Demand-Menü nahe Cursor, verschiebbar, bleibt bei Auswahl | N09 |
-| Guide-F06 | Gewählten Punkt verschieben | N11 |
-| Guide-F07 | Bewegen | N10/N30 |
-| Guide-F08 | Info anzeigen | N09/N53 |
-| Guide-F09 | Strecken einer gewählten Seite | N13 |
-| Guide-F10 | Maßstableiste unter Canvas mit Änderungsmöglichkeit | N04/N15/MS |
-| Guide-F11 | Skalierwerkzeug für importierte Zeichnung mit zwei Messpunkten | N25/N28 |
-| Guide-F12 | Neue Länge per Menü oder AI-Sprachbefehl | N18/N25 |
-| Guide-F13 | Gesamte ausgewählte Referenz anhand der Messstrecke skalieren | N25 |
-| Guide-F14 | Grid sowie Snap und Hilfslinien aus dem Gespräch | N07/N08 |
-| Guide-F15 | 2D-Linienwerkzeug Punkt zu Punkt, kein Erstellen in 3D | N12/N39 |
-| Guide-F16 | Voreinstellung Linie oder Polylinie | N12/N53 |
-| Guide-F17 | Farbpalette, Strichstärke und Stricharten | N03/N40/N53 |
-| Guide-F18 | Räume in geschlossenen oder teilweise umschlossenen Wänden | N31 |
-| Guide-F19 | Raumkennung ab R-001, Name und Fläche | N32 |
-| Guide-F20 | Lichte Raumhöhen erkennen und Höhenlinien konfigurieren | N33 |
-| Guide-F21 | Unteren und oberen Messbezug wählen | N34 |
-| Guide-F22 | Höheninformationen in Wohnflächenberechnung verwenden | N33/N35 |
-| Guide-F23 | Schraffur mit optionaler Füllung und Kontur | N39/N40/N58 |
-| Guide-F24 | Wählbare Farbe und Deckkraft oder Muster wie Mauerwerk | N40 |
-| Guide-F25 | Alle genannten Standardebenen | N16/N38 |
-| Guide-F26 | Außenwand als Standard für Wände, 2D-Zeichnungen für 2D | N16 |
-| Guide-F27 | Elemente frei zuordnen, Ebenen erstellen und bearbeiten | N16 |
-| Guide-F28 | Organisation > Ebenen als eigenes Fenster | N16/N17 |
-| Guide-F29 | Ebenenumschalter in Menüleiste, ein- und ausblenden | N17 |
+| Kennung   | Ursprünglicher Wunsch                                          | Weitergeführt unter |
+| --------- | -------------------------------------------------------------- | ------------------- |
+| Guide-F01 | Automatische Wohnflächenberechnung und sichtbarer Rechenweg    | N35                 |
+| Guide-F02 | Türnischen, Schornsteinabzüge und Vorbauwände berücksichtigen  | N35                 |
+| Guide-F03 | Wohnflächenbericht nach Vorlage als PDF                        | N36                 |
+| Guide-F04 | Name, Adresse, Geschossanzahl und Raumzahl im Bericht          | N37                 |
+| Guide-F05 | On-Demand-Menü nahe Cursor, verschiebbar, bleibt bei Auswahl   | N09                 |
+| Guide-F06 | Gewählten Punkt verschieben                                    | N11                 |
+| Guide-F07 | Bewegen                                                        | N10/N30             |
+| Guide-F08 | Info anzeigen                                                  | N09/N53             |
+| Guide-F09 | Strecken einer gewählten Seite                                 | N13                 |
+| Guide-F10 | Maßstableiste unter Canvas mit Änderungsmöglichkeit            | N04/N15/MS          |
+| Guide-F11 | Skalierwerkzeug für importierte Zeichnung mit zwei Messpunkten | N25/N28             |
+| Guide-F12 | Neue Länge per Menü oder AI-Sprachbefehl                       | N18/N25             |
+| Guide-F13 | Gesamte ausgewählte Referenz anhand der Messstrecke skalieren  | N25                 |
+| Guide-F14 | Grid sowie Snap und Hilfslinien aus dem Gespräch               | N07/N08             |
+| Guide-F15 | 2D-Linienwerkzeug Punkt zu Punkt, kein Erstellen in 3D         | N12/N39             |
+| Guide-F16 | Voreinstellung Linie oder Polylinie                            | N12/N53             |
+| Guide-F17 | Farbpalette, Strichstärke und Stricharten                      | N03/N40/N53         |
+| Guide-F18 | Räume in geschlossenen oder teilweise umschlossenen Wänden     | N31                 |
+| Guide-F19 | Raumkennung ab R-001, Name und Fläche                          | N32                 |
+| Guide-F20 | Lichte Raumhöhen erkennen und Höhenlinien konfigurieren        | N33                 |
+| Guide-F21 | Unteren und oberen Messbezug wählen                            | N34                 |
+| Guide-F22 | Höheninformationen in Wohnflächenberechnung verwenden          | N33/N35             |
+| Guide-F23 | Schraffur mit optionaler Füllung und Kontur                    | N39/N40/N58         |
+| Guide-F24 | Wählbare Farbe und Deckkraft oder Muster wie Mauerwerk         | N40                 |
+| Guide-F25 | Alle genannten Standardebenen                                  | N16/N38             |
+| Guide-F26 | Außenwand als Standard für Wände, 2D-Zeichnungen für 2D        | N16                 |
+| Guide-F27 | Elemente frei zuordnen, Ebenen erstellen und bearbeiten        | N16                 |
+| Guide-F28 | Organisation > Ebenen als eigenes Fenster                      | N16/N17             |
+| Guide-F29 | Ebenenumschalter in Menüleiste, ein- und ausblenden            | N17                 |
 
 ## 3. AI01–AI35 – Hauptvision und Ausbaukatalog
 
 **Stand:** Zukunftsanforderungen; vorhandene begrenzte Text-/Sprachactions sind kein Nachweis generativen Designs. A03/A11 des Masterplans sind ab sofort bindend. Die folgende Tabelle erhält jede einzelne Kennung.
 
-
-| ID | Funktion | Erwarteter Inhalt |
-| --- | --- | --- |
-| AI01 | Intent-based CAD | Entwurfsabsicht in Raumprogramm, Randbedingungen und überprüfbare BIM-Varianten übersetzen. |
-| AI02 | AI Design Agent | Varianten analysieren, Fachwerkzeuge nutzen und begründete Verbesserungen vorschlagen. |
-| AI03 | Conversational BIM | Modellabfragen und Änderungen durch Text und Sprache mit eindeutiger BIM-Semantik. |
-| AI04 | AI Command Layer | Kontrollierte, validierte CAD-Befehle über die gemeinsamen Application-Aktionen bereitstellen. |
-| AI05 | Generatives Gebäudedesign | Entwurfsvarianten unter Grundstücks-, Raum-, Budget- und Fachbedingungen vergleichen. |
-| AI06 | AI Space Planning | Räume, Erschließung und Nutzungen anhand von Größen und Nachbarschaften anordnen. |
-| AI07 | Echtzeit-Regelprüfung | Projektbezogene Regelprobleme markieren und geprüfte Änderungsvorschläge anbieten. |
-| AI08 | Building Code Copilot | Vorschrift, Fundstelle, Geltungsbereich, betroffene Bauteile und Lösungsvorschlag verbinden. |
-| AI09 | Scan / Bild / PDF → BIM | Quellen in editierbare BIM-Elemente übersetzen und Genauigkeit sowie unbekannte Eigenschaften ausweisen. |
-| AI10 | Sketch-to-BIM | Handskizzen in einen ersten editierbaren Grundriss übertragen; Maßstab und Unsicherheiten klären. |
-| AI11 | AI-Objektgenerator | Parametrische, klassifizierte BIM-Objekte mit belegbaren Eigenschaften erzeugen. |
-| AI12 | Semantic Materials | Materialdaten einschließlich Technik, Kosten und Umweltwirkung mit nachvollziehbarer Herkunft verknüpfen. |
-| AI13 | AI Facade Generator | Parametrische Fassadenvarianten erzeugen und technische Ziele prüfen. |
-| AI14 | Environmental Simulation | Interaktive Näherungen und validierte Fachsimulationen für Umwelt- und Energiefragen unterscheiden. |
-| AI15 | AI Cost Designer | Modellmengen mit Preisquellen und Unsicherheiten verbinden; Einsparvarianten vorschlagen. |
-| AI16 | Explain my building | Modellbezogene Erklärungen auf Bauteile, Mengen und Analyseergebnisse zurückführen. |
-| AI17 | Architecture Knowledge Graph | Stabile Beziehungen zwischen Räumen, Bauteilen, Materialien, Anforderungen und Analysen zugänglich machen. |
-| AI18 | Branching wie Git | Semantische Modellvarianten vergleichen; Zusammenführung und Konflikte fachlich regeln. |
-| AI19 | Change Impact Analysis | Auswirkungen einer vorgeschlagenen Änderung auf abhängige Bereiche vorab darstellen. |
-| AI20 | Autonomous Documentation | Modellbasierte Pläne, Listen, Raumbücher und Exporte nach Vorlagen vorbereiten. |
-| AI21 | Drawing QA Agent | Modell und tatsächlich ausgegebene Pläne auf Vollständigkeit und Widersprüche prüfen. |
-| AI22 | Coordination Agent | Geometrische und funktionale Konflikte zwischen Fachmodellen nachvollziehbar melden. |
-| AI23 | Natural-Language BIM Query | Sprachliche Fragen in strukturierte Abfragen mit IDs, Einheiten und Modellrevision übersetzen. |
-| AI24 | Spatial AI | Räumliche Nutzbarkeit, Bewegungsflächen und Wartbarkeit mit geeigneten Prüfungen beurteilen. |
-| AI25 | Design Critic | Entwürfe anhand offener Kriterien und Gewichtungen aus mehreren Perspektiven bewerten. |
-| AI26 | Multimodale Eingabe | Text, Sprache, Skizzen, Bilder und markierte Modellbereiche eindeutig mit Kontext verbinden. |
-| AI27 | AI Rendering im Modell | Visualisierungsvarianten erzeugen und die geforderte Geometrie-/Kameratreue prüfen. |
-| AI28 | Open BIM / offene Schnittstellen | Austauschprofile, APIs und Formate bedarfsgerecht integrieren und testen. |
-| AI29 | Cloud-native / Local-first | Betriebsformen, Offline-Verhalten, Synchronisation und projektbezogene Rechte definieren. |
-| AI30 | Performance-Anforderungen | Laufzeit, Reaktion und große Modelle auf definierter Referenzhardware messen. |
-| AI31 | Non-destructive AI | Änderungen als Vorschau und Diff mit Annahme, Anpassung, Ablehnung und vollständiger Rücknahme. |
-| AI32 | AI Confidence | Gesicherte, unsichere und nicht prüfbare Ergebnisse unterscheiden; keine erfundenen Konfidenzwerte. |
-| AI33 | AI Provenance | Quellen, Regelwerksstand, Modellrevision, Annahmen, Zeitpunkt und verwendetes Modell dokumentieren. |
-| AI34 | Spezialisierte Agents | Aufgaben bei belegtem Nutzen verteilen und eindeutige Schreibzuständigkeiten erhalten. |
-| AI35 | Design Goal Memory | Freigegebene Entwurfsziele versionieren und bei Änderungen auf Widersprüche prüfen. |
-
-
+| ID   | Funktion                         | Erwarteter Inhalt                                                                                          |
+| ---- | -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| AI01 | Intent-based CAD                 | Entwurfsabsicht in Raumprogramm, Randbedingungen und überprüfbare BIM-Varianten übersetzen.                |
+| AI02 | AI Design Agent                  | Varianten analysieren, Fachwerkzeuge nutzen und begründete Verbesserungen vorschlagen.                     |
+| AI03 | Conversational BIM               | Modellabfragen und Änderungen durch Text und Sprache mit eindeutiger BIM-Semantik.                         |
+| AI04 | AI Command Layer                 | Kontrollierte, validierte CAD-Befehle über die gemeinsamen Application-Aktionen bereitstellen.             |
+| AI05 | Generatives Gebäudedesign        | Entwurfsvarianten unter Grundstücks-, Raum-, Budget- und Fachbedingungen vergleichen.                      |
+| AI06 | AI Space Planning                | Räume, Erschließung und Nutzungen anhand von Größen und Nachbarschaften anordnen.                          |
+| AI07 | Echtzeit-Regelprüfung            | Projektbezogene Regelprobleme markieren und geprüfte Änderungsvorschläge anbieten.                         |
+| AI08 | Building Code Copilot            | Vorschrift, Fundstelle, Geltungsbereich, betroffene Bauteile und Lösungsvorschlag verbinden.               |
+| AI09 | Scan / Bild / PDF → BIM          | Quellen in editierbare BIM-Elemente übersetzen und Genauigkeit sowie unbekannte Eigenschaften ausweisen.   |
+| AI10 | Sketch-to-BIM                    | Handskizzen in einen ersten editierbaren Grundriss übertragen; Maßstab und Unsicherheiten klären.          |
+| AI11 | AI-Objektgenerator               | Parametrische, klassifizierte BIM-Objekte mit belegbaren Eigenschaften erzeugen.                           |
+| AI12 | Semantic Materials               | Materialdaten einschließlich Technik, Kosten und Umweltwirkung mit nachvollziehbarer Herkunft verknüpfen.  |
+| AI13 | AI Facade Generator              | Parametrische Fassadenvarianten erzeugen und technische Ziele prüfen.                                      |
+| AI14 | Environmental Simulation         | Interaktive Näherungen und validierte Fachsimulationen für Umwelt- und Energiefragen unterscheiden.        |
+| AI15 | AI Cost Designer                 | Modellmengen mit Preisquellen und Unsicherheiten verbinden; Einsparvarianten vorschlagen.                  |
+| AI16 | Explain my building              | Modellbezogene Erklärungen auf Bauteile, Mengen und Analyseergebnisse zurückführen.                        |
+| AI17 | Architecture Knowledge Graph     | Stabile Beziehungen zwischen Räumen, Bauteilen, Materialien, Anforderungen und Analysen zugänglich machen. |
+| AI18 | Branching wie Git                | Semantische Modellvarianten vergleichen; Zusammenführung und Konflikte fachlich regeln.                    |
+| AI19 | Change Impact Analysis           | Auswirkungen einer vorgeschlagenen Änderung auf abhängige Bereiche vorab darstellen.                       |
+| AI20 | Autonomous Documentation         | Modellbasierte Pläne, Listen, Raumbücher und Exporte nach Vorlagen vorbereiten.                            |
+| AI21 | Drawing QA Agent                 | Modell und tatsächlich ausgegebene Pläne auf Vollständigkeit und Widersprüche prüfen.                      |
+| AI22 | Coordination Agent               | Geometrische und funktionale Konflikte zwischen Fachmodellen nachvollziehbar melden.                       |
+| AI23 | Natural-Language BIM Query       | Sprachliche Fragen in strukturierte Abfragen mit IDs, Einheiten und Modellrevision übersetzen.             |
+| AI24 | Spatial AI                       | Räumliche Nutzbarkeit, Bewegungsflächen und Wartbarkeit mit geeigneten Prüfungen beurteilen.               |
+| AI25 | Design Critic                    | Entwürfe anhand offener Kriterien und Gewichtungen aus mehreren Perspektiven bewerten.                     |
+| AI26 | Multimodale Eingabe              | Text, Sprache, Skizzen, Bilder und markierte Modellbereiche eindeutig mit Kontext verbinden.               |
+| AI27 | AI Rendering im Modell           | Visualisierungsvarianten erzeugen und die geforderte Geometrie-/Kameratreue prüfen.                        |
+| AI28 | Open BIM / offene Schnittstellen | Austauschprofile, APIs und Formate bedarfsgerecht integrieren und testen.                                  |
+| AI29 | Cloud-native / Local-first       | Betriebsformen, Offline-Verhalten, Synchronisation und projektbezogene Rechte definieren.                  |
+| AI30 | Performance-Anforderungen        | Laufzeit, Reaktion und große Modelle auf definierter Referenzhardware messen.                              |
+| AI31 | Non-destructive AI               | Änderungen als Vorschau und Diff mit Annahme, Anpassung, Ablehnung und vollständiger Rücknahme.            |
+| AI32 | AI Confidence                    | Gesicherte, unsichere und nicht prüfbare Ergebnisse unterscheiden; keine erfundenen Konfidenzwerte.        |
+| AI33 | AI Provenance                    | Quellen, Regelwerksstand, Modellrevision, Annahmen, Zeitpunkt und verwendetes Modell dokumentieren.        |
+| AI34 | Spezialisierte Agents            | Aufgaben bei belegtem Nutzen verteilen und eindeutige Schreibzuständigkeiten erhalten.                     |
+| AI35 | Design Goal Memory               | Freigegebene Entwurfsziele versionieren und bei Änderungen auf Widersprüche prüfen.                        |
 
 ### Architekturvorgaben für spätere Umsetzung
 
@@ -695,8 +629,6 @@ Ein Mapping ist keine Fertigmeldung. Status/Abnahme folgen den referenzierten N-
 4. **Entwerfen:** Varianten, generative Planung und Fachanalysen nach Aufbau ihrer Modell- und Werkzeuggrundlagen.
 
 Dies ist die Reihenfolge innerhalb des zukünftigen AI-Ausbaus. Die Eingliederung in den Gesamtplan erfolgt später als eigener begrenzter Planungsauftrag. Der aktuelle nächste CAD-Auftrag bleibt maßgeblich.
-
-
 
 ### Ausführliche AI-Originalstrategie (Anlage vom 04.10.)
 
@@ -1447,25 +1379,23 @@ Beispielen brauchen eine definierte Baseline und Messmethode.
 CAD / BIM 2026 • Konzept & AI-Integration • 04.10.2026                                                             15
 ```
 
-
 ## 4. Ergänzungskataloge und aktueller Umfang
-
 
 ### V01–V09
 
 Die ursprüngliche Anforderung/Abnahme bleibt erhalten. Historische Befundzahlen sind keine aktuelle Messung. Prioritäten/Reihenfolge und erledigte Teilaufträge nach Masterplan bewerten.
 
-| Kennung | Anforderung/Befund der Quelle | Abnahme/Architektur |
-| --- | --- | --- |
-| V01 | Live Strecken, Flächen und Winkel messen | Gemeinsames Fang-/Geometriesystem; temporäre Messung ohne Modellkopie oder History je Mausziel. Dauerhafte assoziative Maßketten bleiben N46 als eigener Schritt. |
-| V02 | Bereich in 2D/3D auswählen, darauf skizzieren und per Sprache/Text Änderungen beschreiben | Ergänzt AI10/AI26/AI31. Ansicht, stabile Ziel-IDs und Modellrevision binden; Änderungsvorschau mit Annahme und Undo über vorhandene Aktionen. Eigenes Modelltraining ist keine festgelegte Voraussetzung. |
-| V03 | Live-3D-Schnitt | An N05 anbinden. Zunächst Schnittdarstellung als Ansichtsoperation konzipieren; tatsächliches Beschneiden des Fachmodells ist V09. Umfang der Schnittebenen/Schnittbox vor Umsetzung klären. |
-| V04 | First-Person mit WASD und Maus | Kameranavigation pro Ansicht; keine Modelländerung oder Modell-History pro Kamerabewegung. Perspektive, Eingabekonflikte und große Szenen gesondert abnehmen. |
-| V05 | Kontextmenü mit Kopieren, Einfügen, Importieren, Spiegeln und Darstellungsreihenfolge | N09/N10/N54 ergänzen; zentrale typisierte Aktionen mit Zulässigkeitsprüfung. Bedeutung der Darstellungsreihenfolge in 3D und erlaubte Spiegeloperationen sind noch offen. |
-| V06 | Doppelter Rechtsklick aktiviert das Werkzeug samt Eigenschaften des Elements | Werkzeugvorgaben übernehmen, ohne Quelle zu verändern oder ein neues Element automatisch zu erzeugen. Keine IDs/Anschlüsse kopieren. Eigenschaftenumfang vor Umsetzung festlegen. Das ist nicht automatisch eine Aktion zum Ändern anderer vorhandener Elemente. |
-| V07 | Schraffuren verwalten, erstellen und bearbeiten | N39/N40 erweitern; wiederverwendbare Musterdefinitionen von ihren Anwendungen trennen. Änderungen und Variantenbildung ausdrücklich regeln. |
-| V08 | Gemeinsame Werkzeugeigenschaften einheitlich zuerst anzeigen | N53 erweitern; Fähigkeiten und fachlich passende Felder verwenden. Kein Universalobjekt, das jedem Typ Breite, Höhe, Länge und Geschoss aufzwingt. |
-| V09 | 3D-Objekte vereinfacht trimmen, etwa Wand an Satteldach | N26/N27 und Dachfunktion verbinden. Fachliche Operation mit Abhängigkeiten, geprüfter Vorschau, einem Commit und Undo; kein ausschließlich im Renderer abgeschnittenes Ersatzmodell. |
+| Kennung | Anforderung/Befund der Quelle                                                             | Abnahme/Architektur                                                                                                                                                                                                                                              |
+| ------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| V01     | Live Strecken, Flächen und Winkel messen                                                  | Gemeinsames Fang-/Geometriesystem; temporäre Messung ohne Modellkopie oder History je Mausziel. Dauerhafte assoziative Maßketten bleiben N46 als eigener Schritt.                                                                                                |
+| V02     | Bereich in 2D/3D auswählen, darauf skizzieren und per Sprache/Text Änderungen beschreiben | Ergänzt AI10/AI26/AI31. Ansicht, stabile Ziel-IDs und Modellrevision binden; Änderungsvorschau mit Annahme und Undo über vorhandene Aktionen. Eigenes Modelltraining ist keine festgelegte Voraussetzung.                                                        |
+| V03     | Live-3D-Schnitt                                                                           | An N05 anbinden. Zunächst Schnittdarstellung als Ansichtsoperation konzipieren; tatsächliches Beschneiden des Fachmodells ist V09. Umfang der Schnittebenen/Schnittbox vor Umsetzung klären.                                                                     |
+| V04     | First-Person mit WASD und Maus                                                            | Kameranavigation pro Ansicht; keine Modelländerung oder Modell-History pro Kamerabewegung. Perspektive, Eingabekonflikte und große Szenen gesondert abnehmen.                                                                                                    |
+| V05     | Kontextmenü mit Kopieren, Einfügen, Importieren, Spiegeln und Darstellungsreihenfolge     | N09/N10/N54 ergänzen; zentrale typisierte Aktionen mit Zulässigkeitsprüfung. Bedeutung der Darstellungsreihenfolge in 3D und erlaubte Spiegeloperationen sind noch offen.                                                                                        |
+| V06     | Doppelter Rechtsklick aktiviert das Werkzeug samt Eigenschaften des Elements              | Werkzeugvorgaben übernehmen, ohne Quelle zu verändern oder ein neues Element automatisch zu erzeugen. Keine IDs/Anschlüsse kopieren. Eigenschaftenumfang vor Umsetzung festlegen. Das ist nicht automatisch eine Aktion zum Ändern anderer vorhandener Elemente. |
+| V07     | Schraffuren verwalten, erstellen und bearbeiten                                           | N39/N40 erweitern; wiederverwendbare Musterdefinitionen von ihren Anwendungen trennen. Änderungen und Variantenbildung ausdrücklich regeln.                                                                                                                      |
+| V08     | Gemeinsame Werkzeugeigenschaften einheitlich zuerst anzeigen                              | N53 erweitern; Fähigkeiten und fachlich passende Felder verwenden. Kein Universalobjekt, das jedem Typ Breite, Höhe, Länge und Geschoss aufzwingt.                                                                                                               |
+| V09     | 3D-Objekte vereinfacht trimmen, etwa Wand an Satteldach                                   | N26/N27 und Dachfunktion verbinden. Fachliche Operation mit Abhängigkeiten, geprüfter Vorschau, einem Commit und Undo; kein ausschließlich im Renderer abgeschnittenes Ersatzmodell.                                                                             |
 
 ### R26-01–08
 
@@ -1567,26 +1497,24 @@ Restbefund: Long Task bei Ladebestätigung 814 ms, bei Wiederaufnahme 890 ms; Se
 
 **R26-01/02, K02/03, RC07:** Begrenzter Ladepfad-Nachweis ergänzt; verbleibende Base64-Kosten und allgemeines Projekt-/Assetbudget bleiben offen. Aktiver Folgeauftrag ausschließlich Masterplan §9.
 
-
 **Recovery-Revisionspilot (12.10.2026, perf/recovery-revision-reuse):** PR249 nach ausdrücklicher Freigabe und grüner CI zusammengeführt. Gemeinsamer Application-Writer hält exakt gebundene Speicherbytes und geprüften Vorgänger in einer privaten Sitzung; Fortschreibung ausschließlich nach erfolgreichem CAS-Commit. Neue Inhalte und unbekannte Revisionen weiterhin voll geprüft. Manuelle Aufrufe bei ausgeschalteter Automatik behalten ihre frische Vorbereitung. Kein Format-/UI-/Adapter-/Limitwechsel. Fünf neue Tests vergleichen byteidentische Snapshots mit dem alten vollständigen Pfad und prüfen Fallback, Quota/Abbruch, ungültige Daten, falsche ID, Kontext und konkurrierende Writes. Bestehende Controller-Kontexttests bleiben grün.
 
 **R26-01/02, K02/03, RC07 – Nachweis 12.10.2026:** 865 Tests, beide Typechecks, Build/Lint bestanden; 108 Browser-Inhaltsvergleiche. Auto-Median beim 9,20-MiB-Profil 734 → 157 ms; längste Task 673 → 88 ms. Recovery-Lesen bleibt teuer. Messvertrag/Rohdaten in [RECOVERY_CAPACITY.md](docs/performance/RECOVERY_CAPACITY.md); kein allgemeines Kapazitätsversprechen. Aktiver Folgeauftrag ausschließlich Masterplan §9: einmalige vollständige Assetprüfung an Dateigrenze.
-
 
 **R26-01/02 – Recovery-Messnachweis 10.10.2026:** PR248 nach ausdrücklicher Freigabe zusammengeführt. `bench/recovery-capacity`, Messstand 2ceb659 auf Produktionsbasis 9eac205: sechs isolierte Geometrie-/PNG-Profile, 252 Phasenmessungen, 108 erfolgreiche Inhaltsvergleiche. Größtes Projekt 9,20 MiB; warmer Median manuell 1.366 ms/automatisch 734 ms gegenüber 75 ms im Speicheradapter. Längste Browser-Tasks 1.302/673 ms. [Messvertrag, Rohdaten und Reproduktion](docs/performance/RECOVERY_CAPACITY.md). 860 Tests, App-/Benchmark-Typecheck und Build bestanden; keine Browserfehler. Produktionscode/Dateigrenze unverändert. Begrenzter Service-Nachweis, kein kalter Browserstart, Gesamt-RAM/GPU, vollständiges UI-Laden oder Stromausfalltest. Aktiver Folgeauftrag ausschließlich Masterplan §9: geprüfte Speicherrevision innerhalb der Schreibsitzung unter unverändertem CAS-/Validierungsvertrag wiederverwenden.
 
 Die ursprüngliche Anforderung/Abnahme bleibt erhalten. Historische Befundzahlen sind keine aktuelle Messung. Prioritäten/Reihenfolge und erledigte Teilaufträge nach Masterplan bewerten.
 
-| Kennung | Anforderung/Befund der Quelle | Abnahme/Architektur |
-| --- | --- | --- |
-| R26-01 / P0 | **Große Projektdateien und Referenzen sicher handhaben.** K02/K03 und der bereits vermerkte Wunsch nach verknüpfbaren Bildern konkretisieren. Heute gilt die 10-MiB-Gesamtprojektgrenze; Bilddaten sind eingebettet. | Kapazitätsprofil mit Modellgröße, Bildpixeln, Datei- und Speicherbedarf sowie Öffnen, Bearbeiten, Undo und Speichern messen. Versionierten Modell-/Asset-Vertrag und verknüpfte **oder** portable eingebettete Referenzen mit fehlenden/verschobenen Dateien, Pfadauflösung, Umzug und Austausch prüfen. Keine pauschale Limitanhebung und keine Festlegung auf Datenbank, Desktop oder Browser vor Messung/Vertrag. |
-| R26-02 / P0 | **Datensicherheit und Wiederherstellung.** Neu als ausdrückliche Produktaufgabe. | Atomar speichern, sichere Vorgängerversion/Backup und Wiederaufnahme nach unerwartetem Abbruch konzipieren. Einen unterbrochenen Schreibvorgang und beschädigte/fehlende Assets praktisch prüfen: zuletzt gesichertes Projekt bleibt lesbar; Wiederherstellung zeigt klar an, welchen Stand sie anbietet. Undo ersetzt kein Backup. Plattformadapter bleiben austauschbar. |
-| R26-03 / P1 | **Gebäudekern zu einem nutzbaren Projekt erweitern.** Bereits gewünschte Mehrgeschossigkeit, Höhenbezüge, Türen, Decken, Dächer, Treppen und Räume bündeln; pro Bauteil kleine Schritte. | Gemeinsame stabile Elementidentitäten, Geschoss-/Höhenbezug und fachliche Abhängigkeiten. Änderung eines Bauteils aktualisiert betroffene Anschlüsse, Öffnungen, Räume und Ableitungen nachvollziehbar; Migration, Undo und Dateirundlauf prüfen. Fach-/3D-Elemente werden niemals proportional skaliert; Kalibrierung bleibt auf 2D/PDF/PNG/JPEG-Referenzen beschränkt. |
-| R26-04 / P1 | **Modellgebundene Dokumentation.** Vorhandener Wunsch nach Schnitten, Ansichten, Abbildern, unabhängiger Ansichtsdarstellung, Layouts und Plankopf. | Planansichten und Schnitte aus demselben BIM-Modell ableiten; Annotationen im richtigen Ansichts-/Dokumentkontext verwalten. Änderung am Modell aktualisiert abhängige Zeichnungen; Layout und PDF-Ausgabe behalten Ausschnitt, Maßstab, Sichtbarkeit und Beschriftung. Keine kopierten Bauteile als zweite Wahrheit. |
-| R26-05 / P1 | **Nachvollziehbare Auswertungen.** Räume/Wohnfläche sind bereits gewünscht; neue Ergänzung sind Tür-, Fenster-, Flächen- und Materiallisten. | Bauteillisten aus denselben validierten Modell-IDs und Eigenschaften ableiten. Jede Zahl nennt Umfang/Regelprofil und lässt ihre Quellen erkennen; Änderungen, Ausschlüsse, Rundung und nicht auswertbare Elemente werden sichtbar. Wohnflächenregeln bleiben ein eigenes, versioniertes Profil, keine implizite allgemeine Flächensumme. |
-| R26-06 / P2, früher falls Pilotprojekt blockiert | **Interoperabilität in beide Richtungen.** IFC-Export existiert; IFC-Import bzw. verknüpfte IFC-Referenz und konkret benötigte DWG/DXF-/PDF-Wege sind als Anschlussaufträge zu prüfen. | Erst Austauschfall, unterstützten IFC-Umfang, Einheiten/Koordinaten, GUIDs, unbekannte Bauteile und erneutes Laden festlegen. „IFC unterstützt“ erst behaupten, wenn der konkrete Import-/Exportfall mit Fremddatei reproduzierbar funktioniert. DWG/DXF und PDF sind eigene Teilaufträge, kein pauschales Vollformatversprechen. |
-| R26-07 / P2 | **Planstände und Revisionen.** Neue ausdrückliche Produktaufgabe; an R26-04 anbinden. | Ausgegebene Planversion mit Datum/Stand unveränderlich referenzieren; Änderungen am Modell gegenüber dieser Ausgabe kenntlich machen. Planindex, Revisionsvermerk und reproduzierbarer erneuter Export werden pro Plan geprüft. Modell-History und veröffentlichte Planstände bleiben getrennte Begriffe. |
-| R26-08 / P2 | **Modellqualität und Zusammenarbeit.** Neue ausdrückliche Aufgabe: prüfbare Regeln und später BCF-Aufgaben; IDS nur bei realem IFC-Austauschbedarf. | Vor Ausgabe fehlende Eigenschaften, ungültige Beziehungen und offene Warnungen mit stabilen Element-IDs anzeigen. BCF-Themen an Ansicht/Elemente/Modellrevision binden, importieren und exportieren, sobald ein konkreter Fachplanerablauf feststeht. Prüfregeln dürfen Änderungen nicht heimlich am Modell vornehmen. |
+| Kennung                                          | Anforderung/Befund der Quelle                                                                                                                                                                                        | Abnahme/Architektur                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R26-01 / P0                                      | **Große Projektdateien und Referenzen sicher handhaben.** K02/K03 und der bereits vermerkte Wunsch nach verknüpfbaren Bildern konkretisieren. Heute gilt die 10-MiB-Gesamtprojektgrenze; Bilddaten sind eingebettet. | Kapazitätsprofil mit Modellgröße, Bildpixeln, Datei- und Speicherbedarf sowie Öffnen, Bearbeiten, Undo und Speichern messen. Versionierten Modell-/Asset-Vertrag und verknüpfte **oder** portable eingebettete Referenzen mit fehlenden/verschobenen Dateien, Pfadauflösung, Umzug und Austausch prüfen. Keine pauschale Limitanhebung und keine Festlegung auf Datenbank, Desktop oder Browser vor Messung/Vertrag. |
+| R26-02 / P0                                      | **Datensicherheit und Wiederherstellung.** Neu als ausdrückliche Produktaufgabe.                                                                                                                                     | Atomar speichern, sichere Vorgängerversion/Backup und Wiederaufnahme nach unerwartetem Abbruch konzipieren. Einen unterbrochenen Schreibvorgang und beschädigte/fehlende Assets praktisch prüfen: zuletzt gesichertes Projekt bleibt lesbar; Wiederherstellung zeigt klar an, welchen Stand sie anbietet. Undo ersetzt kein Backup. Plattformadapter bleiben austauschbar.                                           |
+| R26-03 / P1                                      | **Gebäudekern zu einem nutzbaren Projekt erweitern.** Bereits gewünschte Mehrgeschossigkeit, Höhenbezüge, Türen, Decken, Dächer, Treppen und Räume bündeln; pro Bauteil kleine Schritte.                             | Gemeinsame stabile Elementidentitäten, Geschoss-/Höhenbezug und fachliche Abhängigkeiten. Änderung eines Bauteils aktualisiert betroffene Anschlüsse, Öffnungen, Räume und Ableitungen nachvollziehbar; Migration, Undo und Dateirundlauf prüfen. Fach-/3D-Elemente werden niemals proportional skaliert; Kalibrierung bleibt auf 2D/PDF/PNG/JPEG-Referenzen beschränkt.                                             |
+| R26-04 / P1                                      | **Modellgebundene Dokumentation.** Vorhandener Wunsch nach Schnitten, Ansichten, Abbildern, unabhängiger Ansichtsdarstellung, Layouts und Plankopf.                                                                  | Planansichten und Schnitte aus demselben BIM-Modell ableiten; Annotationen im richtigen Ansichts-/Dokumentkontext verwalten. Änderung am Modell aktualisiert abhängige Zeichnungen; Layout und PDF-Ausgabe behalten Ausschnitt, Maßstab, Sichtbarkeit und Beschriftung. Keine kopierten Bauteile als zweite Wahrheit.                                                                                                |
+| R26-05 / P1                                      | **Nachvollziehbare Auswertungen.** Räume/Wohnfläche sind bereits gewünscht; neue Ergänzung sind Tür-, Fenster-, Flächen- und Materiallisten.                                                                         | Bauteillisten aus denselben validierten Modell-IDs und Eigenschaften ableiten. Jede Zahl nennt Umfang/Regelprofil und lässt ihre Quellen erkennen; Änderungen, Ausschlüsse, Rundung und nicht auswertbare Elemente werden sichtbar. Wohnflächenregeln bleiben ein eigenes, versioniertes Profil, keine implizite allgemeine Flächensumme.                                                                            |
+| R26-06 / P2, früher falls Pilotprojekt blockiert | **Interoperabilität in beide Richtungen.** IFC-Export existiert; IFC-Import bzw. verknüpfte IFC-Referenz und konkret benötigte DWG/DXF-/PDF-Wege sind als Anschlussaufträge zu prüfen.                               | Erst Austauschfall, unterstützten IFC-Umfang, Einheiten/Koordinaten, GUIDs, unbekannte Bauteile und erneutes Laden festlegen. „IFC unterstützt“ erst behaupten, wenn der konkrete Import-/Exportfall mit Fremddatei reproduzierbar funktioniert. DWG/DXF und PDF sind eigene Teilaufträge, kein pauschales Vollformatversprechen.                                                                                    |
+| R26-07 / P2                                      | **Planstände und Revisionen.** Neue ausdrückliche Produktaufgabe; an R26-04 anbinden.                                                                                                                                | Ausgegebene Planversion mit Datum/Stand unveränderlich referenzieren; Änderungen am Modell gegenüber dieser Ausgabe kenntlich machen. Planindex, Revisionsvermerk und reproduzierbarer erneuter Export werden pro Plan geprüft. Modell-History und veröffentlichte Planstände bleiben getrennte Begriffe.                                                                                                            |
+| R26-08 / P2                                      | **Modellqualität und Zusammenarbeit.** Neue ausdrückliche Aufgabe: prüfbare Regeln und später BCF-Aufgaben; IDS nur bei realem IFC-Austauschbedarf.                                                                  | Vor Ausgabe fehlende Eigenschaften, ungültige Beziehungen und offene Warnungen mit stabilen Element-IDs anzeigen. BCF-Themen an Ansicht/Elemente/Modellrevision binden, importieren und exportieren, sobald ein konkreter Fachplanerablauf feststeht. Prüfregeln dürfen Änderungen nicht heimlich am Modell vornehmen.                                                                                               |
 
 **P0-Persistenzpilot (10.10.2026, fix/project-file-failure-contract):** PR241 nach ausdrücklicher Freigabe und erfolgreicher CI zusammengeführt (main 43092d1). Gemeinsame Application-Funktionen prepareProjectOpen/requestProjectDownload trennen Dateivorbereitung und bestätigte Modellübernahme von Browser-I/O. 10-MiB-Grenze vor Lesen sowie anhand tatsächlicher UTF-8-Daten; validierter/migrierter Kandidat einschließlich Standardordner wird erneut auf Dateigröße geprüft. Download meldet ausschließlich Anforderung, keine bestätigte Datenträgerspeicherung; Adapter räumt URL/Anker auch bei Fehlern auf. Fehlgeschlagene load-project-Aktion erhält Modell-, Undo-/Redo- und Ebenen-Historien. UI bestätigt Laden/ändert Auswahl erst nach Application-Bestätigung. 822 Tests (7 neue Fehler-/Abbruch-/Erfolgsfälle), Typecheck, vollständiges Lint (0 Fehler, 6 bestehende Warnungen) und Build bestanden. Browser: Download, beschädigte Datei, gültige Datei mit Abbruch und bestätigtes Laden geprüft. Lokaler Beleg outputs/persistence-download-status.png. Grenze: Browser kann späteren Downloadabbruch oder Plattenfehler nicht rückmelden; noch keine atomare Datenträgerablage, automatische Sicherung oder Crash-Recovery.
 
@@ -1619,104 +1547,101 @@ Grenzen: Browser-/Adressbindung, manuelle Sicherung, keine Löschung/Aufbewahrun
 **Recovery-Startangebot (10.10.2026, feat/recovery-startup-offer):** PR244 nach ausdrücklicher Freigabe und grüner CI zusammengeführt. Read-only Application-Abfrage startRecoveryOffer liefert validierten Kandidaten, leeren oder nicht verfügbaren Speicherzustand; Dispose unterdrückt verspätete Ergebnisse und Fehler. RecoveryStartupNotice zeigt dezent Projekt-ID/Zeitpunkt sowie Weiterarbeiten/Wiederaufnahme vorbereiten. Die Vorbereitung öffnet die bestehende Ladebestätigung; keine automatische Modellübernahme oder Speicheränderung. Projektwechsel (auch gleiche ID per neuer Ladeaktion) und Unmount verwerfen den Startkontext. Fehlender Speicher erzeugt keinen Hinweis, Lesefehler blockieren die Bedienung nicht.
 
 Nachweis: 833 Tests, darunter vier neue Tests für Angebot, fehlenden/beschädigten/gesperrten Speicher, verspäteten Erfolg und verspäteten Fehler nach Dispose; Typecheck, vollständiges Lint (0 Fehler/6 bestehende Warnungen) und Build bestanden. Browser: Startangebot mit Zeitpunkt, Weiterarbeiten bei unverändertem Modell/Undo, erneuter Start mit weiter vorhandenem Snapshot, Vorbereitung/Abbruch, bestätigtes Laden der 4-m-Wand statt 3-m-Ausgangsmodell geprüft; keine Konsolenfehler. Beleg outputs/recovery-startup.png. Keine automatische Sicherung; weiterhin ein manueller lokaler Slot plus Vorgänger. Ablehnen blendet nur das Angebot für diese Workspace-Sitzung aus, löscht keinen Snapshot.
+
 ### K01–K08
 
 Die ursprüngliche Anforderung/Abnahme bleibt erhalten. Historische Befundzahlen sind keine aktuelle Messung. Prioritäten/Reihenfolge und erledigte Teilaufträge nach Masterplan bewerten.
 
-| Kennung | Anforderung/Befund der Quelle | Abnahme/Architektur |
-| --- | --- | --- |
-| K01 / P1 | planBounds übergibt alle Extents per Spread an Math.min/max. Isolierter Original-Funktionskörper unter Node 24: 20 Polylinien mit je 10.000 Punkten, etwa 3,48 MB JSON-Testdaten, RangeError. Kein vollständiger Browser-/Projektvalidator-Test dieses Datensatzes. | Grenzen iterativ bestimmen; leere/kleine/große Fälle erhalten; gültige große Fixture und Browser-Einpassen nachweisen. |
-| K02 / P1 | 10-MiB-Gesamtprojektgrenze greift auch beim Commit; Base64-Bilder liegen im Projekt; JPEG-Import normalisiert nach PNG. Harte Produktgrenze aus size.ts/history.ts/import.ts. | Kapazitätsziel und versionierten Modell-/Asset-Speichervertrag anhand K03 festlegen, bevor das Limit erhöht wird. Portable Weitergabe, Altdateimigration und Windows/macOS-Adapter berücksichtigen. |
-| K03 / P1 | Kein vollständiger Nachweis für Dateigröße, Gesamtpixel, Spitzenspeicher und lange History. 16 MP ist nur ein Budget pro Bild; URL-Cache begrenzt Strings, nicht den gesamten decodierten Bild-/GPU-Speicher. | Begrenzte Kapazitätsdiagnose; mehrere Rasterreferenzen, 1/10/50/100 Undo-Stände, Import/Platzierung/Bestätigung/Laden/Speichern und 2D/3D getrennt messen. |
-| K04 / P1 | Auswahlbewegung ist lokal vorbereitet, andere Vorschauen laufen weiterhin über Gesamtprojektprüfungen, u. a. Wandbearbeitung, Wandzeichnen und Bildplatzierung. Statischer Codebefund. | Häufigen verbleibenden Consumer messen, anschließend einzeln an dieselbe Infrastruktur anschließen; keine neue Interaktions-/History-Engine pro Werkzeug. |
-| K05 / P1 | Bestätigung laut SESSION_WALL_EXTRUSION bei 1.000 Elementen etwa 504–512 ms in einzelnen Klickmessungen, eine Materialisierung, fünf Vollvalidierungen. | Commit separat profilieren; redundante Arbeit an derselben unveränderlichen Revision begrenzt reduzieren. Vollständige Datei-/öffentliche Eingangsprüfung und sichere Veröffentlichung erhalten. |
-| K06 / P2 | Betroffene Wandmenge umfasst konservativ die ganze verbundene Komponente; doppelte Konturableitung und Fensterfilter pro Wand bleiben Kandidaten. Statisch belegt, kein neuer isolierter Zeitnachweis. | Zusammenhängenden Wandzug und dichte Anschlüsse messen, Größe der betroffenen Menge protokollieren. Fachlich sichere Grenzen/Host-Indizes und gemeinsame Ableitung erst am Befund verbessern. |
-| K08 / P2 | IFC-Export enthält weitere Vollprüfungen, Fensterfilter pro Wand und vollständige Ausgabestrings im Speicher. Statischer Befund, keine neue Exportzeit. | In K03 Exportzeit/Spitzenspeicher aufnehmen; Host-Index und wiederverwendbare geprüfte Ableitungen erst anhand des Profils verbessern. |
-| K07 / P2 vor großem 3D-Ausbau | BimSolidView projiziert beim Draw alle Vertices auf der CPU und lädt Geometriepuffer neu; Picking durchsucht Flächen. Kein neuer 3D-Lasttest. | Kamera/Picking/mehrere Ansichten vermessen; GPU-Geometrie wiederverwenden, räumliche Suche und gezielte Aktualisierung prüfen. Kein vorab beschlossener Rendererwechsel. |
-
+| Kennung                       | Anforderung/Befund der Quelle                                                                                                                                                                                                                                       | Abnahme/Architektur                                                                                                                                                                                 |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| K01 / P1                      | planBounds übergibt alle Extents per Spread an Math.min/max. Isolierter Original-Funktionskörper unter Node 24: 20 Polylinien mit je 10.000 Punkten, etwa 3,48 MB JSON-Testdaten, RangeError. Kein vollständiger Browser-/Projektvalidator-Test dieses Datensatzes. | Grenzen iterativ bestimmen; leere/kleine/große Fälle erhalten; gültige große Fixture und Browser-Einpassen nachweisen.                                                                              |
+| K02 / P1                      | 10-MiB-Gesamtprojektgrenze greift auch beim Commit; Base64-Bilder liegen im Projekt; JPEG-Import normalisiert nach PNG. Harte Produktgrenze aus size.ts/history.ts/import.ts.                                                                                       | Kapazitätsziel und versionierten Modell-/Asset-Speichervertrag anhand K03 festlegen, bevor das Limit erhöht wird. Portable Weitergabe, Altdateimigration und Windows/macOS-Adapter berücksichtigen. |
+| K03 / P1                      | Kein vollständiger Nachweis für Dateigröße, Gesamtpixel, Spitzenspeicher und lange History. 16 MP ist nur ein Budget pro Bild; URL-Cache begrenzt Strings, nicht den gesamten decodierten Bild-/GPU-Speicher.                                                       | Begrenzte Kapazitätsdiagnose; mehrere Rasterreferenzen, 1/10/50/100 Undo-Stände, Import/Platzierung/Bestätigung/Laden/Speichern und 2D/3D getrennt messen.                                          |
+| K04 / P1                      | Auswahlbewegung ist lokal vorbereitet, andere Vorschauen laufen weiterhin über Gesamtprojektprüfungen, u. a. Wandbearbeitung, Wandzeichnen und Bildplatzierung. Statischer Codebefund.                                                                              | Häufigen verbleibenden Consumer messen, anschließend einzeln an dieselbe Infrastruktur anschließen; keine neue Interaktions-/History-Engine pro Werkzeug.                                           |
+| K05 / P1                      | Bestätigung laut SESSION_WALL_EXTRUSION bei 1.000 Elementen etwa 504–512 ms in einzelnen Klickmessungen, eine Materialisierung, fünf Vollvalidierungen.                                                                                                             | Commit separat profilieren; redundante Arbeit an derselben unveränderlichen Revision begrenzt reduzieren. Vollständige Datei-/öffentliche Eingangsprüfung und sichere Veröffentlichung erhalten.    |
+| K06 / P2                      | Betroffene Wandmenge umfasst konservativ die ganze verbundene Komponente; doppelte Konturableitung und Fensterfilter pro Wand bleiben Kandidaten. Statisch belegt, kein neuer isolierter Zeitnachweis.                                                              | Zusammenhängenden Wandzug und dichte Anschlüsse messen, Größe der betroffenen Menge protokollieren. Fachlich sichere Grenzen/Host-Indizes und gemeinsame Ableitung erst am Befund verbessern.       |
+| K08 / P2                      | IFC-Export enthält weitere Vollprüfungen, Fensterfilter pro Wand und vollständige Ausgabestrings im Speicher. Statischer Befund, keine neue Exportzeit.                                                                                                             | In K03 Exportzeit/Spitzenspeicher aufnehmen; Host-Index und wiederverwendbare geprüfte Ableitungen erst anhand des Profils verbessern.                                                              |
+| K07 / P2 vor großem 3D-Ausbau | BimSolidView projiziert beim Draw alle Vertices auf der CPU und lädt Geometriepuffer neu; Picking durchsucht Flächen. Kein neuer 3D-Lasttest.                                                                                                                       | Kamera/Picking/mehrere Ansichten vermessen; GPU-Geometrie wiederverwenden, räumliche Suche und gezielte Aktualisierung prüfen. Kein vorab beschlossener Rendererwechsel.                            |
 
 ### Aktuelle Statusüberlagerung der Ergänzungskataloge
 
-| ID | Stand / Restauftrag |
-| --- | --- |
-| V01 | Temporäre 2D-Distanz/Fläche/Winkel implementiert. Persistente Maße/Räume bleiben eigene Anforderungen. |
-| V02 | Geplant: markierter Bereich/Skizzenoverlay + Sprache/Text + gleiche Actions, kein Pflichttraining. |
-| V03 | Geplant: Live-3D-Schnitt als Anzeige, getrennt von V09-Fachcut. |
-| V04 | Geplant: First-Person/Perspektive und Navigation. |
-| V05 | Geplant/Teilfähigkeiten separat: Kontext-Copy/Paste/Import/Mirror/Reihenfolge. |
-| V06 | 2D-Pickup für Schraffur/Wand/Fenster/Linie/Polylinie implementiert, inklusive Ebene. 3D ausgeschlossen. |
-| V07 | Bibliothek/Creator/Revision/portable Anwendungen/Winkel und Modell-/Papiermaß implementiert; Musterupload/PAT, konkurrierende Publikation und zusätzliche Formate offen. |
-| V08 | Bestehende Felder/Defaults gemeinsam, zukünftige Capability-Adapter und Strukturierung offen. |
-| V09 | Geplant: fachliches 3D-Trimmen, Abhängigkeit zum Dach vorher klären. |
-| K01 | Großpunkt-Spread-Absturz behoben, nicht erneut als unimplementierten Auftrag starten. |
-| K02 | Vertrag/Pilot, geprüfte Identitätshandles und zentrale Eingangsgrenzen produktiv; Inline-Format/10MiB/Linkrefs bleiben. Recovery-Messung 10.10.: 9,20-MiB-Datei ergibt 18,40 MiB Recovery-Payload mit Vorgänger; Bytes sind kein RAM-/Speicherplatznachweis. |
+| ID  | Stand / Restauftrag                                                                                                                                                                                                                                                         |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| V01 | Temporäre 2D-Distanz/Fläche/Winkel implementiert. Persistente Maße/Räume bleiben eigene Anforderungen.                                                                                                                                                                      |
+| V02 | Geplant: markierter Bereich/Skizzenoverlay + Sprache/Text + gleiche Actions, kein Pflichttraining.                                                                                                                                                                          |
+| V03 | Geplant: Live-3D-Schnitt als Anzeige, getrennt von V09-Fachcut.                                                                                                                                                                                                             |
+| V04 | Geplant: First-Person/Perspektive und Navigation.                                                                                                                                                                                                                           |
+| V05 | Geplant/Teilfähigkeiten separat: Kontext-Copy/Paste/Import/Mirror/Reihenfolge.                                                                                                                                                                                              |
+| V06 | 2D-Pickup für Schraffur/Wand/Fenster/Linie/Polylinie implementiert, inklusive Ebene. 3D ausgeschlossen.                                                                                                                                                                     |
+| V07 | Bibliothek/Creator/Revision/portable Anwendungen/Winkel und Modell-/Papiermaß implementiert; Musterupload/PAT, konkurrierende Publikation und zusätzliche Formate offen.                                                                                                    |
+| V08 | Bestehende Felder/Defaults gemeinsam, zukünftige Capability-Adapter und Strukturierung offen.                                                                                                                                                                               |
+| V09 | Geplant: fachliches 3D-Trimmen, Abhängigkeit zum Dach vorher klären.                                                                                                                                                                                                        |
+| K01 | Großpunkt-Spread-Absturz behoben, nicht erneut als unimplementierten Auftrag starten.                                                                                                                                                                                       |
+| K02 | Vertrag/Pilot, geprüfte Identitätshandles und zentrale Eingangsgrenzen produktiv; Inline-Format/10MiB/Linkrefs bleiben. Recovery-Messung 10.10.: 9,20-MiB-Datei ergibt 18,40 MiB Recovery-Payload mit Vorgänger; Bytes sind kein RAM-/Speicherplatznachweis.                |
 | K03 | Erste Kapazitätsbaseline plus Recovery-Serviceprofil vom 10.10.2026 vorhanden, sechs Profile bis 9,20 MiB, Rohdaten in docs/performance/recovery-capacity-2026-10-10.json. Keine umfassende Spitzenspeicher-/Langhistory-/GPU-/Großdateiabnahme und kein Kaltstartnachweis. |
-| K04 | Vorbereitete Auswahl-/Endpunkt-/Wandzeichenpiloten vorhanden; restliche Consumer individuell messen/anschließen. |
-| K05 | Strukturierter Modellvergleich und atomare Bestätigung verbessert; globale Commit-/Dateiprüfung nicht abgeschafft. |
-| K06 | Kettenendwand-/Extrusionsreuse begrenzt integriert; allgemeine verbundene Komponenten/Öffnungsindizes offen. |
-| K07 | Persistente GPU-Puffer/Kameramatrix und gemeinsamer Welt-Picking-Index produktiv; Erstaufbau/Fallback/Mehrfensterlast bleiben. |
-| K08 | Exportprofil/Spitzenspeicher und weitere begründete Verbesserungen bleiben offen. |
+| K04 | Vorbereitete Auswahl-/Endpunkt-/Wandzeichenpiloten vorhanden; restliche Consumer individuell messen/anschließen.                                                                                                                                                            |
+| K05 | Strukturierter Modellvergleich und atomare Bestätigung verbessert; globale Commit-/Dateiprüfung nicht abgeschafft.                                                                                                                                                          |
+| K06 | Kettenendwand-/Extrusionsreuse begrenzt integriert; allgemeine verbundene Komponenten/Öffnungsindizes offen.                                                                                                                                                                |
+| K07 | Persistente GPU-Puffer/Kameramatrix und gemeinsamer Welt-Picking-Index produktiv; Erstaufbau/Fallback/Mehrfensterlast bleiben.                                                                                                                                              |
+| K08 | Exportprofil/Spitzenspeicher und weitere begründete Verbesserungen bleiben offen.                                                                                                                                                                                           |
 
 ### C01–C04 – direkte Gesprächsanforderungen
 
-| ID | Inhalt / aktueller Umfang | Abnahme |
-| --- | --- | --- |
+| ID  | Inhalt / aktueller Umfang                                                                                        | Abnahme                                                                                         |
+| --- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | C01 | Dezente 3D-Auswahlumrandung. Für Wandflächen implementiert; weitere Typen später über gemeinsame Edge-Ableitung. | Verdeckungsrichtig, keine Dreiecks-/Zellnähte, Fensterselektion markiert nicht fälschlich Host. |
-| C02 | Reale Mikrofon-/Transkriptqualität verbessern, z.B. „Wandlänge auf sechs Meter“. | Tatsächliche Sprachtests auf Zielsystemen; simulierte Transkripte ersetzen sie nicht. |
-| C03 | Glass Flow, obere Werkzeugeigenschaften, bewegliche Actions nahe Zeiger. | Keine doppelten Modelparameter; gleiche Eigenschaftsactions und FloatingPanel. |
-| C04 | Polylinie Doppelklick/Enter; Wandkette jetzt ein Undo/Redo. | Abbruch, Null-/ungültige Segmente, Abschluss und noch gültiger Kontext. |
+| C02 | Reale Mikrofon-/Transkriptqualität verbessern, z.B. „Wandlänge auf sechs Meter“.                                 | Tatsächliche Sprachtests auf Zielsystemen; simulierte Transkripte ersetzen sie nicht.           |
+| C03 | Glass Flow, obere Werkzeugeigenschaften, bewegliche Actions nahe Zeiger.                                         | Keine doppelten Modelparameter; gleiche Eigenschaftsactions und FloatingPanel.                  |
+| C04 | Polylinie Doppelklick/Enter; Wandkette jetzt ein Undo/Redo.                                                      | Abbruch, Null-/ungültige Segmente, Abschluss und noch gültiger Kontext.                         |
 
 ### UX01–UX03 – zusätzlich bestätigte Wünsche vom 08.10.
 
-| ID | Anforderung | Abnahme / offene Entscheidung |
-| --- | --- | --- |
-| UX01 | Anschlüsse ungleicher Wandstärken und weitere zulässige Anschlussarten | Abschlussregeln vorher festlegen; beide Achsrichtungen, Öffnungen, Plan/3D/IFC, Edit/Undo/Dateirundlauf. |
-| UX02 | Allgemeine 3D-Perspektive zusätzlich zur Axonometrie, in Einstellungen wählbar | Kamera/Projektion/Picking/Fang konsistent; Parameter/Persistenz/UI konkretisieren. |
-| UX03 | Settings nach Benutzer/Projekt/Ansicht/Werkzeug ordnen | Ein Besitzer-/Speichervertrag, gemeinsame Fensterhülle, keine widersprüchlichen Defaults. |
+| ID   | Anforderung                                                                    | Abnahme / offene Entscheidung                                                                            |
+| ---- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| UX01 | Anschlüsse ungleicher Wandstärken und weitere zulässige Anschlussarten         | Abschlussregeln vorher festlegen; beide Achsrichtungen, Öffnungen, Plan/3D/IFC, Edit/Undo/Dateirundlauf. |
+| UX02 | Allgemeine 3D-Perspektive zusätzlich zur Axonometrie, in Einstellungen wählbar | Kamera/Projektion/Picking/Fang konsistent; Parameter/Persistenz/UI konkretisieren.                       |
+| UX03 | Settings nach Benutzer/Projekt/Ansicht/Werkzeug ordnen                         | Ein Besitzer-/Speichervertrag, gemeinsame Fensterhülle, keine widersprüchlichen Defaults.                |
 
 ### MS – Maßstab und Abbilder
 
 MS-01: gemeinsamer Kontext/Selector; MS-02: Größen-/Schraffurpilot; MS-03: persistenter Arbeitsmaßstab außerhalb Modell-Undo; MS-03a: produktive Schraffurmodell-/Papiermaße; MS-04a: gespeicherter Ansichtsvertrag; MS-04b: gemeinsamer Arbeitskontext. Alle im genannten Umfang vorhanden. MS-04c: gespeicherte bearbeitbare Grundriss-Abbilder mit PR238 in main (927dfcf), Schema20, gemeinsame Linien/Schraffuren und unabhängige Filter. Kontextverwaltung im Folgebranch feat/document-context-management, 809 Tests bestanden. Weitere Scope-, Schnitt-, Annotations-/Layout- und Ausgabeanforderungen bleiben N05/06/20/46/49/50/57–60. Detailverträge unten.
 
-
 ## 5. Produktverantwortung – neue Anforderungen vom 10.10.
 
 Der technische CAD-Strang und der begleitende Produktstrang sind gemeinsam zu pflegen. Keine Bestätigung rechtlicher Konformität; keine fertigen Rechtstexte. Rechtsquellen/Termine der Anlagen bleiben vor Release aktuell zu prüfen. Sechs Register werden als Abschnitte dieser Datei geführt, damit keine sechs zusätzlichen Planungsdateien nötig sind. Maschinelle SBOM, Distributionstexte oder Security-Meldeeinstieg dürfen bei Umsetzung separate technische Artefakte sein und verweisen auf dieses Register.
 
-
-| ID | Anforderung | Status |
-| --- | --- | --- |
-| RC01 | Dependencies und Code-/Assetrechte inventarisieren, eigene Werke nachweisen, kommerzielle Weitergabe-/Attributions-/Quellcodepflichten tatsächlich prüfen. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-| RC02 | Bedrohungsmodell, Import-/Archiv-/Plugin-/Lizenz-/Updategrenzen, Secret-Schutz, Schwachstellenkontakt/-prozess, sichere Updates und Supportzeitraum. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-| RC03 | Releasegebundene tatsächliche SBOM, ergänzt um native/eingebettete Komponenten; keine Lizenz-/Sicherheitszertifizierung. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-| RC04 | Local-first CAD, getrennte Lizenz-/Privacy-Adapter; Konto/Offlineaktivierung/Geräte/Offlinefristen/kommerzielles Modell offen. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-| RC05 | Diagnose und Crash getrennt, aus/Opt-in/Widerruf, minimierte Daten; kostenlose klar bezeichnete Public Beta, Dauer/Folgemodell offen. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-| RC06 | Nach Ablauf und Lizenzserverausfall unterstützte Projekte lesen/exportieren/drucken, laufende Arbeit sicher erhalten; keine Projektlöschung/-verschlüsselung. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-| RC07 | P0-Dateisicherheit: Snapshot, Tempdatei/Prüfung/atomare Veröffentlichung, gültigen Vorgänger, Autosave/Backups/Recovery, Migration/Concurrency und Fehlertests. | Teilweise: projektbezogene Browser-Recovery, verlustfreie Legacy-Migration, Vorgänger/CAS und nativer Browsernachweis; optionaler Autosave-Pilot mit Konfliktpause vorhanden. Begrenzte Recovery-Kapazitätsmessung 10.10.2026 zeigt Hauptthread-Pausen bis 1,3 s; Sitzungsgebundene Revisionswiederverwendung vom 12.10. reduziert längste Auto-Task im selben Profil auf 88 ms; Fremddaten-Ladeprüfung gemäß Masterplan §9 bleibt offen. Externe Backups, allgemeine Kapazitätsfreigabe und Plattformgarantien offen. Siehe R26-02. |
-| RC08 | Geometrie vs. Normberechnung/Produktversprechen trennen; unabhängige Referenzfälle/Einheiten/Toleranzen/große Koordinaten/Roundtrip. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-| RC09 | Sechs laufende Register mit konkreten Nachweisen aktualisieren; externe Freigabe nicht erfinden. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-| RC10 | Zehn vorbereitende Arbeitsbereiche und Definition of Done aus Anlage erhalten; P0 vor Komfort/externem Test, Rechts-/Steuerprüfung vor Vertrieb. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-| SB01 | Reale Laufzeit-/transitive/native/nachgeladene Komponenten und getrennte Build-Tools erfassen. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-| SB02 | Releaseversion/Commit/Build/Plattform/Architektur/Hash und SBOM-Generator/Schema/Zeit/ID dokumentieren. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-| SB03 | Komponenten exakt aufgelöste Version/Herkunft/Referenz/Paketkennung/Lizenz und Beziehungen/Integrität/Lücken; Unbekanntes nicht schätzen. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-| SB04 | Generator SPDX-JSON oder CycloneDX-JSON passend zu tatsächlichem Stack auswählen und schema-validieren. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-| SB05 | Nach Build/Packaging erzeugen; fehlende/ungültige SBOM und ungeklärte Lizenzen blockieren externen Release. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-| SB06 | SBOM/Notices/Hashes/Prüfbericht archivieren, realen Komponentenbestand stichprobenweise und neue Dependency im Neubuild prüfen. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-| SB07 | Änderungs-/Schwachstellenabgleich mit betroffenen Novikov-Releases, Verantwortlichkeiten/Kontakt/Support vor Verteilung. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-| HP01 | Anbieteridentität/Rechtsform/Anschrift/Märkte/B2B-B2C/Accounts/Lizenzen/Dienste vor Homepage klären. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-| HP02 | Passende Anbieter-/Datenschutz-/EULA-/gegebenenfalls AGB-/Preis-/Support-/Beta-/Rechte-/Security-Inhalte veröffentlichen. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-| HP03 | Anwendbaren Checkout/Verbraucherwiderruf/Vertragsbestätigung/Kündigung/Barrierefreiheit aktuell fachlich prüfen und umsetzen. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-| HP04 | Transparente Beta/kein überraschender Zahlungseintritt, nach Ablauf Lese-/Export-/Druckzugriff, keine erzwungene Projektcloud, getrennte Opt-ins, belegte Marketingaussagen. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-| HP05 | Platzhalter auflösen, rechtliche/steuerliche Freigabe sowie Download/Opt-in/Widerruf/Kontakt/Ablauf/ggf. Kauf/Kündigung praktisch prüfen und Version/Freigabedatum dokumentieren. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
+| ID   | Anforderung                                                                                                                                                                       | Status                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| RC01 | Dependencies und Code-/Assetrechte inventarisieren, eigene Werke nachweisen, kommerzielle Weitergabe-/Attributions-/Quellcodepflichten tatsächlich prüfen.                        | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| RC02 | Bedrohungsmodell, Import-/Archiv-/Plugin-/Lizenz-/Updategrenzen, Secret-Schutz, Schwachstellenkontakt/-prozess, sichere Updates und Supportzeitraum.                              | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| RC03 | Releasegebundene tatsächliche SBOM, ergänzt um native/eingebettete Komponenten; keine Lizenz-/Sicherheitszertifizierung.                                                          | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| RC04 | Local-first CAD, getrennte Lizenz-/Privacy-Adapter; Konto/Offlineaktivierung/Geräte/Offlinefristen/kommerzielles Modell offen.                                                    | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| RC05 | Diagnose und Crash getrennt, aus/Opt-in/Widerruf, minimierte Daten; kostenlose klar bezeichnete Public Beta, Dauer/Folgemodell offen.                                             | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| RC06 | Nach Ablauf und Lizenzserverausfall unterstützte Projekte lesen/exportieren/drucken, laufende Arbeit sicher erhalten; keine Projektlöschung/-verschlüsselung.                     | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| RC07 | P0-Dateisicherheit: Snapshot, Tempdatei/Prüfung/atomare Veröffentlichung, gültigen Vorgänger, Autosave/Backups/Recovery, Migration/Concurrency und Fehlertests.                   | Teilweise: projektbezogene Browser-Recovery, verlustfreie Legacy-Migration, Vorgänger/CAS und nativer Browsernachweis; optionaler Autosave-Pilot mit Konfliktpause vorhanden. Begrenzte Recovery-Kapazitätsmessung 10.10.2026 zeigt Hauptthread-Pausen bis 1,3 s; Sitzungsgebundene Revisionswiederverwendung vom 12.10. reduziert längste Auto-Task im selben Profil auf 88 ms; Fremddaten-Ladeprüfung gemäß Masterplan §9 bleibt offen. Externe Backups, allgemeine Kapazitätsfreigabe und Plattformgarantien offen. Siehe R26-02. |
+| RC08 | Geometrie vs. Normberechnung/Produktversprechen trennen; unabhängige Referenzfälle/Einheiten/Toleranzen/große Koordinaten/Roundtrip.                                              | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| RC09 | Sechs laufende Register mit konkreten Nachweisen aktualisieren; externe Freigabe nicht erfinden.                                                                                  | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| RC10 | Zehn vorbereitende Arbeitsbereiche und Definition of Done aus Anlage erhalten; P0 vor Komfort/externem Test, Rechts-/Steuerprüfung vor Vertrieb.                                  | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| SB01 | Reale Laufzeit-/transitive/native/nachgeladene Komponenten und getrennte Build-Tools erfassen.                                                                                    | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| SB02 | Releaseversion/Commit/Build/Plattform/Architektur/Hash und SBOM-Generator/Schema/Zeit/ID dokumentieren.                                                                           | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| SB03 | Komponenten exakt aufgelöste Version/Herkunft/Referenz/Paketkennung/Lizenz und Beziehungen/Integrität/Lücken; Unbekanntes nicht schätzen.                                         | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| SB04 | Generator SPDX-JSON oder CycloneDX-JSON passend zu tatsächlichem Stack auswählen und schema-validieren.                                                                           | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| SB05 | Nach Build/Packaging erzeugen; fehlende/ungültige SBOM und ungeklärte Lizenzen blockieren externen Release.                                                                       | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| SB06 | SBOM/Notices/Hashes/Prüfbericht archivieren, realen Komponentenbestand stichprobenweise und neue Dependency im Neubuild prüfen.                                                   | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| SB07 | Änderungs-/Schwachstellenabgleich mit betroffenen Novikov-Releases, Verantwortlichkeiten/Kontakt/Support vor Verteilung.                                                          | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| HP01 | Anbieteridentität/Rechtsform/Anschrift/Märkte/B2B-B2C/Accounts/Lizenzen/Dienste vor Homepage klären.                                                                              | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| HP02 | Passende Anbieter-/Datenschutz-/EULA-/gegebenenfalls AGB-/Preis-/Support-/Beta-/Rechte-/Security-Inhalte veröffentlichen.                                                         | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| HP03 | Anwendbaren Checkout/Verbraucherwiderruf/Vertragsbestätigung/Kündigung/Barrierefreiheit aktuell fachlich prüfen und umsetzen.                                                     | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| HP04 | Transparente Beta/kein überraschender Zahlungseintritt, nach Ablauf Lese-/Export-/Druckzugriff, keine erzwungene Projektcloud, getrennte Opt-ins, belegte Marketingaussagen.      | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| HP05 | Platzhalter auflösen, rechtliche/steuerliche Freigabe sowie Download/Opt-in/Widerruf/Kontakt/Ablauf/ggf. Kauf/Kündigung praktisch prüfen und Version/Freigabedatum dokumentieren. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 ### Vollständige neue Anlagen – Detailanforderungen erhalten
 
 Die folgenden drei Quellen werden inhaltlich unverändert aufgenommen. Ihr damaliger Hinweis „Repository nicht geprüft“ beschreibt die Erstellung der Anlage, nicht diesen Konsolidierungsauftrag. Stack/CI sind jetzt im Masterplan bekannt; aufgelöste Dependency-/Buildinventare und juristische Freigaben bleiben ungeprüft.
 
-
 #### Anlage: NOVIKOV_CODEX_RELEASE_COMPLIANCE.md
 
- NOVIKOV CAD – Ergänzung für Codex: Release und Produktverantwortung
+NOVIKOV CAD – Ergänzung für Codex: Release und Produktverantwortung
 
 Stand: 10.10.2026. Grundlage: Entscheidungen des Projektinhabers in diesem Gespräch.
 Status: Verbindliche Entwicklungsanforderungen und offene Entscheidungen, keine Bescheinigung rechtlicher Konformität. Die bestehende Projekt-MD und der Quellcode lagen bei Erstellung nicht vor. Dieser Nachtrag wurde noch nicht in das Repository integriert; technische Funktionen sind damit noch nicht implementiert.
@@ -1729,20 +1654,20 @@ Ein technischer Entwicklungsstrang (Core, Geometrie, UI, Dateien, Rendering, Wer
 
 #### Festgehaltene Entscheidungen
 
-| Gesprächspunkt | Vorgabe | Status |
-|---|---|---|
-| 8 | Eigene Modelle/Schraffuren bevorzugen; Herkunft und Fremdbestandteile dokumentieren | Prüfregel aufgenommen |
-| 10 | Security von Anfang an dokumentieren und in Architektur berücksichtigen | beschlossen |
-| 11 | SBOM-Verfahren und Release-Zuordnung aufbauen | beschlossen; separates Konzept |
-| 12 | Lokale Projektdaten bevorzugen; Konto- und Lizenzmodell separat entscheiden | Kontoentscheidung offen |
-| 13 | Freiwillige, transparente Diagnose und Crashberichte | beschlossen |
-| 14 | Klar gekennzeichnete kostenlose Public Beta zur Stabilisierung | beschlossen; Termin offen |
-| 15 | Dauer, Ende und kostenpflichtiges Folgemodell später festlegen | ausdrücklich offen |
-| 16 | Nach Lizenzablauf Projekte weiter öffnen, exportieren und drucken | beschlossen |
-| 19 | Homepage-Anforderungen separat vorbereiten | separate Datei |
-| 22 | Dateisicherheit und Wiederherstellung haben höchste Priorität | beschlossen |
-| 24/25 | Produktanforderungen laufend pflegen; sechs Register führen | beschlossen |
-| 30 | Zehn vorbereitende Arbeitsbereiche in den Plan aufnehmen | unten konkretisiert |
+| Gesprächspunkt | Vorgabe                                                                             | Status                         |
+| -------------- | ----------------------------------------------------------------------------------- | ------------------------------ |
+| 8              | Eigene Modelle/Schraffuren bevorzugen; Herkunft und Fremdbestandteile dokumentieren | Prüfregel aufgenommen          |
+| 10             | Security von Anfang an dokumentieren und in Architektur berücksichtigen             | beschlossen                    |
+| 11             | SBOM-Verfahren und Release-Zuordnung aufbauen                                       | beschlossen; separates Konzept |
+| 12             | Lokale Projektdaten bevorzugen; Konto- und Lizenzmodell separat entscheiden         | Kontoentscheidung offen        |
+| 13             | Freiwillige, transparente Diagnose und Crashberichte                                | beschlossen                    |
+| 14             | Klar gekennzeichnete kostenlose Public Beta zur Stabilisierung                      | beschlossen; Termin offen      |
+| 15             | Dauer, Ende und kostenpflichtiges Folgemodell später festlegen                      | ausdrücklich offen             |
+| 16             | Nach Lizenzablauf Projekte weiter öffnen, exportieren und drucken                   | beschlossen                    |
+| 19             | Homepage-Anforderungen separat vorbereiten                                          | separate Datei                 |
+| 22             | Dateisicherheit und Wiederherstellung haben höchste Priorität                       | beschlossen                    |
+| 24/25          | Produktanforderungen laufend pflegen; sechs Register führen                         | beschlossen                    |
+| 30             | Zehn vorbereitende Arbeitsbereiche in den Plan aufnehmen                            | unten konkretisiert            |
 
 #### 1. Dependencies und Lizenzregister
 
@@ -1818,46 +1743,46 @@ Bei Integration unter docs/product/ anlegen oder vorhandene gleichwertige Dateie
 
 ##### 01_DEPENDENCIES.md
 
-| Komponente/Version | Quelle/Lockfile | direkt/transitiv | Einsatzbereich | ausgeliefert? | Security-Status/Nachweis |
-|---|---|---|---|---|---|
-| Noch aus Repository zu ermitteln | offen | offen | offen | offen | ungeprüft |
+| Komponente/Version               | Quelle/Lockfile | direkt/transitiv | Einsatzbereich | ausgeliefert? | Security-Status/Nachweis |
+| -------------------------------- | --------------- | ---------------- | -------------- | ------------- | ------------------------ |
+| Noch aus Repository zu ermitteln | offen           | offen            | offen          | offen         | ungeprüft                |
 
 ##### 02_LICENSE_REGISTER.md
 
-| Code/Asset/Version | Autor/Quelle | Lizenz/Rechtenachweis | geändert? | Verteilung/kommerzielle Nutzung | Pflichten | Freigabestatus |
-|---|---|---|---|---|---|---|
-| Noch zu inventarisieren | offen | offen | offen | zu prüfen | zu prüfen | ungeprüft |
+| Code/Asset/Version      | Autor/Quelle | Lizenz/Rechtenachweis | geändert? | Verteilung/kommerzielle Nutzung | Pflichten | Freigabestatus |
+| ----------------------- | ------------ | --------------------- | --------- | ------------------------------- | --------- | -------------- |
+| Noch zu inventarisieren | offen        | offen                 | offen     | zu prüfen                       | zu prüfen | ungeprüft      |
 
 ##### 03_SECURITY.md
 
-| Risiko/Schwachstelle | betroffene Version | Auswirkung | Maßnahme | Verantwortlich | Termin | Nachweis/Status |
-|---|---|---|---|---|---|---|
-| Erstes Bedrohungsmodell erstellen | offen | offen | Datenflüsse und Angriffsflächen prüfen | Projektinhaber | vor externem Test | geplant |
+| Risiko/Schwachstelle              | betroffene Version | Auswirkung | Maßnahme                               | Verantwortlich | Termin            | Nachweis/Status |
+| --------------------------------- | ------------------ | ---------- | -------------------------------------- | -------------- | ----------------- | --------------- |
+| Erstes Bedrohungsmodell erstellen | offen              | offen      | Datenflüsse und Angriffsflächen prüfen | Projektinhaber | vor externem Test | geplant         |
 
 ##### 04_PRIVACY.md
 
-| Verarbeitung | Zweck/Daten | Empfänger | Rechtsgrundlage | Aufbewahrung/Löschung | Einwilligung/Widerruf | Status |
-|---|---|---|---|---|---|---|
-| Lizenzverwaltung | Modell offen | offen | zu prüfen | zu definieren | modellabhängig | offen |
-| Optionale Diagnose | minimierte Fehlerdaten | offen | zu prüfen | zu definieren | getrenntes Opt-in | beschlossen, nicht implementiert |
+| Verarbeitung       | Zweck/Daten            | Empfänger | Rechtsgrundlage | Aufbewahrung/Löschung | Einwilligung/Widerruf | Status                           |
+| ------------------ | ---------------------- | --------- | --------------- | --------------------- | --------------------- | -------------------------------- |
+| Lizenzverwaltung   | Modell offen           | offen     | zu prüfen       | zu definieren         | modellabhängig        | offen                            |
+| Optionale Diagnose | minimierte Fehlerdaten | offen     | zu prüfen       | zu definieren         | getrenntes Opt-in     | beschlossen, nicht implementiert |
 
 ##### 05_RELEASE_REQUIREMENTS.md
 
-| Freigabekriterium | Nachweis | Status |
-|---|---|---|
-| Speicher-/Recovery- und Migrationstests erfolgreich | Testbericht je Build | offen |
-| Kritische Geometrie geprüft | Referenztests und Toleranzen | offen |
-| Rechte und Notices geklärt | Register und ausgelieferte Lizenztexte | offen |
-| SBOM passt zum Artefakt | Build-ID, Hash, validierte SBOM | offen |
-| Security-Bewertung und Updateweg geprüft | Risikobewertung/Testprotokoll | offen |
-| Datenschutz/Beta/Lizenzbedingungen passend | fachliche Prüfung | offen |
-| Lesen/Export/Druck nach Ablauf und offline möglich | Abnahmetests | offen |
+| Freigabekriterium                                   | Nachweis                               | Status |
+| --------------------------------------------------- | -------------------------------------- | ------ |
+| Speicher-/Recovery- und Migrationstests erfolgreich | Testbericht je Build                   | offen  |
+| Kritische Geometrie geprüft                         | Referenztests und Toleranzen           | offen  |
+| Rechte und Notices geklärt                          | Register und ausgelieferte Lizenztexte | offen  |
+| SBOM passt zum Artefakt                             | Build-ID, Hash, validierte SBOM        | offen  |
+| Security-Bewertung und Updateweg geprüft            | Risikobewertung/Testprotokoll          | offen  |
+| Datenschutz/Beta/Lizenzbedingungen passend          | fachliche Prüfung                      | offen  |
+| Lesen/Export/Druck nach Ablauf und offline möglich  | Abnahmetests                           | offen  |
 
 ##### 06_PRODUCT_CLAIMS.md
 
-| Funktion/Aussage | tatsächlicher Status | Norm/Version | Gültigkeitsbereich/Toleranz | Testnachweis | zulässige Kommunikation |
-|---|---|---|---|---|---|
-| Bestand aus Code ermitteln | ungeprüft | offen | offen | fehlt | bis Prüfung keine Zusicherung |
+| Funktion/Aussage           | tatsächlicher Status | Norm/Version | Gültigkeitsbereich/Toleranz | Testnachweis | zulässige Kommunikation       |
+| -------------------------- | -------------------- | ------------ | --------------------------- | ------------ | ----------------------------- |
+| Bestand aus Code ermitteln | ungeprüft            | offen        | offen                       | fehlt        | bis Prüfung keine Zusicherung |
 
 Ergänzend SECURITY.md als Einstieg für Sicherheitsmeldungen, THREAT_MODEL.md, RELEASE_PROCESS.md und VULNERABILITY_PROCESS.md erstellen, soweit nicht bereits gleichwertig vorhanden. Inhalte verlinken statt duplizieren. THIRD_PARTY_NOTICES und erforderliche Lizenztexte aus dem geprüften Register für die Distribution bereitstellen.
 
@@ -1881,11 +1806,9 @@ Arbeitsstand Deutschland/EU, keine individuelle Rechtsberatung; Rechtsprüfung v
 
 Die frühere Aussage zum konkreten deutschen Produkthaftungs-Gesetzgebungsverfahren wird hier nicht als geprüfte Tatsache übernommen. Anwendbares Haftungsrecht vor Release gesondert prüfen.
 
-
-
 #### Anlage: NOVIKOV_HOMEPAGE_ANFORDERUNGEN.md
 
- NOVIKOV CAD – Anforderungen für die spätere Homepage
+NOVIKOV CAD – Anforderungen für die spätere Homepage
 
 Stand: 10.10.2026. Separates Planungsdokument zu Gesprächspunkt 19.
 Status: Checkliste für spätere Umsetzung; keine fertigen AGB, EULA oder Datenschutzerklärung. Website, Verkauf und Accounts werden durch diese Datei nicht aktiviert. Rechtslage und konkretes Geschäftsmodell vor Veröffentlichung erneut prüfen.
@@ -1900,17 +1823,17 @@ Status: Checkliste für spätere Umsetzung; keine fertigen AGB, EULA oder Datens
 
 #### Seiten und Inhalte
 
-| Bereich | Anforderung | Freigabe/Nachweis |
-|---|---|---|
-| Impressum | Anbieterangaben und Kontakt leicht auffindbar, unmittelbar erreichbar, dauerhaft verfügbar; zusätzliche Angaben je Anbieterform | Angaben fachlich geprüft |
-| Datenschutz | Tatsächliche Verarbeitung durch Website, Accounts, Zahlung, Support und Diagnose beschreiben; Daten, Zwecke, Rechtsgrundlagen, Empfänger, Fristen und Rechte | Datenflussprüfung und passende Erklärung |
-| Lizenzbedingungen/EULA | Umfang der Nutzung, Geräte, Laufzeit, Updates, Support, Beta-Einschränkungen und Folgen des Ablaufs | Prüfung für tatsächliches Modell |
-| AGB, sofern eingesetzt | Vertragsregeln passend zu Angebot und Zielgruppe; zugänglich und wirksam einbezogen | rechtliche Prüfung |
-| Preise/Lizenzen | Gesamtpreis und anwendbare Steuern, Zahlungsrhythmus, Dauer, Verlängerung/Kündigung sowie Funktionsumfang transparent | endgültiges Modell beschlossen |
-| Support/Updates | Kontakt, unterstützte Systeme/Versionen, Updateversorgung und Supportzeitraum nachvollziehbar erklären | technisch und organisatorisch leistbar |
-| Beta-Download | Vorabstatus, Einschränkungen, Kompatibilität, Backup-Hinweise, Bedingungen und Feedbackweg | Beta-Freigabe |
-| Rechtehinweise | Drittanbieter-Lizenzen und erforderliche Attributionen zugänglich machen | geprüftes Lizenzregister |
-| Sicherheit | Meldeweg für Schwachstellen und unterstützte Versionen bereitstellen | funktionierender Meldeprozess |
+| Bereich                | Anforderung                                                                                                                                                  | Freigabe/Nachweis                        |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
+| Impressum              | Anbieterangaben und Kontakt leicht auffindbar, unmittelbar erreichbar, dauerhaft verfügbar; zusätzliche Angaben je Anbieterform                              | Angaben fachlich geprüft                 |
+| Datenschutz            | Tatsächliche Verarbeitung durch Website, Accounts, Zahlung, Support und Diagnose beschreiben; Daten, Zwecke, Rechtsgrundlagen, Empfänger, Fristen und Rechte | Datenflussprüfung und passende Erklärung |
+| Lizenzbedingungen/EULA | Umfang der Nutzung, Geräte, Laufzeit, Updates, Support, Beta-Einschränkungen und Folgen des Ablaufs                                                          | Prüfung für tatsächliches Modell         |
+| AGB, sofern eingesetzt | Vertragsregeln passend zu Angebot und Zielgruppe; zugänglich und wirksam einbezogen                                                                          | rechtliche Prüfung                       |
+| Preise/Lizenzen        | Gesamtpreis und anwendbare Steuern, Zahlungsrhythmus, Dauer, Verlängerung/Kündigung sowie Funktionsumfang transparent                                        | endgültiges Modell beschlossen           |
+| Support/Updates        | Kontakt, unterstützte Systeme/Versionen, Updateversorgung und Supportzeitraum nachvollziehbar erklären                                                       | technisch und organisatorisch leistbar   |
+| Beta-Download          | Vorabstatus, Einschränkungen, Kompatibilität, Backup-Hinweise, Bedingungen und Feedbackweg                                                                   | Beta-Freigabe                            |
+| Rechtehinweise         | Drittanbieter-Lizenzen und erforderliche Attributionen zugänglich machen                                                                                     | geprüftes Lizenzregister                 |
+| Sicherheit             | Meldeweg für Schwachstellen und unterstützte Versionen bereitstellen                                                                                         | funktionierender Meldeprozess            |
 
 #### Checkout und Verbraucherfunktionen – soweit anwendbar
 
@@ -1940,11 +1863,9 @@ Alle Platzhalter auflösen. Bedingungen, Datenschutzstruktur und Vertrieb durch 
 
 Diese Quellen ersetzen nicht die Prüfung weiterer anwendbarer Vorschriften zum tatsächlichen Veröffentlichungszeitpunkt.
 
-
-
 #### Anlage: NOVIKOV_SBOM_KONZEPT.md
 
- NOVIKOV CAD – SBOM-Konzept und Umsetzungsvorgabe
+NOVIKOV CAD – SBOM-Konzept und Umsetzungsvorgabe
 
 Stand: 10.10.2026. Zugehörig: NOVIKOV_CODEX_RELEASE_COMPLIANCE.md.
 Status: Konzept angelegt; keine fertige SBOM. Ohne Repository, Paketauflösung und Build-Artefakte können keine tatsächlichen Komponenten oder Versionen angegeben werden.
@@ -1959,15 +1880,15 @@ Direkte und transitive Laufzeitabhängigkeiten, native Bibliotheken, eingebettet
 
 #### Erforderliche Angaben
 
-| Ebene | Felder |
-|---|---|
-| Release | Produktversion, Commit, Build-ID, Plattform/Architektur, Zeitpunkt, Hash des ausgelieferten Artefakts |
-| SBOM | Format und Schemaversion, Generator/Version, Erstellungszeitpunkt, eindeutige Dokumentkennung |
-| Komponente | Name, exakt aufgelöste Version, Herkunft/Lieferant soweit bekannt, eindeutige Referenz, Paketkennung soweit verfügbar |
-| Beziehungen | direkte/transitive Abhängigkeiten und Zuordnung zum Produkt |
-| Integrität | Hashes der tatsächlich vorliegenden Komponenten/Artefakte, soweit ermittelbar |
-| Rechte | erkannte/deklarierte Lizenz mit Herkunft; geprüfte Bewertung separat im Lizenzregister |
-| Einschränkungen | fehlende Daten, nicht erfasste Komponenten und ungeprüfte Befunde ausdrücklich nennen |
+| Ebene           | Felder                                                                                                                |
+| --------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Release         | Produktversion, Commit, Build-ID, Plattform/Architektur, Zeitpunkt, Hash des ausgelieferten Artefakts                 |
+| SBOM            | Format und Schemaversion, Generator/Version, Erstellungszeitpunkt, eindeutige Dokumentkennung                         |
+| Komponente      | Name, exakt aufgelöste Version, Herkunft/Lieferant soweit bekannt, eindeutige Referenz, Paketkennung soweit verfügbar |
+| Beziehungen     | direkte/transitive Abhängigkeiten und Zuordnung zum Produkt                                                           |
+| Integrität      | Hashes der tatsächlich vorliegenden Komponenten/Artefakte, soweit ermittelbar                                         |
+| Rechte          | erkannte/deklarierte Lizenz mit Herkunft; geprüfte Bewertung separat im Lizenzregister                                |
+| Einschränkungen | fehlende Daten, nicht erfasste Komponenten und ungeprüfte Befunde ausdrücklich nennen                                 |
 
 Unbekannte Lizenz oder Version nicht schätzen. Erkannte Metadaten sind keine juristische Freigabe.
 
@@ -1994,63 +1915,58 @@ Unbekannte Lizenz oder Version nicht schätzen. Erkannte Metadaten sind keine ju
 
 Technologiestack, Generator, Schema-Version, CI-System, Artefaktablage und Verantwortungs-/Prüfablauf. Diese Angaben erst nach Sichtung des Repositories ausfüllen. Sicherheitskontakt und Supportzeitraum gemeinsam mit dem Release-Prozess festlegen.
 
-
-
-
 ### Laufende Produktregister – zunächst bewusst ohne erfundene Befunde
 
 #### Register 01 – Dependencies
 
-| Komponente/Version | Quelle | direkt/transitiv | ausgeliefert | Security/Nachweis |
-| --- | --- | --- | --- | --- |
-| Stack festgestellt, tatsächliche Paketauflösung noch zu inventarisieren | package.json / bun.lock, main-Referenz | offen | Packaging offen | Keine SBOM oder Lizenzfreigabe erzeugt |
+| Komponente/Version                                                      | Quelle                                 | direkt/transitiv | ausgeliefert    | Security/Nachweis                      |
+| ----------------------------------------------------------------------- | -------------------------------------- | ---------------- | --------------- | -------------------------------------- |
+| Stack festgestellt, tatsächliche Paketauflösung noch zu inventarisieren | package.json / bun.lock, main-Referenz | offen            | Packaging offen | Keine SBOM oder Lizenzfreigabe erzeugt |
 
 #### Register 02 – Code-/Assetlizenzen
 
-| Code/Asset/Version | Autor/Quelle | Rechte/Lizenz | Änderung/Weitergabe/Pflichten | Freigabe |
-| --- | --- | --- | --- | --- |
-| Tatsächlichen Bestand inventarisieren | offen | ungeprüft | vor Distribution klären | offen |
+| Code/Asset/Version                    | Autor/Quelle | Rechte/Lizenz | Änderung/Weitergabe/Pflichten | Freigabe |
+| ------------------------------------- | ------------ | ------------- | ----------------------------- | -------- |
+| Tatsächlichen Bestand inventarisieren | offen        | ungeprüft     | vor Distribution klären       | offen    |
 
 #### Register 03 – Security
 
-| Risiko | betroffene Version | Maßnahme | Verantwortlicher/Termin | Nachweis |
-| --- | --- | --- | --- | --- |
-| Imports/Parser/Archive, Persistenz, Updates, Plugins, Lizenzdienste | Architekturflächen; kein hier nachgewiesener Exploit | Erstes konkretes Bedrohungsmodell/Trust-Grenzen | Projektverantwortung zuordnen; vor externem Test | geplant |
+| Risiko                                                              | betroffene Version                                   | Maßnahme                                        | Verantwortlicher/Termin                          | Nachweis |
+| ------------------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------ | -------- |
+| Imports/Parser/Archive, Persistenz, Updates, Plugins, Lizenzdienste | Architekturflächen; kein hier nachgewiesener Exploit | Erstes konkretes Bedrohungsmodell/Trust-Grenzen | Projektverantwortung zuordnen; vor externem Test | geplant  |
 
 #### Register 04 – Datenschutz
 
-| Verarbeitung | Zweck/Daten | Empfänger/Rechtsgrundlage | Frist/Löschung/Zustimmung | Status |
-| --- | --- | --- | --- | --- |
-| Lizenzverwaltung | separat zu definieren; keine Projektinhalte | Modell/Anbieter offen | modellabhängig | Entscheidung offen |
-| Optionale Diagnose/Crash | getrennt/minimiert, sensible Inhalte bereinigen | zu definieren/prüfen | aus, getrenntes Opt-in/Widerruf, Fristen offen | Anforderung beschlossen, nicht implementiert |
-| Externe AI/Dokumentanalyse | genau zu definierende projektbezogene Übermittlung | Provider/Datenrollen offen | Rechte/Zustimmung/Fristen vor Pilot klären | geplant |
+| Verarbeitung               | Zweck/Daten                                        | Empfänger/Rechtsgrundlage  | Frist/Löschung/Zustimmung                      | Status                                       |
+| -------------------------- | -------------------------------------------------- | -------------------------- | ---------------------------------------------- | -------------------------------------------- |
+| Lizenzverwaltung           | separat zu definieren; keine Projektinhalte        | Modell/Anbieter offen      | modellabhängig                                 | Entscheidung offen                           |
+| Optionale Diagnose/Crash   | getrennt/minimiert, sensible Inhalte bereinigen    | zu definieren/prüfen       | aus, getrenntes Opt-in/Widerruf, Fristen offen | Anforderung beschlossen, nicht implementiert |
+| Externe AI/Dokumentanalyse | genau zu definierende projektbezogene Übermittlung | Provider/Datenrollen offen | Rechte/Zustimmung/Fristen vor Pilot klären     | geplant                                      |
 
 #### Register 05 – Externe Releasefreigabe
 
-| Gate | benötigter Nachweis | Status |
-| --- | --- | --- |
-| Dateisicherheit/Recovery/Migration | Abbruch, voller Datenträger, Rechte, beschädigte Datei, Konkurrenz, fehlerhafte Migration; letzter gültiger Stand | offen |
-| Fachgeometrie/Toleranzen/Claims | unabhängige Referenzfälle und definierter Gültigkeitsbereich | Teiltests vorhanden; gesamte Releasefreigabe offen |
-| Rechte/Notices | vollständiges geprüftes Code-/Assetregister und ausgelieferte Hinweise | offen |
-| SBOM/Integrität | reales Artefakt, Build-ID/Hash, schema-valide SBOM | offen |
-| Security/Updates/Support | Risikobewertung, Update-/Recoverytest, Kontakt/Zeitraum | offen |
-| Datenschutz/Beta/Lizenzen/Homepage | tatsächliche Datenflüsse/Bedingungen, fachliche Prüfung | offen |
-| Ablauf-/Offlinezugriff | Lesen/Export/Druck ohne gültige Bearbeitungslizenz oder erreichbaren Server | offen |
+| Gate                               | benötigter Nachweis                                                                                               | Status                                             |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Dateisicherheit/Recovery/Migration | Abbruch, voller Datenträger, Rechte, beschädigte Datei, Konkurrenz, fehlerhafte Migration; letzter gültiger Stand | offen                                              |
+| Fachgeometrie/Toleranzen/Claims    | unabhängige Referenzfälle und definierter Gültigkeitsbereich                                                      | Teiltests vorhanden; gesamte Releasefreigabe offen |
+| Rechte/Notices                     | vollständiges geprüftes Code-/Assetregister und ausgelieferte Hinweise                                            | offen                                              |
+| SBOM/Integrität                    | reales Artefakt, Build-ID/Hash, schema-valide SBOM                                                                | offen                                              |
+| Security/Updates/Support           | Risikobewertung, Update-/Recoverytest, Kontakt/Zeitraum                                                           | offen                                              |
+| Datenschutz/Beta/Lizenzen/Homepage | tatsächliche Datenflüsse/Bedingungen, fachliche Prüfung                                                           | offen                                              |
+| Ablauf-/Offlinezugriff             | Lesen/Export/Druck ohne gültige Bearbeitungslizenz oder erreichbaren Server                                       | offen                                              |
 
 #### Register 06 – Produktversprechen
 
-| Aussage/Funktion | tatsächlicher Umfang | Regel/Toleranz | Beleg | zulässige Kommunikation |
-| --- | --- | --- | --- | --- |
-| Aktueller Entwicklungsprototyp | Bestand im Masterplan §4 | kein allgemeines Norm-/Großdatenversprechen | dortige Commit-/Testquellen | nur konkret vorhandenen Umfang benennen |
-| Autonome AI-CAD-Entwürfe | Hauptvision, nicht implementiert | Quellen/Unsicherheit/Fachregeln erst aufbauen | Zielabnahme A11/AI | als Entwicklungsziel kennzeichnen |
-| Automatische Wohnfläche | nicht implementiert | geprüftes versioniertes WoFlV-Profil fehlt | N35/Guide-F01 | keine fertige Wohnflächen-/Normzusage |
-| Große Dateien | 10MiB-Produktlimit, begrenzte Diagnoseprofile | keine 200–300MB-Zusage | K03/CAPACITY_BASELINE historisch | gemessene Szenarien/Hardware nennen |
-
+| Aussage/Funktion               | tatsächlicher Umfang                          | Regel/Toleranz                                | Beleg                            | zulässige Kommunikation                 |
+| ------------------------------ | --------------------------------------------- | --------------------------------------------- | -------------------------------- | --------------------------------------- |
+| Aktueller Entwicklungsprototyp | Bestand im Masterplan §4                      | kein allgemeines Norm-/Großdatenversprechen   | dortige Commit-/Testquellen      | nur konkret vorhandenen Umfang benennen |
+| Autonome AI-CAD-Entwürfe       | Hauptvision, nicht implementiert              | Quellen/Unsicherheit/Fachregeln erst aufbauen | Zielabnahme A11/AI               | als Entwicklungsziel kennzeichnen       |
+| Automatische Wohnfläche        | nicht implementiert                           | geprüftes versioniertes WoFlV-Profil fehlt    | N35/Guide-F01                    | keine fertige Wohnflächen-/Normzusage   |
+| Große Dateien                  | 10MiB-Produktlimit, begrenzte Diagnoseprofile | keine 200–300MB-Zusage                        | K03/CAPACITY_BASELINE historisch | gemessene Szenarien/Hardware nennen     |
 
 ## 6. Zusammengeführte Detailverträge
 
 Diese Quellenkapseln erhalten die präzisen Regeln, Grenzen, offenen Wünsche und Akzeptanzfälle. Jede Kapsel ist ein datierter Originaltext; der Masterplan und aktuelle Statusüberlagerungen oben bestimmen, welche Passagen weiter gelten. Alte Folgeaufträge, Planungsstatus und Schemaangaben sind historische Evidenz. Inhaltliche Pflege künftig im passenden Registerabschnitt; ursprüngliche Datei als Herkunft, keine zweite aktiv gepflegte Prioritätenquelle.
-
 
 ### Detail D01 – F13_HILFLINIENSYSTEM.md
 
@@ -2477,8 +2393,6 @@ Bestehende Architektur und vorhandene Funktionen von NOVIKOV CAD nicht unnötig 
 
 Vor der Implementierung zuerst die bestehende Codebasis analysieren und feststellen, welche Geometry-, Pointer-, Viewport-, Tool- und Rendering-Systeme bereits vorhanden sind. Bestehende Funktionen wiederverwenden, statt parallele Systeme zu erzeugen.
 
-
-
 ### Detail D02 – docs/3D_INTERACTION_CONTRACT.md
 
 Herkunft: `docs/3D_INTERACTION_CONTRACT.md`, Snapshot main/PR237. Altstatus nicht als aktuelle Fertigmeldung lesen.
@@ -2506,14 +2420,14 @@ Sichtbarkeit und Fangbarkeit müssen zusammenpassen. Navigation darf niemals zug
 
 #### Produktvorschläge und offene Entscheidungen
 
-| Thema | Empfehlung zur späteren Abstimmung | Alternative / Folge |
-| --- | --- | --- |
-| Ebene erkennen | Während eines Ebenenvorgangs dezente Kennzeichnung „XY · z=0“, temporäre Hilfslinien und hohle silbergraue Anker im bestehenden Stil | Dauerhaftes Ebenengitter möglich, aber visuell dichter; noch nicht beschlossen |
-| Bewegungsursprung | Ausgewähltes Element bietet eindeutig benannte Fußpunkte auf z=0; erst deren Wahl startet den Vorgang | Wandflächenklick allein bleibt Elementauswahl; Oberpunkte nicht still nach unten projizieren |
-| Verdeckte Ziele | Standardmäßig nur sichtbare Anker anbieten; gesonderter, ausdrücklich aktivierter Referenzmodus könnte verdeckte Quellen anzeigen | X-Ray oder durchscheinende Ebene müssen erkennbar und abschaltbar sein; keine automatische Freigabe |
-| Kamera während Bearbeitung | Werkzeugklick und Navigation über expliziten Navigationsmodus trennen; nach Navigation Entwurf fortsetzen | Mitteltaste/Modifier wären schneller, benötigen aber ein einheitliches Konzept für 2D, 3D und Touch |
-| Kein Werkzeug aktiv | Bestehendes Wand-Picking und Linksziehen zunächst erhalten | Eine globale neue Gestenbelegung wäre ein eigener Auftrag |
-| Fast seitliche Ebene | Kleiner Hinweis „Arbeitsebene aus diesem Blick nicht eindeutig“, Cursorziel pausieren | Kein automatisches Drehen, kein erfundener Ersatzpunkt |
+| Thema                      | Empfehlung zur späteren Abstimmung                                                                                                   | Alternative / Folge                                                                                 |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Ebene erkennen             | Während eines Ebenenvorgangs dezente Kennzeichnung „XY · z=0“, temporäre Hilfslinien und hohle silbergraue Anker im bestehenden Stil | Dauerhaftes Ebenengitter möglich, aber visuell dichter; noch nicht beschlossen                      |
+| Bewegungsursprung          | Ausgewähltes Element bietet eindeutig benannte Fußpunkte auf z=0; erst deren Wahl startet den Vorgang                                | Wandflächenklick allein bleibt Elementauswahl; Oberpunkte nicht still nach unten projizieren        |
+| Verdeckte Ziele            | Standardmäßig nur sichtbare Anker anbieten; gesonderter, ausdrücklich aktivierter Referenzmodus könnte verdeckte Quellen anzeigen    | X-Ray oder durchscheinende Ebene müssen erkennbar und abschaltbar sein; keine automatische Freigabe |
+| Kamera während Bearbeitung | Werkzeugklick und Navigation über expliziten Navigationsmodus trennen; nach Navigation Entwurf fortsetzen                            | Mitteltaste/Modifier wären schneller, benötigen aber ein einheitliches Konzept für 2D, 3D und Touch |
+| Kein Werkzeug aktiv        | Bestehendes Wand-Picking und Linksziehen zunächst erhalten                                                                           | Eine globale neue Gestenbelegung wäre ein eigener Auftrag                                           |
+| Fast seitliche Ebene       | Kleiner Hinweis „Arbeitsebene aus diesem Blick nicht eindeutig“, Cursorziel pausieren                                                | Kein automatisches Drehen, kein erfundener Ersatzpunkt                                              |
 
 Diese Empfehlungen werden durch Freigabe des Dokumentations-PRs nicht automatisch zu einer Gesten- oder X-Ray-Entscheidung. Vor dem entsprechenden UI-Auftrag sind die betroffenen offenen Punkte konkret zu klären. Der folgende technische Schritt benötigt diese Entscheidungen nicht.
 
@@ -2535,9 +2449,6 @@ After PR #74 the user explicitly instructed continuation of the presented propos
 
 Projection state, visibility and local candidates described above are implemented by PRs #72-74. The first visible preview now uses them and the shared hover state machine. No full 3D editing or generated guide-intersection acquisition is claimed.
 
-
-
-
 ### Detail D03 – docs/3D_WORKPLANE_PLAN.md
 
 Herkunft: `docs/3D_WORKPLANE_PLAN.md`, Snapshot main/PR237. Altstatus nicht als aktuelle Fertigmeldung lesen.
@@ -2551,16 +2462,16 @@ Dieser Auftrag verändert ausschließlich Dokumentation. Die nachfolgend vorgesc
 
 #### 1. Nachgewiesener Bestand
 
-| Bereich | Vorhanden | Für eine Arbeitsebene fehlt |
-| --- | --- | --- |
-| `src/lib/bim/model.ts` | Meter, eine Geschoss-ID, XY-Wände und Linien; Wandhöhe und Fensterbrüstung | Geschosshöhe, beliebige Z-Koordinate für einen Wandfuß oder Zeichnungspunkt |
-| `src/lib/bim/geometry.ts` | `buildSolid`, Z nach oben, orthographisches `projectPoint`; Zentrierung und Maßstab aus Solid-Grenzen | inverse Projektion auf eine Ebene, unabhängiger Projektionsrahmen |
-| `src/components/cad/BimSolidView.tsx` | WebGL-Wände mit Öffnungen, Orbit/Pan/Zoom, Auswählen per Wand-ID | Arbeitsebenen-Cursor, Fangoverlay, ToolInteraction-Anbindung; Linien werden nicht als 3D-Geometrie gezeichnet |
-| `src/lib/bim/picking.ts` | `pickWall` prüft projizierte Dreiecke und Tiefe, respektiert Öffnungen | kein Welt-Trefferpunkt; Wand-ID allein ist kein Bewegungsursprung |
-| `src/application/tools/interaction.ts`, `snapping.ts` | gemeinsamer Ursprung, validierte Vorschau/Bestätigung, Werkzeugausschlüsse und Fangresolver | Rendering-Adapter für Ebenenkoordinaten aus 3D-Zeigerposition |
-| `src/application/snapping/local-sources.ts` | Modell-Snapshotcache, lokale XY-Primitivsuche, volle Quellenvalidierung | projektionsabhängiges Suchgebiet und exakte CSS-Metrik |
-| `src/constraints/snapping/*`, `inference/segment-hover.ts`, `src/rendering/viewport/reference-picking.ts` | Ranking, Hover und Picking mit skalarem Pixel-pro-Meter-Faktor | anisotrope Bildschirmabstände einer schräg gesehenen Ebene |
-| `src/components/cad/CadViewport.tsx`, `CadWorkspace.tsx` | aktive Ansicht, getrennte 2D-/3D-Kamera, gemeinsames Modell | 3D ist heute primär Darstellung/Auswahl; Werkzeugstart/Einzelansicht und Moduswechsel führen teils zurück nach 2D bzw. brechen Entwürfe ab |
+| Bereich                                                                                                   | Vorhanden                                                                                             | Für eine Arbeitsebene fehlt                                                                                                                |
+| --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/lib/bim/model.ts`                                                                                    | Meter, eine Geschoss-ID, XY-Wände und Linien; Wandhöhe und Fensterbrüstung                            | Geschosshöhe, beliebige Z-Koordinate für einen Wandfuß oder Zeichnungspunkt                                                                |
+| `src/lib/bim/geometry.ts`                                                                                 | `buildSolid`, Z nach oben, orthographisches `projectPoint`; Zentrierung und Maßstab aus Solid-Grenzen | inverse Projektion auf eine Ebene, unabhängiger Projektionsrahmen                                                                          |
+| `src/components/cad/BimSolidView.tsx`                                                                     | WebGL-Wände mit Öffnungen, Orbit/Pan/Zoom, Auswählen per Wand-ID                                      | Arbeitsebenen-Cursor, Fangoverlay, ToolInteraction-Anbindung; Linien werden nicht als 3D-Geometrie gezeichnet                              |
+| `src/lib/bim/picking.ts`                                                                                  | `pickWall` prüft projizierte Dreiecke und Tiefe, respektiert Öffnungen                                | kein Welt-Trefferpunkt; Wand-ID allein ist kein Bewegungsursprung                                                                          |
+| `src/application/tools/interaction.ts`, `snapping.ts`                                                     | gemeinsamer Ursprung, validierte Vorschau/Bestätigung, Werkzeugausschlüsse und Fangresolver           | Rendering-Adapter für Ebenenkoordinaten aus 3D-Zeigerposition                                                                              |
+| `src/application/snapping/local-sources.ts`                                                               | Modell-Snapshotcache, lokale XY-Primitivsuche, volle Quellenvalidierung                               | projektionsabhängiges Suchgebiet und exakte CSS-Metrik                                                                                     |
+| `src/constraints/snapping/*`, `inference/segment-hover.ts`, `src/rendering/viewport/reference-picking.ts` | Ranking, Hover und Picking mit skalarem Pixel-pro-Meter-Faktor                                        | anisotrope Bildschirmabstände einer schräg gesehenen Ebene                                                                                 |
+| `src/components/cad/CadViewport.tsx`, `CadWorkspace.tsx`                                                  | aktive Ansicht, getrennte 2D-/3D-Kamera, gemeinsames Modell                                           | 3D ist heute primär Darstellung/Auswahl; Werkzeugstart/Einzelansicht und Moduswechsel führen teils zurück nach 2D bzw. brechen Entwürfe ab |
 
 Der Stand ist keine perspektivische Kamera und kein 3D-Flächenmodellierer. Bestehende stabile Bauteil-IDs, Undo/Redo, Projektdateien und IFC bleiben maßgeblich. `pickWall` und Punktfang beantworten verschiedene Fragen: welches Bauteil ausgewählt wird und welcher geometrische Zielpunkt gemeint ist.
 
@@ -2617,17 +2528,17 @@ Alle Entfernungspfade erfassen: `candidates.ts`, Achsenkandidaten in `engine.ts`
 
 #### 6. Lebenszyklus und Eingabe — vorgeschlagene Fortführung
 
-| Ereignis | Verhalten beim späteren Anschluss |
-| --- | --- |
-| Ebenenbezogenen Vorgang starten | Modell/Element-ID/Ebene binden; exakten gewählten Ursprung sofort als geschützte Referenz setzen |
-| Mausbewegung | CSS → Ebene → gemeinsame lokale Suche plus aktive Referenzen → Vorschau/Overlay |
-| Tab, Winkel/Länge, Shift | bestehende ToolInteraction und Hilfseingabe; keine zweite Eingabeleiste oder Kopie der Tab-Logik |
-| Orbit/Pan/Zoom/Resize | Erwerb während Navigation suspendieren, Cursor anschließend neu berechnen; Modellreferenzen behalten, Gültigkeit der Abbildung prüfen |
-| Fast seitlicher Blick | keine Bestätigung aus ungültiger Inverse; Entwurf/Referenzen erhalten; gültiger Blick setzt fort |
-| Ebene/aktive Ansicht/Layout wechseln | Entwurf abbrechen, temporäre Quellen verwerfen; kein Übertragen in eine andere Ebene ohne ausdrücklichen Vorgang |
-| Modell/Undo/Redo/Laden | bestehende Snapshot-Invalidierung; alte Ereignisse nicht mehr übernehmen |
-| Snap aus/ein | heutiger Vertrag: zusätzliche Referenzen löschen, geschützten Ursprung bei aktiver Aktion wieder anbieten; numerische Eingabe bleibt fachlich validiert |
-| Escape | zuerst modaler Dialog, dann Mehrdeutigkeitsliste, dann Referenzauswahl, schließlich Werkzeugentwurf; keine doppelte Bestätigung/Abbruchwirkung |
+| Ereignis                             | Verhalten beim späteren Anschluss                                                                                                                       |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ebenenbezogenen Vorgang starten      | Modell/Element-ID/Ebene binden; exakten gewählten Ursprung sofort als geschützte Referenz setzen                                                        |
+| Mausbewegung                         | CSS → Ebene → gemeinsame lokale Suche plus aktive Referenzen → Vorschau/Overlay                                                                         |
+| Tab, Winkel/Länge, Shift             | bestehende ToolInteraction und Hilfseingabe; keine zweite Eingabeleiste oder Kopie der Tab-Logik                                                        |
+| Orbit/Pan/Zoom/Resize                | Erwerb während Navigation suspendieren, Cursor anschließend neu berechnen; Modellreferenzen behalten, Gültigkeit der Abbildung prüfen                   |
+| Fast seitlicher Blick                | keine Bestätigung aus ungültiger Inverse; Entwurf/Referenzen erhalten; gültiger Blick setzt fort                                                        |
+| Ebene/aktive Ansicht/Layout wechseln | Entwurf abbrechen, temporäre Quellen verwerfen; kein Übertragen in eine andere Ebene ohne ausdrücklichen Vorgang                                        |
+| Modell/Undo/Redo/Laden               | bestehende Snapshot-Invalidierung; alte Ereignisse nicht mehr übernehmen                                                                                |
+| Snap aus/ein                         | heutiger Vertrag: zusätzliche Referenzen löschen, geschützten Ursprung bei aktiver Aktion wieder anbieten; numerische Eingabe bleibt fachlich validiert |
+| Escape                               | zuerst modaler Dialog, dann Mehrdeutigkeitsliste, dann Referenzauswahl, schließlich Werkzeugentwurf; keine doppelte Bestätigung/Abbruchwirkung          |
 
 Heute nutzt die 3D-Navigation Linksziehen und PointerUp zur Wandselektion. Die spätere Arbeitsebenenbedienung benötigt explizite gegenseitige Zuständigkeit: Navigationsgeste bestätigt nie ein Modell, Werkzeugklick ersetzt keine stabile Zielselektion. Konkrete Gestenwahl ist noch offen; bevor eine 3D-Modellaktion freigeschaltet wird, muss sie zur vorhandenen 2D-Bedienung passen. Die Ausblendung inaktiver Auswahlpanels aus PR #63 bleibt gültig.
 
@@ -2660,9 +2571,6 @@ Abschnitt 8 ist umgesetzt: `geometry/projections/orthographic.ts` ist die gemein
 Die normalisierte 2x2-Matrix verhindert unnötigen Determinantenüberlauf. Das Verhältnis der Singulärwerte darf höchstens 1e6 sein; seitlicher Blick wird abgelehnt. Pro Rückrechnung wird zusätzlich 32 * Maschinen-Epsilon * (CSS-Größenordnung * Unendlichnorm der Inversen + Welt-Größenordnung) als konservative Rundungsreserve geschätzt. Sie berücksichtigt die Größen der Subtraktionen und die Verstärkung durch die Inverse; Ergebnisse über 1e-6 m werden abgelehnt. Der Sicherheitsfaktor deckt die kurze arithmetische Rechenkette in den getesteten Bereichen ab, ist aber kein formaler Intervallbeweis für beliebige IEEE-754-Eingaben. Gerätegenauigkeit, CSS-Quantisierung und ungenaue Quelldaten sind ausdrücklich nicht enthalten. Diese Grenze ist kein Fangradius und verändert keine Modellvalidierung.
 
 Die vier inversen Ecken des CSS-Suchquadrats bilden dessen affines Parallelogramm. Seine um die Rundungsreserve erweiterte AABB ist nur Kandidaten-Vorauswahl; genaue Abstände müssen anschließend in CSS geprüft werden. Tests decken Randpunkte, negative Koordinaten, verschiedene Kameras, Zoom/Pan, CSS-Backbuffer-Rundung, h=0/h=3,2, Snapshot-Isolation und bewusst abgelehnte Extremwerte ab. 264 Tests/TypeScript/Build erfolgreich, ESLint ohne Fehler (sechs bekannte Warnungen); Browserprüfung der bisherigen Wanddarstellung und Auswahl bestanden. Der einzige aktive Folgeauftrag steht in DEVELOPMENT_PLAN.md.
-
-
-
 
 ### Detail D04 – docs/AUTOMATIC_WALL_CONNECTIONS.md
 
@@ -2729,9 +2637,6 @@ Nettovolumina fuer Ecke und geschlossenen Grundriss bestanden. Der neue regulär
 Export muss noch in Archicad praktisch abgenommen werden; die fruehere Abnahme
 des expliziten Eck-Testexports bleibt als separater Nachweis bestehen.
 
-
-
-
 ### Detail D05 – docs/LAYER_CONTRACT.md
 
 Herkunft: `docs/LAYER_CONTRACT.md`, Snapshot main/PR237. Altstatus nicht als aktuelle Fertigmeldung lesen.
@@ -2776,16 +2681,16 @@ deserializeProject; seine Fehlermeldung nennt ausdrücklich Version 1.
 Project; Sichtbarkeit ist bisher kein Ebenenfilter. Die Sichtbarkeitsprüfung der
 3D-Fußpunkte behandelt Verdeckung durch Material, nicht Organisationsebenen.
 
-| Quelle | Erhaltener Umfang | Abhängigkeit / Verantwortung |
-| --- | --- | --- |
-| Guide F25–F27, N16 | Standardebenen, stabile Zuordnung, frei zuordnen/erstellen/umbenennen | domain/layers, Project-Validierung; application/layers und gemeinsame History |
-| Guide F28–F29, N17 | Organisation > Ebenen; Umschalter, einzeln/alle/außer Auswahl schalten | gemeinsamer Sichtbarkeitskontext vor Rendering, Auswahl und Fang; UI erst danach |
-| N38 | Räume standardmäßig auf Raum | zusätzliche Ebene; Raumtyp bleibt späterer Auftrag |
-| N39, N46, N49 | 2D-Ergänzungen, Bemaßung und Textelemente | Annotation-Scope bleibt eigenständiger Bezug; keine implizite Scope-Änderung durch Layer |
-| N42, N47 | Wand-/Deckenaufbau | AssemblyLayer ist Materialschicht, keine Organisationsebene |
-| N05–N06, N57–N60 | Ansichten und Abbilder mit eigener Darstellung | ModelView/DrawingDocument referenzieren dieselben Layer- und Element-IDs |
-| N18–N19, N29, N53 | gleiche Aktionen aus Maus, Eigenschaften, Text/AI/Voice und Ansichten | stabile Ziel-ID und aktueller Projektkontext; keine zweite Mutation |
-| N02, N21–N22, N25, N31 | Export, Geschosse/Höhen, Skalieren, Räume | Layer ändert weder Exportumfang, Höhenbezug noch Bauteil-Capability |
+| Quelle                 | Erhaltener Umfang                                                      | Abhängigkeit / Verantwortung                                                             |
+| ---------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Guide F25–F27, N16     | Standardebenen, stabile Zuordnung, frei zuordnen/erstellen/umbenennen  | domain/layers, Project-Validierung; application/layers und gemeinsame History            |
+| Guide F28–F29, N17     | Organisation > Ebenen; Umschalter, einzeln/alle/außer Auswahl schalten | gemeinsamer Sichtbarkeitskontext vor Rendering, Auswahl und Fang; UI erst danach         |
+| N38                    | Räume standardmäßig auf Raum                                           | zusätzliche Ebene; Raumtyp bleibt späterer Auftrag                                       |
+| N39, N46, N49          | 2D-Ergänzungen, Bemaßung und Textelemente                              | Annotation-Scope bleibt eigenständiger Bezug; keine implizite Scope-Änderung durch Layer |
+| N42, N47               | Wand-/Deckenaufbau                                                     | AssemblyLayer ist Materialschicht, keine Organisationsebene                              |
+| N05–N06, N57–N60       | Ansichten und Abbilder mit eigener Darstellung                         | ModelView/DrawingDocument referenzieren dieselben Layer- und Element-IDs                 |
+| N18–N19, N29, N53      | gleiche Aktionen aus Maus, Eigenschaften, Text/AI/Voice und Ansichten  | stabile Ziel-ID und aktueller Projektkontext; keine zweite Mutation                      |
+| N02, N21–N22, N25, N31 | Export, Geschosse/Höhen, Skalieren, Räume                              | Layer ändert weder Exportumfang, Höhenbezug noch Bauteil-Capability                      |
 
 Die vollständige historische N01–N60-Matrix bleibt in
 `FUNCTION_REQUIREMENTS_2026-10-03.md` erhalten. Dieser Abgleich aktualisiert den
@@ -2891,9 +2796,6 @@ Tests erhalten/anpassen, Build/TypeScript/Lint ausführen. Praktisch anschließe
 altes Projekt öffnen, Maße/Positionen vergleichen, neu speichern und wieder öffnen.
 Die native Dateidialog-Abnahme aus PR #83 bleibt bis zu einem echten Bediennachweis offen.
 
-
-
-
 ### Detail D06 – docs/LAYER_VISIBILITY_PLAN.md
 
 Herkunft: `docs/LAYER_VISIBILITY_PLAN.md`, Snapshot main/PR237. Altstatus nicht als aktuelle Fertigmeldung lesen.
@@ -2982,9 +2884,6 @@ Der Nutzer hat entschieden: globales Undo/Redo betrifft nur Modellveraenderungen
 
 Die Palette nutzt die gemeinsame Application-Aktion; der Renderer erhaelt den gespeicherten Filter. 363 Tests bestanden; Browserabnahme ist wegen Verbindungs-Timeouts noch offen. Der einzige naechste Auftrag ist die praktische Gesamtabnahme gemaess letztem Abschnitt in DEVELOPMENT_PLAN.md. Fruehere Rubriken mit Folgeauftraegen sind historische Zwischenstaende.
 
-
-
-
 ### Detail D07 – docs/LOCAL_SNAP_QUERY_PLAN.md
 
 Herkunft: `docs/LOCAL_SNAP_QUERY_PLAN.md`, Snapshot main/PR237. Altstatus nicht als aktuelle Fertigmeldung lesen.
@@ -3006,17 +2905,17 @@ Basis: PR #53 (6a5f47a), zuvor lokal f55912e. Der Wiederverwendungsschritt ist u
 
 #### Iststand und konkrete Änderungen
 
-| Vorhandenes Modul | Befund | Geplante Verantwortung |
-|---|---|---|
-| application/snapping/project-references.ts | Baut Punkte/Segmente und über segmentIntersectionReferences alle Kreuzungen. WeakMap hält den fertigen Satz je Project. | Primitive Quellen und Segmentgeometrie ohne globale Kreuzungen ableiten; Snapshot mit Index und stabilem Quellenverzeichnis wiederverwenden. |
-| constraints/snapping/segment-references.ts | Vollständige Paarprüfung, kanonische Quellenreihenfolge und Abhängigkeiten. | Dieselbe exakte Schnittprüfung nur auf lokalen Segmenten; bisherige Vollprüfung als Testoracle behalten. |
-| geometry/intersections/segments.ts und tolerances/model.ts | Geprüfte Schnitt- und Toleranzregeln. | Unverändert für endgültige Trefferentscheidung; konservative Suchboxen dürfen keine hier akzeptierten Treffer verlieren. |
-| application/tools/snapping.ts, direct-edit/snapping.ts | Gemeinsamer Einstieg, Eigen-/Host-Ausschlüsse, feste Achsen. | Suchsnapshot und Quellenerlaubnis weitergeben; beide Blätter eines Schnittpunkts prüfen. Keine globale Listenfilterung pro Mausbewegung. |
-| constraints/snapping/candidates.ts | Durchläuft alle Punktquellen; activeSources baut pro Abfrage eine vollständige Map. | Lokale Punkte getrennt von aktiven Quellen auswerten; Gültigkeit aktiver Quellen über Snapshot-Lookup prüfen. |
-| constraints/inference/construction-reference.ts | Prüft Blattabhängigkeiten gegen vollständige Basisliste; acquisitionReference sucht Kandidaten in dieser Liste. | Identität und Blattgeometrie über Quellenverzeichnis prüfen; lokal erzeugte Schnittreferenz direkt übernehmen können. Kein räumlicher Ausschluss gültiger entfernter Blätter. |
-| constraints/inference/hover-reference.ts | sameHoverSession hängt an Array-Identität. | Modell-/Policy-/Reset-Identität statt wechselnder lokaler Ergebnisliste; Mausbewegung darf Timer und Referenzen nicht pauschal zurücksetzen. |
-| useHoverReference.ts, segment-hover.ts | Zweite querySnap-Abfrage und linearer Segmentscan für Referenzerwerb. | Dieselbe lokale Geometriesuche nutzen; bestehende getrennte Hover-Semantik und Zeitquelle erhalten. Hover-Abfrage muss nicht dieselben Achsbeschränkungen wie der Commit haben. |
-| BimPlan.tsx | Liefert Kamera, Pointer, Policy, Hover und Darstellung. | Liefert Abfragekontext; enthält weder Indexbau noch eigene Schnittmathematik. Vorschau und Bestätigung verwenden dieselbe Auflösung. |
+| Vorhandenes Modul                                          | Befund                                                                                                                  | Geplante Verantwortung                                                                                                                                                          |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| application/snapping/project-references.ts                 | Baut Punkte/Segmente und über segmentIntersectionReferences alle Kreuzungen. WeakMap hält den fertigen Satz je Project. | Primitive Quellen und Segmentgeometrie ohne globale Kreuzungen ableiten; Snapshot mit Index und stabilem Quellenverzeichnis wiederverwenden.                                    |
+| constraints/snapping/segment-references.ts                 | Vollständige Paarprüfung, kanonische Quellenreihenfolge und Abhängigkeiten.                                             | Dieselbe exakte Schnittprüfung nur auf lokalen Segmenten; bisherige Vollprüfung als Testoracle behalten.                                                                        |
+| geometry/intersections/segments.ts und tolerances/model.ts | Geprüfte Schnitt- und Toleranzregeln.                                                                                   | Unverändert für endgültige Trefferentscheidung; konservative Suchboxen dürfen keine hier akzeptierten Treffer verlieren.                                                        |
+| application/tools/snapping.ts, direct-edit/snapping.ts     | Gemeinsamer Einstieg, Eigen-/Host-Ausschlüsse, feste Achsen.                                                            | Suchsnapshot und Quellenerlaubnis weitergeben; beide Blätter eines Schnittpunkts prüfen. Keine globale Listenfilterung pro Mausbewegung.                                        |
+| constraints/snapping/candidates.ts                         | Durchläuft alle Punktquellen; activeSources baut pro Abfrage eine vollständige Map.                                     | Lokale Punkte getrennt von aktiven Quellen auswerten; Gültigkeit aktiver Quellen über Snapshot-Lookup prüfen.                                                                   |
+| constraints/inference/construction-reference.ts            | Prüft Blattabhängigkeiten gegen vollständige Basisliste; acquisitionReference sucht Kandidaten in dieser Liste.         | Identität und Blattgeometrie über Quellenverzeichnis prüfen; lokal erzeugte Schnittreferenz direkt übernehmen können. Kein räumlicher Ausschluss gültiger entfernter Blätter.   |
+| constraints/inference/hover-reference.ts                   | sameHoverSession hängt an Array-Identität.                                                                              | Modell-/Policy-/Reset-Identität statt wechselnder lokaler Ergebnisliste; Mausbewegung darf Timer und Referenzen nicht pauschal zurücksetzen.                                    |
+| useHoverReference.ts, segment-hover.ts                     | Zweite querySnap-Abfrage und linearer Segmentscan für Referenzerwerb.                                                   | Dieselbe lokale Geometriesuche nutzen; bestehende getrennte Hover-Semantik und Zeitquelle erhalten. Hover-Abfrage muss nicht dieselben Achsbeschränkungen wie der Commit haben. |
+| BimPlan.tsx                                                | Liefert Kamera, Pointer, Policy, Hover und Darstellung.                                                                 | Liefert Abfragekontext; enthält weder Indexbau noch eigene Schnittmathematik. Vorschau und Bestätigung verwenden dieselbe Auflösung.                                            |
 
 #### Gemeinsamer Abfragevertrag (Semantik verbindlich, Namen Vorschlag)
 
@@ -3058,9 +2957,6 @@ Die Schritte 2–3 sind Abhängigkeiten, keine parallelen Aufträge. Kein Komple
 #### Genau ein ausführbarer Folgeauftrag
 
 Den reinen lokalen Quellensuchdienst implementieren: primitive Modellableitung ohne Kreuzungen, unveränderlicher räumlicher Index mit Quellen-Lookup, CSS-Radiusabfrage für Punkte und lange Segmente sowie lokale Schnittreferenzen mit bestehender Identität/Toleranz. Differentialtests gegen vollständigen Referenzaufbau im Suchradius und ein reproduzierbarer Messlauf für 100/1000/5000 Elemente. Keine UI-/Hover-Umschaltung, keine neue Fangart, kein globaler Index aller Kreuzungen. Der Dienst muss tatsächlich abfragbar und getestet sein, nicht nur aus Platzhaltertypen bestehen. Erst auf diesem Nachweis die gemeinsame Integration planen.
-
-
-
 
 ### Detail D08 – docs/PERSISTENT_T_RELATIONS.md
 
@@ -3225,9 +3121,6 @@ anbinden; gemeinsame Application-Aktion wiederverwenden. Aktueller Detailauftrag
 steht in DEVELOPMENT_PLAN.md. Keine zweite Geometrie und keine Pflichtbedienung
 im Diagnosefenster.
 
-
-
-
 ### Detail D09 – docs/REFERENCE_SELECTION_PLAN.md
 
 Herkunft: `docs/REFERENCE_SELECTION_PLAN.md`, Snapshot main/PR237. Altstatus nicht als aktuelle Fertigmeldung lesen.
@@ -3248,15 +3141,15 @@ Hinweis: „Viele mögliche Fangziele – automatische Schnittpunkte pausiert“
 
 Dichtezustand (normal/pausiert) und Auswahlzustand (automatisch/auswählen/eingeschränkt) getrennt führen. Ein zentraler reiner Application-Controller verwaltet Ereignisse, keine Zustandsschalter in jedem Werkzeug.
 
-| Ereignis | Wirkung |
-|---|---|
-| Referenzen auswählen | Entwurf/letzte Vorschau einfrieren, vorhandene bestätigte Auswahl als Arbeitskopie übernehmen, übrige Geometrie dezent abblenden |
-| Klick auf Segment | Segment in Arbeitskopie umschalten; keine Modellselektion, kein Bewegungsklick |
-| Klick auf vorhandenen Punkt | Explizite Hilfsreferenz vormerken; keine Null-Längen-Linie und kein Segmentpaar erzeugen |
-| Übernehmen / Enter | Nichtleere gültige Arbeitskopie bestätigen; Auswahlmodus verlassen und denselben Entwurf fortsetzen |
-| Abbrechen / Escape | Arbeitskopie verwerfen, vorherige Auswahl und Entwurf erhalten; Escape nicht zusätzlich ans Werkzeug weiterreichen |
-| Auswahl aufheben | Automatischen Modus wiederherstellen; bei weiter dichter Geometrie bleiben automatische Schnittpunkte sichtbar pausiert |
-| Vorgang bestätigen/abbrechen, Werkzeugwechsel, Modellwechsel/Undo/Redo/Laden | Auswahl und suspendierten Kontext verwerfen, vorhandenen gemeinsamen Sitzungsreset verwenden |
+| Ereignis                                                                     | Wirkung                                                                                                                          |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Referenzen auswählen                                                         | Entwurf/letzte Vorschau einfrieren, vorhandene bestätigte Auswahl als Arbeitskopie übernehmen, übrige Geometrie dezent abblenden |
+| Klick auf Segment                                                            | Segment in Arbeitskopie umschalten; keine Modellselektion, kein Bewegungsklick                                                   |
+| Klick auf vorhandenen Punkt                                                  | Explizite Hilfsreferenz vormerken; keine Null-Längen-Linie und kein Segmentpaar erzeugen                                         |
+| Übernehmen / Enter                                                           | Nichtleere gültige Arbeitskopie bestätigen; Auswahlmodus verlassen und denselben Entwurf fortsetzen                              |
+| Abbrechen / Escape                                                           | Arbeitskopie verwerfen, vorherige Auswahl und Entwurf erhalten; Escape nicht zusätzlich ans Werkzeug weiterreichen               |
+| Auswahl aufheben                                                             | Automatischen Modus wiederherstellen; bei weiter dichter Geometrie bleiben automatische Schnittpunkte sichtbar pausiert          |
+| Vorgang bestätigen/abbrechen, Werkzeugwechsel, Modellwechsel/Undo/Redo/Laden | Auswahl und suspendierten Kontext verwerfen, vorhandenen gemeinsamen Sitzungsreset verwenden                                     |
 
 Keine automatische Bestätigung nach dem zweiten Klick. Eine einzelne Linie oder ein Punkt ist als Hilfsreferenz sinnvoll; ein einzelnes Segment erzeugt keine lokale Kreuzung. Entfernte aktive Referenzen und Ursprung bleiben beim Eintritt erhalten. Hover-Erwerb/-Entfernung und Richtungsupdates während der Auswahl suspendieren; angezeigte Führungen einfrieren. Nach Rückkehr beginnt eine neue Hover-Verweildauer, ohne gespeicherte Referenzen zu löschen.
 
@@ -3299,13 +3192,9 @@ Spätere Auswahltests: Klick bestätigt niemals Modellaktion, Arbeitskopie/Cance
 
 Erstes Paket umgesetzt: gemeinsame Dichteschranke und sichtbarer Status. Startwerte 32/24/250 ms durch Grenztests und Messung geprüft; siehe performance/SNAP_DENSITY.md. Auswahl-Picking weiterhin Vorschlag. Nächstes Paket: temporäre Segmentauswahl gemäß DEVELOPMENT_PLAN; Punktübernahme separat.
 
-
 #### Zweites Paket umgesetzt: Segmentauswahl
 
 Temporärer Application-Zustand und Segmentfilter sind integriert. Rendering liefert deterministische Treffer, React bindet Auswahlpanel und suspendiert die gemeinsame ToolInteraction. Bestätigte Auswahl überlebt Zoom und Polylinienpunkte, endet bei Modell-/Vorgangswechsel. Segmentidentitäten sind an den aktuellen Modellsnapshot gebunden, keine persistierten Bauteil-IDs. End-/Mittelpunkte und aktive Referenzen bleiben vom Paarfilter unberührt. 250 Tests sowie Browserabnahme gemäß DEVELOPMENT_PLAN. Explizite Punktübernahme und ihre Kapazitätsanzeige bleiben der nächste begrenzte Auftrag.
-
-
-
 
 ### Detail D10 – docs/T_WALL_CONNECTION_PLAN.md
 
@@ -3455,9 +3344,6 @@ Siehe [T-Fensterprüfung](T_WINDOW_VALIDATION.md) für zuständige Module,
 Kontaktintervalle und konkrete Grenztests. Die Berührungsregel ist angefragt,
 noch nicht bestätigt; automatische T-Verbindungen bleiben unverändert offen.
 
-
-
-
 ### Detail D11 – docs/WALL_CORNER_PLAN.md
 
 Herkunft: `docs/WALL_CORNER_PLAN.md`, Snapshot main/PR237. Altstatus nicht als aktuelle Fertigmeldung lesen.
@@ -3482,15 +3368,15 @@ Nutzerentscheidungen sind verbindlich; technische Vorschlaege bleiben getrennt.
 
 #### Nachgewiesener Stand
 
-| Bereich | Vorhandener Pfad | Bedeutung fuer Anschluesse |
-| --- | --- | --- |
-| Parameter und Validierung | `src/domain/project/schema.ts` | Wand hat Achsanfang/-ende, Staerke, Hoehe, Ebene und bodyOffset. Schema 5; keine Anschlussrelation. |
-| Aenderungen | `src/lib/bim/model.ts`, `src/application/direct-edit/transforms.ts` | Validierte immutable Snapshots. Ganzelementbewegung erhaelt relative Fensterpositionen. Einzelne Wand wird geaendert; Nachbarwand folgt nicht automatisch. |
-| Grundriss | `src/components/cad/BimPlan.tsx`, `src/rendering/viewport/layer-display.ts` | Rotiertes Rechteck pro Wand, getrennte Fensterdarstellung. Keine gemeinsame Anschlusskontur. |
-| 3D | `src/lib/bim/geometry.ts` | `buildSolid` erzeugt je Wand belegte Zellen um Oeffnungen. Keine wanduebergreifende Vereinigung; ueberlappende Wandvolumen werden mehrfach summiert. |
-| IFC | `src/lib/bim/ifc.ts` | Eigenes rechteckiges Extrusionsprofil je Wand, separate Oeffnung/Voids. Eine reine 3D-Korrektur wuerde IFC nicht mitkorrigieren. |
-| Fang und Griffe | `src/application/snapping/project-references.ts`, `src/rendering/viewport/wall-foot-sources.ts` | Achsenden/Mitte bleiben fest; Koerperecken aus domain/elements/wall/body.ts enthalten bodyOffset +/- halbe Staerke; reale 3D-Fusskanten aus Flaechen. Nach Anschlussaenderung gemeinsam aktualisieren. |
-| History/Datei | `src/lib/bim/history.ts`, `src/interop/project-file/load.ts` | Validierte Snapshots, Migration. Dauerhafte Anschlussdaten benoetigen eine ausdrueckliche Schemaentscheidung. |
+| Bereich                   | Vorhandener Pfad                                                                                | Bedeutung fuer Anschluesse                                                                                                                                                                             |
+| ------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Parameter und Validierung | `src/domain/project/schema.ts`                                                                  | Wand hat Achsanfang/-ende, Staerke, Hoehe, Ebene und bodyOffset. Schema 5; keine Anschlussrelation.                                                                                                    |
+| Aenderungen               | `src/lib/bim/model.ts`, `src/application/direct-edit/transforms.ts`                             | Validierte immutable Snapshots. Ganzelementbewegung erhaelt relative Fensterpositionen. Einzelne Wand wird geaendert; Nachbarwand folgt nicht automatisch.                                             |
+| Grundriss                 | `src/components/cad/BimPlan.tsx`, `src/rendering/viewport/layer-display.ts`                     | Rotiertes Rechteck pro Wand, getrennte Fensterdarstellung. Keine gemeinsame Anschlusskontur.                                                                                                           |
+| 3D                        | `src/lib/bim/geometry.ts`                                                                       | `buildSolid` erzeugt je Wand belegte Zellen um Oeffnungen. Keine wanduebergreifende Vereinigung; ueberlappende Wandvolumen werden mehrfach summiert.                                                   |
+| IFC                       | `src/lib/bim/ifc.ts`                                                                            | Eigenes rechteckiges Extrusionsprofil je Wand, separate Oeffnung/Voids. Eine reine 3D-Korrektur wuerde IFC nicht mitkorrigieren.                                                                       |
+| Fang und Griffe           | `src/application/snapping/project-references.ts`, `src/rendering/viewport/wall-foot-sources.ts` | Achsenden/Mitte bleiben fest; Koerperecken aus domain/elements/wall/body.ts enthalten bodyOffset +/- halbe Staerke; reale 3D-Fusskanten aus Flaechen. Nach Anschlussaenderung gemeinsam aktualisieren. |
+| History/Datei             | `src/lib/bim/history.ts`, `src/interop/project-file/load.ts`                                    | Validierte Snapshots, Migration. Dauerhafte Anschlussdaten benoetigen eine ausdrueckliche Schemaentscheidung.                                                                                          |
 
 Fenster passen heute in die Achslaenge und Wandhoehe. Ueberlappende Fenster werden
 im 3D-Volumen als Vereinigung ausgeschnitten; fachliches Verbot von Ueberlappung,
@@ -3542,14 +3428,14 @@ heimliche Reparatur oder Loeschung. Keine neuen pauschalen Randabstaende erfinde
 
 #### Vor Anschlussimplementierung offene Entscheidungen
 
-| Frage | Noch festzulegen |
-| --- | --- |
-| Achsenwechsel N45 | Entschieden 05.10.2026: Zeichenachse bleibt fest, Wandkoerper wird quer dazu versetzt. |
-| Anschlussabsicht | Entschieden 05.10.2026: bewusst mit „Ecke verbinden“. Gespeicherte Relation ist technischer Vorschlag, noch nicht implementiert. |
-| Verbundene Bearbeitung | Entschieden 05.10.2026: Einzelwandbewegung loest Verbindung automatisch. Verhalten einer explizit gemeinsam bearbeiteten Ecke bleibt separat festzulegen. |
-| Unterschiedliche Staerken | Gehrung, durchlaufende Wand oder andere fachliche Prioritaet; Ebenen sind keine AssemblyLayer. |
-| Wandgriff bei Drehung | Fuer unabhaengige Waende korrigiert: endpointAtOffsetTarget trifft die Koerperecke auch mit bodyOffset (PR #110, Regressionstest). Ein kuenftiger Gehrungsgriff ist noch kein vorhandener Einzelwandgriff. |
-| Oeffnungs-Endzone | Welche Oeffnungen sind dort zulaessig, wie wird eine kollidierende Aenderung behandelt? |
+| Frage                     | Noch festzulegen                                                                                                                                                                                           |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Achsenwechsel N45         | Entschieden 05.10.2026: Zeichenachse bleibt fest, Wandkoerper wird quer dazu versetzt.                                                                                                                     |
+| Anschlussabsicht          | Entschieden 05.10.2026: bewusst mit „Ecke verbinden“. Gespeicherte Relation ist technischer Vorschlag, noch nicht implementiert.                                                                           |
+| Verbundene Bearbeitung    | Entschieden 05.10.2026: Einzelwandbewegung loest Verbindung automatisch. Verhalten einer explizit gemeinsam bearbeiteten Ecke bleibt separat festzulegen.                                                  |
+| Unterschiedliche Staerken | Gehrung, durchlaufende Wand oder andere fachliche Prioritaet; Ebenen sind keine AssemblyLayer.                                                                                                             |
+| Wandgriff bei Drehung     | Fuer unabhaengige Waende korrigiert: endpointAtOffsetTarget trifft die Koerperecke auch mit bodyOffset (PR #110, Regressionstest). Ein kuenftiger Gehrungsgriff ist noch kein vorhandener Einzelwandgriff. |
+| Oeffnungs-Endzone         | Welche Oeffnungen sind dort zulaessig, wie wird eine kollidierende Aenderung behandelt?                                                                                                                    |
 
 #### Geplante Anschluss-Abnahmekriterien
 
@@ -3578,7 +3464,6 @@ Abbruch und Undo; Achse liegt sichtbar mittig. Modell/JSON/IFC bleiben unveraend
 3D-Achsdarstellung ist inzwischen umgesetzt (N45).
 Dieser Einstieg erfuellt eine explizite Nutzeranforderung und macht die Bezugsgeometrie
 sichtbar, ohne die offenen Anschlussentscheidungen vorwegzunehmen.
-
 
 Numerischer Wandkoerperversatz ist durchgaengig implementiert; Anschlussfragen bleiben offen. Der einzige aktive Folgeauftrag steht am Anfang von DEVELOPMENT_PLAN.md (Anschlussentwurf gegen Koerperversatz pruefen).
 
@@ -3624,17 +3509,17 @@ endlichen Rechteckkanten. Die benoetigte Verlaengerung/Verkuerzung der Wandkoerp
 wird erst durch die ausdrueckliche Verbindung zugelassen. start/end bleiben C bzw.
 die entfernten Endpunkte; Achslaenge und Koerperseitenlaengen sind unterschiedlich.
 
-| a | b | I | O | Summe Grundflaechen m² |
-| --- | --- | --- | --- | --- |
-| -0.18 | -0.18 | (3.00; 0.00) | (3.36; -0.36) | 2.2896 |
-| -0.18 | 0.00 | (2.82; 0.00) | (3.18; -0.36) | 2.2248 |
-| -0.18 | 0.18 | (2.64; 0.00) | (3.00; -0.36) | 2.1600 |
-| 0.00 | -0.18 | (3.00; 0.18) | (3.36; -0.18) | 2.2248 |
-| 0.00 | 0.00 | (2.82; 0.18) | (3.18; -0.18) | 2.1600 |
-| 0.00 | 0.18 | (2.64; 0.18) | (3.00; -0.18) | 2.0952 |
-| 0.18 | -0.18 | (3.00; 0.36) | (3.36; 0.00) | 2.1600 |
-| 0.18 | 0.00 | (2.82; 0.36) | (3.18; 0.00) | 2.0952 |
-| 0.18 | 0.18 | (2.64; 0.36) | (3.00; 0.00) | 2.0304 |
+| a     | b     | I            | O             | Summe Grundflaechen m² |
+| ----- | ----- | ------------ | ------------- | ---------------------- |
+| -0.18 | -0.18 | (3.00; 0.00) | (3.36; -0.36) | 2.2896                 |
+| -0.18 | 0.00  | (2.82; 0.00) | (3.18; -0.36) | 2.2248                 |
+| -0.18 | 0.18  | (2.64; 0.00) | (3.00; -0.36) | 2.1600                 |
+| 0.00  | -0.18 | (3.00; 0.18) | (3.36; -0.18) | 2.2248                 |
+| 0.00  | 0.00  | (2.82; 0.18) | (3.18; -0.18) | 2.1600                 |
+| 0.00  | 0.18  | (2.64; 0.18) | (3.00; -0.18) | 2.0952                 |
+| 0.18  | -0.18 | (3.00; 0.36) | (3.36; 0.00)  | 2.1600                 |
+| 0.18  | 0.00  | (2.82; 0.36) | (3.18; 0.00)  | 2.0952                 |
+| 0.18  | 0.18  | (2.64; 0.36) | (3.00; 0.00)  | 2.0304                 |
 
 Vorgeschlagene Konturen (gegen Uhrzeigersinn):
 A=[(0;a-h), O, I, (0;a+h)], B=[O, (3-b+h;3), (3-b-h;3), I].
@@ -3772,9 +3657,6 @@ Exakte Oeffnungsberuehrung sowie gerade oder erhaltene schraege Endkappen beim
 automatischen Loesen bleiben offene Nutzerentscheidungen; erneut angefragt.
 Die momentane Ablehnung beruehrender Oeffnungen ist eine technische Grenze.
 
-
-
-
 ### Detail D12 – docs/planning/HATCH_PAPER_SCALE.md
 
 Herkunft: `docs/planning/HATCH_PAPER_SCALE.md`, Snapshot main/PR237. Altstatus nicht als aktuelle Fertigmeldung lesen.
@@ -3786,15 +3668,15 @@ Papiermaß ist noch keine verfügbare Produktfunktion.
 
 #### Bestand und Zuständigkeiten
 
-| Bereich | Nachgewiesener Stand | Konsequenz |
-| --- | --- | --- |
-| `src/domain/elements/hatch/model.ts` | Anwendung akzeptiert ausschließlich `mode: "model"`, Ursprung und optionalen Winkel. | Papiermaß benötigt später eine explizite Formaterweiterung, keine Umdeutung vorhandener Werte. |
-| `src/domain/elements/hatch/pattern.ts` | Definition besitzt lokale metrische Zellmaße und maximal 256 Linien. | Bibliotheksgeometrie bleibt unverändert; Maßbezug gehört zur Anwendung. |
-| `src/application/hatches/actions.ts` | Zuweisung setzt Modellmaß; Vorschau/Commit validieren Projekt und Ausgangskontext. | Neue Eigenschaften müssen durch diese gemeinsame Grenze, ebenso künftig Text/Voice. |
-| `src/rendering/viewport/hatch-pattern.ts` | Kachel verwendet Definitionsmaße direkt, Ursprung und Drehung bleiben getrennt. | Gemeinsame Umrechnung vor dem Erzeugen der Kachel vorsehen. |
-| `src/components/cad/HatchPattern.tsx` | SVG wiederholt ohne erzeugte Modelllinien; Strichbreite derzeit 1 CSS-Pixel. | Zellskalierung muss auch die lokale Strichbreitenumrechnung berücksichtigen. Papierabstand entscheidet nicht automatisch über Druckstifte. |
-| `src/rendering/viewport/plan-camera.ts`, `src/components/cad/CadViewport.tsx` | Kamera in CSS-Pixeln pro Meter; 100 % in 2D bedeutet 100 CSS-Pixel/m. | Zoom bleibt Navigation, ohne physische Bildschirmgrößengarantie. |
-| `src/domain/project/schema.ts` | Produktionsschema 14; kein ModelView-/DrawingDocument-Ausgabemaßstab implementiert. | Noch keine Quelle für einen impliziten Maßstab 1:50 vorhanden. |
+| Bereich                                                                       | Nachgewiesener Stand                                                                 | Konsequenz                                                                                                                                 |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/domain/elements/hatch/model.ts`                                          | Anwendung akzeptiert ausschließlich `mode: "model"`, Ursprung und optionalen Winkel. | Papiermaß benötigt später eine explizite Formaterweiterung, keine Umdeutung vorhandener Werte.                                             |
+| `src/domain/elements/hatch/pattern.ts`                                        | Definition besitzt lokale metrische Zellmaße und maximal 256 Linien.                 | Bibliotheksgeometrie bleibt unverändert; Maßbezug gehört zur Anwendung.                                                                    |
+| `src/application/hatches/actions.ts`                                          | Zuweisung setzt Modellmaß; Vorschau/Commit validieren Projekt und Ausgangskontext.   | Neue Eigenschaften müssen durch diese gemeinsame Grenze, ebenso künftig Text/Voice.                                                        |
+| `src/rendering/viewport/hatch-pattern.ts`                                     | Kachel verwendet Definitionsmaße direkt, Ursprung und Drehung bleiben getrennt.      | Gemeinsame Umrechnung vor dem Erzeugen der Kachel vorsehen.                                                                                |
+| `src/components/cad/HatchPattern.tsx`                                         | SVG wiederholt ohne erzeugte Modelllinien; Strichbreite derzeit 1 CSS-Pixel.         | Zellskalierung muss auch die lokale Strichbreitenumrechnung berücksichtigen. Papierabstand entscheidet nicht automatisch über Druckstifte. |
+| `src/rendering/viewport/plan-camera.ts`, `src/components/cad/CadViewport.tsx` | Kamera in CSS-Pixeln pro Meter; 100 % in 2D bedeutet 100 CSS-Pixel/m.                | Zoom bleibt Navigation, ohne physische Bildschirmgrößengarantie.                                                                           |
+| `src/domain/project/schema.ts`                                                | Produktionsschema 14; kein ModelView-/DrawingDocument-Ausgabemaßstab implementiert.  | Noch keine Quelle für einen impliziten Maßstab 1:50 vorhanden.                                                                             |
 
 Der Architekturvertrag ordnet gespeicherte Ausgabemaßstäbe DrawingDocument und
 Layout-Platzierung zu. Ein ModelView liefert die Modellableitung. Für die reine
@@ -3906,9 +3788,6 @@ bleiben Eigenschaften der einzelnen Anwendung, nicht globale Bibliotheksänderun
 angebunden; 792 Tests, Typprüfung, Build und Browserprüfung bestanden. Druck/PDF und
 physische Druckstifte bleiben offen. Nächster Einzelauftrag siehe DEVELOPMENT_PLAN.md.
 
-
-
-
 ### Detail D13 – docs/planning/HATCH_PATTERN_LIBRARY.md
 
 Herkunft: `docs/planning/HATCH_PATTERN_LIBRARY.md`, Snapshot main/PR237. Altstatus nicht als aktuelle Fertigmeldung lesen.
@@ -4016,7 +3895,6 @@ Storage-Adapter, validierten Definitionen/IDs/Namen, Liste mit Vorschauen und
 Speichern eines Creator-Entwurfs implementieren. Laden nach Neustart prüfen;
 keine Anwendung, Projektmigration, Synchronisation oder Upload in diesem Schritt.
 Anwendungs-/Maßstabs- und Aktualisierungsregeln folgen als eigener Auftrag.
-
 
 #### V07d Umsetzung - 09.10.2026
 
@@ -4209,9 +4087,6 @@ Genau ein Folgeauftrag V07j: Papiermaß-/Ansichtsmaßstab-Vertrag anhand Code/Ar
 prüfen und einen begrenzten Umsetzungspiloten planen. Keine Zoom-basierte Ersatzregel.
 Upload wartet weiterhin auf die Nutzerentscheidung zum konkreten Austauschformat.
 
-
-
-
 ### Detail D14 – docs/planning/HATCH_PRESET_PICKUP.md
 
 Herkunft: `docs/planning/HATCH_PRESET_PICKUP.md`, Snapshot main/PR237. Altstatus nicht als aktuelle Fertigmeldung lesen.
@@ -4262,9 +4137,6 @@ bleibt offen; keine pauschale Freigabe fuer noch nicht angebundene Elemente.
 V06c Fenster an dieselbe Uebernahmegrenze anbinden: Breite, Hoehe, Bruestung,
 Ebene. Keine Host-ID/Position. Gemeinsame Platzierung und Validierung beibehalten.
 
-
-
-
 ### Detail D15 – docs/planning/SAVED_DRAWING_VIEWS.md
 
 Herkunft: `docs/planning/SAVED_DRAWING_VIEWS.md`, Snapshot main/PR237. Altstatus nicht als aktuelle Fertigmeldung lesen.
@@ -4279,14 +4151,14 @@ Maßgebend: [Architektur §29](../../ARCHITECTURE.md),
 
 #### Befund am vorhandenen Code
 
-| Bereich | Nachgewiesener Stand | Noch fehlend |
-| --- | --- | --- |
-| `src/domain/project/schema.ts` | Schema 16, ein Geschoss, optionale workingViews mit höchstens einem working-plan-Eintrag; fehlend bedeutet 1:100 | Persistente ModelViews/DrawingDocuments und Referenzvalidierung |
-| `src/application/views/project-scale.ts`, `src/domain/views/scale.ts` | Identität aus Projekt/Geschoss, validierter Maßstab, gemeinsame metrische Größenauflösung | Auflösung eines gespeicherten Dokumentziels; ScaleContext kennt nur working-plan |
-| `src/application/layers/visibility.ts` | Gemeinsame Sichtbarkeitsregel einschließlich Fenster/Host; drawing-document-Scope als Token | Existenz eines Dokuments wird ausdrücklich noch nicht geprüft; Token ist kein gespeicherter Ausschnitt |
-| `src/application/layers/visibility-actions.ts` | Projektfilter mit eigener Paletten-History | Aktionen/History für unabhängige Dokumentfilter |
-| `src/components/cad/CadViewport.tsx`, `BimPlan.tsx`, `CadWorkspace.tsx` | Arbeitsmaßstab und Sichtbarkeit sind an mehreren Stellen verbunden; BimPlan rekonstruiert working-plan | Gemeinsame Auflösung von Bindung, Maßstab und Sichtbarkeit vor Übergabe an Renderer |
-| `src/lib/bim/history.ts`, `src/domain/project/model-equality.ts` | Modell-Undo erhält aktuelle workingViews/bimVisibility | Bewusste Regel für Dokumentanlage, Löschung, Ausschnittänderung und Dokumentmaßstab |
+| Bereich                                                                 | Nachgewiesener Stand                                                                                             | Noch fehlend                                                                                           |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `src/domain/project/schema.ts`                                          | Schema 16, ein Geschoss, optionale workingViews mit höchstens einem working-plan-Eintrag; fehlend bedeutet 1:100 | Persistente ModelViews/DrawingDocuments und Referenzvalidierung                                        |
+| `src/application/views/project-scale.ts`, `src/domain/views/scale.ts`   | Identität aus Projekt/Geschoss, validierter Maßstab, gemeinsame metrische Größenauflösung                        | Auflösung eines gespeicherten Dokumentziels; ScaleContext kennt nur working-plan                       |
+| `src/application/layers/visibility.ts`                                  | Gemeinsame Sichtbarkeitsregel einschließlich Fenster/Host; drawing-document-Scope als Token                      | Existenz eines Dokuments wird ausdrücklich noch nicht geprüft; Token ist kein gespeicherter Ausschnitt |
+| `src/application/layers/visibility-actions.ts`                          | Projektfilter mit eigener Paletten-History                                                                       | Aktionen/History für unabhängige Dokumentfilter                                                        |
+| `src/components/cad/CadViewport.tsx`, `BimPlan.tsx`, `CadWorkspace.tsx` | Arbeitsmaßstab und Sichtbarkeit sind an mehreren Stellen verbunden; BimPlan rekonstruiert working-plan           | Gemeinsame Auflösung von Bindung, Maßstab und Sichtbarkeit vor Übergabe an Renderer                    |
+| `src/lib/bim/history.ts`, `src/domain/project/model-equality.ts`        | Modell-Undo erhält aktuelle workingViews/bimVisibility                                                           | Bewusste Regel für Dokumentanlage, Löschung, Ausschnittänderung und Dokumentmaßstab                    |
 
 Die vorhandenen Größenresolver und Sichtbarkeitspolicies werden weiterverwendet.
 Eine zusätzliche Rendering-Engine, Datenbank oder neue BIM-History ist hierfür
@@ -4348,13 +4220,13 @@ Dies sind Architekturregeln, keine behaupteten neuen Bedienentscheidungen:
 
 #### Offene Bedienentscheidungen und Vorschläge
 
-| Offen | Vorschlag, noch nicht beschlossen | Vor welchem Schritt erforderlich |
-| --- | --- | --- |
-| Anfangsfilter | Entschieden: aktuelle Ebenensichtbarkeit einmal übernehmen, danach unabhängig ändern und speichern | Dokumentanlage |
-| Dokumentaktionen: History | Keine eigene Abbild-History (Nutzerentscheidung). Die Zuordnung von Anlage/Löschung zum bestehenden Projekt-Undo ist dadurch noch nicht ausdrücklich entschieden. Ebenensichtbarkeit bleibt beim vorhandenen Ebenenumschalter. | Persistente Dokumentaktionen |
-| Wahl/Änderung des Ausschnittbereichs | Rechteck in Modellkoordinaten; Fit/Zoom verändert ihn nicht | Sichtbarer Ausschnittpilot |
-| Bearbeitungsmodus im Ausschnitt | Erster Pilot nur Ansicht, spätere Modell-/Annotationsbearbeitung klar trennen | Ausschnitt-UI |
-| Neue/gelöschte Ebenen in Dokumentfiltern | Hidden-ID-Modell wiederverwenden; neue Ebenen sichtbar, gelöschte IDs bereinigen | Dokumentfilter-Persistenz |
+| Offen                                    | Vorschlag, noch nicht beschlossen                                                                                                                                                                                              | Vor welchem Schritt erforderlich |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------- |
+| Anfangsfilter                            | Entschieden: aktuelle Ebenensichtbarkeit einmal übernehmen, danach unabhängig ändern und speichern                                                                                                                             | Dokumentanlage                   |
+| Dokumentaktionen: History                | Keine eigene Abbild-History (Nutzerentscheidung). Die Zuordnung von Anlage/Löschung zum bestehenden Projekt-Undo ist dadurch noch nicht ausdrücklich entschieden. Ebenensichtbarkeit bleibt beim vorhandenen Ebenenumschalter. | Persistente Dokumentaktionen     |
+| Wahl/Änderung des Ausschnittbereichs     | Rechteck in Modellkoordinaten; Fit/Zoom verändert ihn nicht                                                                                                                                                                    | Sichtbarer Ausschnittpilot       |
+| Bearbeitungsmodus im Ausschnitt          | Erster Pilot nur Ansicht, spätere Modell-/Annotationsbearbeitung klar trennen                                                                                                                                                  | Ausschnitt-UI                    |
+| Neue/gelöschte Ebenen in Dokumentfiltern | Hidden-ID-Modell wiederverwenden; neue Ebenen sichtbar, gelöschte IDs bereinigen                                                                                                                                               | Dokumentfilter-Persistenz        |
 
 Diese Punkte blockieren den untenstehenden Vorbereitungsschritt nicht. Sie werden
 vor der jeweils abhängigen Umsetzung entschieden, nicht als Nutzerfreigabe erfunden.
@@ -4388,7 +4260,6 @@ Dieser konkrete Abbau der aktuellen mehrfachen Kontextverdrahtung bereitet den
 Ausschnittpilot vor, ohne offene Dokument-Bedienregeln vorwegzunehmen. Nach MS-04b
 wird genau ein neuer Auftrag im Entwicklungsplan festgelegt.
 
-
 #### MS-04b umgesetzt — 10.10.2026
 
 Gemeinsamer Resolver und produktive Verdrahtung implementiert, 796 Tests und Build
@@ -4396,7 +4267,6 @@ bestanden; Browservergleich der geteilten Ansicht erfolgreich. Siehe aktuellen
 DEVELOPMENT_PLAN.md für Nachweis und den einzigen Folgeauftrag MS-04c. Die obige
 Pilotbeschreibung ist damit historisch; die offenen Dokumententscheidungen bleiben
 offen, bis die angefragten Nutzerantworten vorliegen.
-
 
 #### Nutzerpräzisierung: Abbilder und Navigator — 10.10.2026
 
@@ -4421,9 +4291,6 @@ Dies dokumentiert Bedienanforderungen, keine bereits implementierte Oberfläche.
 Keine eigene Abbild-History bedeutet nicht automatisch, dass Anlage/Löschung niemals
 rückgängig gemacht werden dürfen; diese konkrete Zuordnung wird vor Umsetzung geprüft.
 
-
-
-
 ### Detail D16 – docs/planning/VIEW_SCALE_CONTRACT.md
 
 Herkunft: `docs/planning/VIEW_SCALE_CONTRACT.md`, Snapshot main/PR237. Altstatus nicht als aktuelle Fertigmeldung lesen.
@@ -4440,13 +4307,13 @@ beschreiben den damaligen Stand; der aktuelle Auftrag steht im Entwicklungsplan.
 
 #### 1. Begriffe und Geltungsbereich
 
-| Begriff | Bedeutung und Eigentümer |
-| --- | --- |
-| **Bearbeitungsmodus / Arbeitsansicht** | Der gegenwärtige Canvas, in dem das gemeinsame BIM-Modell über Geschosse, Grundriss und weitere Arbeitsansichten bearbeitet wird. Er hat einen **Arbeitsmaßstab** für die Darstellung maßstabsabhängiger 2D-Anmerkungen. Beim neuen Projekt ist er **1:100**. Er ist keine Maßangabe für BIM-Geometrie. |
-| **Ausschnitt / Abbild** | Eine später gespeicherte, weiterhin modellgebundene Sicht auf z. B. ein Geschoss, einen Schnitt oder eine Ansicht. Nach §29: ModelView beschreibt die Modellableitung; DrawingDocument speichert Ausschnitt, Sichtbarkeit, ergänzende Annotation und **seinen eigenen Ausgabemaßstab**. Kein kopiertes, unabhängig bearbeitbares Gebäude. |
-| **Ansichts-/Ausgabemaßstab 1:S** | Expliziter positiver, endlicher Nenner S für die Darstellung im jeweiligen 2D-Kontext. 1:100 im Bearbeitungsmodus ist die Anfangsvorgabe; ein Ausschnitt erhält beim Erstellen seinen frei wählbaren eigenen Wert und kann ihn später ändern. Änderung einer Ansicht ändert keinen anderen Maßstab. |
-| **Zoom/Kamera** | Bildschirmnavigation in CSS-Pixeln pro Modellmeter, einschließlich Fit/Pan/Mausrad. Sie ändert nur die Bildschirmvergrößerung. Die vorhandene Zoom-Prozentanzeige und die grafische Meterleiste sind **keine** 1:S-Ausgabe. |
-| **Modellmaß / Papiermaß** | Eigenschaft der **Größe/Strichabstände** einer darstellenden Annotationsanwendung, nicht ihres geometrischen Messwerts. Beide Modi speichern intern Meter, mit explizitem Maßbezug. Papiermaße werden in der Bedienung in mm angezeigt/eingegeben und an dieser Grenze umgerechnet. |
+| Begriff                                | Bedeutung und Eigentümer                                                                                                                                                                                                                                                                                                                  |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Bearbeitungsmodus / Arbeitsansicht** | Der gegenwärtige Canvas, in dem das gemeinsame BIM-Modell über Geschosse, Grundriss und weitere Arbeitsansichten bearbeitet wird. Er hat einen **Arbeitsmaßstab** für die Darstellung maßstabsabhängiger 2D-Anmerkungen. Beim neuen Projekt ist er **1:100**. Er ist keine Maßangabe für BIM-Geometrie.                                   |
+| **Ausschnitt / Abbild**                | Eine später gespeicherte, weiterhin modellgebundene Sicht auf z. B. ein Geschoss, einen Schnitt oder eine Ansicht. Nach §29: ModelView beschreibt die Modellableitung; DrawingDocument speichert Ausschnitt, Sichtbarkeit, ergänzende Annotation und **seinen eigenen Ausgabemaßstab**. Kein kopiertes, unabhängig bearbeitbares Gebäude. |
+| **Ansichts-/Ausgabemaßstab 1:S**       | Expliziter positiver, endlicher Nenner S für die Darstellung im jeweiligen 2D-Kontext. 1:100 im Bearbeitungsmodus ist die Anfangsvorgabe; ein Ausschnitt erhält beim Erstellen seinen frei wählbaren eigenen Wert und kann ihn später ändern. Änderung einer Ansicht ändert keinen anderen Maßstab.                                       |
+| **Zoom/Kamera**                        | Bildschirmnavigation in CSS-Pixeln pro Modellmeter, einschließlich Fit/Pan/Mausrad. Sie ändert nur die Bildschirmvergrößerung. Die vorhandene Zoom-Prozentanzeige und die grafische Meterleiste sind **keine** 1:S-Ausgabe.                                                                                                               |
+| **Modellmaß / Papiermaß**              | Eigenschaft der **Größe/Strichabstände** einer darstellenden Annotationsanwendung, nicht ihres geometrischen Messwerts. Beide Modi speichern intern Meter, mit explizitem Maßbezug. Papiermaße werden in der Bedienung in mm angezeigt/eingegeben und an dieser Grenze umgerechnet.                                                       |
 
 Ein Maßstab in 1:S ist für maßhaltige 2D-/orthografische Darstellungen
 definiert. Eine perspektivische 3D-Kamera hat keinen über das ganze Bild
@@ -4572,12 +4439,12 @@ Zwischenergebnisse sicherstellen.
 
 #### 5. Kleine, abhängige Aufträge für Codex
 
-| Schritt | Umfang | Abnahme |
-| --- | --- | --- |
-| **MS-01 Vertrag und Maßstab-UI** | Gemeinsamen typisierten ScaleContext/Größenresolver in Domain/Rendering und sitzungsbezogene Kontextänderung in Application anbinden; keine Umrechnung pro Werkzeug. Selector **unten neben Zoom** im fokussierten 2D-Bearbeitungs-Canvas mit initial 1:100. Noch keine Persistenz oder Modell-History; dieser Pilot entscheidet nicht die spätere History-Regel. | Auswahl und freie Eingabe funktionieren; ungültige Werte verändern nichts; Wechsel 1:100 → 1:50 lässt Zoom %, Meterleiste, Geometrie, Fang, Messung und BIM-Undo unverändert. Zwei Fenster derselben fachlichen Ansicht teilen S, nicht Zoom; Fensterwechsel/Schließen verliert oder überträgt S nicht. Unterschiedliche Kontexte bleiben unabhängig. |
-| **MS-02 Papier-/Modellgröße als Pilot** | Ein vorhandenes geeignetes Zeichnungselement bzw. den V07k-Musterpiloten über denselben ScaleContext anbinden; der späteren Text-/Maßketten-Werkzeugeigenschaft einen typisierten Vertrag geben, wenn das Werkzeug implementiert wird. | Das 2-mm-/0,20-m-Beispiel bei 1:50 und 1:100; Zoom und unterschiedliche Browsergrößen liefern die gleichen Modellwerte; bestehende Modellmuster bleiben identisch. Keine leeren Text-/Bemaßungs-Klassen als Vorleistung. |
-| **MS-03 gespeicherte Arbeitsansicht** | Per-Projekt-Persistenz des Arbeitsmaßstabs und Undo-Regel begrenzt entscheiden/implementieren; Migration 1:100 für Altprojekte. | Speichern/Öffnen erhält eigene gültige Wahl, alte Datei öffnet 1:100; keine Änderung an Modellgeometrie, History-/Undo-Verhalten dokumentiert. |
-| **MS-04 eigenständige Ausschnitte** | Erst beim tatsächlichen ModelView-/DrawingDocument-Schritt: frei wählbares S bei Erstellung, gespeicherte Änderung und unabhängige Darstellung. | Arbeitsansicht 1:100 plus zwei modellgebundene Abbilder 1:50/1:200; Bearbeitungsmaßstab und Zoom beliebig ändern; Abbildwerte, Modell-IDs, eigene Annotationen, Dateirundlauf und Ausgabe-Ableitung bleiben korrekt. |
+| Schritt                                 | Umfang                                                                                                                                                                                                                                                                                                                                                            | Abnahme                                                                                                                                                                                                                                                                                                                                               |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MS-01 Vertrag und Maßstab-UI**        | Gemeinsamen typisierten ScaleContext/Größenresolver in Domain/Rendering und sitzungsbezogene Kontextänderung in Application anbinden; keine Umrechnung pro Werkzeug. Selector **unten neben Zoom** im fokussierten 2D-Bearbeitungs-Canvas mit initial 1:100. Noch keine Persistenz oder Modell-History; dieser Pilot entscheidet nicht die spätere History-Regel. | Auswahl und freie Eingabe funktionieren; ungültige Werte verändern nichts; Wechsel 1:100 → 1:50 lässt Zoom %, Meterleiste, Geometrie, Fang, Messung und BIM-Undo unverändert. Zwei Fenster derselben fachlichen Ansicht teilen S, nicht Zoom; Fensterwechsel/Schließen verliert oder überträgt S nicht. Unterschiedliche Kontexte bleiben unabhängig. |
+| **MS-02 Papier-/Modellgröße als Pilot** | Ein vorhandenes geeignetes Zeichnungselement bzw. den V07k-Musterpiloten über denselben ScaleContext anbinden; der späteren Text-/Maßketten-Werkzeugeigenschaft einen typisierten Vertrag geben, wenn das Werkzeug implementiert wird.                                                                                                                            | Das 2-mm-/0,20-m-Beispiel bei 1:50 und 1:100; Zoom und unterschiedliche Browsergrößen liefern die gleichen Modellwerte; bestehende Modellmuster bleiben identisch. Keine leeren Text-/Bemaßungs-Klassen als Vorleistung.                                                                                                                              |
+| **MS-03 gespeicherte Arbeitsansicht**   | Per-Projekt-Persistenz des Arbeitsmaßstabs und Undo-Regel begrenzt entscheiden/implementieren; Migration 1:100 für Altprojekte.                                                                                                                                                                                                                                   | Speichern/Öffnen erhält eigene gültige Wahl, alte Datei öffnet 1:100; keine Änderung an Modellgeometrie, History-/Undo-Verhalten dokumentiert.                                                                                                                                                                                                        |
+| **MS-04 eigenständige Ausschnitte**     | Erst beim tatsächlichen ModelView-/DrawingDocument-Schritt: frei wählbares S bei Erstellung, gespeicherte Änderung und unabhängige Darstellung.                                                                                                                                                                                                                   | Arbeitsansicht 1:100 plus zwei modellgebundene Abbilder 1:50/1:200; Bearbeitungsmaßstab und Zoom beliebig ändern; Abbildwerte, Modell-IDs, eigene Annotationen, Dateirundlauf und Ausgabe-Ableitung bleiben korrekt.                                                                                                                                  |
 
 Die Tabelle ist eine **Folge begrenzter Aufträge**, keine Aufforderung,
 MS-01–MS-04 gleichzeitig zu bauen oder den laufenden Auftrag des
@@ -4616,9 +4483,6 @@ Regeln wie Rendering verwenden. Modell-/Papiermoduswechsel erhält die sichtbare
 (Nutzerentscheidung); gezeichnete Konturen werden nie skaliert. MS-04a konkretisiert
 als nächster begrenzter Planungsauftrag gespeicherte Ausschnitte gemäß Entwicklungsplan.
 
-
-
-
 ### Detail D17 – docs/references/IMAGE_REFERENCE_PLAN.md
 
 Herkunft: `docs/references/IMAGE_REFERENCE_PLAN.md`, Snapshot main/PR237. Altstatus nicht als aktuelle Fertigmeldung lesen.
@@ -4646,17 +4510,17 @@ Asset-Grenzwerten wird daraus abgeleitet.
 
 #### Nachgewiesener Bestand und Anschlussstellen
 
-| Aufgabe | Vorhanden | Erforderliche Ergänzung |
-| --- | --- | --- |
-| Projekt | src/domain/project/schema.ts: striktes Schema 8, ein Geschoss; Wände, Fenster, Linien, Schraffuren | Referenztyp, Asset-Tabelle, eindeutige IDs und geprüfte Verweise |
-| Datei | src/interop/project-file/load.ts: Migration 1–8; src/lib/bim/model.ts: serializeProject | Versionierte Migration und dauerhafte Bilddaten, kein gespeichertes blob: URL |
-| History | src/lib/bim/history.ts: commitProject, Undo/Redo, 100 Snapshots, 10 MiB Dateileselimit | Atomarer Import; Kalibrierung nur Transformation, Asset nicht erneut dekodieren |
-| Aktionen | src/application/hatches/actions.ts: snapshotgebundene Vorschau/Commit | Eigener Referenzadapter nach gleichem Vertrag; keine neue Logik im Workspace |
-| Auswahl | src/application/selection/target.ts und state.ts; rendering/viewport/selection-shapes.ts | Typed reference-Ziel und abgeleitetes Viereck für Klick/Strg/Marquee |
-| Ebenen | src/application/layers/actions.ts und visibility.ts | Referenzen bei Belegung, Zuweisung und Eligibility berücksichtigen |
-| Eingabe/Fang | application/tools/interaction.ts, tools/snapping.ts, useToolInteraction | Verbraucher derselben Engine; kein eigener Fang oder Tab-Handler |
-| Einheiten | src/core/units/metres.ts parst numerischen Metertext | Explizite Einheit für Kalibrierstrecke prüfen; vorhandene Befehlsparser gezielt abgleichen |
-| IFC/3D | Vorhandene Wand-/Öffnungsexporte und Solids | Referenz bleibt 2D; kein Bildkörper oder IfcWall-Ersatz |
+| Aufgabe      | Vorhanden                                                                                          | Erforderliche Ergänzung                                                                    |
+| ------------ | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Projekt      | src/domain/project/schema.ts: striktes Schema 8, ein Geschoss; Wände, Fenster, Linien, Schraffuren | Referenztyp, Asset-Tabelle, eindeutige IDs und geprüfte Verweise                           |
+| Datei        | src/interop/project-file/load.ts: Migration 1–8; src/lib/bim/model.ts: serializeProject            | Versionierte Migration und dauerhafte Bilddaten, kein gespeichertes blob: URL              |
+| History      | src/lib/bim/history.ts: commitProject, Undo/Redo, 100 Snapshots, 10 MiB Dateileselimit             | Atomarer Import; Kalibrierung nur Transformation, Asset nicht erneut dekodieren            |
+| Aktionen     | src/application/hatches/actions.ts: snapshotgebundene Vorschau/Commit                              | Eigener Referenzadapter nach gleichem Vertrag; keine neue Logik im Workspace               |
+| Auswahl      | src/application/selection/target.ts und state.ts; rendering/viewport/selection-shapes.ts           | Typed reference-Ziel und abgeleitetes Viereck für Klick/Strg/Marquee                       |
+| Ebenen       | src/application/layers/actions.ts und visibility.ts                                                | Referenzen bei Belegung, Zuweisung und Eligibility berücksichtigen                         |
+| Eingabe/Fang | application/tools/interaction.ts, tools/snapping.ts, useToolInteraction                            | Verbraucher derselben Engine; kein eigener Fang oder Tab-Handler                           |
+| Einheiten    | src/core/units/metres.ts parst numerischen Metertext                                               | Explizite Einheit für Kalibrierstrecke prüfen; vorhandene Befehlsparser gezielt abgleichen |
+| IFC/3D       | Vorhandene Wand-/Öffnungsexporte und Solids                                                        | Referenz bleibt 2D; kein Bildkörper oder IfcWall-Ersatz                                    |
 
 Es gibt aktuell weder Bild-Asset-Schema noch Referenzimport oder Kalibrieraktion.
 DrawingDocument ist Architekturvertrag, noch kein persistenter Besitzer im Schema.
@@ -4759,9 +4623,6 @@ Funktion exponieren. Noch keine Kalibrieraktion; keine Bilddekodierung durch Dom
 Das schafft eine überprüfbare Grundlage für den anschließenden Importadapter,
 ohne leere Klassen, zweite History oder komplette Dokumentarchitektur anzulegen.
 
-
-
-
 ### Detail D18 – docs/walls/CORNER_T_COMBINATION_PLAN.md
 
 Herkunft: `docs/walls/CORNER_T_COMBINATION_PLAN.md`, Snapshot main/PR237. Altstatus nicht als aktuelle Fertigmeldung lesen.
@@ -4846,11 +4707,11 @@ Bereits funktionierende reine Eckketten und Mehrfach-Ts bleiben erhalten.
 
 #### Kleiner Testgrundriss (Meter)
 
-| ID | Achsanfang | Achsende | Stärke | Höhe | Körperversatz | Beziehung |
-|---|---|---|---|---|---|---|
-| H | (0,0) | (6,0) | 0.36 | 2.80 | +0.18 | Hauptwand |
-| E | (0,0) | (0,3) | 0.36 | 2.80 | +0.18 | Ecke H/0–E/0 |
-| N | (3,-3) | (3,0) | 0.36 | 2.80 | +0.18 | T auf H, N/1 |
+| ID  | Achsanfang | Achsende | Stärke | Höhe | Körperversatz | Beziehung    |
+| --- | ---------- | -------- | ------ | ---- | ------------- | ------------ |
+| H   | (0,0)      | (6,0)    | 0.36   | 2.80 | +0.18         | Hauptwand    |
+| E   | (0,0)      | (0,3)    | 0.36   | 2.80 | +0.18         | Ecke H/0–E/0 |
+| N   | (3,-3)     | (3,0)    | 0.36   | 2.80 | +0.18         | T auf H, N/1 |
 
 Optionales Fenster F auf H: Breite 1.20, Höhe 1.20, Brüstung 0.90,
 relative Position 0.5. Es liegt über dem T-Bereich und entfernt sich deutlich
@@ -4881,26 +4742,26 @@ vortäuschen: der aktuelle Loader muss eine solche Relation weiterhin zurückwei
 
 #### Akzeptanzmatrix für die Umsetzung
 
-| Fall | Erwartung |
-|---|---|
-| H/E zuerst, dann N per T-Fang | Ecke bleibt geometrisch identisch; N endet an richtiger Host-Seite |
-| H/N zuerst, dann E | Gleiches Ergebnis, unabhängig von Erzeugungsreihenfolge |
-| N von gegenüberliegender Seite; gedrehter Aufbau | Analoger Abschluss ohne Lücke/Überlappung |
-| Kontakt nahe Gehrung, nur teilweise auf gerader Seite | Verständliche Ablehnung; kein Commit |
-| Gleicher Knoten für Ecke und T | Ablehnung, kein automatischer Mehrfachknoten |
-| Schräger T oder verschiedene Stärke/Höhe | Bestehende Ablehnung bleibt |
-| Nebenwand mit Ecke oder zwei T-Enden | Weiterhin ausgeschlossen |
-| F über T verschieben | Frei auf H; Eckgrenze bleibt wirksam |
-| F berührt schrägen Eckabschluss | Ablehnung trotz T-Clipping |
-| Host entlang Achse verlängern/kürzen | T-Weltanker bleibt; außerhalb liegender Anker löst sich |
-| Ganze H oder N verschieben | Betroffene Verbindungen lösen nach bestehender Regel, übrige bleiben |
-| Gemeinsame Ecke bewegen | Bestehende Eckaktion; alle betroffenen Ts atomar neu prüfen |
-| Kombination kippt während Bearbeitung in nicht unterstützte Geometrie | Keine Teiländerung; Abbruch erhält Ausgangsprojekt |
-| Vorschau und Platzierung | Identische Kontur für dasselbe Ziel; Entwurfs-ID ist nicht persistent |
-| Undo/Redo, JSON-Roundtrip | Gleiche IDs/Relationen/Konturen, atomare Historie |
-| Grundriss/3D/IFC | Gleiche Profile, geschlossene Körper, plausible Volumina, separate Bauteil-IDs |
-| Ebene eines Partners ausgeblendet | Darstellungskontakt korrekt; gespeicherte Verbindung bleibt bestehen |
-| Bestehende reine Ecke/reine Ts | Kein Verlust bereits nachgewiesener Abläufe |
+| Fall                                                                  | Erwartung                                                                      |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| H/E zuerst, dann N per T-Fang                                         | Ecke bleibt geometrisch identisch; N endet an richtiger Host-Seite             |
+| H/N zuerst, dann E                                                    | Gleiches Ergebnis, unabhängig von Erzeugungsreihenfolge                        |
+| N von gegenüberliegender Seite; gedrehter Aufbau                      | Analoger Abschluss ohne Lücke/Überlappung                                      |
+| Kontakt nahe Gehrung, nur teilweise auf gerader Seite                 | Verständliche Ablehnung; kein Commit                                           |
+| Gleicher Knoten für Ecke und T                                        | Ablehnung, kein automatischer Mehrfachknoten                                   |
+| Schräger T oder verschiedene Stärke/Höhe                              | Bestehende Ablehnung bleibt                                                    |
+| Nebenwand mit Ecke oder zwei T-Enden                                  | Weiterhin ausgeschlossen                                                       |
+| F über T verschieben                                                  | Frei auf H; Eckgrenze bleibt wirksam                                           |
+| F berührt schrägen Eckabschluss                                       | Ablehnung trotz T-Clipping                                                     |
+| Host entlang Achse verlängern/kürzen                                  | T-Weltanker bleibt; außerhalb liegender Anker löst sich                        |
+| Ganze H oder N verschieben                                            | Betroffene Verbindungen lösen nach bestehender Regel, übrige bleiben           |
+| Gemeinsame Ecke bewegen                                               | Bestehende Eckaktion; alle betroffenen Ts atomar neu prüfen                    |
+| Kombination kippt während Bearbeitung in nicht unterstützte Geometrie | Keine Teiländerung; Abbruch erhält Ausgangsprojekt                             |
+| Vorschau und Platzierung                                              | Identische Kontur für dasselbe Ziel; Entwurfs-ID ist nicht persistent          |
+| Undo/Redo, JSON-Roundtrip                                             | Gleiche IDs/Relationen/Konturen, atomare Historie                              |
+| Grundriss/3D/IFC                                                      | Gleiche Profile, geschlossene Körper, plausible Volumina, separate Bauteil-IDs |
+| Ebene eines Partners ausgeblendet                                     | Darstellungskontakt korrekt; gespeicherte Verbindung bleibt bestehen           |
+| Bestehende reine Ecke/reine Ts                                        | Kein Verlust bereits nachgewiesener Abläufe                                    |
 
 #### Genau ein ausführbarer Folgeauftrag
 
@@ -4912,16 +4773,13 @@ Keine Erweiterung auf die ausdrücklich ausgeschlossenen Topologien. Falls die
 geometrische Prüfung neue Bedienentscheidungen erfordert, konkret dokumentieren
 statt still neue Nutzerregeln zu erfinden.
 
-
 #### Erweiterung 06.10.2026: zwei Ecken an der T-Hauptwand
+
 Verbindlicher implementierter Stand: Beide Hostenden dürfen rechtwinklige
 Eckanschlüsse besitzen. Die gemeinsame Prüfung berücksichtigt jeden Eckpartner
 und die zusammengesetzte Hostkontur. Kontakt/Überlappung mit einem Eckpartner
 bleibt verboten. Historische Begrenzungen auf genau einen Host-Eckanschluss
 sind damit überholt; andere Topologiegrenzen bleiben bestehen. Kein Schemawechsel.
-
-
-
 
 ### Detail D19 – docs/walls/SELECTION_MOVE_PLAN.md
 
@@ -4966,17 +4824,17 @@ getrennte Faehigkeiten; Aktionen validieren ihre gesamte Zielmenge.
 
 #### Nachgewiesener Stand
 
-| Stelle | Befund und Konsequenz |
-|---|---|
-| `src/application/selection/target.ts`, `src/components/cad/bim-view.ts` | Ein `ElementTarget` oder null, keine Auswahlmenge. |
-| `src/components/cad/CadWorkspace.tsx` | `requestedSelection` und `showSelection` ersetzen ein einzelnes Ziel; Auswahlanzahl ist 0 oder 1. |
-| `src/components/cad/TopToolbar.tsx` | Window selection / Filter rufen `onAction` auf; Workspace bindet `showNotice`. Sichtbare Schaltflaechen sind keine implementierte Mehrfachauswahl. |
-| `src/components/cad/BimPlan.tsx` | Picking liefert ein Ziel mit Ursprung/Griff; keine additive Auswahl. |
-| `src/application/direct-edit/controller.ts` | Session bindet Basisprojekt und ein Ziel; Vorschau prueft dessen Aktualitaet. |
-| `src/application/direct-edit/transforms.ts`, `src/lib/bim/model.ts` | `moveElement` bewegt eine Wand; `updateWall` mit intent move entfernt beteiligte Ts und gleicht Ecken danach ab. |
-| `src/application/tools/interaction.ts`, `adapters.ts` | Wiederverwendbarer Vertrag fuer Ursprung, Fangregeln, Zahlenvorschau, Validierung, Commit und Abbruch. |
+| Stelle                                                                         | Befund und Konsequenz                                                                                                                                       |
+| ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/application/selection/target.ts`, `src/components/cad/bim-view.ts`        | Ein `ElementTarget` oder null, keine Auswahlmenge.                                                                                                          |
+| `src/components/cad/CadWorkspace.tsx`                                          | `requestedSelection` und `showSelection` ersetzen ein einzelnes Ziel; Auswahlanzahl ist 0 oder 1.                                                           |
+| `src/components/cad/TopToolbar.tsx`                                            | Window selection / Filter rufen `onAction` auf; Workspace bindet `showNotice`. Sichtbare Schaltflaechen sind keine implementierte Mehrfachauswahl.          |
+| `src/components/cad/BimPlan.tsx`                                               | Picking liefert ein Ziel mit Ursprung/Griff; keine additive Auswahl.                                                                                        |
+| `src/application/direct-edit/controller.ts`                                    | Session bindet Basisprojekt und ein Ziel; Vorschau prueft dessen Aktualitaet.                                                                               |
+| `src/application/direct-edit/transforms.ts`, `src/lib/bim/model.ts`            | `moveElement` bewegt eine Wand; `updateWall` mit intent move entfernt beteiligte Ts und gleicht Ecken danach ab.                                            |
+| `src/application/tools/interaction.ts`, `adapters.ts`                          | Wiederverwendbarer Vertrag fuer Ursprung, Fangregeln, Zahlenvorschau, Validierung, Commit und Abbruch.                                                      |
 | `src/application/direct-edit/snapping.ts`, `src/application/tools/snapping.ts` | Bewegtes Ziel und Abhaengigkeiten aus Fangquellen ausschliessen; fuer eine Auswahlmenge auf alle bewegten IDs erweitern. Raeumlichen Index weiterverwenden. |
-| `src/lib/bim/history.ts` | Ein vollstaendiger validierter Snapshot kann mit einem History-Schritt uebernommen werden. |
+| `src/lib/bim/history.ts`                                                       | Ein vollstaendiger validierter Snapshot kann mit einem History-Schritt uebernommen werden.                                                                  |
 
 Lesender Modellversuch mit H/E/N aus corner-t-demo: nacheinander alle drei
 Waende um (1,0) bewegen. Vorher 1 Ecke/1 T; danach 1 Ecke/0 T. Ausgangsprojekt
@@ -5060,9 +4918,6 @@ Gemeinsame freie Verschiebung als Verbraucher der zentralen Auswahlmenge gemaess
 dem aktuellen DEVELOPMENT_PLAN umsetzen. Die Auswahl bleibt typunabhaengig;
 Bewegungsfaehigkeiten und Host-Abhaengigkeiten werden von Aktionen validiert.
 
-
-
-
 ### Detail D20 – docs/walls/TWO_CORNER_T_ACCEPTANCE.md
 
 Herkunft: `docs/walls/TWO_CORNER_T_ACCEPTANCE.md`, Snapshot main/PR237. Altstatus nicht als aktuelle Fertigmeldung lesen.
@@ -5128,9 +4983,6 @@ Die Lücke des Browser-Datei-Roundtrips ist damit geschlossen. Keine Anpassung a
 Save project erforderlich. Der Timeout bleibt eine Einschränkung des verwendeten
 Automationssignals. Dies ersetzt weiterhin keine Archicad-Abnahme.
 
-
-
-
 ### Vollständige Nutzer-Funktionsquelle vom 08.10.
 
 Explizite neuere Präzisierungen (BIM-Skalierverbot, 2D-only Pickup, kein Pflichttraining, Maßstab und unabhängige Abbildfilter) im Masterplan haben Vorrang.
@@ -5158,7 +5010,7 @@ Die Rasterengine soll aber auch in 3D Fenster funktionieren. Denn das Modell kan
 
 Um die Entwicklung des 3D Modells zu vereinfachen, gibt es hochqualitative Rastersysteme und Hilflinien on demand, die sogenannte Rasterengine. Um die Bedienbarkeit weiterhin zu vereinfachen, wird ein „On Demand Menü“ hinzugefügt.
 Dieses Menü popt im Canvas auf, sofern ein Element ausgewählt wird und lässt sich, wie bereits vorhanden - bewegen. Darin befinden sich die Buttons für die folgenden Funktionen:
-1.Gesamtes Element bewegen 
+1.Gesamtes Element bewegen
 
 #### Absatz 5
 
@@ -5176,18 +5028,17 @@ Eine zuvor ausgewählte Funktion bleibt wird vorgemerkt, und beim nächsten Öff
 
 Canvas hat einen Maßstab, Grundriss auch. Dieser kann in dem Leisten ganz unten geändert werden. Jegliche Wände, Schraffuren, Texte, Linien, Kreise, Möbeldarstellungen oder sonst welche Dinge sollen alle einer Ebene hinzugefügt werden. Die genannten Ebenen sollen mit Hilfe eines Ebenen Umschalters jederzeit sichtbar und unsichtbar geschaltet werden. Der Ebenen Umschalter erlaubt auch Funktionen wie „Alle außer diese Ebenen“ unsichtbar machen, oder eben andersrum. Außerdem sollen ALLE ebenen ausgeblendet und wieder eingeblendete werden können.
 
-
 #### Absatz 10
 
 Idealerweise lässt sich das Programm mit Hilfe einer AI sowie Spracheingabe bedienen. Dies soll der wichtigste Indikator der Software sein. Das Zeichnen von Wänden, hinzufügen von Türen, Fenstern, decken und Dächern, sowie das anschließende Vermaßen soll langfristig durch Spracheingabe oder Texteingabe zuverlässig funktionieren können.
 
 #### Absatz 12
 
-Das Modell wird einer Gebäudestruktur zugeordnet. Der Nutzer kann über den Navigator Anzahl der Geschosse frei erstellen, sowie die Höhenpunkte dieses Definierens. 
+Das Modell wird einer Gebäudestruktur zugeordnet. Der Nutzer kann über den Navigator Anzahl der Geschosse frei erstellen, sowie die Höhenpunkte dieses Definierens.
 
 #### Absatz 13
 
-Wände, Stützen, oder sonstige Bauteile, welche in der Höhe eines geschosses gebaut werden können, wissen somit die Geschosshöhe, des Geschosses, in dem Sie sich befinden. 
+Wände, Stützen, oder sonstige Bauteile, welche in der Höhe eines geschosses gebaut werden können, wissen somit die Geschosshöhe, des Geschosses, in dem Sie sich befinden.
 
 #### Absatz 14
 
@@ -5207,15 +5058,15 @@ Hochgeladene PDF-Dateien sollen in 2d Elemente zerlegt werden können.
 
 #### Absatz 18
 
-Anpassungen am Modell sollen entweder in 2D am Grundriss, in der Ansicht, im Schnitt, oder aber auch in 3D ausgeführt werden. (z.B. Verschieben der Wände, verschieben der Fenster, Löschen von Elementen, etc. 
+Anpassungen am Modell sollen entweder in 2D am Grundriss, in der Ansicht, im Schnitt, oder aber auch in 3D ausgeführt werden. (z.B. Verschieben der Wände, verschieben der Fenster, Löschen von Elementen, etc.
 
 #### Absatz 19
 
-Raumwerkzeug zum Definieren von „Räumen“ innerhalb von geschlossenen oder teil umschlossenen Wandflächen. Räume haben die folgenden Eigenschaften: Namen, eindeutige ID (beginnend mit R-001), einem Namen, eine Fläche. 
+Raumwerkzeug zum Definieren von „Räumen“ innerhalb von geschlossenen oder teil umschlossenen Wandflächen. Räume haben die folgenden Eigenschaften: Namen, eindeutige ID (beginnend mit R-001), einem Namen, eine Fläche.
 
 #### Absatz 20
 
-Das Raumwerkzeug erkennt die lichten Raumhöhen und erkennt die „Höhenlinien“, welche ebenfalls im Raumeigenschaften Fenster erstellt werden können. Die Höhenlinien erkennen „an dieser Stelle im Raum beträgt die Raumhöhe x,xx m“ Dabei können die beiden Messpunkte definiert werden. 
+Das Raumwerkzeug erkennt die lichten Raumhöhen und erkennt die „Höhenlinien“, welche ebenfalls im Raumeigenschaften Fenster erstellt werden können. Die Höhenlinien erkennen „an dieser Stelle im Raum beträgt die Raumhöhe x,xx m“ Dabei können die beiden Messpunkte definiert werden.
 
 #### Absatz 21
 
@@ -5248,8 +5099,9 @@ Eigenschaften: Farbe ja oder nein, Kontur ja oder nein, Farbe Deckkraft frei wä
 #### Absatz 31
 
 Differenzieren jeglicher Zeichenwerkzeuge
+
 1. Wandwerkzeug Auswahl -> öffnen der Funktionen im Eigenschaftenpanel: da kann ausgewählt werden wie dick eine wand ist, ob diese die Geschosshöhe, oder alternative Höhe aufweist (änderbar), ob diese eine Monolithische Wand ist, oder ob diese aus verschiedenen Schichten besteht (Schichten müssen auch auswählbar oder selbstherstellbar sein.)
-Es kann auch ausgewählt werden, ob per Wandwerkzeug Auswahl nur eine Wand gezeichnet wird, oder ob dieses Werkzeug mit jedem Klick wände zeichnet, so lange bis mit einem doppelklick der Abschluss signalisiert wird.
+   Es kann auch ausgewählt werden, ob per Wandwerkzeug Auswahl nur eine Wand gezeichnet wird, oder ob dieses Werkzeug mit jedem Klick wände zeichnet, so lange bis mit einem doppelklick der Abschluss signalisiert wird.
 
 #### Absatz 32
 
@@ -5269,7 +5121,7 @@ Deckenwerkzeug: ebenfalls wie Wand, Aufbau aus schichten möglich, Auswahl Mater
 
 #### Absatz 38
 
-Textwerkzeug: Texte schreiben, Hochschreibweise für Zahlen, Farbauswahl, Größenauswahl, Schriftartauswahl, Fett, kursiv, Unterstrichen, Umrandung möglich inkl. Farbauswahl, Hintergrundfläche mit Farbauswahl. (Zuordnung zur Ebene Textelemente) 
+Textwerkzeug: Texte schreiben, Hochschreibweise für Zahlen, Farbauswahl, Größenauswahl, Schriftartauswahl, Fett, kursiv, Unterstrichen, Umrandung möglich inkl. Farbauswahl, Hintergrundfläche mit Farbauswahl. (Zuordnung zur Ebene Textelemente)
 
 #### Absatz 39
 
@@ -5283,7 +5135,7 @@ ALLGEMEINES: Die Eigenschaftenleiste unterhalb des Menüs zeigt immer die Eigens
 
 Bedeutet: Ich wähle das Wandwerkzeug aus, und im genannten Menü erscheinen jegliche Eigenschaften, welche ich anpassen kann, bevor ich anfange zu zeichnen. Ebene, Stärke, Höhe, Material, Darstellung etc.
 Dasselbe Menü erscheint auch, wenn ich eine bereits gezeichnete Wand anklicke, nur halt mit den Eigenschaften der spezifischen Wand.
-Dieses wollen wir für alle Werkzeuge einführen. 
+Dieses wollen wir für alle Werkzeuge einführen.
 
 #### Absatz 43
 
@@ -5296,19 +5148,21 @@ Allgemeine Steuerung:
 #### Absatz 47
 
 Es sollen Hotkeys eingeführt werden:
-z.B.:	E -> ausgewähltes Element bewegen
+z.B.: E -> ausgewähltes Element bewegen
 
 #### Absatz 48
 
- 	STRG+ E -> ausgewähltes Element kopieren + Bewegen
+```
+STRG+ E -> ausgewähltes Element kopieren + Bewegen
+```
 
 #### Absatz 49
 
-	D-> ausgewähltes Element drehen
+    D-> ausgewähltes Element drehen
 
 #### Absatz 50
 
-	STRG+ D – ausgewähltes Element drehen.
+    STRG+ D – ausgewähltes Element drehen.
 
 #### Absatz 51
 
@@ -5321,8 +5175,8 @@ Das Navigationsfensteer beinhaltet „Geschosse, Schnitte, Ansichten, 3D-Ansicht
 
 #### Absatz 55
 
-Aus diesen Kann ein Abbild erstellt werden. Z.B kann ich Ein Abbild vom Geschoss erstellen, daraufhin wird in einem externen Abbildverzeichniss (Dargestellt ebenfalls im Navigator, nur in eigene Sektion, z.B. darunter) entsteht ein Abbild von Geschoss x. Dieses Abbild gilt als Ableitung, jedoch kann darin die darstellung der ebenen variabel geändert werden. Dieses Abbild ist keine Kopie vom Geschoss x. Es reagiert weiterhin auf jegliche Änderungen am Modell. Allerdings kann ich im Abbild Ebenen unabhängig aktivieren und deaktivieren, ohne dass dies Einfluss auf das Hauptmodell hat. 
-Diese Funktion hat den Zweck, einen Abschnitt eines Geschosses zu erstellen, dort Extra ebenen auszufüllen wie Gestaltungen, textliche Anmerkungen etc., und den Plan für den Export vorzubereiten. 
+Aus diesen Kann ein Abbild erstellt werden. Z.B kann ich Ein Abbild vom Geschoss erstellen, daraufhin wird in einem externen Abbildverzeichniss (Dargestellt ebenfalls im Navigator, nur in eigene Sektion, z.B. darunter) entsteht ein Abbild von Geschoss x. Dieses Abbild gilt als Ableitung, jedoch kann darin die darstellung der ebenen variabel geändert werden. Dieses Abbild ist keine Kopie vom Geschoss x. Es reagiert weiterhin auf jegliche Änderungen am Modell. Allerdings kann ich im Abbild Ebenen unabhängig aktivieren und deaktivieren, ohne dass dies Einfluss auf das Hauptmodell hat.
+Diese Funktion hat den Zweck, einen Abschnitt eines Geschosses zu erstellen, dort Extra ebenen auszufüllen wie Gestaltungen, textliche Anmerkungen etc., und den Plan für den Export vorzubereiten.
 
 Dieses Abbild erstellen, soll mit allen Geschossen, Schnitten und Ansichten möglich sein.
 
@@ -5336,12 +5190,12 @@ Dazu kommt ein Plankopf, und dann kann dies exportiert werden. Die Layouts erhal
 
 #### Absatz 60
 
-Später wird es so sein: Ein Nutzer zeichnet in 2D, wechselt rüber zu 3D, und wechselt rüber in ein 2D Abbild. Hierfür muss die UI passen. 
+Später wird es so sein: Ein Nutzer zeichnet in 2D, wechselt rüber zu 3D, und wechselt rüber in ein 2D Abbild. Hierfür muss die UI passen.
 Es wäre sinnvoll, wie bereits im UI vorgesehen, den Bildschirm spaltbar zu machen. Jedes der ausgewählten Fenster kann aktiviert werden und eine Zeichnung dem zugewiesen. Ein Ablauf könnte so sein: Doppelklick auf ein Canvasfenster -> Klick auf z.B. Erggeschossabbild -> im Canvasfenster 1 ist das Erdgeschoss. Im Anderen Fenster das 3D Model.
 
 #### Absatz 62
 
-Dachfunktion: Es soll in  ein Dach gezeichnet werden, welches in den Einstellungen voreingestellt oder live geändert werden kann. Beginntn vereinfacht mit einer Dachfläche. Später soll ein Walmdach hinzukommen.
+Dachfunktion: Es soll in ein Dach gezeichnet werden, welches in den Einstellungen voreingestellt oder live geändert werden kann. Beginntn vereinfacht mit einer Dachfläche. Später soll ein Walmdach hinzukommen.
 Gaubenfunktion: Ähnlich wie Dach, in 2D angeordnet, in 3d dargestellt.
 
 #### Absatz 64
@@ -5358,21 +5212,17 @@ AI: Ein Bereich in 3D oder 2D ansicht soll ausgewählt werden können, und ein �
 
 #### Absatz 66
 
-
 Rechtsklick in 3D oder 2D - > Kopieren, einfügen, importieren, Spiegeln, Reihenfolge der Darstellung ändern.
 
 Schneller doppelter Rechtsklick auf ein jegliches Element: Übernahme des Objekts, bzw. des Werkzeuges mit denselben Eigenschaften.
 
 Schrauffurübersicht – Ein Bereich, in dem Schraffuren bearbeitet erstellt und hinzugefügt werden können.
 
-
-Grundsätzlich: 
-Die Werkzeuge haben die folgenden Eigenschaften: Ebenenzuordnung, breite, Höhe, Länge, Farbe, Kontur,  Geschosszuordnung. 
+Grundsätzlich:
+Die Werkzeuge haben die folgenden Eigenschaften: Ebenenzuordnung, breite, Höhe, Länge, Farbe, Kontur, Geschosszuordnung.
 Wir werden später herauskristallisieren, welcher Eigenschaften durch die Werkzeuge gemeinsam geteilt werden. Die am meisten geteilten Eigenschaften werden in Eigenschaftenmenü d. Werkzeuge an erster Stelle angezeigt, absteigend.
 
-Trimmen bzw. Beschneiden von 3D Objekten. Ähnlich wie  Boolisch Operationen, nur dass mit weniger input gearbeitet wird. Sinnvoll wenn eine Wand auf ein Satteldachzugeschnitten werden muss. 
-
-
+Trimmen bzw. Beschneiden von 3D Objekten. Ähnlich wie Boolisch Operationen, nur dass mit weniger input gearbeitet wird. Sinnvoll wenn eine Wand auf ein Satteldachzugeschnitten werden muss.
 
 ### Frühe Anlage – nur nicht zurückgenommene Wünsche erhalten
 
@@ -5381,7 +5231,7 @@ Der Guide vom 02.10. ersetzt diese Anlage als Reihenfolgenquelle; keine erneute 
 ```text
 Geplante Funktionen
 Allgemeine Funktionen
- 
+
 1.1
 Wohnflächenberechnung automatisiert
 Erkennen von Raumflächen, und daraus eine Wohnfläche nach Wo-FIV erstellen. (Türnischen, Schornsteinabzüge, Vorbauwände etc. korrekt beachten.) Erstellen eines Wohnflächenberichts nach einer Vorlage. PDF, Variablen: Geschossanzahl, Raumzahl, Name, Adresse. Darstellung eines Rechenweges.
@@ -5396,14 +5246,14 @@ e
 able Men
 ü
 Ein Menü, welches in der Nähe des Cursors aufpoppt,
- (jedoch auch zur Seite bewegt werden kann, falls ungünstig aufgepoppt, und es bleibt bestehen, 
-sobald ein Bauteil, 3D Element, 2D 
+ (jedoch auch zur Seite bewegt werden kann, falls ungünstig aufgepoppt, und es bleibt bestehen,
+sobald ein Bauteil, 3D Element, 2D
 E
 lement, oder sonstiges, geschaffenes Element an
 g
 eklickt wird
  und markiert bleibt.
-Inhalt: 
+Inhalt:
 Funktion: „gewählten punkt verschieben“
 Funktion: „bewegen“
 Funktion: „Info Anzeigen“
@@ -5413,7 +5263,7 @@ Maßstableiste – unter den Canvas
 Änderungen am Maßstab ermöglichen
 1.4
 Skalier-Werkzeug in der Menüleiste
-Hochgeladene PDF-Elemente (oder sonstige Dateitypen) sollen skaliert werden können. Das Skalier-Werkzeug funktioniert wie folgt: 
+Hochgeladene PDF-Elemente (oder sonstige Dateitypen) sollen skaliert werden können. Das Skalier-Werkzeug funktioniert wie folgt:
 Maßstabuntreue Zeichnung wird markiert.
 Ein eingebettetes „linienwerkzeug als Supp-werkzeug zeichnet eine zu skalierende Linie ein, mittels anfangs und Endpunkt.
 Es wird das „On Demand – Menü“ erscheinen, wo per Eingabe (oder auch AI Sprachbefehl) die neue Länge der soeben zeigten Linie abgefragt werden soll.
@@ -5425,16 +5275,16 @@ Werkzeuge
 Linienwerkzeug
 Linienwerkzeug.
 Erstell eine Linie (Punkt zu Punkt) (nicht in 3D Ansicht)
-Eigenschaften des Werkzeugs: 
-Voreinstellung, ob Linienwerkzeug, oder Polylinie erstellt werden soll. 
+Eigenschaften des Werkzeugs:
+Voreinstellung, ob Linienwerkzeug, oder Polylinie erstellt werden soll.
 Farbe aus einer Farbpalette
-Strichstärke 
+Strichstärke
 Strichart (gestrichelt, Abbruchlinie etc.)
 Raumwerkzeug
-Definieren von „Räumen“ innerhalb von geschlossenen oder teil umschlossenen Wandflächen. Räume haben die folgenden Eigenschaften: Namen, eindeutige ID (beginnend mit R-001), einem Namen, eine Fläche. 
-Das Raumwerkzeug erkennt die lichten Raumhöhen und erkennt die „Höhenlinien“, welche ebenfalls im Raumeigenschaften Fenster erstellt werden können. Die Höhenlinien erkennen „an dieser Stelle im Raum beträgt die 
+Definieren von „Räumen“ innerhalb von geschlossenen oder teil umschlossenen Wandflächen. Räume haben die folgenden Eigenschaften: Namen, eindeutige ID (beginnend mit R-001), einem Namen, eine Fläche.
+Das Raumwerkzeug erkennt die lichten Raumhöhen und erkennt die „Höhenlinien“, welche ebenfalls im Raumeigenschaften Fenster erstellt werden können. Die Höhenlinien erkennen „an dieser Stelle im Raum beträgt die
 R
-aumhöhe x,xx m“ Dabei können die beiden Messpunkte definiert werden. 
+aumhöhe x,xx m“ Dabei können die beiden Messpunkte definiert werden.
 Beispiel: Messpunkt 1: Oberkante Fu
 ß
 boden
@@ -5442,16 +5292,16 @@ boden
 Messpunkt 2: Unterkante Dachschräge.
 Daraufhin kann die korrekte Wohnflächenberechnung inkl. Abzüge aufgestellt werden.
 Schraffur Werkzeug
-2D-Tool, welches für Design, Schraffur, Verzierung, etc. verwendet werden kann. 
+2D-Tool, welches für Design, Schraffur, Verzierung, etc. verwendet werden kann.
 Eigenschaften: Farbe ja oder nein, Kontur ja oder nein, Farbe Deckkraft frei wählbar, oder anstelle Farbe Muster, wie z.B. Mauerwerksschraffur.
- 
+
 Ebenen
 Jedes Element bekommt eine eigene Ebene.
 Ebenen sind: Außenwand, Innenwand, Dach, Decke, Fenster, Tür, Möblierung, Geländer, Gelände, 2D-Zeichnungen, Neutrale Ebene, Bemaßung
 Wände liegen standartweise in der wandebene als außenwand.
 2D-Linien, rechtecke, zeichnungen liegen standartweise in „2D-Zeichnungen“
 Es die Elemente können aber beliebig anderen Ebenen zugeordnet werden. Neue Ebenen können hergestellt und erstellt werden.
-Erstelle in de Menüleiste einen Punkt mit dem Namen „Organisation“ und 
+Erstelle in de Menüleiste einen Punkt mit dem Namen „Organisation“ und
 darin ist der Unterpunkt Ebene zu öffnen. Dies erscheint als ein eigenes Fenster mit Darstellung der Ebenen. Inkl. Buttons für das herstellen neuer Ebenen und das Bearbeiten vorhandener Ebenen.
 In der Menüleiste soll außerdem ein Ebenenumschalter als kleines Fenster dargestellt werden. Dort können ausgewählte ebenen Ausgeblendet oder angezeigt werden.
 ```
@@ -5477,118 +5327,115 @@ Historische Reihenfolge/Status nicht mehr aktiv. Jede alte Tabellenanforderung b
 
 99 Markdown-Dateien aus einem konsistenten Repository-Snapshot, zusätzlich Anlagen und lokale frühere Guides. Dateihashes machen den zugrunde liegenden Stand nachvollziehbar. Einzelne Diagnosen/Annahmetests sind Evidenz, keine zusätzlichen aktiven Leitfäden. Keine Quelldatei gelöscht.
 
-| Quelle | Rolle | SHA-256 des gelesenen Inhalts |
-| --- | --- | --- |
+| Quelle                                                     | Rolle                                           | SHA-256 des gelesenen Inhalts                                      |
+| ---------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------ |
 | .lovable/plan/novikov-cad-frontend-prototype-2026-09-29.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `304bfcdeeceb778a6ec11438af515c99ca51482f4b14f4bdc3dc5a3c4df1538c` |
-| AGENTS.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `3e569f9104b69b9172434f4e2d87b3228c526d08b040bc18d0d584584a51035a` |
-| ARCHITECTURE.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `ad3ee4ffb059508c60a5af978ef4b8c2a45d48d7f80659ac89d821ee75ab9855` |
-| DEVELOPMENT_GUIDE.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `84d55c51f07591b8ecb667295e125d47685a2f7d40c8d141ac91832306795dc0` |
-| DEVELOPMENT_PLAN.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `e221b2d156ee3d5af2ff66bae49e3f6cf375300a0b1589ef0ab0227b55938654` |
-| F13_HILFLINIENSYSTEM.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `d01e2109278d9cdf56f6bd6e662e03674161e0a744de40401f3f54f973b28703` |
-| FEATURE_ROADMAP.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `e406699aa2afbe7b3730fa4fc45e5456e93b3e6332c0031a9ac90ce4cdd91aaa` |
-| FUNCTION_REQUIREMENTS_2026-10-03.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `604714d6808e94f792655def583dad14ab0c7285678e2311d43879975a7f81b5` |
-| GUIDE_BASELINE.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `8558b6e2c622b90386bc73af31d7b8f7b64b6cbf84a821a99080055a786a753d` |
-| NOVIKOV_ARCHITEKTUR_REVIEW_UND_FUNKTIONSMAP.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `0b777dc0191168ed8406ac8135773c06ec0063002b8dff6fb3119b7900d971be` |
-| NOVIKOV_FUNKTIONSARCHITEKTUR_2026-10-03.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `4f992519b16c6fe00fd5918308adff7099e86b31814e9fbe9ed045630091288b` |
-| README.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `365563b6236d3a7b8f138e23c64be99c179225fed0c8f8d1f7476d2833749883` |
-| STABILIZATION.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `69c7cd70aa28f83ee884b7795d8bf6eace80151b9e5456fbdf0f987436ac2729` |
-| benchmarks/README.md | Diagnose-/Testevidenz | `ffdc2fa9be0d3687f6826189dbd7bb0b837dd7ce6b76daf87e551a288146ada8` |
-| docs/3D_INTERACTION_CONTRACT.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `b45c3d90af6194488049f014803848fbfb181a2119daf7f66dcc3a6aaa088f79` |
-| docs/3D_WORKPLANE_PLAN.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `128592b35fa4eef643959ebec1cf7f486eddbe2048c207db59aabd6065fefd48` |
-| docs/AUTOMATIC_WALL_CONNECTIONS.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `ab5c6367d4c071c626d04dc46067170a022ca0a3da21c2a764a8571749853ef1` |
-| docs/CONTOUR_EDGE_PERFORMANCE.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `2ef4317ee8c0301beb9f4183cb6b00af3d5456914e6efa8ee743b56821524e7d` |
-| docs/CORNER_IFC_ACCEPTANCE.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `bee41e5e4e7be5a17d8889f6b821e39329b6956775325b83e4e5d54acc8d9e53` |
-| docs/LAYER_CONTRACT.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `f5aab51a6959587bf697efec3c131229d7fe577d74ed6aa524d3efb4db7f0899` |
-| docs/LAYER_VISIBILITY_PLAN.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `dd1208f5abbd703f68b11d6cac8f3f8ed75ce062699cbf9dffde2572d30005cb` |
-| docs/LOCAL_SNAP_QUERY_PLAN.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `502d122271d20173e561f21eeb0bc679833f7fafa3cc9926c7642780ac6a49b4` |
-| docs/PERSISTENT_T_RELATIONS.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `a718140109c7508ff532e07f24df919baf3ea2aaef712757639cfdf39ea77a1d` |
-| docs/REFERENCE_SELECTION_PLAN.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `ef2acc729f61d82bc853a9e19566b3150ffdcebc1fb1298c9b1f31efcd10452a` |
-| docs/T_IFC_ACCEPTANCE.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `df6ff37799ed1bf00f37743084a951a85f1fa7f39ff192149bb0f6842c889ce5` |
-| docs/T_WALL_CONNECTION_PLAN.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `2b180d9d2922edccebac5c5c230b03679ac609ddb367508a88794de8171cde84` |
-| docs/T_WINDOW_VALIDATION.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `0eeaaebd390225c9906429810f81f3602fa01c8d5a182e021170272367759ef6` |
-| docs/WALL_CORNER_PLAN.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `04789c887283a3e7fb5065a574a383c17fe7781e696b861001abea9b7a0a4afd` |
-| docs/acceptance/2026-10-04-parallel-workflow.md | Diagnose-/Testevidenz | `3ca6bec5b6e7a03f2433e61d7b924cddf4d4d7467c9075dc1525828c144da763` |
-| docs/ai/AI_CAD_PRIMARY_VISION.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `7d1bb2e72b2c25dfb011c5e741f93b4be692ba1d1ba4c8dd707580d23beb66b1` |
-| docs/ai/AI_FUTURE_VISION.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `dc2ba9ec6123692ffa7eef8c39cbfe35f35df52445bb0a2a2c8b8acecf3cce65` |
-| docs/performance/A03_COMMIT_VALIDATION.md | Diagnose-/Testevidenz | `50e2e4af2b515c17c637252b2645aba5c515bdefed54ead19deb0f3ca6248bcf` |
-| docs/performance/ACTIVE_MOVEMENT_PROFILE.md | Diagnose-/Testevidenz | `1b3b51ab0fb0843d7b13a050500b05c89775ec209783a6d1aae15d7c5e628a8f` |
-| docs/performance/ARCHITECTURE_REVIEW_2026-10-07.md | Diagnose-/Testevidenz | `5a29d2383faa2e2af2b5c6636801fa4c8839f1c3f193e0af6ad3b88c471ed6d8` |
-| docs/performance/ASSET_INGRESS.md | Diagnose-/Testevidenz | `82d5781d7540b33d2be19fe1bd0f8c1c67d459c6e3e6148b082ef866af8bfe05` |
-| docs/performance/ATOMIC_SELECTION_CONFIRMATION.md | Diagnose-/Testevidenz | `8da980c785d291e26b2b7269c7cf6282936395f874261b4efa53c0d583e842e8` |
-| docs/performance/CAPACITY_BASELINE.md | Diagnose-/Testevidenz | `a33fa2e4c361eabcff7c63ba18fbc8102fa84ce80d52b58b0a34e8bdbf63e45b` |
-| docs/performance/COMMIT_PHASE_PROFILE.md | Diagnose-/Testevidenz | `fd6c4abc3fdaf5bcf35c54b7834360289ec8b7eea8e54149719b647992a51dcd` |
-| docs/performance/CONNECTED_WALLS_PROFILE.md | Diagnose-/Testevidenz | `3b60dc92471de05656ffb32461f36fa33beb2ed333c8b592cb092bbdc0b41ad8` |
-| docs/performance/DENSE_SNAPPING.md | Diagnose-/Testevidenz | `ffe92fd0fbf9f68089d7a118c48c13a2894f2e32c7775b2ae868b45f6ea5aa1b` |
-| docs/performance/IMAGE_URL_REUSE.md | Diagnose-/Testevidenz | `0a8795ffa03aa7992841c77770fb9c550aaca3b42c4be876a7ae560b170f5c98` |
-| docs/performance/LARGE_PLAN_BOUNDS.md | Diagnose-/Testevidenz | `9ebb224f3253e22c87914053532db217532ed2cab77a077cec6071c282e80bf8` |
-| docs/performance/LOCAL_INTEGRATION.md | Diagnose-/Testevidenz | `07c987860553c319b84e82d2b2fc7a3dee1c35c65e73bf0880c00e87dd5eaee3` |
-| docs/performance/LOCAL_PROXIMITY.md | Diagnose-/Testevidenz | `2e19514a0c6b61d740a0e2e80944e6332c7e7ad53df49b3411c59a5f67bfe14a` |
-| docs/performance/LOCAL_SOURCES.md | Diagnose-/Testevidenz | `c5fb0f4ac76fc72abcbff76a09b2c345f8ff6483d225830f8ee527fe03d8f6a7` |
-| docs/performance/MANUAL_MOVEMENT_TRACE.md | Diagnose-/Testevidenz | `7d03c2ae1237de232f6f550bc0f09022353e728e19279472817bbb462c856bfb` |
-| docs/performance/MODEL_ASSET_CONTRACT.md | Diagnose-/Testevidenz | `73e65eb26bbd55d70797c185de4daf463e8115df02d305e752670ea853f28454` |
-| docs/performance/MODEL_COMPARISON.md | Diagnose-/Testevidenz | `ebf6940d0c4a324712f14b8e1c61b96af3d10937de271b8a46eda5db4a6b3944` |
-| docs/performance/P0_BROWSER_BASELINE.md | Diagnose-/Testevidenz | `e4a9db058a54a382e2692495cddebe7ccc20b7ad13cca5578f28a18d1dbebf04` |
-| docs/performance/PREPARED_CHAIN_CORNER.md | Diagnose-/Testevidenz | `f92dae6c23735dce2150633503bf907b9d8e63434205219292455b7f1c08c118` |
-| docs/performance/PREPARED_CHAIN_MOVE.md | Diagnose-/Testevidenz | `4ae85240c7610e92998f2b2f4055156b0d0d9c4572f68c169cdbebe972d9ff00` |
-| docs/performance/PREPARED_ENDPOINT_PILOT.md | Diagnose-/Testevidenz | `258508a9062aabf5d51e61c4b4e3510bbf6c5591eea7d806c774a08fe677a4d5` |
-| docs/performance/PREPARED_SELECTION_PREVIEW.md | Diagnose-/Testevidenz | `59f3252e0ff7c195a17643a6f5765fa1086df99cc3c4f36444c27701d8c7cc74` |
-| docs/performance/PREPARED_WALL_DRAWING.md | Diagnose-/Testevidenz | `4cea62874dd6a5e045c758b42be1b8934a4dbc33daf00138279cc68e8d6b754d` |
-| docs/performance/PROJECTED_PICKING_PILOT.md | Diagnose-/Testevidenz | `f4d83457ecad877627cb2f43e643960b6bedbbf2928c5a1c16ac065604a72f61` |
-| docs/performance/SELECTION_EXTRUSION_AB.md | Diagnose-/Testevidenz | `f16f3a6831155fb3538d7a0b867207140c2e02449c406cb934555a61dfd19042` |
-| docs/performance/SELECTION_PREVIEW_REUSE.md | Diagnose-/Testevidenz | `1aff34219dd6ec9da9405565e579e27b59aa200e1d1c42f25045ace8142fda22` |
-| docs/performance/SELECTION_SCALE_PROFILE.md | Diagnose-/Testevidenz | `976a7710bb723cacfe84ef7022ef205d258e281aafc7d2257a2d3eba3bd3a8c1` |
-| docs/performance/SESSION_WALL_EXTRUSION.md | Diagnose-/Testevidenz | `7796eeff58b57b993bfc14d405e5d54d90b4ac0248a38909772f4c9d5c5ba4fe` |
-| docs/performance/SHARED_CHAIN_CORNER.md | Diagnose-/Testevidenz | `b967e84c9367a8819b0e3f10664406fb4802de0036eaca48cfb5c351e5199fb7` |
-| docs/performance/SHARED_CHAIN_MOVE.md | Diagnose-/Testevidenz | `dac3b7c98eb10ce5003610b76719dcb3a61a3b1a7efc2117a4e3a8d79032be78` |
-| docs/performance/SHARED_ENDPOINT_PREVIEW.md | Diagnose-/Testevidenz | `f648f7a03f6e5f1df9bc031287f842bfe635e76296af2317ddd3a8c9feee8905` |
-| docs/performance/SHARED_SOLID_PICKING.md | Diagnose-/Testevidenz | `840fea65ce5056f5a7d72513ff9f76b21531b34ccda4fa1e431f0c20308280b9` |
-| docs/performance/SHARED_WALL_DRAWING.md | Diagnose-/Testevidenz | `2f9dbf85141bea0025937f34b90b22535e46d318ef280fa9e8604f4ea85b187d` |
-| docs/performance/SHIFT_REPEAT_INPUT.md | Diagnose-/Testevidenz | `2d50b991dedc43441102ff80f7f24b7d24106967a5b821891dc12e1b7d8546fd` |
-| docs/performance/SHIFT_SELECTION_DIAGNOSIS.md | Diagnose-/Testevidenz | `e4c2d82db28484197128a48c1911c5d8f14082f2b891b64bccd2dde5b1e74800` |
-| docs/performance/SINGLE_WALL_SHARED_MOVE.md | Diagnose-/Testevidenz | `16a67ff28bcbea316cdefd51388f33e6cba14b1e1b07940bd488263330c75610` |
-| docs/performance/SNAP_BASELINE.md | Diagnose-/Testevidenz | `e4c5cefd77884004fbf970f6b590a4e077e4f542a7a8eae6e2f403729e3437e0` |
-| docs/performance/SNAP_DENSITY.md | Diagnose-/Testevidenz | `fb7660ebc7c4c156529a1dbd327f58d28370b24103889de56c005f192ea273eb` |
-| docs/performance/SOLID_CAMERA_PROFILE.md | Diagnose-/Testevidenz | `7fe746c6568e75de9d6ea4d47c1007be16ac4f2bfc11bf29174ce8cb1b061c71` |
-| docs/performance/SOLID_LIFECYCLE_PILOT.md | Diagnose-/Testevidenz | `50542ece21c2c4b78b599a501005d29e5707792f5a5289c75d7e1bd0c2f55b8b` |
-| docs/performance/SOLID_MATRIX_PILOT.md | Diagnose-/Testevidenz | `b62f17e62efa7f8f750ac671b7478220c0f594df3630ea31dfb272da97ee25d2` |
-| docs/performance/SOLID_RENDERER_INTEGRATION.md | Diagnose-/Testevidenz | `5f21fe1f0454016eca0d75b56dddacd2a5c438114ef13ca3000d80f67a834f10` |
-| docs/performance/VALIDATED_ASSET_HANDLES.md | Diagnose-/Testevidenz | `1ee83d5725247b9c23df2ffea858b62756f9c4fa6df3e67cb72bdf801ecf3b79` |
-| docs/performance/WALL_DRAWING_PROFILE.md | Diagnose-/Testevidenz | `686405a8107efd64e1ce241cd6e9b1574e2243f1ed688d30dcb317c9972d9557` |
-| docs/performance/WALL_ENDPOINT_PROFILE.md | Diagnose-/Testevidenz | `7ed973b082a139843fdf6352dcc54801594c5ece213fa78bf3bf1f461b76def5` |
-| docs/performance/WORLD_PICKING_PILOT.md | Diagnose-/Testevidenz | `7d1808e76964bee9be9781c994bbdd5bb86850b14dd397f744d0c26db6b914d4` |
-| docs/planning/DEVELOPMENT_ALIGNMENT_2026-10-08.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `239d021acf7ceb210bc40d4834bf4a2dd23cddbb9e2ff86bed0c10060d427ab9` |
-| docs/planning/HATCH_PAPER_SCALE.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `b53f1bfd2ba6dbbb86d17f2cb2e2b2d67b008a3794062ff65121a111d6eb3e15` |
-| docs/planning/HATCH_PATTERN_LIBRARY.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `8b4311e4cab5709c78ff6b4f30cdfefee0510133699e42dd151f5537567b23be` |
-| docs/planning/HATCH_PRESET_PICKUP.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `bff36ed5a2547db5cc2a545ac9022e0ec600aa6709eb350673139e252960d1a6` |
-| docs/planning/SAVED_DRAWING_VIEWS.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `9f2e41a7a97a8e8d5da3b81647bb8b27423329d396b80e50291941d9787d4a14` |
-| docs/planning/VIEW_SCALE_CONTRACT.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `0dcdc68d9e5d9e9d98cffb17f18a976d20d59660e576581381784a72ea6b0dfe` |
-| docs/references/IMAGE_REFERENCE_PLAN.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `6916dfe68f74585c6a185f354c0b5450ed721a525e2972a539a46dc404e40c12` |
-| docs/requirements/FUNKTIONEN_2026-10-08_SOURCE.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `9e5d6460cd2c03100bd6b3ac80cf423b091b29ec26cfe001250126be7272c14d` |
-| docs/validation/HATCH_CONSTRUCTION_MODES.md | Diagnose-/Testevidenz | `d25511f19aab082282c171fe4789c9c877d5dbcac5473560d8215db0f4425bb9` |
-| docs/validation/LIVE_ANGLE_MEASUREMENT.md | Diagnose-/Testevidenz | `6783e991438838a794ad5f0a43a4b62dbe2c6e097f93b9d8cd66c93b78688481` |
-| docs/validation/LIVE_AREA_MEASUREMENT.md | Diagnose-/Testevidenz | `ee810c4a679cdbd1791fbe9e45a34146be3d8a9f55fc67275480b622ac86fa4b` |
-| docs/validation/LIVE_DISTANCE_MEASUREMENT.md | Diagnose-/Testevidenz | `4c4765a39f329779b3b038fc099be47af2e9bb7399c3e8007246d2948c577990` |
-| docs/walls/CORNER_T_COMBINATION_PLAN.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `4f2957b75957359f97eb3e99dfa818011421fe654643d8fc311a68dd94e70b8c` |
-| docs/walls/SELECTION_MOVE_PLAN.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `e5dec4b83e74bee60bf769f1ac0793c732ecc33b097be0f7775c2814f75f20de` |
-| docs/walls/TWO_CORNER_T_ACCEPTANCE.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `14283bd6a9e790b01dbef95e1eb5098ab67b16a51f3a6c98201f0e048b5fd17c` |
-| src/components/cad/BIM_UI.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `b7912759a1f13f95336dae487359e66dadc4144ebc5d4ce7735ac8841d0eab80` |
-| src/lib/bim/COMMANDS.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `1a4ff6190583433862a7ee07d355e068ac39d3ca111e71f8170fae2cfdaf236e` |
-| src/lib/bim/IFC.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `bd8e96fbec05e9a460dc9ba3df51fae908bc284c8b5fdf905198489cbaa693a1` |
-| src/lib/bim/LINES.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `722e2b2b28b98d9917fe34fcfd730d66608da22e091ab0f459419e3c4c13e21e` |
-| src/lib/bim/PROJECT_FILES.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `a02fc92cb017a8b882c5196c1e90ff997f25355dc4e554c833d28bf05c23ad2c` |
-| src/lib/bim/README.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `ad405208ec953b5c201e540b65ecc4b3db14ce5021cdc21878e94a87a5cd3052` |
-| src/routes/README.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `2486f50763c31c0cfe0f7282bba9a14a7e2c031988dfc0c8df5f88b9e172b736` |
-
+| AGENTS.md                                                  | Guide/Regel/Funktionsquelle; zentral zugeordnet | `3e569f9104b69b9172434f4e2d87b3228c526d08b040bc18d0d584584a51035a` |
+| ARCHITECTURE.md                                            | Guide/Regel/Funktionsquelle; zentral zugeordnet | `ad3ee4ffb059508c60a5af978ef4b8c2a45d48d7f80659ac89d821ee75ab9855` |
+| DEVELOPMENT_GUIDE.md                                       | Guide/Regel/Funktionsquelle; zentral zugeordnet | `84d55c51f07591b8ecb667295e125d47685a2f7d40c8d141ac91832306795dc0` |
+| DEVELOPMENT_PLAN.md                                        | Guide/Regel/Funktionsquelle; zentral zugeordnet | `e221b2d156ee3d5af2ff66bae49e3f6cf375300a0b1589ef0ab0227b55938654` |
+| F13_HILFLINIENSYSTEM.md                                    | Guide/Regel/Funktionsquelle; zentral zugeordnet | `d01e2109278d9cdf56f6bd6e662e03674161e0a744de40401f3f54f973b28703` |
+| FEATURE_ROADMAP.md                                         | Guide/Regel/Funktionsquelle; zentral zugeordnet | `e406699aa2afbe7b3730fa4fc45e5456e93b3e6332c0031a9ac90ce4cdd91aaa` |
+| FUNCTION_REQUIREMENTS_2026-10-03.md                        | Guide/Regel/Funktionsquelle; zentral zugeordnet | `604714d6808e94f792655def583dad14ab0c7285678e2311d43879975a7f81b5` |
+| GUIDE_BASELINE.md                                          | Guide/Regel/Funktionsquelle; zentral zugeordnet | `8558b6e2c622b90386bc73af31d7b8f7b64b6cbf84a821a99080055a786a753d` |
+| NOVIKOV_ARCHITEKTUR_REVIEW_UND_FUNKTIONSMAP.md             | Guide/Regel/Funktionsquelle; zentral zugeordnet | `0b777dc0191168ed8406ac8135773c06ec0063002b8dff6fb3119b7900d971be` |
+| NOVIKOV_FUNKTIONSARCHITEKTUR_2026-10-03.md                 | Guide/Regel/Funktionsquelle; zentral zugeordnet | `4f992519b16c6fe00fd5918308adff7099e86b31814e9fbe9ed045630091288b` |
+| README.md                                                  | Guide/Regel/Funktionsquelle; zentral zugeordnet | `365563b6236d3a7b8f138e23c64be99c179225fed0c8f8d1f7476d2833749883` |
+| STABILIZATION.md                                           | Guide/Regel/Funktionsquelle; zentral zugeordnet | `69c7cd70aa28f83ee884b7795d8bf6eace80151b9e5456fbdf0f987436ac2729` |
+| benchmarks/README.md                                       | Diagnose-/Testevidenz                           | `ffdc2fa9be0d3687f6826189dbd7bb0b837dd7ce6b76daf87e551a288146ada8` |
+| docs/3D_INTERACTION_CONTRACT.md                            | Guide/Regel/Funktionsquelle; zentral zugeordnet | `b45c3d90af6194488049f014803848fbfb181a2119daf7f66dcc3a6aaa088f79` |
+| docs/3D_WORKPLANE_PLAN.md                                  | Guide/Regel/Funktionsquelle; zentral zugeordnet | `128592b35fa4eef643959ebec1cf7f486eddbe2048c207db59aabd6065fefd48` |
+| docs/AUTOMATIC_WALL_CONNECTIONS.md                         | Guide/Regel/Funktionsquelle; zentral zugeordnet | `ab5c6367d4c071c626d04dc46067170a022ca0a3da21c2a764a8571749853ef1` |
+| docs/CONTOUR_EDGE_PERFORMANCE.md                           | Guide/Regel/Funktionsquelle; zentral zugeordnet | `2ef4317ee8c0301beb9f4183cb6b00af3d5456914e6efa8ee743b56821524e7d` |
+| docs/CORNER_IFC_ACCEPTANCE.md                              | Guide/Regel/Funktionsquelle; zentral zugeordnet | `bee41e5e4e7be5a17d8889f6b821e39329b6956775325b83e4e5d54acc8d9e53` |
+| docs/LAYER_CONTRACT.md                                     | Guide/Regel/Funktionsquelle; zentral zugeordnet | `f5aab51a6959587bf697efec3c131229d7fe577d74ed6aa524d3efb4db7f0899` |
+| docs/LAYER_VISIBILITY_PLAN.md                              | Guide/Regel/Funktionsquelle; zentral zugeordnet | `dd1208f5abbd703f68b11d6cac8f3f8ed75ce062699cbf9dffde2572d30005cb` |
+| docs/LOCAL_SNAP_QUERY_PLAN.md                              | Guide/Regel/Funktionsquelle; zentral zugeordnet | `502d122271d20173e561f21eeb0bc679833f7fafa3cc9926c7642780ac6a49b4` |
+| docs/PERSISTENT_T_RELATIONS.md                             | Guide/Regel/Funktionsquelle; zentral zugeordnet | `a718140109c7508ff532e07f24df919baf3ea2aaef712757639cfdf39ea77a1d` |
+| docs/REFERENCE_SELECTION_PLAN.md                           | Guide/Regel/Funktionsquelle; zentral zugeordnet | `ef2acc729f61d82bc853a9e19566b3150ffdcebc1fb1298c9b1f31efcd10452a` |
+| docs/T_IFC_ACCEPTANCE.md                                   | Guide/Regel/Funktionsquelle; zentral zugeordnet | `df6ff37799ed1bf00f37743084a951a85f1fa7f39ff192149bb0f6842c889ce5` |
+| docs/T_WALL_CONNECTION_PLAN.md                             | Guide/Regel/Funktionsquelle; zentral zugeordnet | `2b180d9d2922edccebac5c5c230b03679ac609ddb367508a88794de8171cde84` |
+| docs/T_WINDOW_VALIDATION.md                                | Guide/Regel/Funktionsquelle; zentral zugeordnet | `0eeaaebd390225c9906429810f81f3602fa01c8d5a182e021170272367759ef6` |
+| docs/WALL_CORNER_PLAN.md                                   | Guide/Regel/Funktionsquelle; zentral zugeordnet | `04789c887283a3e7fb5065a574a383c17fe7781e696b861001abea9b7a0a4afd` |
+| docs/acceptance/2026-10-04-parallel-workflow.md            | Diagnose-/Testevidenz                           | `3ca6bec5b6e7a03f2433e61d7b924cddf4d4d7467c9075dc1525828c144da763` |
+| docs/ai/AI_CAD_PRIMARY_VISION.md                           | Guide/Regel/Funktionsquelle; zentral zugeordnet | `7d1bb2e72b2c25dfb011c5e741f93b4be692ba1d1ba4c8dd707580d23beb66b1` |
+| docs/ai/AI_FUTURE_VISION.md                                | Guide/Regel/Funktionsquelle; zentral zugeordnet | `dc2ba9ec6123692ffa7eef8c39cbfe35f35df52445bb0a2a2c8b8acecf3cce65` |
+| docs/performance/A03_COMMIT_VALIDATION.md                  | Diagnose-/Testevidenz                           | `50e2e4af2b515c17c637252b2645aba5c515bdefed54ead19deb0f3ca6248bcf` |
+| docs/performance/ACTIVE_MOVEMENT_PROFILE.md                | Diagnose-/Testevidenz                           | `1b3b51ab0fb0843d7b13a050500b05c89775ec209783a6d1aae15d7c5e628a8f` |
+| docs/performance/ARCHITECTURE_REVIEW_2026-10-07.md         | Diagnose-/Testevidenz                           | `5a29d2383faa2e2af2b5c6636801fa4c8839f1c3f193e0af6ad3b88c471ed6d8` |
+| docs/performance/ASSET_INGRESS.md                          | Diagnose-/Testevidenz                           | `82d5781d7540b33d2be19fe1bd0f8c1c67d459c6e3e6148b082ef866af8bfe05` |
+| docs/performance/ATOMIC_SELECTION_CONFIRMATION.md          | Diagnose-/Testevidenz                           | `8da980c785d291e26b2b7269c7cf6282936395f874261b4efa53c0d583e842e8` |
+| docs/performance/CAPACITY_BASELINE.md                      | Diagnose-/Testevidenz                           | `a33fa2e4c361eabcff7c63ba18fbc8102fa84ce80d52b58b0a34e8bdbf63e45b` |
+| docs/performance/COMMIT_PHASE_PROFILE.md                   | Diagnose-/Testevidenz                           | `fd6c4abc3fdaf5bcf35c54b7834360289ec8b7eea8e54149719b647992a51dcd` |
+| docs/performance/CONNECTED_WALLS_PROFILE.md                | Diagnose-/Testevidenz                           | `3b60dc92471de05656ffb32461f36fa33beb2ed333c8b592cb092bbdc0b41ad8` |
+| docs/performance/DENSE_SNAPPING.md                         | Diagnose-/Testevidenz                           | `ffe92fd0fbf9f68089d7a118c48c13a2894f2e32c7775b2ae868b45f6ea5aa1b` |
+| docs/performance/IMAGE_URL_REUSE.md                        | Diagnose-/Testevidenz                           | `0a8795ffa03aa7992841c77770fb9c550aaca3b42c4be876a7ae560b170f5c98` |
+| docs/performance/LARGE_PLAN_BOUNDS.md                      | Diagnose-/Testevidenz                           | `9ebb224f3253e22c87914053532db217532ed2cab77a077cec6071c282e80bf8` |
+| docs/performance/LOCAL_INTEGRATION.md                      | Diagnose-/Testevidenz                           | `07c987860553c319b84e82d2b2fc7a3dee1c35c65e73bf0880c00e87dd5eaee3` |
+| docs/performance/LOCAL_PROXIMITY.md                        | Diagnose-/Testevidenz                           | `2e19514a0c6b61d740a0e2e80944e6332c7e7ad53df49b3411c59a5f67bfe14a` |
+| docs/performance/LOCAL_SOURCES.md                          | Diagnose-/Testevidenz                           | `c5fb0f4ac76fc72abcbff76a09b2c345f8ff6483d225830f8ee527fe03d8f6a7` |
+| docs/performance/MANUAL_MOVEMENT_TRACE.md                  | Diagnose-/Testevidenz                           | `7d03c2ae1237de232f6f550bc0f09022353e728e19279472817bbb462c856bfb` |
+| docs/performance/MODEL_ASSET_CONTRACT.md                   | Diagnose-/Testevidenz                           | `73e65eb26bbd55d70797c185de4daf463e8115df02d305e752670ea853f28454` |
+| docs/performance/MODEL_COMPARISON.md                       | Diagnose-/Testevidenz                           | `ebf6940d0c4a324712f14b8e1c61b96af3d10937de271b8a46eda5db4a6b3944` |
+| docs/performance/P0_BROWSER_BASELINE.md                    | Diagnose-/Testevidenz                           | `e4a9db058a54a382e2692495cddebe7ccc20b7ad13cca5578f28a18d1dbebf04` |
+| docs/performance/PREPARED_CHAIN_CORNER.md                  | Diagnose-/Testevidenz                           | `f92dae6c23735dce2150633503bf907b9d8e63434205219292455b7f1c08c118` |
+| docs/performance/PREPARED_CHAIN_MOVE.md                    | Diagnose-/Testevidenz                           | `4ae85240c7610e92998f2b2f4055156b0d0d9c4572f68c169cdbebe972d9ff00` |
+| docs/performance/PREPARED_ENDPOINT_PILOT.md                | Diagnose-/Testevidenz                           | `258508a9062aabf5d51e61c4b4e3510bbf6c5591eea7d806c774a08fe677a4d5` |
+| docs/performance/PREPARED_SELECTION_PREVIEW.md             | Diagnose-/Testevidenz                           | `59f3252e0ff7c195a17643a6f5765fa1086df99cc3c4f36444c27701d8c7cc74` |
+| docs/performance/PREPARED_WALL_DRAWING.md                  | Diagnose-/Testevidenz                           | `4cea62874dd6a5e045c758b42be1b8934a4dbc33daf00138279cc68e8d6b754d` |
+| docs/performance/PROJECTED_PICKING_PILOT.md                | Diagnose-/Testevidenz                           | `f4d83457ecad877627cb2f43e643960b6bedbbf2928c5a1c16ac065604a72f61` |
+| docs/performance/SELECTION_EXTRUSION_AB.md                 | Diagnose-/Testevidenz                           | `f16f3a6831155fb3538d7a0b867207140c2e02449c406cb934555a61dfd19042` |
+| docs/performance/SELECTION_PREVIEW_REUSE.md                | Diagnose-/Testevidenz                           | `1aff34219dd6ec9da9405565e579e27b59aa200e1d1c42f25045ace8142fda22` |
+| docs/performance/SELECTION_SCALE_PROFILE.md                | Diagnose-/Testevidenz                           | `976a7710bb723cacfe84ef7022ef205d258e281aafc7d2257a2d3eba3bd3a8c1` |
+| docs/performance/SESSION_WALL_EXTRUSION.md                 | Diagnose-/Testevidenz                           | `7796eeff58b57b993bfc14d405e5d54d90b4ac0248a38909772f4c9d5c5ba4fe` |
+| docs/performance/SHARED_CHAIN_CORNER.md                    | Diagnose-/Testevidenz                           | `b967e84c9367a8819b0e3f10664406fb4802de0036eaca48cfb5c351e5199fb7` |
+| docs/performance/SHARED_CHAIN_MOVE.md                      | Diagnose-/Testevidenz                           | `dac3b7c98eb10ce5003610b76719dcb3a61a3b1a7efc2117a4e3a8d79032be78` |
+| docs/performance/SHARED_ENDPOINT_PREVIEW.md                | Diagnose-/Testevidenz                           | `f648f7a03f6e5f1df9bc031287f842bfe635e76296af2317ddd3a8c9feee8905` |
+| docs/performance/SHARED_SOLID_PICKING.md                   | Diagnose-/Testevidenz                           | `840fea65ce5056f5a7d72513ff9f76b21531b34ccda4fa1e431f0c20308280b9` |
+| docs/performance/SHARED_WALL_DRAWING.md                    | Diagnose-/Testevidenz                           | `2f9dbf85141bea0025937f34b90b22535e46d318ef280fa9e8604f4ea85b187d` |
+| docs/performance/SHIFT_REPEAT_INPUT.md                     | Diagnose-/Testevidenz                           | `2d50b991dedc43441102ff80f7f24b7d24106967a5b821891dc12e1b7d8546fd` |
+| docs/performance/SHIFT_SELECTION_DIAGNOSIS.md              | Diagnose-/Testevidenz                           | `e4c2d82db28484197128a48c1911c5d8f14082f2b891b64bccd2dde5b1e74800` |
+| docs/performance/SINGLE_WALL_SHARED_MOVE.md                | Diagnose-/Testevidenz                           | `16a67ff28bcbea316cdefd51388f33e6cba14b1e1b07940bd488263330c75610` |
+| docs/performance/SNAP_BASELINE.md                          | Diagnose-/Testevidenz                           | `e4c5cefd77884004fbf970f6b590a4e077e4f542a7a8eae6e2f403729e3437e0` |
+| docs/performance/SNAP_DENSITY.md                           | Diagnose-/Testevidenz                           | `fb7660ebc7c4c156529a1dbd327f58d28370b24103889de56c005f192ea273eb` |
+| docs/performance/SOLID_CAMERA_PROFILE.md                   | Diagnose-/Testevidenz                           | `7fe746c6568e75de9d6ea4d47c1007be16ac4f2bfc11bf29174ce8cb1b061c71` |
+| docs/performance/SOLID_LIFECYCLE_PILOT.md                  | Diagnose-/Testevidenz                           | `50542ece21c2c4b78b599a501005d29e5707792f5a5289c75d7e1bd0c2f55b8b` |
+| docs/performance/SOLID_MATRIX_PILOT.md                     | Diagnose-/Testevidenz                           | `b62f17e62efa7f8f750ac671b7478220c0f594df3630ea31dfb272da97ee25d2` |
+| docs/performance/SOLID_RENDERER_INTEGRATION.md             | Diagnose-/Testevidenz                           | `5f21fe1f0454016eca0d75b56dddacd2a5c438114ef13ca3000d80f67a834f10` |
+| docs/performance/VALIDATED_ASSET_HANDLES.md                | Diagnose-/Testevidenz                           | `1ee83d5725247b9c23df2ffea858b62756f9c4fa6df3e67cb72bdf801ecf3b79` |
+| docs/performance/WALL_DRAWING_PROFILE.md                   | Diagnose-/Testevidenz                           | `686405a8107efd64e1ce241cd6e9b1574e2243f1ed688d30dcb317c9972d9557` |
+| docs/performance/WALL_ENDPOINT_PROFILE.md                  | Diagnose-/Testevidenz                           | `7ed973b082a139843fdf6352dcc54801594c5ece213fa78bf3bf1f461b76def5` |
+| docs/performance/WORLD_PICKING_PILOT.md                    | Diagnose-/Testevidenz                           | `7d1808e76964bee9be9781c994bbdd5bb86850b14dd397f744d0c26db6b914d4` |
+| docs/planning/DEVELOPMENT_ALIGNMENT_2026-10-08.md          | Guide/Regel/Funktionsquelle; zentral zugeordnet | `239d021acf7ceb210bc40d4834bf4a2dd23cddbb9e2ff86bed0c10060d427ab9` |
+| docs/planning/HATCH_PAPER_SCALE.md                         | Guide/Regel/Funktionsquelle; zentral zugeordnet | `b53f1bfd2ba6dbbb86d17f2cb2e2b2d67b008a3794062ff65121a111d6eb3e15` |
+| docs/planning/HATCH_PATTERN_LIBRARY.md                     | Guide/Regel/Funktionsquelle; zentral zugeordnet | `8b4311e4cab5709c78ff6b4f30cdfefee0510133699e42dd151f5537567b23be` |
+| docs/planning/HATCH_PRESET_PICKUP.md                       | Guide/Regel/Funktionsquelle; zentral zugeordnet | `bff36ed5a2547db5cc2a545ac9022e0ec600aa6709eb350673139e252960d1a6` |
+| docs/planning/SAVED_DRAWING_VIEWS.md                       | Guide/Regel/Funktionsquelle; zentral zugeordnet | `9f2e41a7a97a8e8d5da3b81647bb8b27423329d396b80e50291941d9787d4a14` |
+| docs/planning/VIEW_SCALE_CONTRACT.md                       | Guide/Regel/Funktionsquelle; zentral zugeordnet | `0dcdc68d9e5d9e9d98cffb17f18a976d20d59660e576581381784a72ea6b0dfe` |
+| docs/references/IMAGE_REFERENCE_PLAN.md                    | Guide/Regel/Funktionsquelle; zentral zugeordnet | `6916dfe68f74585c6a185f354c0b5450ed721a525e2972a539a46dc404e40c12` |
+| docs/requirements/FUNKTIONEN_2026-10-08_SOURCE.md          | Guide/Regel/Funktionsquelle; zentral zugeordnet | `9e5d6460cd2c03100bd6b3ac80cf423b091b29ec26cfe001250126be7272c14d` |
+| docs/validation/HATCH_CONSTRUCTION_MODES.md                | Diagnose-/Testevidenz                           | `d25511f19aab082282c171fe4789c9c877d5dbcac5473560d8215db0f4425bb9` |
+| docs/validation/LIVE_ANGLE_MEASUREMENT.md                  | Diagnose-/Testevidenz                           | `6783e991438838a794ad5f0a43a4b62dbe2c6e097f93b9d8cd66c93b78688481` |
+| docs/validation/LIVE_AREA_MEASUREMENT.md                   | Diagnose-/Testevidenz                           | `ee810c4a679cdbd1791fbe9e45a34146be3d8a9f55fc67275480b622ac86fa4b` |
+| docs/validation/LIVE_DISTANCE_MEASUREMENT.md               | Diagnose-/Testevidenz                           | `4c4765a39f329779b3b038fc099be47af2e9bb7399c3e8007246d2948c577990` |
+| docs/walls/CORNER_T_COMBINATION_PLAN.md                    | Guide/Regel/Funktionsquelle; zentral zugeordnet | `4f2957b75957359f97eb3e99dfa818011421fe654643d8fc311a68dd94e70b8c` |
+| docs/walls/SELECTION_MOVE_PLAN.md                          | Guide/Regel/Funktionsquelle; zentral zugeordnet | `e5dec4b83e74bee60bf769f1ac0793c732ecc33b097be0f7775c2814f75f20de` |
+| docs/walls/TWO_CORNER_T_ACCEPTANCE.md                      | Guide/Regel/Funktionsquelle; zentral zugeordnet | `14283bd6a9e790b01dbef95e1eb5098ab67b16a51f3a6c98201f0e048b5fd17c` |
+| src/components/cad/BIM_UI.md                               | Guide/Regel/Funktionsquelle; zentral zugeordnet | `b7912759a1f13f95336dae487359e66dadc4144ebc5d4ce7735ac8841d0eab80` |
+| src/lib/bim/COMMANDS.md                                    | Guide/Regel/Funktionsquelle; zentral zugeordnet | `1a4ff6190583433862a7ee07d355e068ac39d3ca111e71f8170fae2cfdaf236e` |
+| src/lib/bim/IFC.md                                         | Guide/Regel/Funktionsquelle; zentral zugeordnet | `bd8e96fbec05e9a460dc9ba3df51fae908bc284c8b5fdf905198489cbaa693a1` |
+| src/lib/bim/LINES.md                                       | Guide/Regel/Funktionsquelle; zentral zugeordnet | `722e2b2b28b98d9917fe34fcfd730d66608da22e091ab0f459419e3c4c13e21e` |
+| src/lib/bim/PROJECT_FILES.md                               | Guide/Regel/Funktionsquelle; zentral zugeordnet | `a02fc92cb017a8b882c5196c1e90ff997f25355dc4e554c833d28bf05c23ad2c` |
+| src/lib/bim/README.md                                      | Guide/Regel/Funktionsquelle; zentral zugeordnet | `ad405208ec953b5c201e540b65ecc4b3db14ce5021cdc21878e94a87a5cd3052` |
+| src/routes/README.md                                       | Guide/Regel/Funktionsquelle; zentral zugeordnet | `2486f50763c31c0cfe0f7282bba9a14a7e2c031988dfc0c8df5f88b9e172b736` |
 
 ### Erhaltene Prüfkandidaten aus übrigen Quellen
 
 Diese Liste schützt vor Verlust kleiner offener Aufgaben in Diagnose-/Historienquellen. **Sie ist keine aktive To-do-Reihenfolge und kein Beweis, dass der Punkt heute noch offen ist.** Vor Auswahl gegen neuere Implementierung prüfen. Fertige Arbeit nicht erneut starten. Originale Folgeaufträge innerhalb alter Texte bleiben historisch. K-IDs/R26/A-Regeln übernehmen aktive fachliche Aufgaben; weitere Befunde erst bei aktuellem Profil konkretisieren.
 
-
 #### Herkunft: AGENTS.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0001**
 
@@ -5611,21 +5458,17 @@ Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträ
 - `FEATURE_ROADMAP.md` is a historical record, not the active sequence. Do not consult or request updates to the superseded `0.Where it all Begins` attachment. Preserve explicit conversation requirements not withdrawn by the user, including 3D selection outlines and speech-recognition improvements; map them during guide Stage 0.
 - Put all selected-element properties in the fixed Werkzeugeigenschaften bar below the main toolbar. The Navigator is for project structure/selection. Open contextual movement actions automatically near the pointer on element/point selection and avoid duplicating property fields there; new element types must use the shared properties bar.
 
-
 **Q0002**
 
 - Every interactive movement must immediately pin the chosen point as a shared construction origin: point/element movement, stretch and axis actions alike. New element adapters must participate in the same snapping/inference pipeline; do not make origin activation a per-tool opt-in. Preserve explicit host/axis constraints and the user Snap toggle. See ARCHITECTURE.md, Universal movement origin.
-
 
 **Q0003**
 
 - New precision-input consumers must use the ToolInteraction contract and shared useToolInteraction/InteractionInput lifecycle. Keep element-specific validation in application/domain adapters; do not add numeric preview switches or per-tool form/Tab handlers to CadWorkspace or BimPlan. Preserve existing geometric snapping services.
 
-
 #### Herkunft: ARCHITECTURE.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0004**
 
@@ -5653,7 +5496,6 @@ V07k follows as its hatch consumer within MS-02, not a separate scale implementa
 See [general contract](docs/planning/VIEW_SCALE_CONTRACT.md) and
 [hatch-specific acceptance](docs/planning/HATCH_PAPER_SCALE.md).
 
-
 **Q0005**
 
 Implemented: domain/views identifies the existing semantic working plan by project
@@ -5666,7 +5508,6 @@ model/paper metric sizes and separate screen metrics, rejecting invalid contexts
 and non-positive/non-finite results. Product hatches remain model-space; MS-02 will
 consume this resolver rather than introduce another one. Production schema stays 14.
 
-
 **Q0006**
 
 User decision: opened CAD windows follow the Ebenen palette: draggable, no
@@ -5676,7 +5517,6 @@ Window contents own their application/draft actions and validation. Existing
 layer, line creator, hatch creator, display settings, connection preview and
 project-load confirmation use this shell. New CAD windows must reuse it rather
 than copying drag logic or introducing a modal overlay.
-
 
 **Q0007**
 
@@ -5702,7 +5542,6 @@ Global catalog edits affect future explicit style assignments; cross-project
 propagation for line styles is not implemented by this snapshot pilot. Hatch
 update-all semantics remain the separately agreed future requirement.
 
-
 **Q0008**
 
 Pattern definitions and contour applications are distinct. Repetition and clipping
@@ -5718,7 +5557,6 @@ actions; React does not own the library. Embedded project definitions, revisions
 offline resolution and update/undo policy remain technical proposals, not yet
 implemented decisions. Paper-space rendering needs an explicit view scale.
 See [requirements, proposals and next task](docs/planning/HATCH_PATTERN_LIBRARY.md).
-
 
 **Q0009**
 
@@ -5742,7 +5580,6 @@ Other element adapters remain future work. The user explicitly excluded 3D
 pickup on 2026-10-08: tool-default pickup is a 2D-only workflow.
 [Contract and evidence](docs/planning/HATCH_PRESET_PICKUP.md).
 
-
 **Q0010**
 
 The rendering/viewport world index is derived disposable data bound to immutable
@@ -5752,7 +5589,6 @@ retain the existing full scan until ready; previews and identity mismatches use
 that same fallback. Displayed-projection validity and footpoint priority remain
 with BimSolidView. No second editable model or per-tool picking implementation.
 See [evidence and limits](docs/performance/SHARED_SOLID_PICKING.md).
-
 
 **Q0011**
 
@@ -5764,7 +5600,6 @@ CPU picking, stable model IDs and validated model actions remain unchanged.
 The old renderer is retained only as a diagnostic oracle under benchmarks.
 See [integration evidence](docs/performance/SOLID_RENDERER_INTEGRATION.md).
 
-
 **Q0012**
 
 The shared asset schema may preserve an asset only when its exact object identity
@@ -5775,7 +5610,6 @@ PNG/JPEG import and schema-9 project loading now issue fresh handles (K02c).
 File storage validation is not a claim of full image decoding at project load.
 See [pilot evidence and limits](docs/performance/VALIDATED_ASSET_HANDLES.md).
 
-
 **Q0013**
 
 Stable logical asset IDs and immutable payload identity are separate concerns.
@@ -5784,14 +5618,12 @@ boundary. Commit validation and atomic undo remain mandatory. Reusing payload
 verification requires an immutable, trusted handle; it must never trust arbitrary
 caller-supplied hashes or skip geometry/reference validation.
 
-
 **Q0014**
 
 The [K02 contract and measurements](docs/performance/MODEL_ASSET_CONTRACT.md)
 define an isolated versioned experiment. Pool layout, portable container,
 retention/GC and budgets are proposals, not a production schema migration.
 Schema 9, current limits, history and rendering remain unchanged.
-
 
 **Q0015**
 
@@ -5806,7 +5638,6 @@ BIM scaling remains forbidden; existing allowed 2D and PDF/PNG/JPEG reference
 calibration is unchanged. No new renderer, language, storage technology or
 desktop packaging is selected by this planning update.
 
-
 **Q0016**
 
 Prepared selection translation may retain one derived local extrusion per pinned
@@ -5817,7 +5648,6 @@ foreign endpoints and window rules. Stationary neighbours remain in the closure.
 The cache is private to the prepared session and exposes fresh world-space output;
 public derivation and full confirmation/history validation remain independent.
 See [evidence and limits](docs/performance/SESSION_WALL_EXTRUSION.md).
-
 
 **Q0017**
 
@@ -5833,7 +5663,6 @@ History still validates independently, and the UI's latest-context publication
 guard remains unchanged. Text/voice keep using the same full selection action.
 Other adapters are not migrated by this change.
 
-
 **Q0018**
 
 This section sets the direction for A-04 and supersedes the proposed next
@@ -5843,13 +5672,11 @@ code evidence, reproducible diagnostics, alternatives and the single next pilot.
 Existing product rules and the dependency direction UI → Application → Domain →
 Geometry/Core remain binding.
 
-
 **Q0019**
 
 Tool-specific settings, properties and option hints belong exclusively in the
 Werkzeugeigenschaften area, not the top application toolbar. TopToolbar has no
 active-tool option model; global project/view/layer controls remain there.
-
 
 **Q0020**
 
@@ -5873,7 +5700,6 @@ a new interaction; old preview/commit callbacks reject a changed revision. Inval
 or incomplete fields cannot fall back to earlier valid dimensions. These tool
 preferences do not mutate existing entities or create model history/file fields.
 
-
 **Q0021**
 
 Window centre bounds are derived once per action by the shared domain wall/window-range
@@ -5882,7 +5708,6 @@ those bounds are capped before validated addWindow/updateWindow. Bounds include
 corner seams with numerical clearance and deliberately ignore T junctions. Invalid
 sizes and unavailable hosts remain errors; model validation is not relaxed.
 
-
 **Q0022**
 
 User requirement: selection is a tool-independent Application capability for all
@@ -5890,7 +5715,6 @@ current and future element types, including mixed sets. Support click, Ctrl-clic
 and rectangular marquee. User clarification: active means visible; all shown layers
 are eligible. Reuse existing visibility policy, including hidden-host exclusion for
 windows. Do not introduce a separate activation/lock state for this requirement.
-
 
 **Q0023**
 
@@ -5901,7 +5725,6 @@ of movement support. Actions validate the full pinned target set; never silently
 act on just its first member. Properties, Navigator, On-Demand and AI/Text/Voice
 consume the same context. A selected host does not implicitly select its windows;
 future transformations must account for dependencies without double movement.
-
 
 **Q0024**
 
@@ -5942,7 +5765,6 @@ preview; commit creates one model history entry. First delivery is 2D. Text/Voic
 must consume this same validated action with pinned whole-selection context, never
 fall back to a single target. See the [selection plan](docs/walls/SELECTION_MOVE_PLAN.md).
 
-
 **Q0025**
 
 `application/commands/selection-command.ts` adapts a bounded translation grammar
@@ -5961,7 +5783,6 @@ only supplies normalized text and the shared command preview, never a commit.
 Invalid transcripts remain editable; explicit acceptance retains action validation.
 The existing browser recognition lifecycle supplies timeout, cancellation and errors.
 
-
 **Q0026**
 
 A host may combine exactly one right-angle corner with remote perpendicular T
@@ -5973,14 +5794,12 @@ contact with the corner partner. No fixed clearance margin is introduced.
 Corner-window validation runs before T opening clipping; crossing a T does not
 permit crossing a miter. All interaction and export paths share this derivation.
 
-
 **Q0027**
 
 Schema 8 is retained: relation fields, units, identity and interpretation are
 unchanged; this extends admissible topology. Older builds reject mixed files
 under their stricter validation. Loading never deletes relations to make them
 fit an older implementation. Existing schema-8 files remain valid.
-
 
 **Q0028**
 
@@ -5994,7 +5813,6 @@ history; its implementation and connection handling still require verification.
 Individual whole-wall translation retains its existing automatic-detachment rule.
 See [combination plan](docs/walls/CORNER_T_COMBINATION_PLAN.md).
 
-
 **Q0029**
 
 ToolInteraction may expose previewProject for a disposable model snapshot. The
@@ -6007,7 +5825,6 @@ added to that project. Invalid targets retain already accepted draft segments,
 show the precise validation error and do not display an invalid body. The current
 slice is the 2D plan; shared 3D drawing preview is not introduced here.
 
-
 **Q0030**
 
 Wall drawing reuses Application findTAxisReference/queryTAxisSnap and
@@ -6018,7 +5835,6 @@ The current slice ends a new segment on an existing visible host axis. A chain
 ending at a T must be finished before drawing again; corner/T combinations
 remain unsupported. Starting on a host axis does not yet create a T relation.
 
-
 **Q0031**
 
 Binding user clarification: windows stay on their original wall and ignore T
@@ -6026,7 +5842,6 @@ contacts while moving. This supersedes the earlier overlap prohibition for T
 openings only. Original wall-axis extent, dimensions and opening-overlap rules
 remain; corner rules are unchanged. Moving a window neither transfers its host
 nor cuts a neighbouring wall. Geometric contact reports remain diagnostic.
-
 
 **Q0032**
 
@@ -6041,7 +5856,6 @@ files retain their exact relations. Earlier builds may reject new multi-T files.
 An endpoint already participating in a T is excluded from automatic corner
 acquisition, preventing a false corner between opposite incoming branches.
 
-
 **Q0033**
 
 Rendering wallPlanOutlines removes coincident contact strokes only between
@@ -6052,7 +5866,6 @@ Turquoise is reserved for the authoritative drawing axis and its handles (2.5 CS
 remain intact. This is a ground-plan display rule, not a solid boolean union.
 The existing temporary pair-preview overlay remains separately outlined.
 
-
 **Q0034**
 
 Application t-axis-snap derives an endpoint target from nearby eligible axis
@@ -6062,7 +5875,6 @@ inside the segment and within the CSS snap radius. Ambiguous hosts produce no
 connection intent; existing reference selection can restrict sources. No global
 wall-pair search, no inference of a connection from a numeric coordinate alone.
 Only axis-endpoint point/stretch interactions participate in this first slice.
-
 
 **Q0035**
 
@@ -6075,7 +5887,6 @@ includeInteractionTargets keeps 3D unmodified until its target transport is
 integrated; it is a generic carrier, not geometry logic in the renderer.
 The existing isolated/equal-cross-section/right-angle relation limits still apply.
 
-
 **Q0036**
 
 Shift now latches the acquired construction direction for the current interaction,
@@ -6087,7 +5898,6 @@ otherwise the first direction uses the existing 45-degree acquisition. Exact
 compatible snap targets remain eligible along the held axis. Releasing Shift
 permits recalibration; a new interaction/reset discards the latch; view zoom does
 not. This state is neither project data nor model history.
-
 
 **Q0037**
 
@@ -6102,7 +5912,6 @@ silently become a corner. Invalid remaining contact geometry rejects atomically.
 Windows may touch T contact but cannot overlap it, including hidden windows.
 No automatic T creation or additional UI workflow is introduced in this slice.
 
-
 **Q0038**
 
 Domain t-pair owns inspection and solid derivation from resolved Wall parameters,
@@ -6116,7 +5925,6 @@ contours and no second geometry implementation. Application preview and isolated
 IFC export retain their existing public interfaces and strict validation.
 Schema remains 7; persistence/automatic T relations are not implemented here.
 
-
 **Q0039**
 
 User confirmed: changing one host endpoint keeps the incoming endpoint at its
@@ -6129,7 +5937,6 @@ Separate validated public entry points from pure internal derivation before
 connecting T solids to validateProject, avoiding recursive validation. Movement
 intent must be explicit; coordinate differences alone are not the action type.
 
-
 **Q0040**
 
 contour-solid reconciles numerically compatible local profile X coordinates and
@@ -6139,7 +5946,6 @@ model tolerances. No project mutation or persisted opening resize. T relations
 remain temporary; save/ordinary IFC still use the unchanged model. Further joins
 on either wall remain unsupported by the diagnostic T path.
 
-
 **Q0041**
 
 This pure helper knows no Project, windows, other joins, persistence or UI.
@@ -6148,7 +5954,6 @@ adds a relation. Contact width touching a host end, insufficient incoming length
 non-right angles and invalid inputs reject. Existing automatic endpoint joins
 remain unchanged. No schema migration, new command or duplicated renderer path.
 The planned anchor/host-movement policies remain open.
-
 
 **Q0042**
 
@@ -6160,7 +5965,6 @@ movement/anchor behavior and host opening clearance remain explicit proposals.
 The next geometry-only helper introduces no persistence, UI or command path.
 Text/voice remain companion adapters of verified actions per the guide; there
 is no blanket deferral based on the user's priority question.
-
 
 **Q0043**
 
@@ -6174,7 +5978,6 @@ require it. Equal thickness/height, exact endpoint identity, two ends per node,
 valid composed profiles and opening clearance remain mandatory. Parallel axes,
 numerically unresolved seams and miters reaching the opposite cap reject.
 
-
 **Q0044**
 
 Schema 7 is unchanged: joins still store only IDs/end indices. Existing valid
@@ -6184,7 +5987,6 @@ and ordinary IFC export consume connectedWallSolids. A complete wall chain still
 forms one undo action. T contacts, collinear subdivision and unequal wall sections
 remain outside this step. Future text/voice adapters use existing validated wall
 actions and stable target context, not a separate corner mutation path.
-
 
 **Q0045**
 
@@ -6198,7 +6000,6 @@ existing confirmation creates one history entry. Cancellation never changes the
 model. Style, layer and stable ID are preserved; file schema remains 7. Future
 text/voice adapters use these same actions. Offset is not uniform scaling.
 
-
 **Q0046**
 
 Interop strictly validates V1–V6 before migration to schema 7. Legacy paints are
@@ -6211,7 +6012,6 @@ with stale-context validation and one normal model-history commit. Future
 text/voice adapters must call this same action; no separate appearance mutation.
 The fixed properties bar edits all three paints; no pattern engine is implied.
 
-
 **Q0047**
 
 Schema 6 requires storey.wallJoins, each relating two stable wall IDs and endpoint
@@ -6223,7 +6023,6 @@ the opposite endpoint changes. End coordinates must match exactly (the shared
 snap engine supplies exact targets); model tolerance is not an identity radius.
 Candidate lookup scans only the changed wall's ends, not all wall pairs.
 
-
 **Q0048**
 
 User decisions now confirmed: openings must not touch the joined end boundary;
@@ -6233,7 +6032,6 @@ unequal height/thickness, non-right angles, multiple ends at a node or invalid
 opening/profile geometry reject atomically. A T contact is not an endpoint join.
 Editing one connected wall's height/thickness may therefore require detachment
 first; propagation to a whole group remains future work.
-
 
 **Q0049**
 
@@ -6245,7 +6043,6 @@ filtering. Joined physical corners are snap references, not independent endpoint
 grips; authoritative axis grips remain editable through existing EditSessions.
 Persisted file relations undergo the same geometry validation. No UI-only joins.
 The previous temporary dialog remains diagnostic, not a commit requirement.
-
 
 **Q0050**
 
@@ -6263,7 +6060,6 @@ the shared form accepts the next point. One-segment chains are valid. Invalid
 continuations preserve prior accepted segments. Current right-angle join limits
 still apply; collinear subdivision and arbitrary-angle connections are deferred.
 
-
 **Q0051**
 
 The new user direction supersedes explicit-menu-only connections: snapping wall
@@ -6271,7 +6067,6 @@ axes together is to connect their bodies automatically. Continuous wall chains
 are the subsequent drawing goal. The pair-preview dialog is a diagnostic aid,
 not the required future modelling workflow. Automatic joins and chain drawing
 are not implemented by this axis correction.
-
 
 **Q0052**
 
@@ -6283,7 +6078,6 @@ changes retain relative axis placement through shared updateWall. Historical V5
 files with outside axes still load without relocating bodies/windows; new axis
 placements cannot reproduce them. An explicit legacy conversion is future work.
 
-
 **Q0053**
 
 Application walls/corner-preview owns validation and the snapshot-bound derived
@@ -6293,7 +6087,6 @@ there is no automatic pair search, mutation, history entry or persisted join.
 The UI dialog selects stable wall IDs/endpoints and presents existing plan and
 solid viewports. Closing/Escape discards the preview. Ordinary model views and
 the normal IFC export remain unchanged.
-
 
 **Q0054**
 
@@ -6307,14 +6100,12 @@ Currently unsupported corner-opening contacts remain a limitation, not a new
 product policy. Persistent connections await the outstanding end-contact and
 detachment decisions documented in docs/WALL_CORNER_PLAN.md.
 
-
 **Q0055**
 
 This section supersedes the preparation-only status below. Existing plan/solid
 viewports consume the shared visibility policy for geometry, picking, snapping,
 active references and 3D occlusion. The BIM palette now supplies the persisted
 working filter; explicit DrawingDocument contexts remain independent.
-
 
 **Q0056**
 
@@ -6326,13 +6117,11 @@ openings and IFC scope remain independent of display filtering. New drawing
 filter initialization is still undecided. Browser acceptance remains outstanding;
 automated migration/history/rendering checks do not substitute for it.
 
-
 **Q0057**
 
 This adapter is tested but not yet consumed by BimPlan/BimSolidView. Viewport
 binding, gesture cancellation and the remaining source/picking consumers must be
 integrated before visibility switches are exposed. No UI or file format change.
-
 
 **Q0058**
 
@@ -6345,7 +6134,6 @@ interaction origin remains available independently of excluded model targets;
 stale project/context bindings suppress even that origin. Consumers must replace
 the query on model/filter changes, never on zoom. Existing callers without an
 eligibility binding retain their all-visible behavior.
-
 
 **Q0059**
 
@@ -6360,7 +6148,6 @@ The document ID is a binding token, not a claim that schema 2 contains documents
 future binding adapters must validate document existence. No UI, persisted filter,
 export filtering or per-tool implementation is introduced in this slice.
 
-
 **Q0060**
 
 The BIM project and its derived working plans, sections, elevations and 3D views
@@ -6369,7 +6156,6 @@ independent layer visibility contexts. A layout rendering of a DrawingDocument
 uses that document's context. BIM-project visibility is not an upstream mask:
 a layer hidden in the working model can remain visible in a DrawingDocument.
 All contexts reference the same authoritative elements; no building copies.
-
 
 **Q0061**
 
@@ -6384,7 +6170,6 @@ BIM visibility is implemented with separate palette Undo/Redo, outside model his
 Document lifecycle/history is not decided by that working-view rule. See
 docs/planning/SAVED_DRAWING_VIEWS.md for the current code/contract distinction.
 
-
 **Q0062**
 
 The canonical runtime is now schema 2. domain/project/schema.ts owns current and
@@ -6395,7 +6180,6 @@ Default IDs, rather than editable names or array positions, drive creation.
 interop/project-file/load.ts validates schema 1 before deterministic migration and
 validates schema 2 afterwards; current files are never silently repaired. The old
 lib/bim/model exports remain a compatibility facade, without a dependency cycle.
-
 
 **Q0063**
 
@@ -6408,13 +6192,11 @@ tool. This step adds no visibility filter, layer management UI or language parse
 Future UI/Text/Voice adapters must use these actions. Organisation has no effect
 on wall material, hosted openings, coordinates or current IFC output.
 
-
 **Q0064**
 
 The schema-2 addition defaultLayerIds makes defaults survive renaming and
 migration-ID collisions. Windows default to the separate Fenster layer; no host
 membership inheritance is introduced. Visibility decisions below remain open.
-
 
 **Q0065**
 
@@ -6426,7 +6208,6 @@ Layer membership does not change AssemblyLayer, annotation scope, host relations
 height binding or editing capabilities. File migration validates old input before
 conversion and the current model afterwards; runtime validation must not silently
 migrate snapshots during editing. Preserve existing element IDs and geometry.
-
 
 **Q0066**
 
@@ -6440,56 +6221,45 @@ display combinations remain open product decisions. The schema-2 field proposal
 and window default in the linked contract are implementation proposals, not claims
 of user decisions or implemented behaviour.
 
-
 **Q0067**
 
 Projection fitting uses the committed model, never the moving preview. Camera/viewport changes rebuild the shared projection independently of geometry preview. A left click during movement fixes direction or confirms through ToolInteraction; it cannot also navigate. Explicit Pan suspends pointer targeting and never confirms on release. Wheel and keyboard camera navigation remain available. Invalid/stale projection blocks pointer targeting. Model/selection validation and one-step Undo/Redo remain application responsibilities. Free Z movement, point deformation and further element adapters are not included in this step.
-
 
 **Q0068**
 
 The wall-source adapter now resolves its known axis-end/corner feature identity to endpoint index 0 or 1. A midpoint or unknown feature has no endpoint index and must not become a point-edit grip. The clicked physical model-space corner remains the anchor; it is not replaced by the wall axis. BimSolidView forwards the stable wall ID, endpoint index and anchor to the existing selection/Direct Edit contract. The `point` action consumes the same workplane inference, projection frame and ToolInteraction as whole-wall movement; its existing click contract confirms the target directly. Corner offset correction, retained wall thickness/opposite endpoint, hosted opening validation and history stay in the existing shared application/model operations. Other constrained actions still use their previous 2D entry until explicitly integrated.
 
-
 **Q0069**
 
 The existing stretch/axis/x/y actions now enter the same 3D workplane interaction as move/point. `supportsWallWorkplaneEdit` is the single application capability check used at entry and by the viewport: only walls, and point/stretch require endpoint index 0 or 1. An explicitly selected footpoint is required for every entry. No axis solver or numeric widget was added. `editDirection`, `resolveEditSnap`/fixedAxis and numericMoveAxis remain authoritative for direction and signed distance; explicit axes take precedence over Shift/Ortho and remain constraints with Snap disabled. Stretch retains the opposite endpoint and checks hosted openings, while axis/x/y translate the whole wall. Existing Pan/confirmation isolation and transaction history are reused.
-
 
 **Q0070**
 
 The shared hoveredSegment/useHoverReference path owns 600ms activation, revisit removal, capacity and navigation suspension. Parallel directions and guides use the existing shared functions. SolidSnapPreview adds a dashed hover edge and stronger active edge behind wall pixels; the existing midpoint ring remains. No model or history action is introduced. Current scope is lower material edges on z=0, not wall axes, top edges or arbitrary 3D workplanes. Future adapters supply sources to these same services.
 
-
 **Q0071**
 
 `rendering/viewport/selection-outline.ts` derives boundary and crease segments from the selected entity's displayed polygon faces. It is independent of domain IDs and React; BimSolidView supplies the faces of the current selected wall, including edit preview geometry. No persisted selection or model copy is introduced. Equal-coordinate shared edges with matching unit normals are omitted, removing cell seams and triangle diagonals while retaining opening reveals. The input contract is a conforming mesh with identical shared vertex coordinates, as produced by buildSolid; future nonconforming adapters must subdivide T-junctions first.
-
 
 **Q0072**
 
 Edges are cached by displayed geometry/selection and projected through the existing ProjectionState. CSS-width triangle ribbons (1.5px) use the same WebGL depth buffer as walls, with depth writes disabled and a 1e-6 NDC depth bias to avoid coincidence flicker. Hidden segments remain occluded; this is not X-ray selection. Depth bias is a rendering tolerance, not a model or snap tolerance. Current styling is a subtle light grey-blue border accompanying existing selection tint. Only an actual wall selection gets the border; selecting a window does not falsely outline its entire host as the selected object. Other element types need their displayed-face adapter when implemented, not separate outline algorithms. No large-scene, nonconforming-mesh or general solid topology support is claimed.
 
-
 **Q0073**
 
 The rules in this document apply to all new implementation work unless a later documented architecture decision explicitly replaces them.
-
 
 **Q0074**
 
 The current working system must not be rewritten merely to match folder names in this document. Migration is incremental: preserve working behaviour, tests and validated Stage-1 workflows while moving responsibilities behind clearer boundaries.
 
-
 **Q0075**
 
 NOVIKOV CAD shall be designed for long-term growth, not only for the next visible feature.
 
-
 **Q0076**
 
 The architecture must support, without fundamental redesign:
-
 
 **Q0077**
 
@@ -6509,76 +6279,61 @@ The architecture must support, without fundamental redesign:
 - automated tests
 - later plugin/extensibility mechanisms
 
-
 **Q0078**
 
 Features must communicate through explicit interfaces and application actions instead of reaching across unrelated layers.
-
 
 **Q0079**
 
 A low-level module must never import a higher-level presentation concern.
 
-
 **Q0080**
 
 These features are assets and must be preserved.
-
 
 **Q0081**
 
 New generic systems such as snapping, guide inference, geometric primitives, transactions or tool runtime must not automatically be added to `src/lib/bim`.
 
-
 **Q0082**
 
 Core must not know about React, IFC, toolbar state, wall rendering or voice commands.
-
 
 **Q0083**
 
 Future dependency graphs and transaction systems belong here when they become necessary.
 
-
 **Q0084**
 
 It must not be implemented as BIM-specific wall code.
-
 
 **Q0085**
 
 Later solid/mesh operations may extend this subsystem.
 
-
 **Q0086**
 
 But geometry primitives must never import `Wall`, `Window`, `Slab` or other BIM entities.
-
 
 **Q0087**
 
 Numerical tolerances must be centralized instead of scattering arbitrary epsilon values throughout tools and geometry code.
 
-
 **Q0088**
 
 Domain models must contain architectural meaning and validated parameters, not React components, Lucide icons, CSS state, Three/WebGL objects or IFC entities.
-
 
 **Q0089**
 
 NOVIKOV CAD must have exactly one authoritative project/model state for a running document.
 
-
 **Q0090**
 
 The following must derive from the same model state:
 
-
 **Q0091**
 
 Derived rendering data may be cached, but it must be disposable and reproducible from the authoritative model.
-
 
 **Q0092**
 
@@ -6590,106 +6345,85 @@ Derived rendering data may be cached, but it must be disposable and reproducible
 - voice commands
 - future macros or plugins
 
-
 **Q0093**
 
 AI/text/voice commands must bind to stable selected IDs and must reject stale context if the project or selection changed after preview.
-
 
 **Q0094**
 
 Natural-language interpretation must not silently guess a target when selection/context is ambiguous.
 
-
 **Q0095**
 
 However, future architecture must permit migration toward explicit transactions/change sets when model size makes complete snapshots inefficient.
-
 
 **Q0096**
 
 A future transaction may represent operations such as:
 
-
 **Q0097**
 
 Undo/redo belongs to the application/core boundary and must not be implemented independently by UI components.
-
 
 **Q0098**
 
 Tools may request snapping and geometry services, but they must not duplicate them.
 
-
 **Q0099**
 
 All input surfaces must use stable entity IDs.
-
 
 **Q0100**
 
 2D plan selection, 3D picking, Navigator selection, Inspector context, AI context and direct-edit context must converge on the same selection abstraction.
 
-
 **Q0101**
 
 A renderer may report a picked render primitive, but it must map that result back to a stable domain entity ID before editing commands execute.
-
 
 **Q0102**
 
 The Stage-2 snapping and guide system must be implemented as a reusable subsystem, not embedded in individual tools or React components.
 
-
 **Q0103**
 
 Snap priority and visual indication must be deterministic and testable.
-
 
 **Q0104**
 
 The snapping subsystem must use the existing authoritative model and shared geometry primitives. It must not create a parallel CAD model.
 
-
 **Q0105**
 
 UI components must not become the authoritative owners of BIM geometry.
-
 
 **Q0106**
 
 2D and 3D views must represent the same project entities.
 
-
 **Q0107**
 
 Model geometry and architectural properties remain shared.
-
 
 **Q0108**
 
 The domain model must not be designed around IFC implementation details.
 
-
 **Q0109**
 
 IFC export must read the same authoritative project state used by the UI and renderer.
-
 
 **Q0110**
 
 Loading must validate:
 
-
 **Q0111**
 
 When future features change the file model, introduce migrations instead of silently interpreting incompatible files.
 
-
 **Q0112**
 
 Temporary UI state such as hover, active menu or current tooltip must not be stored as architectural project data.
-
 
 **Q0113**
 
@@ -6703,16 +6437,13 @@ revision-bound context, model diff, explicit publication boundary and Undo.
 A CAD button itself is not the AI integration surface; no direct UI automation
 or second editable AI model is authoritative.
 
-
 **Q0114**
 
 `CadWorkspace` may orchestrate layout and temporary UI state, but long-term project editing responsibilities must migrate to application/domain services rather than continuously enlarging `CadWorkspace.tsx`.
 
-
 **Q0115**
 
 Browser/manual acceptance tests remain valuable for interaction quality, but they do not replace lower-level deterministic tests.
-
 
 **Q0116**
 
@@ -6727,21 +6458,17 @@ Browser/manual acceptance tests remain valuable for interaction quality, but the
 9. Does IFC need to reflect it?
 10. What automated tests prove the core behaviour?
 
-
 **Q0117**
 
 The next precision-drawing stage must strengthen the architecture rather than add isolated UI behaviour.
-
 
 **Q0118**
 
 Wall, line and future slab/roof tools should consume these shared capabilities.
 
-
 **Q0119**
 
 ##### 28. Rule for Codex and Future Contributors
-
 
 **Q0120**
 
@@ -6751,11 +6478,9 @@ Wall, line and future slab/roof tools should consume these shared capabilities.
 - **Layout / MasterLayout** describe paper composition and reusable page format/title-block definitions. A layout placement (working name LayoutViewport) references a DrawingDocument and stores placement/crop/output-scale settings; it does not embed its elements. Deleting a referenced master/document requires explicit dependency handling. Paper units and output scale are distinct from model metres and screen pixels.
 - **ViewportBinding** routes one on-screen pane to a ModelView, DrawingDocument or Layout through a typed ID reference. Each pane has an independent camera/navigation context; focus determines the receiving pane. Project, committed selection and application actions remain shared. Screen panes and paper LayoutViewports are different concepts. Persistence of pane arrangements is not decided here.
 
-
 **Q0121**
 
 Saved definitions and annotations may initially share the versioned Project file and existing snapshot history. Hover, temporary guides and open menus remain ephemeral. Model actions and document actions are distinct typed operations through the same validated application/history boundary; no second BIM history or state store is introduced by a canvas pane. New persistent types require reference validation, migration from schemaVersion 1, round-trip and undo tests before release. Navigation alone must not produce model history entries.
-
 
 **Q0122**
 
@@ -6767,7 +6492,6 @@ foreign or stale references are explicit failures. Closing a pane does not delet
 its saved definition. Document visibility is independent of the BIM visibility mask.
 Derived caches include relevant model/definition identity, not pointer or camera.
 
-
 **Q0123**
 
 Schema 16 currently has workingViews only; the drawing-document visibility token
@@ -6777,11 +6501,9 @@ ModelView/Document classes. Document initialization, crop interaction and lifecy
 history remain proposals until decided. Existing storey annotations retain scope.
 See [saved-view contract and single pilot](docs/planning/SAVED_DRAWING_VIEWS.md).
 
-
 **Q0124**
 
 **Binding technical rules for future implementations:**
-
 
 **Q0125**
 
@@ -6791,201 +6513,161 @@ See [saved-view contract and single pilot](docs/planning/SAVED_DRAWING_VIEWS.md)
 4. Each new checked model or document action must expose a typed parameter/target contract for mouse, properties, shortcuts and AI/Text/Voice adapters. Context includes stable target IDs, target kind/scope, originating view/work plane when relevant, and a model/document revision or equivalent snapshot identity. Preview and apply reject changed targets or stale context. Ambiguity is clarified, never resolved by guessing another nearby element. Creation uses explicit container/host IDs; it cannot require a pre-existing created-element ID.
 5. Action acceptance includes adapter tests for the supported text intent and simulated voice transcript, invalid parameters and stale context; real speech-recognition quality is a separate test. An unsupported intent is reported explicitly. Neither AI nor speech components contain geometry, validation or independent model mutation.
 
-
 **Q0126**
 
 **Binding user restriction and required application guard for N25:** proportional scaling is allowed only for genuine 2D entities and imported PDF references. BIM/3D objects (including walls, windows, doors, slabs and roofs) remain forbidden even when rendered in a 2D view or DrawingDocument. The future scaling action must resolve authoritative target types/capabilities and validate _every_ target before preview or commit. If any target is forbidden or unresolved, reject the entire selection without partial changes or a history entry. Hiding a toolbar command is insufficient; direct action calls, AI/Text/Voice and imported/reloaded references must pass the same guard. Validate finite positive lengths, nonzero measurement baseline, anchor and target revision. Uniform scale and an explicit anchor form the proposed calibration contract; text/style scaling semantics need separate definition.
-
 
 **Q0127**
 
 **Open user meanings — no default invented:** D versus Ctrl+D; whether a wall-axis switch preserves physical wall position or the drawn reference axis; the 3D export format/contents; undo grouping for wall chains. These block only their respective implementation. Detailed field names, folder layout, PDF decomposition approach, solid-library choice, per-annotation styling and layout-template linkage mechanics remain proposals until separately decided.
 
-
 **Q0128**
 
 Tool adapters supply origin and current aim, validate tool-specific constraints and confirm through existing model/application actions. Line drawing rejects zero length and changed model context; direct edit retains its pinned selection, axis and opening constraints. Numeric targets take precedence over mouse snapping. There is one helper component and one draft hook, not a copied form/state machine per tool. The existing workspace coordinates these consumers; migration of its remaining legacy drawing orchestration is incremental. AI/Text/Voice must use the same validated actions, not React draft state or separate model logic.
-
 
 **Q0129**
 
 Currently connected: element/point movement, point stretching, single straight-line drawing and straight-wall drawing. Polyline segments also consume this contract; other tools remain future precision-input consumers.
 
-
 **Q0130**
 
 Every interactive movement starts with a pinned construction reference at the chosen point, immediately and without hover dwell. This applies to point movement, whole-element movement, stretching and axis-constrained movement, including hosted elements. Future slabs, roofs, stairs, furniture and other elements must use the same interaction/constraint pipeline; origin activation is not an optional per-tool feature.
-
 
 **Q0131**
 
 The origin stays at the original model-space position during preview and zoom. Shared inference supplies cursor-dependent guides, additional hover references and intersections. Do not display every possible guide simultaneously. Explicit axis/host constraints and model validation still take precedence; a window remains on its wall. User-controlled Snap disable remains respected. Completion/cancellation removes the session origin without committing construction geometry. Future 3D movements must supply the active work-plane context to this same system.
 
-
 **Q0132**
 
 PrecisionInput centrally handles Tab during an active interaction: from the viewport into length, then angle, then length. On first entry the current mouse direction is captured at full precision through the input adapter, not from the rounded display hint. Enter confirms, Escape cancels. Unrelated text fields keep their normal keyboard behaviour. Explicit axis constraints retain a read-only angle. All future consumers must use this shared keyboard contract. Free point movement now consumes the same polar adapter as whole-element movement.
-
 
 **Q0133**
 
 Drawing actions for straight walls and lines/polylines now converge on application/drawing/actions.ts. It validates the pinned model context and delegates creation to existing addWall/addLine domain operations. Mouse and numeric confirmation use the same action and history path. previewDrawingInput shares the polar text adapter; the former line-input export remains compatible. CadWorkspace still coordinates pointer collection and presentation, but no longer calls addWall/addLine directly. Defaults for a drawn wall remain 0.36 m thickness and 2.80 m height. Drawing preview is a 2D axis guide; the confirmed wall supplies the existing 3D rendering.
 
-
 **Q0134**
 
 application/tools/adapters.ts adapts existing Direct Edit and Drawing actions to this contract. Fixed axes, window constraints and the distinction between point and element mutation belong here or in the existing validated model actions. They must not be reimplemented in the input component or viewport click handler.
-
 
 **Q0135**
 
 useToolInteraction runs one shared draft/preview/pick/confirm/cancel lifecycle. InteractionInput binds it to the single PrecisionInput, including shared Tab behaviour. CadWorkspace selects an adapter and connects existing project/history actions; it no longer owns the tool-specific numeric preview switch or form confirmation branches. BimPlan forwards picked targets without deciding which edit action locks a direction. Existing shared snapping, hover references, origins and geometric projection services remain in place.
 
-
 **Q0136**
 
 Migration limits: legacy point collection for drawing and rendering/edit-session plumbing still exist. This change does not claim a complete universal tool framework or a 3D work-plane runtime. Future input consumers implement the small adapter contract; adding one must not require copied Tab, hover, polar-input or form-confirmation logic.
-
 
 **Q0137**
 
 Polyline reuse verified (2026-10-03): each last draft vertex supplies the existing drawingInteraction identity/origin. The same runtime, PrecisionInput, Tab and snapping services are unchanged. Numeric confirmation adds a draft vertex; completion uses one createDrawing/history commit. Invalid explicit input must not be silently discarded by double-click/viewport Enter completion.
 
-
 **Q0138**
 
 Modal dialogs own Tab and application shortcuts while open. PrecisionInput must not intercept navigation outside its own panel inside a dialog/alertdialog; workspace tool shortcuts likewise yield to modal content. Cancelling project-file confirmation preserves the suspended draft. Confirmed project replacement and history navigation clear edit/drawing context through the existing shared reset; Undo restores committed model state, never an old interaction session. Session identity checks reject delayed confirmations even after returning to an earlier model snapshot.
-
 
 **Q0139**
 
 Decision: replace production-wide intersection precomputation with local point/segment retrieval and local segment intersections. Reuse immutable model-space primitive data, a spatial index and a full source-identity lookup; do not index all potential intersections. The existing cached reference list is a transitional optimization, not this target implementation. CSS-pixel radii are converted per query; zoom and tool changes do not rebuild the model index. Long segments are indexed by their full extent, not just endpoints. Exact existing geometry, tolerances, ranking and tool source exclusions remain authoritative.
 
-
 **Q0140**
 
 Immediate point/intersection snapping is independent of the 600 ms reference acquisition/removal delay. Active and pinned references are processed separately from local geometry; validate their original source dependencies against the complete snapshot lookup, never only the local result list. Local result-array changes must not reset hover sessions. Model changes/load/history must resolve the matching snapshot and preserve existing session invalidation rules. One shared query path serves drawing, Direct Edit and hover acquisition; no per-tool spatial engines.
-
 
 **Q0141**
 
 Module responsibilities, integration hazards and acceptance cases: docs/LOCAL_SNAP_QUERY_PLAN.md. A static AABB tree, concrete API names and a full primitive-index rebuild on a new snapshot are proposals for the first implementation; incremental updates and index tuning remain evidence-driven choices. The former plan to accelerate a global all-pairs intersection build is superseded. Implementation status and measured limits are recorded below and in docs/performance/LOCAL_INTEGRATION.md and DENSE_SNAPPING.md.
 
-
 **Q0142**
 
 Existing binding rules remain: one authoritative model, one shared snapping/inference pipeline, stable selected-entity context and the same validated application actions for mouse, numeric input and AI/Text/Voice. Work-plane coordinates and overlays are derived interaction data; no renderer mesh or second model becomes authoritative.
-
 
 **Q0143**
 
 The working proposal in [docs/3D_WORKPLANE_PLAN.md](docs/3D_WORKPLANE_PLAN.md) starts with the XY plane at z=0, matching the current model. It requires a shared orthographic forward/inverse projection and later a shared CSS-screen metric for foreshortened views; a single pixels-per-metre factor is insufficient. A plane/model operation scope is distinct from camera navigation. Gesture allocation, occlusion policy and numerical conditioning thresholds are explicitly proposals/open issues, not implemented or user-approved product decisions. The next package is only projection extraction and tested inversion, preserving current rendering and picking; no new 3D editing UI or model mutation is authorized by this planning document.
 
-
 **Q0144**
 
 `rendering/viewport/horizontal-workplane.ts` captures immutable bounds/camera/viewport values and maps a fixed horizontal plane to client CSS pixels and back. Callers must supply the exact rendered aspect, including backing-buffer rounding, separately from the CSS rectangle. Its inverse search AABB is a conservative prefilter, never a substitute for exact CSS-distance ranking. Invalid input, poor conditioning and excessive estimated roundoff return explicit failure statuses; consumers must not confirm an invalid point. The current numeric guards (condition <= 1e6 and estimated roundoff <= 1e-6 m) are implementation safeguards, not model tolerances or guarantees of pointer accuracy. See the plan for their limits.
-
 
 **Q0145**
 
 This adapter has no interaction consumer yet. Supporting a mathematical height does not add model storeys or Z movement. Shared snapping metrics, origin acquisition, occlusion and gestures must be completed before enabling 3D editing. Product decisions still open in the planning boundary remain open; the numerical guards above supersede only the previously undecided conditioning threshold.
 
-
 **Q0146**
 
 `application/snapping/local-sources.ts` accepts either this metric or the compatible numeric 2D scale. Numeric callers use the same service through an isotropic adapter, preserving point-distance arithmetic. Candidate segments pass AABB, segment-box and CSS-distance checks before density counting or pair construction. Model-tolerance and roundoff padding retain uncertain contacts for existing exact intersection validation; they do not widen final point acceptance. Unlike the former square-only test, segments near square corners but outside the CSS radius no longer contribute false density. Source identities, full extents, snapshot caching and remote reference lookup remain intact.
-
 
 **Q0147**
 
 The rest of the resolver still uses its existing 2D metric. The affine query API is not a complete 3D snapping path and must not be used to enable that UI yet. Ranking, guide projection, hover and explicit reference picking must converge on this contract in subsequent bounded changes.
 
-
 **Q0148**
 
 SnapContext now optionally carries ScreenMetric. querySnap supplies the isotropic adapter for legacy numeric callers and forwards the same instance to the shared source query. The Application adapter uses it for local filtering and density; point candidates use it for radius acceptance and distance ranking. Existing priority, activation and stable source tie-break rules remain unchanged. Non-finite point distances are rejected.
-
 
 **Q0149**
 
 This supersedes the point-ranking limitation above only. Guide generation/projection, guide distances, Shift/Ortho direction selection, hover and explicit picking retain their current model/2D contracts. Affine point support alone must not enable a mixed-metric 3D interaction. Model angles and lengths remain model quantities.
 
-
 **Q0150**
 
 Direction selection/hysteresis, explicit Shift/Ortho and fixed-axis constraints remain model-space operations. Intersections remain exact model geometry. A candidate must still satisfy the model constraint; projection does not move or duplicate its source. This supersedes the guide-distance/projection limitation above. Hover, acquisition and explicit reference picking still require metric integration before 3D interaction can be enabled.
-
 
 **Q0151**
 
 Dwell, toggle-on-revisit, suspension, capacity and pinned-reference rules remain in the existing inference state machine. No per-tool hover state or alternate reference store is introduced. This supersedes the hover-metric limitation above; explicit reference picking and later 3D UI/visibility/navigation integration remain pending.
 
-
 **Q0152**
 
 [docs/3D_INTERACTION_CONTRACT.md](docs/3D_INTERACTION_CONTRACT.md) records the current viewport audit and separates binding technical requirements from proposed product behavior. Element ID, client-space menu anchor and geometric movement origin are distinct. The next implementation binds rendering, wall picking and plane inversion to one immutable projection state; it does not authorize a gesture change or hidden-target acquisition. Current CSS versus rounded-backbuffer aspect usage differs at the call sites and must be unified. Proposed plane presentation, visibility and gesture policies require explicit resolution before their UI implementation.
-
 
 **Q0153**
 
 Implemented in rendering/viewport/projection-state.ts: an immutable copy of frame, camera, CSS viewport and actual rounded backbuffer size supplies projection, client-to-NDC conversion and horizontal workplane inversion. BimSolidView rendering and wall picking consume the same displayed snapshot. Camera/layout/DPR changes invalidate stale selection; resize, scroll and resolution changes request redraw. Existing pickWall remains compatible through pickWallInProjection. An optional explicit frame supports later operation-pinned framing; current editing callers do not yet pin it.
 
-
 **Q0154**
 
 This completes the projection-state implementation above, without enabling 3D snapping or deciding gestures/occlusion. Rendering remains derived state. Visibility classification is a separate rendering concern; product policy must not be hidden in geometry or duplicated per tool.
-
 
 **Q0155**
 
 This is continuous geometric visibility against current opaque wall faces, not exact GPU pixel coverage/MSAA/depth-buffer quantization. No policy for hidden reference activation is implied. No new caches or per-tool implementations; the current query scans faces, so high-frequency batch use requires profiling and shared projected-scene reuse before scaling to large projects. No slabs or future element occluders are claimed until those renderer adapters exist.
 
-
 **Q0156**
 
 This adapter supports existing wall axis ends, corners and axis midpoints only. It does not reinterpret annotation lines or window coordinates as 3D points, compute new intersections, or process active guides. Queries pause on invalid/ill-conditioned inverse. Application project snapshots must remain immutable. The adapter is not yet connected to viewport events and does not define X-ray or navigation policy. Visibility still scans current wall faces per candidate; no large-scene performance claim.
-
 
 **Q0157**
 
 The user accepted the concrete proposal after PR #74: immediate hollow silver-grey rings for visible wall footpoints with Snap enabled, including no active drawing tool; shared 600ms acquire/revisit-toggle; navigation suspends acquisition and retains references; wall selection and left-drag navigation remain unchanged. This supersedes the pending approval for these preview rules only, not future 3D movement gestures or X-ray modes.
 
-
 **Q0158**
 
 SolidSnapPreview connects the displayed projection to wall-preview-context and the existing useHoverReference state machine. HoverContext.acceptReference is an optional view eligibility predicate: ineligible active sources cannot win acquisition ranking, while stored references remain intact across view changes. Timers, capacity, direction hysteresis and dwell removal stay shared. Only real visible z=0 wall points are eligible in this slice; generated construction intersections remain a later connection.
-
 
 **Q0159**
 
 The 3D preview now uses querySnap for immediate markers as well as the shared hover acquisition path. wall-preview-context supplies remote active origins and flattened original dependencies alongside local sources, using the existing model source lookup and withConstructionReferences. Construction points must have current wall-source dependencies and visible finite z=0 positions. Optional SnapContext.acceptCandidate filters ranked geometric candidates before ranking, so hidden targets cannot mask valid alternatives. Explicit axis/Shift and grid fallback behavior are unchanged; this preview does not use those modes.
 
-
 **Q0160**
 
 No new intersection algorithm or timer is introduced. Shared acquisitionReference, reference capacity, 600ms toggle and model-session invalidation remain authoritative. Decorative SVG floor and guide layers are conservative behind-wall overlays, not general depth-tested scene surfaces. Existing limitations for 3D movement and non-wall sources remain.
-
 
 **Q0161**
 
 User decision: NOVIKOV CAD shall support Windows and macOS. Whether the product is delivered through a browser, as an installable desktop application, or through both remains open. No desktop framework or distribution channel has been selected. These targets are requirements, not a claim that the current application has been accepted on both platforms.
 
-
 **Q0162**
 
 The authoritative project format, geometry/domain logic and shared validated Application actions shall be reusable across delivery forms. Filesystem access, storage, native dialogs and operating-system integration belong to explicit adapters at the appropriate application/interop/platform boundary. Browser or desktop dependencies must not leak into the CAD kernel or domain. Reuse and extract existing boundaries incrementally; this decision does not require empty interfaces, a parallel model, or an immediate rewrite.
-
 
 **Q0163**
 
 Input adapters must account for Windows Ctrl and macOS Command conventions, mouse and trackpad use. Exact gestures remain subject to the shared interaction contract. Rendering and dependency choices must be evaluated for both target platforms; code-level portability alone is not a performance or compatibility acceptance test.
 
-
 **Q0164**
 
 Minimum OS/browser versions, supported browsers and hardware, CPU architectures, offline behavior, installation, signing, distribution and updates will be defined for the concrete delivery package. Essential acceptance scenarios shall include editing a representative larger project, saving/loading and export on Windows and macOS; offline acceptance is required only after its scope is decided. Browser/desktop prototypes and measured file, input and graphics behavior should inform the later delivery decision.
-
 
 **Q0165**
 
@@ -6997,7 +6679,6 @@ No holes, repeated closing vertex, BIM volume, pattern or contour-pen definition
 is included yet. Optional fill/outline and configurable patterns remain requirements.
 The initial ownership is the existing storey's model-space 2D drawing scope;
 DrawingDocument-local annotations are not implicitly introduced.
-
 
 **Q0166**
 
@@ -7011,7 +6692,6 @@ interactive tool adapters are pending, so no canvas capability is claimed here.
 IFC remains the existing building export; 2D hatches are stored in project JSON,
 not converted into BIM solids. Existing BIM scaling prohibition remains unchanged.
 
-
 **Q0167**
 
 The Hatch tool shares the existing multi-point drawing state, drawingInteraction,
@@ -7020,7 +6700,6 @@ previewHatch; only the drawing adapter removes an explicit repeated closing poin
 Domain validation remains strict. Double-click/Enter finish the accumulated points;
 Escape discards the draft. Closure must remain possible after the final click resets
 the numeric preview to a zero-length segment; validity belongs to the creation action.
-
 
 **Q0168**
 
@@ -7034,7 +6713,6 @@ behind walls/lines, with a thin selection border; 3D geometry/IFC remain unchang
 The current UI offers solid fill only. Patterns, contour pens, holes and hatch
 Direct Edit remain pending. Automated checks do not constitute browser acceptance.
 
-
 **Q0169**
 
 Hatch targets now participate in EditSession/ToolInteraction. The selected vertex
@@ -7043,7 +6721,6 @@ preview/commit and history paths remain shared with walls and lines. Whole-eleme
 move, X/Y and axis translation preserve every vertex offset. Point and stretch
 change only the selected vertex, validated by previewHatch and the simple polygon
 validator. Self-intersection and collapsed contours cannot commit.
-
 
 **Q0170**
 
@@ -7057,14 +6734,12 @@ snapping and inference; visible zoom-adaptive grid display is independent.
 Explicit numeric targets and existing axis/Shift precedence remain unchanged.
 No per-tool rounding, new model actions or alternative snapping engine is added.
 
-
 **Q0171**
 
 BimPlan now overlays the selected visible wall's start/end centre axis from its
 current validated display/preview snapshot. The dashed line has screen-constant
 stroke and ignores pointer events. It introduces no model entity, snap source or
 mutation. Axis offsets, 3D axis display and wall-join decisions remain open.
-
 
 **Q0172**
 
@@ -7075,7 +6750,6 @@ its openings and hosted windows translate perpendicular to that axis together.
 Axis length, thickness, height, IDs and relative opening positions are preserved.
 This is not whole-element translation and does not approve automatic wall joins.
 
-
 **Q0173**
 
 Implement body coordinates once in a domain wall-geometry adapter backed by
@@ -7084,7 +6758,6 @@ Plan geometry, bounds, 3D solids, openings, hit testing, corner grips and snappi
 windowCentre/edit anchors and IFC must consume that same derivation. The selected
 axis overlay continues to display start/end. Do not create another editable Wall
 or store renderer/IFC geometry as authoritative data.
-
 
 **Q0174**
 
@@ -7096,7 +6769,6 @@ Changing the offset itself leaves the axis fixed. Other endpoint edits retain th
 stored signed offset relative to the resulting direction; reversing direction
 and deliberately keeping the body fixed is not introduced as a new command.
 
-
 **Q0175**
 
 Persist the offset with an explicit new project schema version and validated
@@ -7105,7 +6777,6 @@ new-version snapshots. Layer and visibility semantics stay unchanged. The next
 implementation must cover all consumers before exposing the numeric field.
 3D axis overlay, interactive offset dragging, side presets, wall joins and
 material-layer priorities remain separate work.
-
 
 **Q0176**
 
@@ -7124,7 +6795,6 @@ Hosted openings retain longitudinal position and move with the physical body.
 IFC placement uses physical body coordinates and records BodyOffset as a property.
 No join semantics or 3D axis overlay are introduced in this step.
 
-
 **Q0177**
 
 The user chose explicit creation through "Ecke verbinden"; shared endpoints or
@@ -7136,7 +6806,6 @@ implemented yet. Shared-corner editing, endpoint/property edits and cap geometry
 after detachment remain separate unresolved behaviours. See docs/WALL_CORNER_PLAN.md
 for offset examples and the bounded pure contour-derivation proposal. Persisted
 join relations are a technical proposal, not an existing schema capability.
-
 
 **Q0178**
 
@@ -7153,7 +6822,6 @@ tolerance is dimensionless 1e-10. Invalid/too-short geometry throws; no clamping
 Contours have positive winding and local computed area; converted world geometry
 is validated too. No runtime consumers, schema changes or UI command yet.
 
-
 **Q0179**
 
 geometry/solids/profile-openings.ts extrudes convex CCW profiles along Z with
@@ -7163,7 +6831,6 @@ Slab intersections use original edges for identical shared vertices. Directed
 edge incidence is checked; non-manifold opening contacts and numerically
 inseparable cuts fail closed instead of silently dropping material. Faces have
 variable polygon vertex counts, not the legacy renderer's fixed quad contract.
-
 
 **Q0180**
 
@@ -7176,7 +6843,6 @@ Only contained openings are supported in this path. Rejection of touching is an
 implementation boundary, not a settled product rule. Existing buildSolid and
 normal project export are unchanged. Future renderer/IFC adapters must consume
 this shared domain derivation rather than calculate separate joins.
-
 
 **Q0181**
 
@@ -7193,7 +6859,6 @@ existing project/kind/source-ID namespace. The acceptance path rejects currently
 unsupported end-contact openings without deciding the future product policy.
 See docs/CORNER_IFC_ACCEPTANCE.md for independent validation and import limits.
 
-
 **Q0182**
 
 prepareContourEdge reuses this preparation across pointer targets. Orientation
@@ -7207,7 +6872,6 @@ Full contour/project validation still runs through the existing preview/commit
 adapters. No trusted-preview bypass, schema change or relaxed commit validation.
 See docs/CONTOUR_EDGE_PERFORMANCE.md for timings and remaining limits.
 
-
 **Q0183**
 
 Blue edge arrows are an input shortcut to the existing edge EditSession, not a
@@ -7219,7 +6883,6 @@ precision input, cap and commit continue through the shared edit interaction.
 Pointer-up suppresses its following click; simple click/keyboard activation
 leaves the standard edit active. Capture loss/cancel aborts; session/model binding
 prevents stale drags. Other on-demand edge and insertion actions remain available.
-
 
 **Q0184**
 
@@ -7233,7 +6896,6 @@ BIM elements. Browser decoders and disposable URLs belong to adapters; project
 files must preserve assets independently of their original local files. Proposed
 field names and embedded storage are an incremental design, not user decisions.
 
-
 **Q0185**
 
 Runtime schema 9 adds project assets and storey.references. The reference domain
@@ -7243,7 +6905,6 @@ decode images; future file/browser adapters must verify actual content, orientat
 and decoded dimensions before rendering/import. No bitmap is trusted as executable
 markup. Migration 1–8 belongs solely to the file adapter and adds empty collections.
 Image bytes are stored once per asset; no blob URLs or decoded images enter history.
-
 
 **Q0186**
 
@@ -7256,7 +6917,6 @@ measured browser capacity promise. Renderer/decoder resource checks remain pendi
 Layer assignment, occupancy and eligibility include references. Selection/rendering
 and calibration are not yet exposed; existing BIM IFC output ignores these 2D data.
 
-
 **Q0187**
 
 `useReferenceCalibration` is a ToolInteraction adapter: shared point capture and
@@ -7265,7 +6925,6 @@ length form; CadWorkspace only coordinates it. A session pins project, visibilit
 selected reference and two world points. Context changes invalidate it; preview
 does not mutate project/assets and acceptance produces one model history entry.
 Text/Voice adapters are the next bounded task and must reuse this action.
-
 
 **Q0188**
 
@@ -7277,7 +6936,6 @@ the same Application action. No image-specific movement engine or pixel snapping
 Host-window restrictions, visibility eligibility, stale-context guards and
 relationship detachment rules remain binding.
 
-
 **Q0189**
 
 Form reset keys use immutable project identity (weak revision token) and selected
@@ -7287,7 +6945,6 @@ The initialProject prop only seeds the normal validated editing reducer; it is
 not a second controlled model. A separate development-only benchmark entry mounts
 the actual workspace and calls existing Application actions. It is not a product
 route and its React/heap measurements must not be treated as production guarantees.
-
 
 **Q0190**
 
@@ -7302,7 +6959,6 @@ cancel, one committed group move, Undo and Redo. Timing is synthetic-dispatch to
 a frame opportunity with DOM verification, not OS input or guaranteed GPU display.
 Nested inclusive phases must not be summed as exclusive costs.
 
-
 **Q0191**
 
 `application/tools/point-preview.ts` is a disposable one-entry cache scoped to a
@@ -7316,7 +6972,6 @@ for late callbacks. No global project cache or per-element UI branch is introduc
 Unconstrained polar input preserves the exact already-resolved aim; explicit
 angle/length constraints and finite-distance guards retain their contracts.
 
-
 **Q0192**
 
 LineStyleDefinition.colorEditable defaults to true for legacy definitions. When
@@ -7325,7 +6980,6 @@ rejects divergent line colors. UI disables the color control. Renderer converts
 system pen width explicitly using viewport pixels per metre and pattern scale.
 Definitions remain portable project snapshots; catalog edits do not silently
 rewrite existing project lines.
-
 
 **Q0193**
 
@@ -7342,7 +6996,6 @@ React owns the transient draft and list presentation; previews are derived paths
 not copied project elements. Pattern usage, model/paper scale, portable embedded
 snapshots, revisions and update/undo conflicts remain pending V07e.
 
-
 **Q0194**
 
 Technical decisions for the next incremental feature: embed used definitions once
@@ -7351,7 +7004,6 @@ integrity and keep an explicit local-plane anchor. Model sizing uses metres; pap
 sizing requires an explicit output scale from the future view/document contract,
 never camera zoom. The first assignment pilot is model-space only. Legacy hatches
 retain their solid appearance. Repetition/clipping are derived bounded rendering.
-
 
 **Q0195**
 
@@ -7363,7 +7015,6 @@ a reported integrity conflict, not an implicit replacement. Library Undo publish
 restored content under a new revision. Project snapshot restoration must use the
 same resolution rather than rewinding global content. Multi-tab transaction safety
 is not implied by localStorage. These mechanisms remain future implementation.
-
 
 **Q0196**
 
@@ -7381,7 +7032,6 @@ No model geometry is allocated per repetition. Fill color/opacity control stroke
 background and contour remain independent. Global revision editing/History, automatic
 library reconciliation, paper-space sizing and uploads remain unimplemented.
 
-
 **Q0197**
 
 The central resolver takes an explicit project snapshot and embedded/available
@@ -7392,14 +7042,12 @@ These are implemented Domain/Application contracts. Production schema 11 still
 does not persist revision metadata; automatic load/History resolution and global
 editing UI remain future integration, starting with portable revision context V07h.
 
-
 **Q0198**
 
 Production schema 12 adds an optional positive safe-integer revision to each used
 embedded definition. Omission means unknown provenance; strict versions 1–11 migrate
 at file ingress without inventing a revision. Definition identity and content remain
 stored once per project, never per hatch. Schema 11 still rejects revision metadata.
-
 
 **Q0199**
 
@@ -7413,7 +7061,6 @@ missing or older. It never writes the library or adds a reconciliation Undo step
 File decoding itself remains platform-neutral and does not consult global storage.
 Live cross-tab updates and the global editing UI are still future work.
 
-
 **Q0200**
 
 One storage notification adapter feeds both catalog consumers and active-project
@@ -7426,14 +7073,12 @@ and optimistic session guards do not constitute atomic multi-tab publication.
 Production schema remains 12. Paper-space applications still require an explicit
 view/output scale contract, independent of interactive camera zoom.
 
-
 **Q0201**
 
 Implemented contract: Creator pattern cells use local x-right/y-down coordinates.
 The shared preview/committed SVG tile preserves those coordinates and anchors the
 cell bottom-left at the application's model-space origin. It must not reflect local
 line geometry again when mapping the model's y-up contour into SVG.
-
 
 **Q0202**
 
@@ -7447,7 +7092,6 @@ schemas reject the new field. Defaults, pickup, movement and global revision
 reconciliation retain this application property. Paper-space scale remains pending
 V07j and must not be inferred from camera zoom.
 
-
 **Q0203**
 
 Implemented: domain/pens owns strict named color/set/inventory data. Application/pens
@@ -7460,7 +7104,6 @@ colors remain independent HEX values after catalog changes or deletion. Inventor
 ordered and limited to ten existing unique pen IDs. Reapplying a package refreshes the
 project snapshot; library writes never occur during project Undo/Redo.
 
-
 **Q0204**
 
 Shared ColorField/ColorPicker and FloatingPanel serve all existing color entry points;
@@ -7472,7 +7115,6 @@ editors, precision operations or AI proposals. Palette context is presentation s
 the project and Application actions remain authoritative. Browser visual acceptance
 is still required; automated checks do not claim a verified pointer workflow.
 
-
 **Q0205**
 
 Implemented MS-02/V07k: shared rendering/viewport hatch tile derivation consumes
@@ -7483,14 +7125,12 @@ both tile scaling and camera pixels per metre. Production consumers still defaul
 to model sizing. The isolated benchmark reuses the actual SVG component. Derived
 sizing is not a second model and does not extend production schema 14.
 
-
 **Q0206**
 
 Binding user decision: working output scale is a persisted semantic-view setting
 outside normal model Undo/Redo. Model undo must preserve the current view setting.
 Persistence and legacy-file migration are the next bounded MS-03 task, not yet
 implemented by this renderer pilot. Paper-mode product integration follows later.
-
 
 **Q0207**
 
@@ -7503,7 +7143,6 @@ Panes retain independent cameras. Presets are 1:50/100/200/500/1000/2500/5000; a
 Individuell choice accepts strict 1:S input, committing with Enter or blur. Zoom and
 model geometry remain unchanged. Paper hatch product integration is still pending.
 
-
 **Q0208**
 
 The generic metric resolver now lives in domain/views/display-size so Domain validation
@@ -7514,7 +7153,6 @@ Incomplete draft sizes cannot crash the canvas; commit/file ingress still reject
 Project validation checks resolved cell extents at the stored view scale, including
 finite arithmetic. Paper mode is available in 2D properties/defaults. No claim of a
 physical printed output or paper-sized pen width is made; strokes remain 1 CSS pixel.
-
 
 **Q0209**
 
@@ -7528,18 +7166,15 @@ visibility overrides retain their scope and never imply document persistence.
 No schema or history changes; saved ModelViews/DrawingDocuments remain future work.
 The resolver is independent of React and available to future typed query adapters.
 
-
 #### Herkunft: DEVELOPMENT_GUIDE.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0210**
 
 Berechne die geometrische Grundfläche aus gültigen Polygonen. Kennzeichne sie
 als geometrische Fläche; sie ist noch keine geprüfte Wohnfläche. Beginne mit
 manueller Begrenzung über das gemeinsame Zeichen- und Fangsystem.
-
 
 **Q0211**
 
@@ -7549,23 +7184,21 @@ definierte obere und untere Oberfläche. Berechne deren Höhenunterschied über
 der Raumfläche und leite Höhenlinien beziehungsweise Flächenbereiche ab.
 Ermögliche die Konfiguration im Raumeigenschaftenfenster.
 
-
 **Q0212**
 
 7 Entscheidungen rechtzeitig festhalten
 Diese Punkte blockieren die Bestandsaufnahme nicht. Codex klärt sie vor der jeweiligen Implementierung, verwendet bei reversiblen Details nachvollziehbare Startwerte und hält die Entscheidung im Entwicklungsplan fest.
-Entscheidung	Vor Etappe	Vorgeschlagener Start
-Ergänzung der abgebrochenen Grid-Anforderung	2–3	Gesprächsanforderungen verwenden und als Ergänzung markieren
-Hover-Zeit, Fangradius und Richtungen	3	Konfigurierbare Werte, im Bedienversuch anpassen
-Ebenensichtbarkeit je Ansicht oder gemeinsam	4	Eine klare Variante für alle ersten Abläufe festlegen
-Strichstärken und Muster in Modell oder Papiermaßen	5	Einheiten ausdrücklich dokumentieren
-Welche Elemente welche Bearbeitung unterstützen	6	Aktionen zunächst für vorhandene Elementtypen
-Bedeutung der Maßstabanzeige und unterstützte Importformate	7	Ansichts-/Ausgabemaßstab trennen; PDF-Seite und Bild zuerst
-Raumkennungen und Umgang mit teiloffenen Grenzen	8	Projektweit eindeutige Kennungen und explizite virtuelle Grenzen
-Verfügbare Dach- und Deckenquellen	9	Automatisch nur aus tatsächlicher Modellgeometrie
-Regelprofil, Korrekturen und fachliche Prüfung	10	Amtliche Quelle prüfen, Annahmen offen dokumentieren
-Konkrete Berichtsvorlage und Berichtsumfang	11	Standardvorlage, später bereitgestellte Vorlage übernehmen
-
+Entscheidung Vor Etappe Vorgeschlagener Start
+Ergänzung der abgebrochenen Grid-Anforderung 2–3 Gesprächsanforderungen verwenden und als Ergänzung markieren
+Hover-Zeit, Fangradius und Richtungen 3 Konfigurierbare Werte, im Bedienversuch anpassen
+Ebenensichtbarkeit je Ansicht oder gemeinsam 4 Eine klare Variante für alle ersten Abläufe festlegen
+Strichstärken und Muster in Modell oder Papiermaßen 5 Einheiten ausdrücklich dokumentieren
+Welche Elemente welche Bearbeitung unterstützen 6 Aktionen zunächst für vorhandene Elementtypen
+Bedeutung der Maßstabanzeige und unterstützte Importformate 7 Ansichts-/Ausgabemaßstab trennen; PDF-Seite und Bild zuerst
+Raumkennungen und Umgang mit teiloffenen Grenzen 8 Projektweit eindeutige Kennungen und explizite virtuelle Grenzen
+Verfügbare Dach- und Deckenquellen 9 Automatisch nur aus tatsächlicher Modellgeometrie
+Regelprofil, Korrekturen und fachliche Prüfung 10 Amtliche Quelle prüfen, Annahmen offen dokumentieren
+Konkrete Berichtsvorlage und Berichtsumfang 11 Standardvorlage, später bereitgestellte Vorlage übernehmen
 
 **Q0213**
 
@@ -7593,11 +7226,9 @@ Regressionstest, wenn er den Fehler sinnvoll absichert. Starte kein neues Featur
 Gib Codex diesen Guide und den Auftrag aus Etappe 0. Danach sollte Codex dir sagen können: „Diese Bereiche funktionieren nachweislich, diese Teile fehlen, und dies ist der nächste kleine Auftrag.“ So wird aus der Funktionsliste ein prüfbarer Entwicklungsprozess.
 Die erste sichtbare neue Funktion nach dem nötigen Fundament ist voraussichtlich der gemeinsame Endpunktfang. Ob vorher noch ein kleiner Application-Schritt erforderlich ist, entscheidet der aktuelle Code und nicht die Vermutung aus unserem bisherigen Gespräch.
 
-
 #### Herkunft: DEVELOPMENT_PLAN.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0214**
 
@@ -7609,7 +7240,6 @@ Workspace, Viewport und Plan verteilt. Keine zweite Modell- oder Rendererstruktu
 nötig. Architektur §29 präzisiert validierte Kontextauflösung, fehlende Referenzen
 und unabhängige Filter. Historische Maßstabsangaben auf heutigen Stand gebracht.
 
-
 **Q0215**
 
 Offen bleiben Anfangsfilter, Crop-Bedienung und Dokument-Lebenszyklus/History;
@@ -7617,7 +7247,6 @@ Vorschläge sind ausdrücklich keine Nutzerentscheidungen. Keine Laufzeitänderu
 Dokumentation gegen genannte Codepfade geprüft, lokale Links und Diff geprüft.
 Tests/Build nicht erneut ausgeführt: letzter Code-Nachweis PR234 mit 792 Tests,
 Typprüfung und Build; diese Planung behauptet keine neue Funktionsabnahme.
-
 
 **Q0216**
 
@@ -7629,7 +7258,6 @@ je Fenster und Trennung vom Modell-Undo bleiben verbindlich. Öffnen/Speichern,
 Altdateien, ungültige Daten und Modell-Undo nach Maßstabswechsel testen. Noch keine
 Papiermodus-Freischaltung oder weiteren Ansichts-/Layouttypen in diesem Auftrag.
 
-
 **Q0217**
 
 Grenzen: nur sitzungsbezogen, keine Speicherung oder Änderung der Modell-History.
@@ -7637,7 +7265,6 @@ Noch keine Papiermuster-/Textdarstellung oder Druckfunktion. Andere fachliche
 Kontexte sind im Kern auf Isolation geprüft; die aktuelle UI zeigt weiterhin das
 vorhandene eine Geschoss. Fang-/Messalgorithmen erhalten keinen neuen Maßstabsinput;
 kein neuer manueller Gesamt-Fang-/IFC-Abnahmelauf in diesem Schritt behauptet.
-
 
 **Q0218**
 
@@ -7650,7 +7277,6 @@ Initialwert 1:100 und Bedienung neben Zoom gelten; spätere persistente History
 bleibt offen. Architektur, allgemeiner Vertrag, Schraffurplan und AGENTS verweisen
 auf dieselbe Regel. Keine Produktionslogik oder Schemaänderung in diesem Abgleich.
 
-
 **Q0219**
 
 Offen bleiben Speicherort/History/Initialwert des Maßstabs der rohen Arbeitsansicht,
@@ -7658,7 +7284,6 @@ spätere effektive Layoutmaßstäbe sowie physische Druckstifte. Keine Nutzerent
 dazu erfunden. Codeprüfung zeigt insbesondere die erforderliche Strichumrechnung
 innerhalb skalierter SVG-Kacheln. Keine neuen Laufzeittests für reine Dokumentation;
 Nachweis: Quelldateien/Formeln/relative Links geprüft, git diff --check sauber.
-
 
 **Q0220**
 
@@ -7670,7 +7295,6 @@ Browserautomation wieder. Vite benötigte weiterhin einen genehmigten Start
 außerhalb der Sandbox (spawn EPERM innerhalb); keine pauschale Entwarnung für
 alle Kindprozesse. Keine weitere Sicherheitskonfiguration verändert.
 
-
 **Q0221**
 
 Nachweise: 778 Tests bestanden, Typecheck und Produktionsbuild erfolgreich, vollständiger
@@ -7681,13 +7305,11 @@ Setup meldet Windows-Fehler 32 beim Öffnen von node_repl.exe für die ACL-Prüf
 Eigener Sitzungsreset erfolglos; vier ältere Hilfsprozesse mit aktiven Eltern gefunden.
 App-Neustart ist der nächste Diagnoseversuch, noch keine bestätigte Reparatur.
 
-
 **Q0222**
 
 **Genau ein nächster Auftrag:** Nach Codex-Neustart Sandbox und gemeinsame Farb-/
 Eigenschaftenbedienung praktisch prüfen und diesen Schritt abnehmen. Anschließend
 bleibt V07j Papiermaß-/Ansichtsmaßstab-Vertrag als fachlicher Folgeauftrag vorgemerkt.
-
 
 **Q0223**
 
@@ -7696,7 +7318,6 @@ Y-Koordinaten nach unten. Die bisherige Plan-Kachel negierte diese nochmals und
 spiegelte dadurch z. B. eine von links unten nach rechts oben gezeichnete Linie.
 Der gemeinsame Renderer erhält jetzt die Orientierung der Zeichenzelle unverändert;
 Vorschau und platzierte Schraffur verwenden denselben Kachelvertrag.
-
 
 **Q0224**
 
@@ -7708,7 +7329,6 @@ Fehlende/ältere Muster erhalten die portable Darstellung, Konflikte bleiben sic
 Andere Projekte übernehmen beim Öffnen; geschlossene Dateien werden nicht verändert.
 Mehrtab-Benachrichtigung ist integriert, atomare parallele Publikation bleibt offen.
 Projektformat bleibt 12. Modell-/Papiermaßwahl und Upload bleiben ausstehend.
-
 
 **Q0225**
 
@@ -7722,7 +7342,6 @@ Name oder Linien ändern, Änderungen speichern. Beide Schraffuren aktualisieren
 Bibliothekspfeile prüfen; Füllfarbe im Projekt ändern und normales Undo prüfen.
 Fenster schließen/öffnen: Bibliotheks-History bleibt. Kopie/Neuer Entwurf prüfen.
 
-
 **Q0226**
 
 Gemeinsame Application-Auflösung integriert in Projektöffnung, Projektübernahme und
@@ -7734,7 +7353,6 @@ Projekt-Undo erhält auch ohne Bibliothek neuere bekannte Definitionen desselben
 Projekts. Öffnen bleibt ein Undo-Schritt; Musterabgleich erzeugt keinen zusätzlichen
 Schritt und schreibt niemals in die Bibliothek. Neue globale Bearbeitungs-UI und
 automatische Aktualisierung aller offenen Tabs bleiben ausstehend.
-
 
 **Q0227**
 
@@ -7749,7 +7367,6 @@ Praktische Abnahme: vorhandene Musterschraffur speichern, öffnen, Darstellung p
 Füllfarbe ändern, Undo/Redo, erneut speichern/öffnen. Automatisch neuere Muster lassen
 sich nach Anbindung der Bibliotheksbearbeitung praktisch erzeugen und prüfen.
 
-
 **Q0228**
 
 746 Tests bestanden; Typecheck, voller Lint ohne Fehler (sechs bekannte Warnungen),
@@ -7762,7 +7379,6 @@ Abnahme: Muster unter Tools anlegen; Schraffurwerkzeug > Muster wählen, zeichne
 vorhandene Schraffur > Muster wählen > Übernehmen. Zoomen, verschieben, Ecke bewegen,
 Undo/Redo, speichern/öffnen. Vollfläche wählen: Muster weg, alte Farben bleiben.
 
-
 **Q0229**
 
 **Genau ein nächster Auftrag: V07g Revisions- und Bibliotheks-History-Kern.**
@@ -7772,7 +7388,6 @@ begrenzten Domain-/Application-Piloten testen. Neuere Revision automatisch über
 fehlende/ältere Bibliothek erhalten, gleiche Revision mit anderem Inhalt melden;
 Bibliotheks-Undo veröffentlicht neue Revision. Noch keine automatische UI-/Tab-
 Synchronisation, Papiermaß oder Upload. UI-Anbindung folgt nach diesem Kernnachweis.
-
 
 **Q0230**
 
@@ -7791,7 +7406,6 @@ Details und Nachweise in docs/planning/HATCH_PATTERN_LIBRARY.md (V07e).
 Dokumentations-Diff geprüft; 741 Tests/Build und CI stammen vom PR221-Commit,
 nicht erneut ausgeführt. Praktische V07d-Abnahme bleibt im Browser offen.
 
-
 **Q0231**
 
 **Genau ein nächster Auftrag: V07f portabler Modellmaß-Pilot.**
@@ -7801,7 +7415,6 @@ speichern, Migration und Referenzen prüfen. Begrenzte geklippte Darstellung,
 Anker bei Bewegung, Undo/Redo und Dateirundlauf ohne lokale Bibliothek nachweisen.
 Keine globale Musterbearbeitung, Papiermaß, Revision-Synchronisation, Upload oder
 Layout in diesem Piloten. Diese geforderten Erweiterungen bleiben offen.
-
 
 **Q0232**
 
@@ -7825,7 +7438,6 @@ Abnahme: Tools > Schraffurenverwaltung, Linie zeichnen, Muster benennen/speicher
 Browser neu laden: Vorschau bleibt. Als neuen Entwurf öffnen, ändern, unter neuem
 Namen speichern: beide Definitionen bleiben. Anderes Projekt öffnen: Liste bleibt.
 
-
 **Q0233**
 
 Eigene SVG-Muster verwenden eine explizite Umrechnung der System-Strichstärke
@@ -7840,8 +7452,8 @@ Praktische Abnahme offen: Browsersteuerung startet derzeit nicht. Prüfen:
 rote eigene Linienart mit gesperrter Farbe speichern, auswählen, zeichnen,
 abwählen und zoomen; entsperrte Linie muss weiterhin umfärbbar sein.
 Folgeauftrag bleibt V07d globale lokale Schraffurmusterbibliothek.
-##### Linieninventar am Linienwerkzeug - 09.10.2026
 
+##### Linieninventar am Linienwerkzeug - 09.10.2026
 
 **Q0234**
 
@@ -7866,7 +7478,6 @@ beendet den Node-Prozess vor Zugriff. Visuelle Muster-/Stiftprüfung ist offen.
 Abnahme: Inventarart wählen, Musterlänge 0,25 m, Linie/Polylinie zeichnen; zoomen,
 Wert ändern, rückgängig; speichern/öffnen; Katalogart löschen, bestehende Linie bleibt.
 
-
 **Q0235**
 
 Nutzer korrigiert bisherigen Umfang: alle Katalogarten bearbeiten/löschen,
@@ -7883,7 +7494,6 @@ Löschen und Schreibfehler bestanden; Typecheck/Lint/Build. Browser-Abnahme offe
 Abnahme: vorhandene Art bearbeiten, Farbe und Struktur ändern, speichern; neue Art
 über Button zeichnen; Inventar füllen (max. zehn), Art löschen, neu laden prüfen.
 
-
 **Q0236**
 
 Nutzer präzisiert: eigenständiger Tools-Eintrag Linien Creator für Linienarten,
@@ -7898,7 +7508,6 @@ Browser-Abnahme weiterhin offen. Praktischer Test: Tools > Linien Creator,
 Name und 8 5 2 5 eingeben, speichern, bearbeiten, schließen/öffnen und neu laden,
 eigene Art löschen. Tools > Schraffurenverwaltung bleibt Flächenmuster-Creator.
 
-
 **Q0237**
 
 Nutzerentscheidungen: globale projektübergreifende Musterbibliothek; Modell-/
@@ -7909,7 +7518,6 @@ Revisionsabgleich und projektübergreifendes Undo sind technische Vorschläge,
 keine implementierte Synchronisation. Creator-Abnahme weiterhin offen.
 PR215: CI-Formatierungsfehler behoben; voller lokaler Lint ohne Fehler
 (sechs bestehende Fast-Refresh-Warnungen). Produktionscode sonst unverändert.
-
 
 **Q0238**
 
@@ -7926,14 +7534,12 @@ Upload und persistente Bibliothek sind noch nicht implementiert. Empfehlung:
 CAD-PAT zuerst, eingeschränktes SVG später, Rasterbilder als eigene Texturen.
 Das ist keine verbindliche Formatentscheidung des Nutzers.
 
-
 **Q0239**
 
 Nutzer bestaetigt praktische 2D-Abnahme; V06 abgeschlossen fuer heutige Typen.
 Neue Anforderung: Tools > Schraffurenverwaltung, Liste/Vorschauen, Linien-Creator
 mit Wiederholung und Musterupload. Uploadformat offen, Nutzer recherchiert.
 [Architektur, offene Entscheidungen und Abnahme](docs/planning/HATCH_PATTERN_LIBRARY.md).
-
 
 **Q0240**
 
@@ -7948,7 +7554,6 @@ Wandabnahme praktisch offen. Abnahme: Wand zweimal rechts anklicken, Werte
 pruefen/aendern, freie Kette mit zwei Abschnitten zeichnen/abschliessen, Undo:
 gesamte neue Kette weg, Quelle bleibt bestehen.
 
-
 **Q0241**
 
 **Genau ein naechster Auftrag: V06a Werkzeugvorgabenuebernahme fuer Schraffuren
@@ -7958,7 +7563,6 @@ Punkte oder Verknuepfungen). Gemeinsame Vorgaben-Grenze konkretisieren. Noch kei
 stillschweigende Entscheidung ueber offene Eigenschaften oder andere Werkzeuge.
 Offene K-/V-Ziele bleiben erhalten.
 
-
 **Q0242**
 
 **Genau ein naechster Auftrag: V01b temporaere Flaechenmessung in 2D.**
@@ -7966,7 +7570,6 @@ Punktfolge mit gemeinsamem Fang-/Interaktionspfad erfassen, per Doppelklick schl
 Quadratmeter anzeigen und ungueltige Konturen behandeln. Kein Raum-/Schraffurmodell,
 kein Undo-Eintrag. Winkel und dauerhafte Massketten bleiben spaeter. Offene K-/V-
 Anforderungen und Leistungsgrenzen bleiben bestehen.
-
 
 **Q0243**
 
@@ -7976,14 +7579,12 @@ Browservergleiche und 697 Tests bestanden; Typecheck/Lint/Build erfolgreich.
 Projektion. Daher noch keine Produktintegration.
 [Nachweis und Entscheidung](docs/performance/PROJECTED_PICKING_PILOT.md).
 
-
 **Q0244**
 
 **Genau ein naechster Auftrag: K07e isolierter Picking-Pilot.** Trefferkandidaten
 pro angezeigter Projektion vorbereiten; Wand/Fenster-ID, Tiefe, Verdeckung und
 Kontextwechsel gegen Vollscan pruefen. Noch keine produktive Picking-Umstellung.
 Andere K-/V-Ziele bleiben erhalten.
-
 
 **Q0245**
 
@@ -7994,14 +7595,12 @@ maximal zwei abweichende Pixel. 695 Tests, Typecheck, Lint und Build bestanden.
 Kein GPU-/Framezeitnachweis, noch keine Produktumstellung.
 [Nachweis und Grenzen](docs/performance/SOLID_MATRIX_PILOT.md).
 
-
 **Q0246**
 
 **Genau ein naechster Auftrag: K07b isolierter Kameramatrix-/Geometriepuffer-Pilot.**
 Bestehenden WebGL-Pfad verwenden; unveraenderte Weltgeometrie wiederverwenden,
 Projektion/Tiefe/Oeffnungen/IDs gegen bisherigen Pfad vergleichen. Noch keine
 Produktumstellung oder Picking-Neuschreibung. Andere K-/V-Ziele bleiben erhalten.
-
 
 **Q0247**
 
@@ -8010,14 +7609,12 @@ Wand einer freien Eckkette.** Stationaere Ableitungen wiederverwenden, fachliche
 Grenze gegen Vollpfad beweisen; Fenster/Fremdendpunkte und konservativen Fallback
 pruefen. Noch keine produktive Anbindung. K-/V-Ziele bleiben erhalten.
 
-
 **Q0248**
 
 **Genau ein naechster Auftrag: K04g isolierter Pilot fuer den zweiten
 rechtwinkligen Abschnitt einer freien Wandkette.** Bestehende Eckregeln,
 Vollpfadvergleich und konservativer Fallback bei Fremdkontakt/T-Kandidaten.
 Noch keine produktive Erweiterung. Andere K-/V-Ziele bleiben erhalten.
-
 
 **Q0249**
 
@@ -8026,7 +7623,6 @@ freien Wandabschnitt.** Bestehende Fachregeln, Vergleich gegen Vollpfad,
 konservativer Fallback bei Anschlusskandidaten/ungeprueften Bedingungen.
 Noch keine produktive Anbindung oder Ketten-Ausweitung. Bestaetigung bleibt
 vollstaendig geprueft, ein Undo. Andere K-/V-Ziele und manuelle Shift-Abnahme bleiben.
-
 
 **Q0250**
 
@@ -8037,7 +7633,6 @@ Bei 1.000 Elementen Vorschau ca. 3 ms ohne Anschluesse und 8-9 ms mit T-Gruppen;
 Fang/Shift ca. 0,1 ms. Kein DOM-/Renderer-Latenznachweis, Shift-Ruckeln bleibt offen.
 670 Tests, Typechecks, Build und Lint bestanden (sechs bekannte Warnungen).
 
-
 **Q0251**
 
 JPEG→PNG/Base64 wächst im Test stark; Referenzserie scheitert an Gesamtdateigrenze.
@@ -8045,7 +7640,6 @@ Mit drei Bildern kosten kleine Änderungen inklusive History mehrere hundert ms.
 Heapwerte sind Stichproben, kein Peak-/GPU-Nachweis; keine allgemeine Großprojekt-
 Freigabe. Zusammenhängender 100-Wand-Zug bestätigt 100 betroffene Wände bei Einzel-
 bewegung. Reale Großpläne/3D-Navigation/Spitzenspeicher bleiben zu prüfen.
-
 
 **Q0252**
 
@@ -8060,14 +7654,12 @@ Zwei Shift-Läufe und ein freier Lauf bestehen Vollpfadvergleich und Bedienprüf
 Ein erster Konturvergleich schlug einmal fehl; seine Ursache bleibt offen.
 Keine vollständige Behebung des sporadischen Ruckelns behauptet.
 
-
 **Q0253**
 
 **Genau ein nächster ausführbarer Auftrag:** Den einmaligen Konturvergleich mit
 jetzt vollständiger Ist-/Soll-Fehlermeldung reproduzieren und klären; anschließend
 die reale Shift-Bewegung praktisch abnehmen. Die atomare Bestätigung bleibt
 nachgeordnet. Keine weitere spekulative Optimierung und noch keine Übernahme.
-
 
 **Q0254**
 
@@ -8079,7 +7671,6 @@ kein neuer Modellpfad und keine Änderung der Produktionsoberfläche.
 [Anleitung, Nachweise und Grenzen](docs/performance/MANUAL_MOVEMENT_TRACE.md).
 644 Tests bestanden, Typprüfungen/Lint/Build erfolgreich. Der Shift-Aussetzer
 ist weiterhin offen; die Bedienprüfung bestätigt den Recorder, keinen Bugfix.
-
 
 **Q0255**
 
@@ -8093,7 +7684,6 @@ Shift/Tab, Abbruch, Platzierung und ein Undo/Redo bestanden. Ein langer
 RAF-Abstand von 236 ms trat einmal auf; Wiederholungen maximal 35 ms.
 Ursache noch nicht zugeordnet, kein Produktfix behauptet. A-04 bleibt offen.
 
-
 **Q0256**
 
 **Genau ein nächster ausführbarer Auftrag:** Nach praktischer Pilotabnahme die
@@ -8104,7 +7694,6 @@ History-Übergang, Kontextschutz, Vergleich zum Vollpfad und genau ein Undo blei
 verbindlich. Keine pauschale Migration weiterer Werkzeuge in diesem Schritt.
 A-04 bleibt insgesamt offen; A-01-Messlücken und A-05/A-06/A-07 bleiben bestehen.
 
-
 **Q0257**
 
 ARCHITECTURE.md trennt nun ausdrücklich den bestehenden Stand von der
@@ -8113,7 +7702,6 @@ Vorschau über stabiler Basis, wiederverwendete Anzeige und volle Absicherung
 beim Commit. Keine neue Bedienregel, kein zweites Modell, kein History-/Datei-
 Komplettumbau. Die bisherigen Anforderungsmatrizen und Nutzerwünsche bleiben gültig.
 A-04 bleibt offen; A-01 hat weiterhin Messlücken, A-05/A-06/A-07 bleiben offen.
-
 
 **Q0258**
 
@@ -8124,7 +7712,6 @@ Alle sechs Ablaufe bestehen Vorschau, Abbruch, Platzierung, Undo und Redo.
 633 Tests, Typpruefung und Build bestanden; Lint: 0 Fehler, 6 bekannte Warnungen.
 A-04 bleibt offen: Vollvalidierung und Darstellung grosser Projekte sind teuer.
 A-01-Messluecken fuer reale/dichte Faelle und Hardwareeingabe bleiben bestehen.
-
 
 **Q0259**
 
@@ -8139,7 +7726,6 @@ Alle sechs Ablaufe mit Vorschau, Abbruch, Platzierung, Undo und Redo bestanden.
 A-04 bleibt offen: zwei Vollvalidierungen je Vorschau und teure Wandableitungen
 bestehen weiterhin. A-01-Messluecken fuer reale/dichte Faelle bleiben bestehen.
 
-
 **Q0260**
 
 PR168 freigegeben und zusammengefuehrt. Der begrenzte Messauftrag A-01/A-04
@@ -8147,7 +7733,6 @@ ist abgeschlossen; keine neue Produktfunktion oder Vorschauoptimierung in diesem
 [Messbericht](docs/performance/ACTIVE_MOVEMENT_PROFILE.md) und sechs Einzelberichte
 mit je 21 Stichproben dokumentieren den realen gemeinsamen Handler-/Renderpfad
 mit synthetischen DOM-Ereignissen (keine Messung von Hardware- oder GPU-Latenz).
-
 
 **Q0261**
 
@@ -8157,7 +7742,6 @@ erfolgreich; Lint ohne Fehler mit 6 bekannten Warnungen. Diagnosecode fehlt im
 Produktionsbundle. A-01 bleibt fuer reale Projekte, dichte/Kontur-Faelle, Hardware-
 Pointer und Peak-/GPU-Speicher offen. A-04 ist vermessen, noch nicht optimiert.
 
-
 **Q0262**
 
 623 Tests, TypeScript inklusive Diagnose und Build bestanden; Lint ohne Fehler,
@@ -8165,14 +7749,12 @@ Pointer und Peak-/GPU-Speicher offen. A-04 ist vermessen, noch nicht optimiert.
 Fensterbreite 1,2 -> 1,4 m, Undo -> 1,2 m, Redo -> 1,4 m bestaetigt.
 A-01 bleibt mit seinen ausgewiesenen Messluecken offen.
 
-
 **Q0263**
 
 A-01 ist ein Teilnachweis: aktive Pointer-bis-Bild-Vorschau, Kontur-/Dichte-
 Browserregressionen, echte Nutzerprojekte und Peak-/GPU-Speicher bleiben offen.
 ConnectedWallSolids besitzt bereits einen Snapshot-Cache; A-04 muss neue Vorschau-
 Snapshots und unveraendertes Modell unterscheiden. Keine pauschale Speicher-Kopiebehauptung.
-
 
 **Q0264**
 
@@ -8182,81 +7764,77 @@ Bildreferenzen bleibt der festgelegte Funktionsauftrag. Größere Umbauten
 folgen erst auf Messungen mit realen Projekten. Die Checkboxen zeigen den aktuellen Stand; ein Codebefund allein belegt
 noch keinen spuerbaren Browser-Engpass.
 
-
 **Q0265**
 
 - [ ] **A-01 Browser-Baseline für große Projekte.** Reproduzierbare Szenarien
-  mit etwa 100, 1.000 und 5.000 Elementen sowie ohne und mit eingebetteten
-  PNG/JPEG-Referenzen nahe der heutigen 10-MiB-Projektgrenze anlegen.
-  Auswahl/Eigenschaften, Pointer-Vorschau, Commit, Undo/Redo und
-  JSON-Laden/Speichern messen; Median/P95 und Speicherbedarf samt Browser,
-  Testdaten und Messmethode dokumentieren. Auch viele verbundene Wände und
-  ausgewählte Gruppen aufnehmen. **Abnahme:** Eine Vergleichsbasis macht
-  sichtbar, welcher Pfad tatsächlich bremst; Wiederholung nach Änderungen
-  zeigt denselben Ablauf ohne Funktionsverlust.
+      mit etwa 100, 1.000 und 5.000 Elementen sowie ohne und mit eingebetteten
+      PNG/JPEG-Referenzen nahe der heutigen 10-MiB-Projektgrenze anlegen.
+      Auswahl/Eigenschaften, Pointer-Vorschau, Commit, Undo/Redo und
+      JSON-Laden/Speichern messen; Median/P95 und Speicherbedarf samt Browser,
+      Testdaten und Messmethode dokumentieren. Auch viele verbundene Wände und
+      ausgewählte Gruppen aufnehmen. **Abnahme:** Eine Vergleichsbasis macht
+      sichtbar, welcher Pfad tatsächlich bremst; Wiederholung nach Änderungen
+      zeigt denselben Ablauf ohne Funktionsverlust.
 - [x] **A-02 Eigenschaftsformulare ohne vollständige JSON-Schlüssel.** In
-  `CadWorkspace` werden Formzustände derzeit über
-  `JSON.stringify([selection, project])` geschlüsselt (zwei Stellen). Einen
-  stabilen Schlüssel aus Auswahlidentität und passender Modellrevision
-  verwenden, ohne das gesamte Projekt bei jedem Render zu serialisieren.
-  **Abnahme:** Auswahlwechsel, Bearbeitung, Undo/Redo sowie Ebenen- und
-  Referenzänderungen aktualisieren die Formulare korrekt; der große
-  Serialisierungsschritt entfällt. Die isolierte Messung von etwa 10 ms für
-  5 MiB ist ein Hinweis, kein gemessener Browserwert.
-
+      `CadWorkspace` werden Formzustände derzeit über
+      `JSON.stringify([selection, project])` geschlüsselt (zwei Stellen). Einen
+      stabilen Schlüssel aus Auswahlidentität und passender Modellrevision
+      verwenden, ohne das gesamte Projekt bei jedem Render zu serialisieren.
+      **Abnahme:** Auswahlwechsel, Bearbeitung, Undo/Redo sowie Ebenen- und
+      Referenzänderungen aktualisieren die Formulare korrekt; der große
+      Serialisierungsschritt entfällt. Die isolierte Messung von etwa 10 ms für
+      5 MiB ist ein Hinweis, kein gemessener Browserwert.
 
 **Q0266**
 
 - [x] **A-03 Validierung und History auf Kosten prüfen.** Beim Commit werden
-  aktuell das gesamte Projekt validiert, verbundene Wandkörper abgeleitet und
-  ein JSON-Snapshot für den Vergleich erzeugt. Besonders eingebettete
-  Bilddaten in der A-01-Messung betrachten. Nur bei nachgewiesenem Engpass
-  den Commit-/Vergleichspfad begrenzt optimieren, etwa durch stabile
-  Änderungsidentitäten oder wiederverwendbare, unveränderliche Daten.
-  **Abnahme:** Ungültige und veraltete Aktionen bleiben gesperrt; Undo/Redo,
-  Dateiroundtrip und Projektvalidierung liefern dieselben Ergebnisse.
-  Keine pauschale Aussage über 100-fach kopierte Bilder im Speicher treffen.
+      aktuell das gesamte Projekt validiert, verbundene Wandkörper abgeleitet und
+      ein JSON-Snapshot für den Vergleich erzeugt. Besonders eingebettete
+      Bilddaten in der A-01-Messung betrachten. Nur bei nachgewiesenem Engpass
+      den Commit-/Vergleichspfad begrenzt optimieren, etwa durch stabile
+      Änderungsidentitäten oder wiederverwendbare, unveränderliche Daten.
+      **Abnahme:** Ungültige und veraltete Aktionen bleiben gesperrt; Undo/Redo,
+      Dateiroundtrip und Projektvalidierung liefern dieselben Ergebnisse.
+      Keine pauschale Aussage über 100-fach kopierte Bilder im Speicher treffen.
 - [ ] **A-04 Vorschauen lokal halten.** `previewWallChain` und
-  `previewSelectionMove` können bei Pointerbewegungen ganze
-  Projektprüfungen auslösen; `BimPlan` berechnet verbundene Wandkörper
-  für die Anzeige. Mit A-01 die Kosten bei vielen Wänden, Öffnungen und
-  Mehrfachauswahl prüfen. Wenn relevant, Vorschau auf betroffene Elemente
-  und gültige Sitzungs-/Projektversion begrenzen oder Ableitungen cachen;
-  beim endgültigen Commit vollständig absichern. **Abnahme:** Messbarer
-  Rückgang der Pointer-Latenz ohne andere Vorschau, veraltete Ergebnisse
-  oder geänderte Commit-/Undo-Semantik.
-
+      `previewSelectionMove` können bei Pointerbewegungen ganze
+      Projektprüfungen auslösen; `BimPlan` berechnet verbundene Wandkörper
+      für die Anzeige. Mit A-01 die Kosten bei vielen Wänden, Öffnungen und
+      Mehrfachauswahl prüfen. Wenn relevant, Vorschau auf betroffene Elemente
+      und gültige Sitzungs-/Projektversion begrenzen oder Ableitungen cachen;
+      beim endgültigen Commit vollständig absichern. **Abnahme:** Messbarer
+      Rückgang der Pointer-Latenz ohne andere Vorschau, veraltete Ergebnisse
+      oder geänderte Commit-/Undo-Semantik.
 
 **Q0267**
 
 - [ ] **A-05 Importzyklus der Kontur-/Offsetlogik auflösen.**
-  `src/application/direct-edit/offset.ts` und `contour.ts` importieren
-  einander. Gemeinsame reine Hilfslogik an eine eindeutige Stelle verschieben.
-  **Abnahme:** Kein gegenseitiger Runtime-Import; Offset- und
-  Konturfunktionen einschließlich Grenzfällen verhalten sich wie zuvor.
+      `src/application/direct-edit/offset.ts` und `contour.ts` importieren
+      einander. Gemeinsame reine Hilfslogik an eine eindeutige Stelle verschieben.
+      **Abnahme:** Kein gegenseitiger Runtime-Import; Offset- und
+      Konturfunktionen einschließlich Grenzfällen verhalten sich wie zuvor.
 - [ ] **A-06 Projektgröße und Bildspeicherung entscheiden.** Die aktuelle
-  10-MiB-Dateigrenze, eingebettete Base64-Bildreferenzen und das
-  16-Megapixel-Pixelbudget anhand realistischer Projekte und A-01 bewerten.
-  Bilddateien sollen künftig wahlweise als externe Referenz verknüpft werden
-  können; eingebettete Referenzen und vorhandene Schema-9-Projekte bleiben
-  nutzbar. Logische Asset-/Referenz-IDs und ihre Platzierung dürfen nicht vom
-  Dateipfad abhängen. Fehlende oder verschobene Dateien müssen erkennbar und
-  gezielt neu verknüpfbar sein. Für die vollständige Weitergabe muss ein
-  portables Projektpaket die benötigten Referenzdateien mitnehmen.
-  Speicherformat, Auflösung von Dateipfaden, Budgets und Grenzen erst nach
-  Messungen an realistischen Projekten festlegen; das 10-MiB-Limit nicht
-  pauschal erhöhen. **Abnahme:** Import, Speichern, Öffnen, Wiederverknüpfen
-  und Weitergabe funktionieren mit dokumentierten Grenzen; Browser sowie
-  eine spätere Windows-/macOS-Desktop-Hülle nutzen dieselbe Projektlogik und
-  getrennte Dateizugriffsadapter. PDF-Import ist eine eigene künftige Funktion.
+      10-MiB-Dateigrenze, eingebettete Base64-Bildreferenzen und das
+      16-Megapixel-Pixelbudget anhand realistischer Projekte und A-01 bewerten.
+      Bilddateien sollen künftig wahlweise als externe Referenz verknüpft werden
+      können; eingebettete Referenzen und vorhandene Schema-9-Projekte bleiben
+      nutzbar. Logische Asset-/Referenz-IDs und ihre Platzierung dürfen nicht vom
+      Dateipfad abhängen. Fehlende oder verschobene Dateien müssen erkennbar und
+      gezielt neu verknüpfbar sein. Für die vollständige Weitergabe muss ein
+      portables Projektpaket die benötigten Referenzdateien mitnehmen.
+      Speicherformat, Auflösung von Dateipfaden, Budgets und Grenzen erst nach
+      Messungen an realistischen Projekten festlegen; das 10-MiB-Limit nicht
+      pauschal erhöhen. **Abnahme:** Import, Speichern, Öffnen, Wiederverknüpfen
+      und Weitergabe funktionieren mit dokumentierten Grenzen; Browser sowie
+      eine spätere Windows-/macOS-Desktop-Hülle nutzen dieselbe Projektlogik und
+      getrennte Dateizugriffsadapter. PDF-Import ist eine eigene künftige Funktion.
 - [ ] **A-07 Große UI-Module schrittweise entlasten.** `CadWorkspace`
-  (rund 1.200 Zeilen) und `BimPlan` (rund 1.460 Zeilen) bei konkreten
-  Änderungen in kleine Verantwortlichkeiten schneiden; Geometrie und
-  Projektzustand in bestehenden Domain-/Application-Grenzen halten.
-  **Abnahme:** Kein zweites editierbares Modell im React-State; sichtbares
-  Verhalten und Regressionstests des jeweils bearbeiteten Werkzeugs bleiben
-  erhalten. Kein pauschaler Komplettumbau.
-
+      (rund 1.200 Zeilen) und `BimPlan` (rund 1.460 Zeilen) bei konkreten
+      Änderungen in kleine Verantwortlichkeiten schneiden; Geometrie und
+      Projektzustand in bestehenden Domain-/Application-Grenzen halten.
+      **Abnahme:** Kein zweites editierbares Modell im React-State; sichtbares
+      Verhalten und Regressionstests des jeweils bearbeiteten Werkzeugs bleiben
+      erhalten. Kein pauschaler Komplettumbau.
 
 **Q0268**
 
@@ -8265,14 +7843,12 @@ anklicken oder Winkel/Laenge eingeben. Danach Wand mit Strg/Cmd dazunehmen und
 Auswahl frei bewegen. Undo muss jeweils die gesamte Bewegung zuruecknehmen.
 Keine Bildinhalts-Fangpunkte, keine freie Drehung oder PDF-Unterstuetzung.
 
-
 **Q0269**
 
 Abnahme: Bild anklicken → Zweipunkt-Kalibrierung → zwei Punkte einer bekannten
 Strecke anklicken → beispielsweise „5 m“ eingeben → Vorschau übernehmen.
 Grenzen: Bildpixel besitzen keine Vektorfangpunkte; noch kein PDF oder Text/Voice-
 Adapter für Kalibrierung. Einzelne Referenzbewegung bleibt ein späterer Auftrag.
-
 
 **Q0270**
 
@@ -8282,7 +7858,6 @@ andere SVG-Auswahlziele outline-none, der vorhandene CSS-konstante türkise
 Auswahlrahmen bleibt. Browserprüfung: fokussiertes Bild, outline-style none.
 Nächster Auftrag bleibt Zweipunkt-Kalibrierung.
 
-
 **Q0271**
 
 Gemeinsame Auswahl um reference erweitert: Klick, Strg/Cmd, Marquee-Geometrie,
@@ -8291,7 +7866,6 @@ Bild liegt hinter vorhandener Modellgeometrie. Fit berücksichtigt Bildausdehnun
 Keine zweite Engine. Bildinhalt hat keine Vektorfangpunkte. Noch keine Referenz-
 Bewegung oder Kalibrieraktion; gemischte Bewegung mit Referenz wird atomar abgewiesen.
 
-
 **Q0272**
 
 Genau ein Folgeauftrag: Persistenten Referenz-Datenkern mit validierten Assets,
@@ -8299,18 +7873,16 @@ Transformation/Verweisen, Dateimigration, atomarer Erstellung, Größenprüfung 
 Roundtrip-/History-/Fehlereingabetests implementieren. Noch keine Canvas-Bedienung,
 keine PDF-Zerlegung und keine Änderung der BIM-Skalierungssperre.
 
-
 **Q0273**
 
 PR158 freigegeben und in main d2d3af9 integriert. Reproduzierbarer Generator
 scripts/generate-two-corner-t-fixtures.mjs und Abnahmeprotokoll
- docs/walls/TWO_CORNER_T_ACCEPTANCE.md ergänzt. Browser: automatisches Zeichnen
+docs/walls/TWO_CORNER_T_ACCEPTANCE.md ergänzt. Browser: automatisches Zeichnen
 auf Hauptwand mit zwei Ecken, Fenster entlang Host über T bewegen, Undo/Redo und
 3D geprüft. IFC unabhängig mit IfcOpenShell: Schema fehlerfrei, fünf Wände,
 ein Fenster, Soll-/Ist-Wandvolumen 21,41136 m³. Archicad-Abnahme ausstehend.
 Browser-Download-Event nicht bestätigt (Timeout); Details und Dateiabgrenzung im
 Abnahmeprotokoll. Keine Änderungen am Anwendungscode dieses Schritts.
-
 
 **Q0274**
 
@@ -8322,14 +7894,12 @@ Freigabe abgelehnt; UI-Korrektur als zusätzlicher Commit im bestehenden PR.
 Genau ein Folgeauftrag bleibt Fenster-Integration im verbundenen Grundriss
 mit Speichern/Laden und IFC; keine weitere neue Werkzeugfunktion in diesem Schritt.
 
-
 **Q0275**
 
 Grundriss: ausgewählte Fenster erhalten die gemeinsame türkise Auswahlfarbe;
 Kontur und Mittellinie verwenden die vorhandene zoomunabhängige Wandkonturstärke.
 Automatische Wandlängenbeschriftung entfernt. Eigene Fenstermodelle sind ausdrücklich
 für später vorgemerkt; Mess- und Bemaßungswerkzeuge folgen separat.
-
 
 **Q0276**
 
@@ -8341,7 +7911,6 @@ türkise Kontur sichtbar, automatische Wandmaßzahl entfernt. Screenshot window-
 Genau ein Folgeauftrag bleibt die unten beschriebene Fenster-Integrationsprüfung
 im verbundenen Grundriss einschließlich Projektdatei und IFC.
 
-
 **Q0277**
 
 Die textuelle Befehlsvorschau zeigt Anzahl, Richtung/Laenge, mitgefuehrte Fenster,
@@ -8352,7 +7921,6 @@ und berechnet ueber dieselbe validierte Aktion neu. Kontextwechsel verwirft die
 angezeigte Vorschau. Ein Undo-Schritt, gemeinsame Auswahl bleibt nach Uebernahme.
 Das On-Demand-Menue schliesst beim Fokus auf die Befehlseingabe.
 
-
 **Q0278**
 
 Gepinnte Auswahl/Basis/Sichtbarkeit werden erneut geprueft. Modell-, Auswahl- oder
@@ -8361,7 +7929,6 @@ oder Layoutwechsel verwerfen die Vorschau. Ein Commit, ein Modell-Undo; Nullbewe
 legt keinen History-Eintrag an. Kein Dateiformatwechsel, keine BIM-Skalierung.
 Bedienung in 2D; noch keine 3D-Gruppenbewegung und keine Text-/Voice-Gruppenbefehle.
 Keine neue grosse Performance-Messreihe fuer diese Aktion behauptet.
-
 
 **Q0279**
 
@@ -8373,7 +7940,6 @@ Modell-/Sichtbarkeitswechsel verwerfen den Rahmen. Kein Modell-/Dateiformatwechs
 und kein Auswahl-Undo. Wandachsen bleiben hervorgehoben; 3D zeigt gewaehlte Waende,
 aber noch keine neue 3D-Mehrfachklick-/Rahmenbedienung. Gruppenbewegung bleibt aus.
 
-
 **Q0280**
 
 Genau ein Folgeauftrag: Allgemeinen 2D-Auswahl-
@@ -8381,7 +7947,6 @@ baustein samt Klick/Strg-Klick/Rahmen fuer alle vorhandenen Elementtypen umsetze
 und pruefen. Gruppenverschiebung folgt als Verbraucher dieser Auswahl, nicht als
 wandbezogene Parallelstruktur. Noch keine Laufzeitaenderung; nur Planungsdokumente.
 Dieser Abschnitt und der ueberarbeitete Plan ersetzen die aelteren Folgeauftraege.
-
 
 **Q0281**
 
@@ -8393,7 +7958,6 @@ mit drei Waenden und Fenster geladen, Grundriss und 3D visuell geprueft.
 IFC generiert und Regressionen bestanden; externer Archicad-Import dieses neuen
 Pruefmodells steht dem Nutzer zur Abnahme offen.
 
-
 **Q0282**
 
 Genau ein Folgeauftrag: Den vorhandenen Stand der Mehrfachauswahl und gemeinsamen
@@ -8404,7 +7968,6 @@ Verbindungen und Anschluesse zu nicht ausgewaehlten Waenden ausdruecklich pruefe
 Noch keine Gruppenbewegung als implementiert oder abgenommen ausweisen.
 Diese Korrektur aendert nur die Planung, nicht die Laufzeitlogik von PR145.
 
-
 **Q0283**
 
 Genau ein Folgeauftrag: Kombination aus Eck- und T-Anschluss an derselben
@@ -8412,13 +7975,11 @@ Hauptwand anhand eines kleinen Testgrundrisses fachlich und geometrisch
 abgrenzen und einen begrenzten Umsetzungsplan mit Akzeptanzfaellen festhalten.
 Noch keine pauschale Freigabe beliebiger Anschlussnetze.
 
-
 **Q0284**
 
 **Genau ein ausführbarer Folgeauftrag:** T-Fang beim Abschluss neuer Wandabschnitte
 an die gemeinsame Application-Aktion anbinden und Undo der ganzen Wandkette
 beibehalten. Offener PR138 enthält die Korrekturen; noch keine Zusammenführung.
-
 
 **Q0285**
 
@@ -8427,7 +7988,6 @@ unabhängig vom Zoom. Die maßgebende Achse bleibt türkis und 2,5 Pixel stark;
 ihre Griffpunkte bleiben ebenfalls türkis. Gemeinsame Grundflächen und
 entfernte Kontaktlinien bleiben erhalten. Ergänzung zum offenen PR138.
 Nächster Auftrag bleibt T-Fang beim Zeichnen neuer Wandabschnitte.
-
 
 **Q0286**
 
@@ -8438,14 +7998,12 @@ Undo/Redo sowie 3D prüfen. Optional Testdatei outputs/t-axis-start.project.json
 (lokal, nicht Teil des Repositories). Noch keine T/Eck-Kombination, mehrere Ts
 pro Wand, Zeichnen neuer Wände oder automatische T-Erzeugung in 3D.
 
-
 **Q0287**
 
 Nur Dokumentation geändert. Quellpfade/Verbraucher, Links und diff --check geprüft;
 keine neuen Build-/Testläufe. Letzter Code-Nachweis bleibt 486 Tests sowie drei
 unabhängig bestandene IFC-Prüfungen. Archicad-Abnahme der T-Dateien noch offen.
 Im Programm ist weiterhin nur die temporäre T-Vorschau vorhanden.
-
 
 **Q0288**
 
@@ -8455,7 +8013,6 @@ geprüft werden. Öffentliche Vorschau/Abnahmeexport strikt validieren; denselbe
 Kern verwenden und bestehende Geometrie-, Fenster- und IFC-Tests erhalten.
 Noch keine Schemaänderung, automatische T-Erkennung oder neue Bedienregel.
 
-
 **Q0289**
 
 Archicad-Abnahme noch offen. Testdateien in outputs/t-ifc-acceptance;
@@ -8463,7 +8020,6 @@ Anleitung und Reproduktion in [T-IFC-Abnahme](docs/T_IFC_ACCEPTANCE.md).
 Zuerst t-touch.ifc prüfen: zwei Wände und zwei Fenster, beide Öffnungen bündig
 am Anschluss, Hauptwand ungeteilt und kein überschneidendes Wandvolumen.
 Nicht mit dem regulären Export der Ausgangs-Projektdatei verwechseln.
-
 
 **Q0290**
 
@@ -8474,7 +8030,6 @@ für Einzelwandbewegung (lösen) berücksichtigen; keine relative Ankerbewegung
 oder Mitnahme unbestätigt einführen. Danach einen begrenzten Persistenzauftrag
 festhalten. Text/Voice bleiben Adapter gemeinsamer geprüfter Aktionen.
 
-
 **Q0291**
 
 PR129 freigegeben und übernommen (fb0f21e). Nutzer erlaubt Fenster gegen Wände;
@@ -8484,7 +8039,6 @@ gegen die Kontaktbreite, Nebenfenster gegen den gekürzten Körper. Application
 nutzt den Bericht und die gemeinsame Öffnungsextrusion. Rundung an lokalen
 Kappengrenzen wird in abgeleiteter Geometrie innerhalb Modell-Toleranz vereinheitlicht.
 
-
 **Q0292**
 
 Die Frage Berührung erlauben/verbieten wurde an den Nutzer gestellt und ist noch
@@ -8492,14 +8046,12 @@ offen. Empfehlung bleibt Nichtkontakt ohne zusätzlichen Zentimeterabstand.
 Kein neues Laufzeitverhalten, weiterhin fensterlose T-Vorschau. Die Entscheidung
 wird nicht aus einer allgemeinen PR-Freigabe als bestätigt abgeleitet.
 
-
 **Q0293**
 
 Geprüft: Quellmodule, Randindizes und analytische Beispiele; Referenz-Netto bei
 zwei freien 1x1-m-Fenstern ist 8,17056 m³. Dokumentlinks und diff --check geprüft.
 Keine neuen Tests/Builds für die reine Dokumentation; letzter Code-Nachweis aus
 PR128 bleibt 481 bestandene Tests, TypeScript/Build und Browserprüfung.
-
 
 **Q0294**
 
@@ -8510,7 +8062,6 @@ Nebenkontur und Kontaktsegment. Hauptwand-ID und alle Achsen bleiben unveränder
 Wiederverwendung von Wandkörper-, Schnittpunkt-, Toleranz- und Polygonfunktionen.
 Noch keine Projektverknüpfung oder neue Bedienfunktion.
 
-
 **Q0295**
 
 Siehe [T-Anschluss-Arbeitsentwurf](docs/T_WALL_CONNECTION_PLAN.md): aktuelles
@@ -8519,14 +8070,12 @@ Migration, Fangkontext, Undo sowie gemeinsame 2D/3D/IFC-Abnahmekriterien geprüf
 T-spezifischer Achsanker und Folgen einer Hauptwandänderung bleiben offen;
 Vorschläge sind ausdrücklich von bestehenden Architekturregeln getrennt.
 
-
 **Q0296**
 
 Korrektur der vorherigen Prioritätsnotiz auf Nutzerwunsch: Text/Sprache werden
 weiterhin gemäß Protokoll an geprüfte Application-Aktionen angebunden, nicht
 wegen der letzten Rückfrage generell vertagt. PR124 ist weiterhin separat offen.
 Diese Freigabe bezog sich auf PR125; PR124 wurde nicht stillschweigend übernommen.
-
 
 **Q0297**
 
@@ -8536,14 +8085,12 @@ Build-/Testläufe für reine Dokumentation; letzte Codeprüfung unverändert gü
 Praktische Abnahme weiterhin: schräge Wandkette zeichnen, 2D/3D und Undo prüfen.
 Der Entwurf selbst schaltet noch keine neue T-Funktion frei.
 
-
 **Q0298**
 
 Dieser Abschnitt ersetzt die historischen Folgeauftraege. Ausgangspunkt ist der
 freigegebene Integrationsstand 1a1608b (PR123). PR124 mit Offset-Textadapter bleibt
 separat offen und ist hier nicht enthalten. Sprache bleibt vorgemerkt; nach der
 Rueckfrage des Nutzers wird zuerst die gemeinsame Wandgeometrie erweitert.
-
 
 **Q0299**
 
@@ -8552,7 +8099,6 @@ geprueften 2D-Kontur-Offset an den bestehenden Copilot anbinden. Auswahl-ID und
 Modellstand pinnen, Vorschau/Bestaetigung/Undo ueber denselben Application-Pfad;
 keine separate AI-Geometrie. Konkave Formen, Kreise und Kopie-Hotkey bleiben
 vorgemerkt. Sprachparser-Ausbau folgt erst nach geprueftem Textadapter.
-
 
 **Q0300**
 
@@ -8563,13 +8109,11 @@ und Undo integrieren. Ungueltige/zusammenfallende oder konkave Ergebnisse zuerst
 klar abweisen; keine stillen Reparaturen. BIM bleibt ausgeschlossen. Kreis-
 Unterstuetzung, komplexe Konturen und Kopie-Hotkey bleiben vorgemerkt.
 
-
 **Q0301**
 
 Grenzen: Kettenanschluesse weiterhin rechtwinklig mit gleicher Hoehe/Staerke,
 keine kollineare Unterteilung, T-Knoten oder beliebigen Winkel. Noch keine
 Wandparameterwahl vor dem Zeichnen (0,36 m / 2,80 m, rechte Kantenachse).
-
 
 **Q0302**
 
@@ -8578,7 +8122,6 @@ Schraffur-Eigenschaftenschritt umsetzen: unabhaengige Hintergrundfarbe und
 waehlbare Konturanzeige mit Linienfarbe. Gemeinsame validierte Application-
 Aenderung, Eigenschaftenleiste, Dateikompatibilitaet und Undo/Redo verwenden.
 Linienarten und Offset bleiben fuer spaeter vorgemerkt.
-
 
 **Q0303**
 
@@ -8590,14 +8133,12 @@ abgewiesen; T-Kontakte und blosse Koerperueberlappung sind noch keine Anschluess
 Keine gemeinsame automatische Hoehen-/Staerkenpropagation. Gemeinsame Ecke
 als Gruppe bewegen bleibt separat; aktuelle Griffe bearbeiten die gewaehlte Wand.
 
-
 **Q0304**
 
 Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege. Der
 Schraffur-Eigenschaftenschritt bleibt vorgemerkt. Neue Nutzerentscheidung:
 Achsenden zusammenfuehren soll automatisch Wandkoerper verbinden; anschliessend
 Waende wie eine Polylinie durchzeichnen. "Bewusst Ecke verbinden" ist ersetzt.
-
 
 **Q0305**
 
@@ -8608,7 +8149,6 @@ Kantenachse gezeichnet. Feste 130px-Eigenschaftenleiste bleibt erhalten.
 Noch keine automatische Verbindung und kein Kettenzeichnen. PR119 wird mit
 dieser Korrektur aktualisiert, nicht ungefragt zusammengefuehrt.
 
-
 **Q0306**
 
 Nachweis: 449 Tests bestanden; TypeScript und Build erfolgreich. ESLint:
@@ -8618,7 +8158,6 @@ zur unveraenderten Hauptansicht geprueft. Archicad-Abnahme des isolierten
 Eckexports ist bereits vom Nutzer bestaetigt. Noch keine produktive Verbindung,
 kein Anschluss-Commit und keine Aenderung am normalen IFC-Export.
 
-
 **Q0307**
 
 Neue Nutzerwuensche bleiben erhalten in FUNCTION_REQUIREMENTS_2026-10-03.md:
@@ -8626,7 +8165,6 @@ Schraffur-Hintergrundfarbe, waehlbare Konturlinie mit eigener Farbe (Linienarten
 spaeter), Offset geschlossener Polygone/Kreise und spaetere Kopie per Hotkey.
 Offset-Abstand versus Skalierungsfaktor ist noch zu klaeren; BIM-Skalierung
 bleibt ausgeschlossen. Offene Wandanschlussregeln wurden erneut angefragt.
-
 
 **Q0308**
 
@@ -8638,14 +8176,12 @@ bleiben unabhaengig von der sichtbaren Linie nutzbar. Keine Linienarten, keine
 Offset-Geometrie und keine separate AI-Modelllogik in diesem Schritt.
 Die dauerhafte Wandverbindung bleibt bis zur Klaerung ihrer Regeln vorgemerkt.
 
-
 **Q0309**
 
 Der Nutzer bestaetigt am 05.10.2026 den erfolgreichen Archicad-Import des neuen
 IFC-Eckmodells einschliesslich Fenster und rechtwinkligem Wandanschluss.
 Diese konkrete Exportabnahme ist damit abgeschlossen. Regeln zur genauen
 Oeffnungsberuehrung und zu Endkappen nach dem Loesen bleiben weiterhin offen.
-
 
 **Q0310**
 
@@ -8659,7 +8195,6 @@ History-Buchung oder produktive Aktion „Ecke verbinden“, solange die offenen
 Anschlussregeln nicht entschieden sind. Tests fuer gemeinsame Ziele/Geometrie,
 Abbruch und unzulaessige Paare; normale Werkzeuge und Export beibehalten.
 
-
 **Q0311**
 
 Nachweis: 437 Tests, TypeScript/Build erfolgreich, Lint 0 Fehler/6 bekannte Warnungen.
@@ -8670,13 +8205,11 @@ Tests sichern Identitaet, Snapshot-Isolation, gezielte Profilauswahl und Fehlerf
 Generator/Abnahmeanleitung: docs/CORNER_IFC_ACCEPTANCE.md. Import dieses neuen
 Modells in Archicad bleibt unbestaetigt und ist als praktische Abnahme offen.
 
-
 **Q0312**
 
 Die Fragen zur exakten Oeffnungsberuehrung und zur Endkappe nach dem Loesen bleiben
 offen. Eine allgemeine Freigabe ersetzt keine konkrete Antwort. Dieser Schritt
 schaltet keine produktive Verbindung frei und veraendert keine Bedienablaeufe.
-
 
 **Q0313**
 
@@ -8688,7 +8221,6 @@ keine neue Produktentscheidung zur Anschlusszulaessigkeit. Offene Regeln zu
 Beruehrung und Endkappen beim Loesen bleiben offen; „Freigabe und go“ beantwortet
 nicht die zuvor gestellten Auswahlfragen.
 
-
 **Q0314**
 
 Nachweis: 433 Tests bestanden, TypeScript/Build erfolgreich; ESLint 0 Fehler und
@@ -8699,7 +8231,6 @@ Kontakt-/Fehlermeldungen und Oeffnungen am Fuss/Kopf. git diff --check bestanden
 Keine neue UI-, Schema-, History-, Rendering- oder IFC-Anbindung. Keine sichtbare
 Aenderung im Browser; praktische Anschlussabnahme bleibt nach Integration offen.
 
-
 **Q0315**
 
 Pruefung: 426 Tests bestanden, TypeScript und Build erfolgreich, ESLint 0 Fehler
@@ -8709,14 +8240,12 @@ Rotation/Spiegelung/Translation/Achsumkehr, Sichtbarkeit, Snapshotwechsel und
 ungueltige Eingaben ab. git diff --check bestanden. Keine neue Browserfunktion;
 praktische Abnahme der Anschlussbedienung bleibt bis zur Integration ausstehend.
 
-
 **Q0316**
 
 Angefragte Produktentscheidungen fuer die spaetere Aktion: Beruehrung einer
 Oeffnung an der Gehrung zulassen oder zunaechst abweisen; nach automatischem Loesen
 wieder gerade Abschluesse oder Gehrungsform erhalten. Solange keine Antwort
 vorliegt, bleiben dies offene Fragen, keine Zustimmung durch Schweigen.
-
 
 **Q0317**
 
@@ -8730,7 +8259,6 @@ beide Vorzeichen, umgekehrte Achsrichtung. Ergebnis ist ein geometrischer Befund
 die Produktentscheidung fuer Beruehrung/Endzonen und Anschlussbearbeitung bleibt
 offen. Noch keine UI-Freischaltung oder persistenten Anschlussdaten.
 
-
 **Q0318**
 
 Wand.bodyOffset ist ein vorzeichenbehafteter Meterwert, positiv links in Richtung
@@ -8741,7 +8269,6 @@ application/walls/body-offset.ts prueft Snapshot, Auswahl und Ziel-ID, erzeugt e
 verwerfbare Vorschau und uebernimmt einen History-Schritt. Die Eigenschaftenleiste
 haelt den Entwurf bis „Versatz uebernehmen“ lokal; „Verwerfen“ setzt ihn zurueck.
 Es gibt noch keine laufende grafische Vorschau waehrend der Texteingabe.
-
 
 **Q0319**
 
@@ -8754,96 +8281,77 @@ Undo/Redo pruefen. Achse darf weder Picking noch Eckgriffe blockieren. Damit ist
 die feste Bezugsachse auch bei versetztem Koerper im Raum nachvollziehbar.
 Anschlussregeln bleiben separat offen (docs/WALL_CORNER_PLAN.md).
 
-
 **Q0320**
 
 Praktische Abnahme: Punktfang einschalten, zwei Punkte jeweils 0,6 s anhovern und daraus einen Schnittpunkt aktivieren. Mit Mausrad oder Plus/Minus zoomen: Markierungen müssen erhalten bleiben. Escape löst sie gezielt. Dieser Nachtrag ersetzt frühere Protokollaussagen, nach denen Zoom Referenzen verwirft. Die Korrektur ergänzt PR #36; Nutzerfreigabe für PR #35/#36 gilt nach erfolgreicher Prüfung. Der einzige nächste Entwicklungsauftrag bleibt der unten beschriebene Schnitt externer Hilflinien mit festen Direct-Edit-Achsen.
-
 
 **Q0321**
 
 Abnahme: Snap einschalten, Punkt 0,6 s anhovern → silbergrauer Ring. Zeiger weg und wieder 0,6 s darüber → Ring weg. Dort verbleiben → bleibt gelöst. Nach erneutem Verlassen wieder aktivierbar. In einer bereits offenen Sitzung kann die bisherige Zeiteinstellung erhalten bleiben; im Linienwerkzeug auf 0,6 s stellen, ohne das Projekt neu zu laden.
 
-
 **Q0322**
 
 PR #29 wurde mit Nutzerfreigabe als normaler Merge 655c5f1 in feat/direct-edit-shared-snap übernommen. PR #27/#28 bleiben offen; main wurde nicht geändert. Dieser Funktionsschritt basiert auf dem freigegebenen Dokumentationsstand.
-
 
 **Q0323**
 
 Prüfung: 168 Tests bestanden (vier neue Fälle: alle acht Winkelgrenzen mit Hin-/Rückweg, getrennte Quellen und Identitätswechsel, Anzeige/Schnittpunkt/Radius/Shift/Ortho sowie Direct-Edit-Commit/Undo/Redo/JSON). TypeScript und Build erfolgreich; ESLint null Fehler/sechs bekannte React-Refresh-Warnungen. Browser beim Linienzeichnen und freien Linienbewegen: 20° → 24° bleibt horizontal, 28° wechselt auf 45°; Rückweg über 22° bleibt diagonal, 17° schaltet zurück. Zwei Referenzen erzeugen weiterhin den nach 600 ms erworbenen dritten Hilfspunkt. Freie Linienbewegung auf (1,5; 1,5) bestätigt, Undo/Redo geprüft. Escape, Modell-Commit, Kamerawechsel und Snap aus räumen Führungen auf. Screenshot: outputs/guide-hysteresis-direct-edit.png.
 
-
 **Q0324**
 
 Aufbauend auf PR #33 / 3fad40a; PR #33 bleibt offen und wurde durch den Fortsetzungsauftrag nicht automatisch zusammengeführt. Neue Implementierung auf feat/shared-midpoint-snap.
-
 
 **Q0325**
 
 geometry/intersections/segments.ts prüft eindeutige Schnitte innerhalb beider endlicher Segmente mit der zentralen numerischen Toleranz. Degenerierte/nichtendliche Strecken, bloße Geradenverlängerungen und Überlappungen erzeugen keinen Fangpunkt; eindeutige Endberührungen bleiben möglich. constraints/snapping/segment-references.ts bildet Quellenpaare deterministisch. Der Projektadapter stellt Wandachsen und vorhandene Linien-/Polyliniensegmente bereit, einschließlich Selbstkreuzungen einer Polylinie. Keine Wandflächenverschneidung oder Änderung des BIM-Modells.
 
-
 **Q0326**
 
 Nutzerpräzisierung: Die derzeit zentrierte Wandachse bei ausgewählter Wand sichtbar machen und später verschiebbar machen. In FUNCTION_REQUIREMENTS_2026-10-03.md bei N45 ergänzt, kein Doppelauftrag. Vor Wandanschlüssen passend einordnen. Ob die physische Wandlage erhalten oder mitverschoben wird, bleibt bis zur fachlichen Klärung offen; hier keine Implementierung.
-
 
 **Q0327**
 
 Aufbauend auf 4c542ea / PR #35, der weiterhin offen bleibt. Neue Umsetzung auf feat/oblique-guide-intersections. Kein Merge durch den allgemeinen Fortsetzungsauftrag.
 
-
 **Q0328**
 
 Die bisher dokumentierte Lücke bei achsengebundener Bearbeitung schließen: externe Hilfsreferenzen dürfen seitlich der erlaubten Bewegungsachse liegen, wenn ihre mausrelevante Führung diese Achse schneidet. Den Schnitt gemeinsam und eindeutig berechnen, die feste X-/Y-/Elementachse weiterhin strikt einhalten und keine bloß projizierten Endpunkte als echte Fangpunkte beschriften. Zuerst vorhandenen Filter und Kandidatenvertrag prüfen; keine separate SnapEngine im Werkzeug.
-
 
 **Q0329**
 
 Prüfung: 149 automatisierte Tests, TypeScript, vollständiges ESLint und Produktionsbuild. Lint: null Fehler, sechs bekannte React-Refresh-Warnungen. Neue Fälle prüfen freie Wandbewegung und Punktänderung, exakte externe Endpunkte, Zoomradius, Snap aus, Shift, Achspriorität, Hover-Führung, geschlossene Polylinien, Fenstergrenzen und Strecken mit Griffversatz. JSON, Undo/Redo und bestehende IFC-Tests bleiben enthalten. Browser: Endpunkt außerhalb des Rasters exakt erkannt, Ring/Hilfslinie beim Bearbeiten sichtbar, Vorschau und Bestätigung geometrisch identisch, Undo auf 3 m und Redo auf 4,131980263614846 m geprüft. Screenshot lokal: outputs/direct-edit-snap-preview.png.
 
-
 **Q0330**
 
 Nachweise: 140 Tests bestanden (fünf neue Tests mit mehreren Fällen), TypeScript, vollständiges ESLint und Produktionsbuild erfolgreich. Lint: null Fehler, sechs bekannte React-Refresh-Warnungen. Tests prüfen beide Achsen, ±10 Millionen Meter, 10/100/1000 px/m, echte Abweichungen, nichtendliche Werte, Toleranzdeckel, exakte Kandidatenkoordinaten und weiterhin ungültige veraltete Hover-Referenzen trotz minimaler Verschiebung. Vorhandene Shift-, Mehrfachreferenz-, Undo/Redo-, JSON- und IFC-Tests bleiben grün. Keine erneute Browserprüfung in diesem rein numerischen Schritt; Bedienoberfläche unverändert.
-
 
 **Q0331**
 
 Bis zu vier durch Verweilen aktivierte Referenzen bleiben innerhalb der Zeichenfläche erhalten. Ein fünfter verdrängt den ältesten; erneutes Aktivieren aktualisiert die Reihenfolge ohne Duplikat. Neben den einzelnen Richtungsführungen unterstützt die Engine als erste gemeinsame Konstruktion Horizontal-von-A/Vertikal-von-B. Ein naher Schnittpunkt gewinnt vor Einzelführungen und wird mit beiden Herkunftslinien dargestellt. Tatsächliche Endpunkte behalten Vorrang. Alle Referenzen werden gegen den aktuellen Modellstand geprüft.
 
-
 **Q0332**
 
 Grenzen: erster Verbraucher bleibt Linie/Polylinie; keine Mehrfachreferenzen, Nachbarparallel-Erkennung, Hysterese oder 3D. Am Polylinienvertex werden die benachbarten gespeicherten Segmente ausgewertet. Nächster Schritt: Wandzeichnen an dieselbe geprüfte Fang-/Hover-/Shift-API anschließen und Wand-Fenster-Workflow mit Undo/Redo und Dateirundlauf prüfen.
-
 
 **Q0333**
 
 Grenzen: erster Verbraucher weiterhin Linie/Polylinie in 2D; maximal eine Referenz, nur Achsführungen, keine dauerhaften Hilfsobjekte. Noch keine Richtungsableitung aus Kanten, Mehrfachreferenzen, Hysterese, Parallel-/Lot-/Winkelbezüge, 3D oder räumlicher Index. Die ursprüngliche vollständige Hilfslinienspezifikation bleibt offen. Die Engine analysiert derzeit vorhandene Wandachsenden und Linienvertices; weitere Elementtypen benötigen Modelladapter.
 
-
 **Q0334**
 
 Nachweise: 118 Tests bestanden, davon acht neue Application-Tests zu Vorschauen, Abbruch, veraltetem Kontext, ungültigen Zielen, No-op/Redo, Linienbewegung, Dateirundlauf, 3D und IFC. TypeScript, gezieltes ESLint der geänderten Dateien und Build erfolgreich. Browser: Vorschau/Abbruch ohne Undo, Wandbewegung mit einem Undo-Schritt, Redo, Linienbewegung und 3D-Wechsel; keine Konsolenfehler. Nach einer Modelländerung wird der alte angeklickte Bewegungsanker verworfen. Eine allgemeine automatische Importgrenzen-Prüfung ist noch nicht implementiert; das neue Modul wurde auf ausschließlich modell-/historybezogene Imports ohne React/DOM geprüft.
-
 
 **Q0335**
 
 Aktueller gesicherter Funktionsstand: feat/plan-camera, Commit 2bca281, PR #17 (offen). 110 Tests, TypeScript, gezieltes ESLint, Build und dokumentierte Browserprüfung bestanden. Dies ersetzt noch nicht die vollständige Anforderungszuordnung nach Guide-Etappe 0. Der vorgezogene Bildschirmmaßstab deckt einen Teil von Guide-Etappe 7/F10 ab; Referenzimport, Kalibrierung und Ausgabemaßstab fehlen weiterhin.
 
-
 **Q0336**
 
 Verbindliche Reihenfolge aus dem Nutzerauftrag vom 01.10.2026. Dieser Plan ersetzt die bisherige technische Reihenfolge in FEATURE_ROADMAP.md; die dort erfassten Einzelanforderungen F01–F14 bleiben erhalten. Bereits funktionierende Modell-, UI-, History- und Exportfunktionen werden weiterverwendet. Pro Änderung eine überschaubare, prüfbare Teil-Etappe.
 
-
 **Q0337**
 
 F13 bleibt die ausführliche Spezifikation. F04 (2D-Kamera/Zoom/Pan/Maßstableiste) als kleine technische Voraussetzung in diese Etappe einordnen. Erster Fangschritt soll vorhandene Geometrie und Werkzeuge nutzen, keine parallele Modellstruktur. Weitere Fangarten erst nach Prüfung der ersten Arten ergänzen.
-
 
 **Q0338**
 
@@ -8852,391 +8360,313 @@ F13 bleibt die ausführliche Spezifikation. F04 (2D-Kamera/Zoom/Pan/Maßstableis
 - Text- und Sprachbefehle nur auf bereits geprüfte Modellfunktionen erweitern. Maus, Maßeingabe und Copilot verwenden dieselben validierten Aktionen. F11 bleibt offen.
 - F12 (gemeinsame Auswahlumrandung) und F14 (Ebenensystem) bleiben geplant. Ebenensichtbarkeit bei Fangfiltern berücksichtigen und Ebenen vor größeren Projekten einordnen, ohne die sechs Etappen umzudeuten.
 
-
 **Q0339**
 
 Git-Synchronisierung und kombinierte praktische Verschiebeabnahme sind am 01.10.2026 abgeschlossen; Nachweis in STABILIZATION.md. Etappe 1 ist damit technisch geprüft, die Übernahme nach main bleibt der PR-Prüfung vorbehalten. Die frühere Aufzählung offener Abschlussbedingungen beschreibt den Stand vor diesem Nachtrag. Etappe 2 kann auf dem gesicherten Gesamtstand beginnen.
-
 
 **Q0340**
 
 Architektur: reine Kameramathematik unter src/rendering/viewport, generischer Point2 unter src/geometry/primitives. Kamera ist flüchtiger Zustand je Ansicht. Das bestehende Project bleibt die einzige Modellquelle; keine Modellaktion, History-Änderung, Dateimigration oder IFC-Anpassung durch Navigation. Alle bestehenden Modellbearbeitungen verwenden weiterhin die geprüften Operationen.
 
-
 **Q0341**
 
 Praktische Abnahme: 2D öffnen, über einer Wandecke mit dem Mausrad zoomen; die Ecke bleibt unter dem Zeiger. Pan aktivieren und ziehen, danach Escape drücken. Maße müssen gleich bleiben. Fit view zeigt das ganze Modell. 100 px/m wählen und zeichnen/bearbeiten; anschließend Undo/Redo prüfen.
-
 
 **Q0342**
 
 Grenzen: px/m ist ein Bildschirmmaßstab, kein Druckmaßstab. Rasterdarstellung ist adaptiv; das bisherige optionale Rasterfangen bleibt ausdrücklich bei 0,10 m. Kameras werden nicht in Projektdateien gespeichert und beim Wechsel des Viewport-Layouts neu initialisiert. Geometrisches Fangen, Referenzaktivierung und Hilfslinien sind noch offen. Nächster Schritt: gemeinsame Endpunkt-/Mittelpunkt-/Schnittpunkt-Kandidaten unter constraints/snapping gemäß ARCHITECTURE.md und F13.
 
-
 **Q0343**
 
 Nutzerkorrektur hat Vorrang vor dem zuvor geplanten Streckgriff: großes festes Streckenfeld durch ein kompaktes Hilfseingabefenster nahe der Auswahl ersetzen und freies Bewegen mit Winkel/Länge unterstützen. Umsetzung auf feat/compact-polar-input, aufbauend auf PR #38 / 86b5839. PR #38 bleibt offen; keine zusätzliche Merge-Freigabe angenommen.
-
 
 **Q0344**
 
 Freies Bewegen hat jetzt einen ausdrücklichen Richtungswahl-Schritt: erster Klick fixiert die Richtung, erzeugt noch keinen History-Eintrag und fokussiert das Längenfeld. Winkel kann stattdessen direkt eingetragen werden. Leerer Winkel folgt der Maus, gesetzter Winkel bleibt fix; leere Länge folgt der Mausprojektion auf die feste Richtung, gesetzte Länge bleibt exakt. Maus setzt beide Eingaben zurück. Enter/Übernehmen bestätigt, Escape/Abbrechen verwirft. Negative Länge bewegt in Gegenrichtung. Dezimalkomma/-punkt werden akzeptiert, ungültige Werte sperren Bestätigung. Bei festem Winkel und leerer Länge bleibt Rückwärtsbewegung vor dem Ursprung bei Länge null; eine negative Länge kann ausdrücklich eingegeben werden.
 
-
 **Q0345**
 
 Dasselbe kompakte Fenster an die bestehende Streckgriff-Aktion anbinden. Die gewählte Fluchtrichtung bleibt fest; positive Länge verlängert, negative verkürzt. Griffversatz, Nachbarüberquerung und Fenstergrenzen müssen unverändert über die gemeinsame Modellaktion validiert werden. Tests für schräge Wände/Linien, unzulässiges Verkürzen, stale Kontext, Escape/Undo/Redo und praktische Prüfung auch der abgeleiteten 3D-Zahlenvorschau. Kein separates Eingabefenster pro Werkzeug; Zeichnen und Fensterbewegung bleiben spätere Verbraucher.
-
 
 **Q0346**
 
 Nachweise: 201 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 bekannte Warnungen. Zwei neue Testgruppen prüfen positive/negative Strecken an beiden Enden schräger Linien/Wände, unveränderten Gegenpunkt, Griffversatz, Fenstergrenzen, Nachbarüberquerung, fehlenden Griff, stale Modell/Auswahl, einen Commit/Undo/Redo/JSON sowie Abbruch. Browser: 3-m-Wand über Endgriff um 1,25 m auf 4,25 m verlängert, Vorschau in 2D und 3D visuell geprüft; Eigenschaften vor Commit weiter 3 m. Ungültige Verkürzung -2 m bei vorhandenem 1,20-m-Fenster gesperrt. Commit 4,25 m, Undo 3 m, Redo 4,25 m. Anschließend -0,5 m ergibt 3,75-m-Vorschau, Escape stellt 4,25 m wieder her. Die noch ausstehende praktische 3D-Zahlenvorschauabnahme ist damit erledigt.
 
-
 **Q0347**
 
 Das vorhandene Hilfseingabefenster nach Setzen des ersten Linienpunkts aktivieren. Ursprung bleibt der erste Punkt; Maus/Fangengine bestimmen die Richtung oder Winkel/Länge werden ausdrücklich eingegeben. Gemeinsame polare Eingabe und vorhandene validierte Linienerzeugung verwenden; keine zweite Zeichenlogik. Zunächst einzelne gerade Linien, keine Polylinien oder weiteren Bauteile. Prüfen: Maus versus fixierte Werte, 0–360°, ungültige/Null-Länge, Escape ohne Bauteil, ein Commit/Undo/Redo und JSON; praktische Browserabnahme. Wandachsenlage N45 und Fensterbewegung bleiben spätere Aufgaben.
-
 
 **Q0348**
 
 Auf feat/shared-wall-precision, basierend auf dem noch offenen PR #43. PR #41–43 bleiben ohne neue Freigabe offen. Nach dem ersten Wandpunkt erscheint dasselbe PrecisionInput wie bei Linie/Bewegung. Ursprung, Parallelreferenzen, Tab Länge/Winkel, feste Zahlen, Maus, Enter und Abbruch werden gemeinsam verwendet. Wandstärke 0,36 m und Höhe 2,80 m bleiben die bisherigen Zeichenstandardwerte; nachher über Eigenschaften änderbar.
 
-
 **Q0349**
 
 Nachweise: 212 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 bestehende Warnungen. Neue Tests für exakte Wand 3,00 × 0,36 × 2,80 m, 3D-Grenzen, Vorschau ohne Mutation, einen Commit/Undo/Redo/JSON, Null-Länge, falsche Winkel/Maße, stale Modell und erhaltene Linien-/Polylinienstile. Browser: Ursprung (0;1), Richtung mit Tab übernommen, 0°/3,00 m bleibt bei Mausbewegung exakt; 0 m und 566° sperren Übernahme. Bestätigte Eigenschaften 3/0,36/2,8; Undo entfernt, Redo stellt Wand wieder her. Neue Sitzung hat leere Felder; Abbrechen entfernt Hilfseingabe ohne Wand. Anschließende 3D-Darstellung visuell geprüft. Vorschau beim Zeichnen bleibt eine 2D-Achslinie; kein neuer 3D-Zeichenvorschaumodus.
-
 
 **Q0350**
 
 Die vorhandene Polylinie als weiteren Verbraucher des gemeinsamen Interaktionsvertrags anbinden. Pro Segment den aktuellen Punkt als Ursprung bereitstellen; dieselbe Eingabe, Tab, Fangengine und Bestätigung unverändert nutzen. Doppelklick beendet weiterhin die Polylinie, ein Undo-Schritt für den Gesamtabschluss bleibt erhalten. Prüfen, dass dazu keine zusätzliche Feld-/Tab-/Hover-Steuerung oder neue Werkzeugabfrage im gemeinsamen Interaktionskern nötig ist. Neue Punktaufnahme, Abschluss und Abbruch mit numerischen Segmenten praktisch testen; keine Wandkettenentscheidung vorwegnehmen.
 
-
 **Q0351**
 
 Die aufeinander aufbauenden PRs ab #41 einschließlich dieses Stabilisierungsschritts auf Zielzweige, Abhängigkeiten und offenen Prüfstatus kontrollieren. Einen verständlichen Übernahmeplan mit finalem Entwicklungsstand und verbleibenden Einschränkungen erstellen. Bereits vorhandene Testnachweise zuordnen; zusätzliche Prüfung nur bei neuen Abweichungen. Keine neuen Funktionen und kein automatischer Merge ohne ausdrückliche Nutzerfreigabe für die betreffenden PRs.
-
 
 **Q0352**
 
 Reproduzierbarer Messlauf mit 100/1000/5000 Elementen abgeschlossen. Skript scripts/benchmark-snapping.mjs; Verfahren, Hardware, Ergebnisse und Einschränkungen unter docs/performance/SNAP_BASELINE.md, Rohwerte in der benachbarten JSON-Datei. Referenzzahlen und Modellwechsel geprüft; ESLint für das Messskript und git diff --check erfolgreich. Anwendungscode unverändert, daher bestehende 225 Tests und Build-Nachweise nicht erneut ausgeführt. PR #51 bleibt zur Dokumentationsprüfung offen; dieser Schritt baut darauf auf.
 
-
 **Q0353**
 
 Primitive Modellquellen ohne globale Kreuzungen ableiten; räumlichen Index mit vollständigem Quellen-Lookup und lokaler Punkt-/Segmentabfrage in CSS-Radius aufbauen. Lokale Schnittreferenzen mit bisheriger Geometrie, Identität und Blattabhängigkeiten berechnen. Differentialtests zum Vollaufbau innerhalb des Suchradius, einschließlich langer Segmente und numerischer Grenzen; reproduzierbare Messung mit 100/1000/5000 Elementen. Noch keine UI-/Hover-Umschaltung, keine neue Fangart und keine leeren Klassen. Der funktionierende Suchdienst liefert den Nachweis für die anschließende gemeinsame Integration gemäß docs/LOCAL_SNAP_QUERY_PLAN.md.
-
 
 **Q0354**
 
 ##### Umgesetzter Folgeauftrag, vollständige Projektabnahme offen: falsche lokale Segmenttreffer vor Paarbildung reduzieren
 
-
 **Q0355**
 
 Konservativer Segment-/Suchquadrat-Test in geometry/intersections/segment-box.ts; local-sources wendet ihn nach Boxsuche und Werkzeugfilter vor Paarbildung an. Originalsegmente und vollständiger Quellenlookup bleiben erhalten. Sechs neue Tests sowie 41 vorhandene reine Engine-Testfälle isoliert bestanden. Die vollständige Projekttestsuite, TypeScript, Build, Lint und Browserabnahme sind in dieser Umgebung mangels installierter Abhängigkeiten offen; kein produktionsreifer Abschluss behauptet. Draft auf Basis von PR #57, kein Merge.
-
 
 **Q0356**
 
 Testfixture mit festen Koordinatentupeln typisiert; alter Dichtetest erwartet für entfernte Diagonalen null Segmente/Paare. Echte Kreuzungen und Differentialvergleich bleiben geprüft. Formatierung korrigiert. 244 Tests, TypeScript, Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen.
 
-
 **Q0357**
 
 Entwurf gegen gemeinsame ToolSnapPolicy, Hover und Picking abgleichen. Zustands- und Quellenvertrag sowie eine begründete vorläufige Auslöseschwelle mit Hysterese vorschlagen. Verhalten ohne Auswahl, bei Abbruch, Idle-Hover und Modellwechsel festlegen. Endpunkt-/Mittelpunktfang, aktive Führungen und feste Achsen erhalten. Ein kleines Umsetzungspaket mit Tests ableiten; noch keine automatische Einschränkung oder Dialoge implementieren.
-
 
 **Q0358**
 
 Nur Dokumentation verändert; kein neuer Test-/Build-/Browserlauf nötig. Bestehende 244 Tests und Abnahme aus PR #58 beziehen sich auf unveränderten Anwendungscode. PR #58 und #57 weiterhin offen; kein Merge in diesem Planungsauftrag.
 
-
 **Q0359**
 
 Grenzen: dichte automatische lokale Schnittpunkte bewusst pausiert, manuelle Referenzauswahl fehlt noch. Primitive Suche und Punktranking bleiben mengenabhängig. Keine 3D-Arbeitsebene. PRs #57–59 weiterhin offen.
-
 
 **Q0360**
 
 Grenzen: zunächst gerade Segmentquellen in 2D; explizite Punktübernahme fehlt. Quellschlüssel gelten für den aktuellen Modellsnapshot und werden nach Modell-/Vorgangswechsel verworfen. Komplette Modal-/Tastaturmatrix noch nicht browserautomatisiert. Ältere gestapelte PRs bleiben offen.
 
-
 **Q0361**
 
 250 Tests bestanden, TypeScript/Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen nach Korrektur einer verbliebenen Formatierung in snapping.ts. Browser: normales Panel verborgen, Einstieg im Elementmenü und Linienwerkzeug, Abbruch blendet Panel wieder aus. Nächster Auftrag bleibt gezielte Punktübernahme gemäß obigem Folgeauftrag. Ergänzung im offenen PR #61, kein Merge.
-
 
 **Q0362**
 
 Grenzen: bestehende 2D-Modellpunkte; keine explizite Übernahme berechneter Schnittpunkte, diese bleiben per Hover verfügbar. Punkt-Arbeitskopie gilt jeweils für eine Übernahme. Vollständige Modal-/Mehrviewport-Matrix bleibt offen. PR #61 nicht zusammengeführt. Shell-Fetch derzeit ohne Netzwerkverbindung; Veröffentlichung über GitHub-Connector, vorhandene lokale Änderungen erhalten.
 
-
 **Q0363**
 
 Vorhandene 3D-Kamera, Picking und gemeinsame ToolInteraction gegen den 2D-Fangpfad prüfen. Einen begrenzten technischen Vertrag für eine horizontale aktive Arbeitsebene mit Welt-/Ebenenkoordinaten, CSS-Fangradius, stabiler Zielauswahl und derselben Application-Aktion dokumentieren. Ebenenwechsel, Ursprung, Referenzen und Abbruch festlegen; Vorschläge von bestehenden Entscheidungen trennen. Noch keine neue Fangengine, keine beliebigen Dach-/Schnittebenen und keine neuen Bauteile implementieren. Daraus genau ein kleines Umsetzungspaket ableiten.
-
 
 **Q0364**
 
 Dokumentationsauftrag auf acc5c44 (PR #63 weiterhin offen, kein Merge). Vorhandene orthographische Kamera, Solid-/Wand-Picking, gemeinsame ToolInteraction, skalare Fangmetrik und Moduswechsel im Workspace untersucht. docs/3D_WORKPLANE_PLAN.md trennt Codebefund, verbindliche bestehende Grenzen und Vorschläge. Startvorschlag z=0 passt zum aktuellen XY-Modell; keine erfundene Geschosshöhe oder freie Z-Bewegung. Eine Wand-ID aus pickWall ist noch kein geometrischer Bewegungsursprung.
 
-
 **Q0365**
 
 Grenzen: nur orthographische horizontale Ebene; numerische Fehlerschätzung ist keine formale Intervallgarantie und umfasst keine Eingabegeräte-/Quellfehler. Noch keine anisotrope Fangmetrik im gemeinsamen Resolver. Gesten, verdeckte Ziele und sichtbare Ebenenanker bleiben offen.
-
 
 **Q0366**
 
 Einen fachunabhängigen numerischen Vertrag für affine Ebenen-zu-CSS-Metrik ergänzen und die gemeinsame lokale Punkt-/Segment-Vorauswahl darauf umstellen: konservative Suchbox, exakter CSS-Punkt-/Segmentabstand vor Dichtezählung und Paarbildung. Den heutigen isotropen 2D-Faktor über denselben Vertrag mit unveränderten Ergebnissen abbilden. Schrägansicht, lange Segmente, Fangradiusgrenzen und Dichtezählung testen; bestehende 2D-Tests und Build erhalten. Noch keine 3D-UI aktivieren: Ranking, Führungen, Hover und manuelles Picking benötigen danach denselben Vertrag, bevor ein vollständiger 3D-Fangpfad freigeschaltet wird. Keine per-Werkzeug-Metrik und keine globale Schnittpunktliste.
 
-
 **Q0367**
 
 Praktische Abnahme: zwei lange Linien kreuzen lassen, Linienwerkzeug nahe der Kreuzung bewegen, Schnittpunkt und End-/Mittelpunkte prüfen. Eine Referenz 0,6 Sekunden aktivieren, zoomen und weiterzeichnen; aktive Hilfslinie soll erhalten bleiben. Bei dichter Geometrie dürfen nur nahe Linien zur Dichteschranke beitragen. Schrägansicht ist mathematisch getestet, aber noch keine aktivierte 3D-Fangbedienung.
-
 
 **Q0368**
 
 Den bestehenden Resolver-Vertrag für Punktkandidaten um dieselbe ScreenMetric erweitern und End-/Mittel-/Schnittpunkt-Abstände samt Rangfolge darüber bewerten. Gemeinsamen Application-Quellenadapter konsistent mit derselben Metrik versorgen; bisherige numerische 2D-Aufrufe kompatibel erhalten. Affine Kandidaten am Radiusrand, konkurrierende Ziele, deterministische Gleichstände und 2D-Differenzialfälle testen. Noch keine 3D-UI aktivieren und fachliche Modellwinkel/-längen nicht in Bildschirmwinkel umdeuten. Führung/Segment-Hover/manuelles Picking bleiben ausdrücklich weitere Anschlussstellen vor Freischaltung des vollständigen 3D-Pfads.
 
-
 **Q0369**
 
 Eine numerische Projektion auf eine Modellgerade nach minimalem CSS-Abstand in ScreenMetric ergänzen. Gemeinsame Führungs-Kandidaten und deren Abstände darüber führen, einschließlich berechneter Führungsschnittpunkte. Modellrichtungen, Shift-/Ortho-Vorgaben, Winkel/Längen und fachliche Achsenzwänge bewahren; keine Bildschirmwinkel als Modellwinkel behandeln. Isotrope 2D-Parität, affine Lotprojektion, konkurrierende Führungen, entfernte aktive Referenzen und Radiusgrenzen testen. Keine 3D-UI aktivieren; Hover und explizites Picking bleiben danach offene Anschlüsse.
-
 
 **Q0370**
 
 Punkt- und Segment-Hover im gemeinsamen Inference-/Application-Pfad an ScreenMetric anschließen, einschließlich CSS-Abstand und nächstem Punkt auf einem endlichen Segment. 600-ms-Erwerb/Entfernen, Kapazität, Ursprungsschutz, Zoom-Erhalt und Modellinvalidierung bewahren. Affine Segmentnähe, Endpunktbegrenzung, Dwell-Wechsel und isotrope 2D-Parität testen. Keine neue Oberfläche und keine 3D-Freischaltung; explizites Referenz-Picking bleibt danach als eigener begrenzter Anschluss offen.
 
-
 **Q0371**
 
 Punkt-/Segment-Picking im bestehenden manuellen Referenzauswahlmodus auf ScreenMetric umstellen, einschließlich CSS-Radius, nächstem Segmentpunkt und stabiler Mehrdeutigkeitsliste. Bestehende isotrope 2D-Aufrufe kompatibel halten. Auswahl/Übernehmen/Abbruch, Quellenfilter vor Paarbildung, affine Trefferreihenfolge und Radiusgrenzen testen; den gemeinsamen 2D-Ablauf einschließlich Hover/Zoom praktisch im Browser abnehmen. Keine zweite Auswahloberfläche und noch keine 3D-Freischaltung; offene Sichtbarkeits-/Gestenentscheidungen anschließend gesondert prüfen.
-
 
 **Q0372**
 
 Browser: Wandecke im Punktmodus übernommen, Zoom erhält Referenz; zweite Punkt-Arbeitskopie abgebrochen, erste Referenz bleibt. Erneutes Hover löst den Punkt, nach Verlassen und neuem Hover wird er wieder aktiv. Wandachse im Linienmodus gewählt und übernommen; Zoom erhält einen Linienfilter und aktiven Hilfspunkt. Screenshot outputs/reference-picking.jpg außerhalb des Repositories. Keine genaue Browser-Zeitmessung der 600 ms, diese bleibt automatisiert geprüft; keine vollständige Mehrviewport-/Direct-Edit-Matrix.
 
-
 **Q0373**
 
 Einen gemeinsamen Rendering-Dienst ergänzen, der einen projizierten 3D-Anker anhand desselben Projektionsstands und der dargestellten Wanddreiecke als sichtbar, verdeckt oder außerhalb klassifiziert. Bestehende Tiefen-/Dreiecksmathematik wiederverwenden oder eng begrenzt extrahieren; keine zweite Picking-Engine. Öffnungen, überdeckende Wände, Rand-/Tiefentoleranzen, Kamerabewegung und ungültige Projektionen testen. Nur technische Klassifikation, keine automatische Referenzaktivierung, X-Ray-Entscheidung oder neue Gesten. Produktregeln für verdeckte Ziele und Orbit/Werkzeugklick bleiben ausdrücklich offen.
-
 
 **Q0374**
 
 Vor dem Anschluss an Mausereignisse die offenen Regeln aus docs/3D_INTERACTION_CONTRACT.md als kurze konkrete Entscheidungsvorlage fuer eine rein lesende 3D-Fangvorschau vorlegen: Umgang mit verdeckten Zielen, Aktivierung der Vorschau und Vorrang von Orbit gegenueber Hover/Referenzerwerb. Bestehende 600-ms-Regel, silbergraue Ringe und gemeinsame Engine bewahren. Nutzerentscheidung einholen, ohne aus PR-Freigaben eine neue Gesten- oder X-Ray-Regel abzuleiten. Erst danach die begrenzte Vorschau integrieren; noch keine Modellbewegung.
 
-
 **Q0375**
 
 Grenzen: erster Adapter fuer Waende. Fenster sind weiterhin Oeffnungen, keine eigenen ausgewaehlten 3D-Koerper. Andere Bauteilarten folgen mit ihrer Geometrie; keine leeren Adapter. Kantenableitung verlangt konforme Flaechen mit identischen gemeinsamen Koordinaten; keine allgemeine T-Junction-Reparatur oder Topologieheilung. Sehr nahe Oberflaechen unterhalb des kleinen NDC-Bias koennen visuell zusammenfallen. Keine Grossprojekt- oder Mehr-GPU-Leistungsmessung. Bestehende Projektions-/Clipping-Grenzen bleiben offen.
-
 
 **Q0376**
 
 Grenzen: GPU-Tiefengenauigkeit bleibt endlich; bei sehr grossen Entfernungen koennen eng benachbarte Flaechen durch NDC-Toleranz/Umrandungsbias optisch zusammenfallen. Kein Grosskoordinaten-Umbau und keine neue Kameraart. Beim Wechsel einer Tiefenstufe kann eine laufende Hover-Verweildauer unterbrochen werden; aktivierte Referenzen und gepinnter Ursprung bleiben erhalten. Automatisierte Pruefung verschiedener Kameras, keine Mehr-GPU-Abnahme.
 
-
 **Q0377**
 
 Grenzen: nur z=0-Materialkanten, keine oberen Kanten oder freie Z-Fuehrung. Segmentmittelpunkt muss zusaetzlich zum Hoverpunkt sichtbar sein; teilweise verdeckte Kanten koennen daher konservativ entfallen. Mesh-Unterteilungen an Oeffnungen koennen mehrere kollineare Referenzabschnitte ergeben. Keine allgemeine Sichtbarkeitszerlegung oder Grossprojekt-/Mehr-GPU-Messung. Temporäre Referenzen werden nicht gespeichert oder exportiert.
-
 
 **Q0378**
 
 Offen bleibt die manuelle Abnahme von tatsaechlichem Browserdownload und erneutem Oeffnen derselben Datei: die vorhandene Browsersteuerung kann keinen Datei-Upload, native Desktopautomatisierung ist fuer diese App nicht zulaessig. Kein pauschaler Vollabnahme-Status. Dateirundlauf und IFC-Inhalt sind automatisiert nachgewiesen. Konkrete Anleitung und weitere Grenzen stehen in docs/acceptance/2026-10-04-parallel-workflow.md. Bestehende Hover-Unterbrechung bei Tiefenstufenwechsel und Sichtbarkeitsgrenzen nicht als neue Fehler umgedeutet.
 
-
 **Q0379**
 
 Der Nutzer hat CAD_BIM_2026_AI_Strategie.pdf als Zukunftsvision bereitgestellt. Original: docs/ai/CAD_BIM_2026_AI_Strategie.pdf; für Codex lesbarer Katalog mit AI01–AI35: docs/ai/AI_FUTURE_VISION.md. Enthält Modellabfragen, kontrollierte Änderungen, Qualitätsprüfung, generative Planung und spätere Fachanalysen. Kein AI-Feature in diesem Dokumentationsschritt implementiert. Architekturvertrag und aktueller nächster Auftrag bleiben maßgeblich. Die spätere AI-Reihenfolge lautet Lesen → Prüfen → Ändern → Entwerfen; Einordnung in den Gesamtplan folgt erst mit den erforderlichen Modell-/Werkzeuggrundlagen.
-
 
 **Q0380**
 
 PR #83 nach Nutzerfreigabe direkt per Merge-Commit 26987d1 in fix/reference-selection-lifecycle uebernommen; keine erneute Testausfuehrung des bereits geprueften Commits. main unveraendert. Auf docs/layer-migration-contract Modell-/Dateigrenze, History, lokale Fangquellen und Guide-Etappe 4 mit den relevanten N-Anforderungen abgeglichen. Schema 1 hat noch keine Ebenen. [docs/LAYER_CONTRACT.md](docs/LAYER_CONTRACT.md) dokumentiert Bestand, technische Grenzen, Schema-2-Vorschlag, kollisionssichere deterministische Migration, Verantwortlichkeiten und Abnahmekriterien. ARCHITECTURE.md erhaelt die verbindlichen Grenzen; keine Produktionsdateien oder Daten geaendert.
 
-
 **Q0381**
 
 Globale versus ansichtsbezogene Sichtbarkeit, Host-/Fensterdarstellung, Auswahl bei Ausblenden und Ebenenloeschregeln bleiben offen. Fenster auf Ebene Fenster ist ein ausdruecklicher technischer Vorschlag, keine erfundene Nutzerentscheidung. Die zwoelf Guide-Standardebenen bleiben erhalten; Raum/Textelemente ergaenzen sie. Keine Umbenennung von 2D-Zeichnungen zu 2D-Ergaenzungen. Historische N01–N60-Matrix bleibt erhalten. Dokumentationspruefung: Quellpfade und Versionsannahmen abgeglichen, Diff auf Leerraumfehler geprueft; bestehender Nachweis 327 Tests aus PR #83, keine neue Test-/Browserabnahme behauptet. Offene manuelle Dateidialog-Abnahme bleibt bestehen.
-
 
 **Q0382**
 
 Der Nutzer legt Windows und macOS als Zielplattformen fest. Browser versus installierbare Desktop-App bleibt offen. Gemeinsames Projektformat, CAD-/Domain-Logik und validierte Application-Aktionen sollen fuer beide Betriebsformen wiederverwendbar sein; Dateizugriff, Speicherung, Dialoge und Betriebssystemintegration erhalten passende Adaptergrenzen. Strg/Command, Maus/Trackpad sowie Grafik-/Abhaengigkeitskompatibilitaet sind bei betroffenen Aenderungen zu beruecksichtigen. ARCHITECTURE.md dokumentiert die Entscheidung, AGENTS.md macht sie fuer Codex auffindbar. Keine Desktop-Technologie, Mindestversion, Offline-Zusage oder neue Entwicklungsprioritaet festgelegt; die konkrete Auslieferung wird spaeter anhand eines repraesentativen Bearbeitungs-/Datei-/Exportablaufs auf beiden Systemen entschieden. Nur Dokumentation, kein Anwendungscode geaendert.
 
-
 **Q0383**
 
 Fuer ausgewaehlte Wand, Fenster oder Linie einen gemeinsamen Ebenenselektor in der vorhandenen oberen Werkzeugeigenschaften-Leiste anbieten. Existierende Ebenen nach Namen anzeigen, Werte ueber stabile IDs an die gemeinsame Zuordnungsaktion geben. Projekt-/Auswahlwechsel duerfen keine alte Zuordnung auf ein anderes Ziel anwenden; laufende Direct-Edit-Vorschau kontrolliert beenden. Undo/Redo und Dateirundlauf pruefen, vorhandene Glass-Flow-Anordnung erhalten. Keine kopierten Typ-spezifischen Mutationen. Noch keine Ebenenerstellung/-umbenennung/-loeschung oder Sichtbarkeit; deren offenen Produktregeln bleiben getrennt. Text-/Voice-Adapter koennen spaeter denselben geprueften Aktionsvertrag nutzen, ein neuer freier Parser gehoert nicht in diesen UI-Auftrag.
-
 
 **Q0384**
 
 Abnahme: Element anklicken → oben Ebene waehlen → Undo/Redo (danach Element wieder auswaehlen). Bei Fenster/Linie wiederholen. Eine Bewegung beginnen und Ebene wechseln: nur die Zuordnung wird gespeichert, keine Vorschauverschiebung. Ebenen wirken weiterhin nur organisatorisch; Ausblenden ist noch nicht implementiert.
 
-
 **Q0385**
 
 Abnahme: Organisation > Ebenen → eigene Ebene erstellen → schliessen → Wand auswaehlen und zuordnen → zugeordnete Ebene umbenennen. Im Selektor muss der neue Name erscheinen; Undo/Redo bleibt nutzbar. Noch keine Sichtbarkeitswirkung erwarten.
-
 
 **Q0386**
 
 PR #89 nach Nutzerfreigabe normal zusammengefuehrt (48a896f), main unveraendert. docs/LAYER_VISIBILITY_PLAN.md dokumentiert Codeabgleich und vorhandenen allowed-Filter vor lokalen Paarvergleichen. Nutzerentscheidung: BIM-Projekt samt Arbeitsansichten teilt einen Filter; Ausschnitte/Abbilder haben unabhaengige Filter, die auch im Layoutbuch gelten. Kein vorgeschalteter BIM-Filter fuer Ausschnitte. Speicherung, Ausschluss vom Picking/Fang, Abbruch verborgener Bearbeitungsziele, Host-/Fensterregel und vollstaendiger IFC-Export bestaetigt. ARCHITECTURE.md aktualisiert. Startfilter neuer Ausschnitte und Undo-Semantik bleiben offen. Produktionscode unveraendert, Dokumentationsdiff geprueft.
 
-
 **Q0387**
 
 Genau ein Folgeauftrag: die reine gemeinsame Eligibility-Policy fuer Wand/Fenster/Linie mit explizitem BIM-/DrawingDocument-Kontext implementieren und gemaess docs/LAYER_VISIBILITY_PLAN.md testen. Insbesondere dieselbe Ebene im BIM-Kontext verborgen und im Ausschnitt sichtbar pruefen. Noch keine UI-/Dateiformat-/Layout-Erweiterung in diesem ersten Auftrag.
-
 
 **Q0388**
 
 Genau ein naechster Auftrag: Darstellung und normales Picking in 2D/3D auf dieselbe explizite Eligibility-Policy vorbereiten und testen, ohne das vollstaendige Project oder reale Fensteroeffnungen zu filtern. 3D-Verdeckungsdaten muessen die sichtbare Darstellung widerspiegeln. All-visible-Kompatibilitaet erhalten, noch kein Schalter/Dateiformatwechsel. Controller-Abbruch, explizite Shift-Urspruenge, 3D-Fussquellen und Referenzauswahl muessen vor spaeterer UI-Freigabe ebenfalls angeschlossen sein; dies ist kein Nachweis vollstaendiger Sichtbarkeit. Startfilter/Undo bleiben offen.
 
-
 **Q0389**
 
 354 Tests bestanden: vier neue Tests fuer Grundrisslisten, unsichtbare Fenstersymbole bei unveraenderten Oeffnungen/IFC, verborgene Vorderwand ohne Picking/Verdeckung, unabhaengige Ausschnitte, alles verborgen sowie stale Kontexte. TypeScript/Build erfolgreich, Lint 0 Fehler/6 bekannte Warnungen. Keine neue Browserabnahme; der Nutzer kann im Canvas noch keine Ebenen ausblenden.
-
 
 **Q0390**
 
 Genau ein naechster Auftrag: den expliziten Sichtbarkeitskontext durch die bestehenden Viewport-Adapter an diese Darstellungsdaten und Fangabfragen weiterreichen. Verborgene Ziele und Vorschauen abbrechen, Griffe/Umrandungen/Referenzwahl/Shift-Urspruenge und 3D-Fussquellen konsistent behandeln. All-visible-Verhalten erhalten und Kontextwechsel automatisiert pruefen; noch keine Persistenz/Schalter freigeben, solange ein Consumer fehlt. Startfilter neuer Ausschnitte und Undo-Semantik bleiben vor Dateiintegration offen.
 
-
 **Q0391**
 
 358 Tests bestanden, davon vier neue Integrationstests fuer 3D-Fussquellen/aktive Referenzen, unabhaengigen Ausschnittfilter, Auswahl-/Abbruchgrenze ohne Modellcommit und konsistente Vorschaugeometrie. TypeScript und Build erfolgreich; Lint 0 Fehler/6 bekannte Warnungen. Browserabnahme OFFEN: die Browserverbindung lief beim Laden/Neuladen in Timeouts, obwohl der lokale Server HTTP 200 lieferte. Deshalb kein visueller Nachweis fuer diese Integration. Kein neuer Schalter, keine Speicherung des Filters, Schema 2 unveraendert; normale Anwendung bleibt all-visible. Ausschnitt-Datenmodell und Startfilter weiterhin nicht implementiert.
-
 
 **Q0392**
 
 Genau ein naechster Auftrag: die BIM-Ebenensichtbarkeit als bedienbare, gespeicherte Projekteinstellung integrieren. Vor Umsetzung Undo-Semantik mit dem Nutzer festlegen; die ausstehende Browserabnahme dieser Adapter nachholen. Gemeinsame Ebenenliste um Sichtbarkeit erweitern, explizite Dateimigration mit all-visible fuer alte Projekte und Tests fuer Abbruch, Undo/Redo und Wiederladen. Keine neuen Ausschnitte oder Layoutfunktionen; deren Startfilter bleibt eine eigene offene Entscheidung.
 
-
 **Q0393**
 
 Schema 3 speichert bimVisibility.hiddenLayerIds. Strikte V1/V2-Migration zeigt alte Dateien vollstaendig an und erhaelt IDs, Zuordnung und Geometrie. Unbekannte/doppelte verborgene Ebenen werden abgelehnt. Palette-Verlauf ist sitzungsbezogen und wird beim Laden zurueckgesetzt; der aktuelle Zustand bleibt gespeichert. Modell-Undo/Redo behaelt die aktuelle Sichtbarkeit bei. Geloeschte Ebenen-IDs werden entfernt; durch Modell-Undo wiederhergestellte Ebenen starten sichtbar, sofern sie im aktuellen Filter nicht enthalten sind. Alte Palette-Eintraege koennen keine geloeschten Ebenen wiedererzeugen. Ausschnitt-Startfilter bleibt offen; es werden weiterhin keine DrawingDocuments angelegt.
-
 
 **Q0394**
 
 363 Tests bestanden, darunter fuenf neue Tests fuer gemischte Modell-/Palette-Verlaeufe, erhaltenes Modell-Redo, Abbruch mit spaetem Commit, JSON-Rundlauf und IFC, strikte V2-Migration/ungueltige Filter, Laden und geloeschte Ebenen. TypeScript und Build erfolgreich; Lint 0 Fehler/6 bekannte Warnungen. Browserabnahme weiterhin OFFEN: CDP-Fokusbefehl und Navigation laufen auch in einem neuen Tab in Timeouts. Keine erfolgreiche visuelle Abnahme behauptet.
 
-
 **Q0395**
 
 365 Tests bestanden, TypeScript und Produktionsbuild erfolgreich; Lint 0 Fehler/6 bekannte Warnungen. Zwei neue Tests pruefen alle vier Aktionen, Teil-/Vollinversion, atomare Palette-History, No-ops sowie unbekannte IDs und veraltete Snapshots. Visuelle Browserabnahme weiterhin offen: frischer Tab scheitert beim Navigieren mit Timeout.
-
 
 **Q0396**
 
 365 Tests, TypeScript und Build erfolgreich; Lint 0 Fehler/6 bekannte Warnungen. Keine redundanten neuen Tests fuer die reine zweite UI-Anbindung. Praktische Browserpruefung erneut versucht: Navigation auch in einem neuen Tab mit Timeout, daher weiterhin kein visueller Nachweis. Nutzerfreigabe und automatisierte Nachweise ersetzen diesen offenen Nachweis nicht; Browserproblem separat offen halten.
 
-
 **Q0397**
 
 375 Tests bestanden, davon zehn neue Polygon-Tests: Rechteck/Flaeche/Umlauf, Konkavitaet, kollineare Zwischenpunkte, ungueltige Koordinaten, Nullkanten/Schlusspunkt, Selbstschnitte mit und ohne Nettoflaeche, Selbstberuehrungen, Ruecklauf einschliesslich Ringschluss, Ueberlappung, kleine Konturen, grosse Versatze und Zahlenbereich. TypeScript und Build erfolgreich; Lint 0 Fehler/6 bekannte Warnungen. Testdatei im normalen npm-test-Lauf registriert. UI und Schema 3 unveraendert; keine neue Browserfunktion abzunehmen. Die vorher offene praktische Ebenenabnahme bleibt separat offen.
-
 
 **Q0398**
 
 381 Tests bestanden, sechs neue Tests fuer Vorschau/Mutation/Commit/No-op/Undo/Redo, ungueltige Geometrie/Fuellung/IDs/Ebenen, stale Zielkontext, Ebenenschutz/Sichtbarkeit, Dateirundlauf/IFC-Unveraendertheit und strikte V3-Migration. Bestehende Tests und aktuelle Runtime-Fixtures explizit auf V4 angepasst; echte Altdateien bleiben Altversionen. TypeScript und Build erfolgreich; Lint 0 Fehler/6 bekannte Warnungen. Kein sichtbares Schraffurwerkzeug, Renderer, Picking oder Direct Edit in diesem Modellschnitt, keine neue Browserabnahme. Die offene Ebenen-Browserabnahme bleibt bestehen.
 
-
 **Q0399**
 
 PR-Anzeige geprueft: Chat enthaelt weiterhin historische PR-Verknuepfungen, auch nach Merge. Auf GitHub waren vor Integration #97 acht PRs offen; danach verbleiben die alten #51-54/#57-59. Die ersten sechs Heads sind Vorfahren des aktuellen Entwicklungszweigs. Bei #59 fehlt nur der Merge-Commit dc1b1f5, dessen beide Eltern bereits enthalten sind. Diese alten PRs zielen auf main bzw. historische Zwischenzweige; keine automatische Komplettuebernahme nach main im Schraffurauftrag. Verknuepfung, GitHub-PR-Status und Integration in main sind getrennte Zustaende.
-
 
 **Q0400**
 
 Solide Fuellung mit Farbe/Deckkraft erscheint hinter Waenden und Linien; Auswahl per Flaeche oder Navigator mit dezenter Umrandung. Eigenschaften in der festen oberen Leiste; Fuellungsanpassung ueber gemeinsame Hatch-Aktion, Ebenenzuordnung ueber bestehende Layer-Aktion. ElementTarget trennt auswaehlbare Elemente von momentan per Direct Edit bearbeitbaren Zielen. Keine vorgetaeuschten Schraffur-Bewegungsaktionen; AI/Text/Voice behaelt die stabile Auswahl und lehnt unpassende Wand-/Fensterbefehle ab. Schraffur-Sprachbefehle, Konturbearbeitung, Muster, optionale Kontur und Aussparungen bleiben offen.
 
-
 **Q0401**
 
 385 Tests bestanden: vier neue Integrationsfaelle fuer gemeinsame numerische Eingabe/Ursprung/Abbruch/Commit/History/JSON, Ringschluss/ungueltige/stale Abschluesse, geschlossene Fangquellen/verborgene Ebenen und Auswahl/Ebenenzuordnung/Plan-Grenzen/abgewiesene Sprachziele. Bestehender All-hidden-Darstellungstest um leere Schraffurliste erweitert. TypeScript und Build erfolgreich; Lint 0 Fehler/6 bekannte Warnungen. Browserabnahme OFFEN: Navigation eines frischen Tabs zu 127.0.0.1:8080 erneut mit Timeout; kein visueller oder echter Doppelklick-Nachweis behauptet.
-
 
 **Q0402**
 
 Die lokale Quellenabfrage erkennt diese Referenzen anhand ihrer exakten Interaktionsidentitaet, auch wenn sie keine sichtbare Modell-ID haben. Abgeleitete Hilfspunkte behalten ihre Originalabhaengigkeiten; ein neuer/abgebrochener Zeichenvorgang akzeptiert alte Quellen nicht. Zoom aendert die Policy-Identitaet nicht. Snap aus unterdrueckt den automatischen Fang. Bestehende Shift-Regel bleibt erhalten: explizite 45-Grad-Richtungsbindung hat Vorrang vor automatischem Schnittpunktfang. Fuer den Rechteckabschluss daher Shift loslassen. BimPlan behaelt den Fangkandidaten auch bei der gemeinsamen Eingabevorschau, solange deren Ziel dem Fangpunkt entspricht, und kann beide wirksamen Fluchten/Schnittpunktmarker zeigen.
 
-
 **Q0403**
 
 391 Tests bestanden, TypeScript/Build erfolgreich, Lint 0 Fehler/6 bekannte Warnungen. Neue Regression prueft acht Mauspositionen im Fangkreis, fuenf Shift-kompatible Drehungen und drei Zoomstufen fuer beide Erstellungsarten; gespeicherte dritte/vierte/erste Ecke bilden jeweils einen rechten Winkel. Zusaetzlich exakter Endpunkt, Abweisung ausserhalb der Achse/des Radius, unveraenderte freie Projektion, ausgeschalteter Fang und View-Filter. Bisherige Tests fuer den alten Shift-Bypass an kompatiblen Mittel-/Schnittpunkten auf die neue Nutzerregel aktualisiert; feste Bearbeitungsachsen und anisotrope Projektionspruefungen bestehen weiterhin. Praktische Browserabnahme bleibt offen; kein neuer visueller Nachweis behauptet.
-
 
 **Q0404**
 
 Umfang fuer die spaetere Umsetzung: zentrale positive endliche Rasterweite in Metern, separate Rasterfang-Aktivierung bei weiterhin aktivem End-/Mittel-/Schnittpunktfang, nachvollziehbare Anzeige der wirksamen Schrittweite. Hintergrundraster und Fangraster ausdruecklich unterscheiden. Alle Zeichen- und Bearbeitungswerkzeuge verwenden denselben Einstellungsvertrag und die bestehende Engine; keine werkzeugspezifischen Rasterkopien. Bestehende Fangprioritaeten, feste Achsen, exakter Shift-Punktfang, 600-ms-Referenzen und Zoom-Erhalt bleiben bestehen. Konkrete UI-Platzierung, Werteauswahl und Speicherung als Benutzer- oder Projekteinstellung sind noch offen, nicht als Nutzerentscheidung vorweggenommen. Kein neues Dateiformat und keine Implementierung in diesem Dokumentationsschritt.
 
-
 **Q0405**
 
 Genau ein naechster ausfuehrbarer Auftrag: den integrierten Schraffurablauf praktisch abnehmen und gefundene Bedienfehler beheben. Rechteck mit gehaltenem Shift zeichnen, exaktes Zentrum beim vierten Punkt pruefen, per Doppelklick abschliessen, Fuellfarbe/Deckkraft aendern, Undo/Redo sowie Speichern/Laden pruefen; danach Ebene ausblenden und Ausschluss aus Auswahl/Fang bestaetigen. Rastersteuerung bleibt als anschliessender kleiner gemeinsamer Komfortschritt vorgemerkt; Muster und Direct Edit werden hier noch nicht begonnen.
-
 
 **Q0406**
 
 Keine Laufzeitdateien geaendert, keine neuen Build-/Testlaeufe erforderlich. Die 391 automatisierten Tests bleiben der vorherige Nachweis, kein neu ausgefuehrter Lauf. Teilabnahme ersetzt die beiden offenen Bediennachweise nicht.
 
-
 **Q0407**
 
 Genau ein naechster begrenzter Auftrag: Farbuebernahme und Download/Wiederoeffnen im Browser isoliert klaeren und nur nachgewiesene App-Fehler beheben. Danach ist die gemeinsame Rastersteuerung der vorgemerkte Komfortschritt.
-
 
 **Q0408**
 
 Genau ein naechster Auftrag: die bereits vorgemerkte gemeinsame Rastersteuerung mit unabhaengigem Rasterfang und positiver Schrittweite sitzungsbezogen implementieren und fuer Zeichen- sowie Bewegungsaktionen pruefen. Schraffur-Kantenoffset, Muster und Sprachbefehle bleiben weitere Anforderungen.
 
-
 **Q0409**
 
 Genau ein naechster Auftrag: den weiterhin unbestaetigten weiss-schwarzen Kreis anhand des konkreten ausloesenden Bedienablaufs reproduzieren und die Ursache beheben; danach zur vorgemerkten zentralen Rastersteuerung zurueckkehren.
-
 
 **Q0410**
 
 Abnahme: Aussenkante einer Schraffur oder geschlossenen Polylinie direkt anklicken, Seite strecken waehlen, senkrecht ziehen oder Mass eingeben. Die blauen Doppelpfeile bleiben alternative Griffe. Offene Polylinien erhalten keine geschlossene Konturbearbeitung.
 
-
 **Q0411**
 
 Vorschlag fuer spaeter: rechtwinklige Zwei-Wand-Ecke mit gleicher Staerke/Hoehe und ohne Oeffnung in der Endzone, gemeinsame Gehrungsgrenze, stabile Wand-IDs. Vorschlag ausdruecklich getrennt von verbindlichen Architekturregeln. Achswechsel, Anschlussabsicht/Persistenz, Mitbewegen von Nachbarn, ungleiche Staerken, Griffversatz bei Drehung und Oeffnungs-Endzone bleiben offen. Keine Nutzerentscheidung erfunden. Akzeptanzfaelle fuer 2D/3D/IFC, Reihenfolge/Richtung, History/Datei und Sichtbarkeit dokumentiert.
-
 
 **Q0412**
 
 PR #107 nach Freigabe normal in den Integrationszweig gemergt (ea8db92). BimPlan zeigt fuer die ausgewaehlte sichtbare Wand eine blaue gestrichelte Mittellinie direkt aus start/end der angezeigten, gegebenenfalls gueltigen Vorschaugeometrie. Strichstaerke 1.25 CSS-Pixel mit non-scaling-stroke, pointer-events none; bestehende Eckgriffe bleiben bedienbar. Keine Modellkopie, neue Fangquelle, Aktion, Schema- oder IFC-Aenderung. 3D-Achse und Achsversatz bleiben offen.
 
-
 #### Herkunft: GUIDE_BASELINE.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0413**
 
 ARCHITECTURE.md bleibt maßgeblich; DEVELOPMENT_GUIDE.md liefert die aktive Reihenfolge. Keine CAD-Implementierung in dieser Etappe. Nachweise sind aktueller Code und heute ausgeführte automatisierte Prüfungen. Bediennachweise aus STABILIZATION.md und dem Kamera-Abschluss wurden zuvor erhoben; heute kein neuer Browser- oder Live-Mikrofontest. Historische Modul-README-Dateien enthalten teilweise überholte Aussagen (z.B. Undo oder Griffe noch geplant); der aktuelle Code ist maßgeblich.
 
-
 **Q0414**
 
 commands.ts und voice.ts bieten begrenzte deterministische Maßbefehle mit stabiler Auswahl, Vorschau und Schutz vor veraltetem Kontext. Kein frei interpretierender KI-Dienst. Reale Erkennungsprobleme bleiben offen. Direct Edit verwendet transforms.ts und validiert gegen den Ausgangszustand. BimPlan berechnet die Vorschau; CadWorkspace koordiniert EditSession, Auswahl und History-Commit. Genau diese Orchestrierung ist der nächste begrenzte Migrationspunkt.
-
 
 **Q0415**
 
@@ -9246,31 +8676,25 @@ commands.ts und voice.ts bieten begrenzte deterministische Maßbefehle mit stabi
 - C04: Polygonabschluss per Doppelklick ist für Polylinien vorhanden; schließt den Umriss nicht automatisch. Künftige Flächenwerkzeuge brauchen eigene gültige Abschlussregeln.
 - Frühere Wünsche nach Wandanschlüssen, mehreren Geschossen/Decken bleiben als fachliche Abhängigkeiten erfasst. Vor automatischer Raum-/Höhenableitung den nötigen Umfang ausdrücklich planen; kein vollständiges Dachwerkzeug still hinzufügen.
 
-
 **Q0416**
 
 Betroffene Grenzen: neues application/direct-edit-Modul hält Start, Vorschau, Bestätigung und Abbruch einer Bewegung; CadWorkspace und BimPlan binden es ein. Auswahl über stabile ID/Typ; Project bleibt history.present. Die Application darf weder Komponenten noch DOM importieren. Vorhandene Maßeingaben und Textbefehle bleiben auf ihren geprüften Modelloperationen; keine umfassende Migration in diesem Teilauftrag. Eine kleine Importgrenzen-Prüfung nur dann ergänzen, wenn sie tatsächliche Importauflösung zuverlässig erfasst.
-
 
 **Q0417**
 
 Das ist der nächste Implementierungsauftrag, noch keine Umsetzung in Etappe 0. Endpunktfang folgt nach diesem nachgewiesenen Application-Schritt. Bestehende volle Lint-Fehler sind ein separater bekannter Prüfpunkt und dürfen nicht als neue Regression oder erfolgreiche Gesamtprüfung ausgegeben werden.
 
-
 #### Herkunft: NOVIKOV_ARCHITEKTUR_REVIEW_UND_FUNKTIONSMAP.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0418**
 
 Die Engine bietet derzeit Endpunkte, Raster, Achsführungen, Flucht, Lot, Diagonalen, Shift-Winkel und horizontale/vertikale Konstruktionen aus mehreren Hover-Referenzen. Der Kandidatentyp `intersection` bedeutet hier einen Schnittpunkt temporärer Achsführungen. Daraus folgt noch kein allgemeiner Schnittpunktfang zwischen Modellsegmenten. Mittelpunkte und beliebige Richtungsschnittpunkte sind noch nicht implementiert.
 
-
 #### Herkunft: STABILIZATION.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0419**
 
@@ -9281,26 +8705,21 @@ Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträ
 - Kein Autosave. Nicht übernommene Formulareingaben sind nicht Teil der Projektdatei.
 - Lokale Git-Historie hinkt dem per Connector veröffentlichten Stand hinterher; verbindlich ist der GitHub-Commit des Prüf-PR. Keine Historie umgeschrieben.
 
-
 **Q0420**
 
 Der durchgehende automatisierte Test enthält jetzt zusätzlich die tatsächlich von der Mausbedienung verwendete Aktion editAtPointer: 6-m-Wand von (2,3) nach (4,2) verschieben, gehostetes Fenster entlang der Wand um 0,60 m versetzen, beide Änderungen einzeln mit Undo/Redo prüfen, JSON wiederherstellen und IFC erzeugen. Prüft stabile IDs/Host, Fensterposition 0,6, 3D-Grenzen und Volumen sowie die IFC-Wandplatzierung (4,2,0). Der bisherige Browsernachweis bleibt auf den oben dokumentierten Ablauf beschränkt; die kombinierte Verschiebeabnahme ist noch offen. Daher Etappe 1 noch nicht pauschal als vollständig abgeschlossen markieren. Neue verbindliche Reihenfolge: DEVELOPMENT_PLAN.md.
-
 
 **Q0421**
 
 Die zuvor offenen Abschlussbedingungen sind erledigt. Lokaler Branch test/stage-one-movement-workflow wurde nach Sicherung des alten Arbeitsverzeichnisses auf den veröffentlichten Commit 4294424b20841d1920ee7f24937b23746e2968ab synchronisiert. Die alten und neuen Dateien wurden vor dem Wechsel abgeglichen; der alte Stand bleibt als Git-Stash gesichert. Git-Fetch gelang mit dem OpenSSL-Backend bei unveränderter Zertifikatsprüfung. Keine veröffentlichte Historie geändert.
 
-
 **Q0422**
 
 Damit ist Etappe 1 technisch abgenommen und als Entwicklungsstand gesichert. Die Grenzen oben bleiben gültig. Freigabe/Übernahme nach main ist eine separate Prüfung; kein Merge und keine stabile Release-Veröffentlichung erfolgt. Nächster kleiner Schritt ist die 2D-Kamera-/Maßstabsgrundlage innerhalb Etappe 2, anschließend Endpunkt-/Mittelpunkt-/Schnittpunktfang.
 
-
 #### Herkunft: benchmarks/README.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0423**
 
@@ -9310,7 +8729,6 @@ Update the reallocation observations when the preview representation changes.
 See [the architecture review](../docs/performance/ARCHITECTURE_REVIEW_2026-10-07.md)
 and its captured `architecture-audit-2026-10-07.json` for scope and implications.
 
-
 **Q0424**
 
 Select 100, 1000 or 5000 elements and optional embedded image, then Load scenario.
@@ -9319,13 +8737,11 @@ line is replaced by a reference for image cases). Image generation uses seeded
 noise in a 1400x1400 canvas, encoded as a real PNG; fixtures remain below 10 MiB.
 Image encoding and fixture construction are included only in fixture/load timing.
 
-
 **Q0425**
 
 Before/after runs must use identical fixtures and the same browser/server/config.
 Check selected property values, applied changes and Undo/Redo as separate functional
 acceptance. Report missing measurement coverage explicitly rather than extrapolate.
-
 
 **Q0426**
 
@@ -9336,7 +8752,6 @@ outside timing, then checks Shift hold/release, Tab length/angle and numeric pre
 These additional checks were added after the six primary measurement runs; the
 saved dense run includes them. Both preview and final DOM must match.
 
-
 **Q0427**
 
 The older architecture-audit and Measure core/groupPreview exercise full snapshot
@@ -9345,11 +8760,9 @@ for the final boundary but must not be described as current pointer allocations.
 Raw reports are diagnostic data, not CI timing thresholds. The product imports no
 benchmark driver, instrumentation or frozen oracle.
 
-
 #### Herkunft: docs/CORNER_IFC_ACCEPTANCE.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0428**
 
@@ -9357,7 +8770,6 @@ Stand: 05.10.2026. Isolierter Testexport, noch keine gespeicherte Verbindung ode
 neue Aktion im normalen CAD-Export. Die Paarauswahl wird dem Testexport explizit
 ueber zwei stabile Wand-IDs und Endpunktindizes uebergeben. Die Projektdatei
 speichert diese temporaere Auswahl nicht als Anschluss.
-
 
 **Q0429**
 
@@ -9369,7 +8781,6 @@ Keine persistente Verbindung, Verbindungshistorie, automatische Nachbarsuche
 oder UI-Freischaltung. Offene Regeln zu Endkappen beim Loesen und
 Oeffnungsberuehrung bleiben offen.
 
-
 **Q0430**
 
 Der Nutzer bestaetigt den Import des bereitgestellten Eckmodells als vollstaendig
@@ -9377,22 +8788,18 @@ korrekt: Fenster und rechtwinkliger Wandanschluss stimmen. Damit ist die oben
 als ausstehend bezeichnete praktische Abnahme dieses Testmodells abgeschlossen.
 Dies ist die Nutzerabnahme, kein durch Codex selbst ausgefuehrter Archicad-Test.
 
-
 #### Herkunft: docs/T_IFC_ACCEPTANCE.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0431**
 
 Stand 06.10.2026. Der separate Export dient der Abnahme; der normale
 Export-Button erzeugt noch keine temporären T-Verbindungen.
 
-
 #### Herkunft: docs/ai/AI_CAD_PRIMARY_VISION.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0432**
 
@@ -9405,22 +8812,19 @@ Annahmen und Quellen überprüfbar; eine ungeprüfte Behauptung der
 B-Plan-Konformität oder stiller externer Versand/Veröffentlichung gehört
 nicht zum Ziel.
 
-
 **Q0433**
 
-| Stufe | Ziel und erster überprüfbarer Liefergegenstand | Voraussetzungen |
-| --- | --- | --- |
-| **AI-Fundament, ab jetzt** | Jede neue fachliche Aktion und Abfrage mit typisierten Parametern, IDs, Einheiten, Revisions-/Sichtbarkeitskontext und Fehlern anschlussfähig halten. Mindestens eine Maus-/Text-/simulierte Spracheingabe liefert dasselbe geprüfte Ergebnis, sofern dieser Kanal für die Aktion angeboten wird. | Architekturvertrag §19; bestehende Actions, Vorschau/Undo. Kein leeres Framework. |
-| **Lesen und Befragen** | Projekt-/Element-/Geschossabfragen mit strukturierten Antworten; ein begrenzter AI-Dialog identifiziert eindeutige Ziele und benennt Lücken. | Semantische Bauteil- und Raumdaten. |
-| **Kontrolliertes Ändern** | Wenige vorhandene Aktionen mit Plan, Vorschau, Diff, Kontextprüfung und Rücknahme; nachweislich gleicher Fachpfad wie manuelle Bedienung. | Fähigkeitskatalog, stabile IDs, Transaktionen. |
-| **Dokumente und Regeln** | Ein abgegrenzter B-Plan-Pilot extrahiert belegte Festsetzungen und verbindet sie mit einem deterministischen Prüffall und überprüfbaren Planstellen. Unlesbare/unklare Fälle werden ausdrücklich offen gelassen. | Dokumentimport, Koordinaten/Skalen, Quellenmodell, definierter Geltungsbereich. |
-| **Autonomer Entwurf** | Ein begrenztes Grundstücks-/Baukörper-/Geschoss-/Raum-Szenario erzeugt Varianten und verbessert sie iterativ im gemeinsamen BIM-Modell. | Mehrgeschossigkeit, Räume, Bauteile, Abhängigkeits- und Prüfregeln, Kapazität für reale Dateien. |
-
+| Stufe                      | Ziel und erster überprüfbarer Liefergegenstand                                                                                                                                                                                                                                                    | Voraussetzungen                                                                                  |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| **AI-Fundament, ab jetzt** | Jede neue fachliche Aktion und Abfrage mit typisierten Parametern, IDs, Einheiten, Revisions-/Sichtbarkeitskontext und Fehlern anschlussfähig halten. Mindestens eine Maus-/Text-/simulierte Spracheingabe liefert dasselbe geprüfte Ergebnis, sofern dieser Kanal für die Aktion angeboten wird. | Architekturvertrag §19; bestehende Actions, Vorschau/Undo. Kein leeres Framework.                |
+| **Lesen und Befragen**     | Projekt-/Element-/Geschossabfragen mit strukturierten Antworten; ein begrenzter AI-Dialog identifiziert eindeutige Ziele und benennt Lücken.                                                                                                                                                      | Semantische Bauteil- und Raumdaten.                                                              |
+| **Kontrolliertes Ändern**  | Wenige vorhandene Aktionen mit Plan, Vorschau, Diff, Kontextprüfung und Rücknahme; nachweislich gleicher Fachpfad wie manuelle Bedienung.                                                                                                                                                         | Fähigkeitskatalog, stabile IDs, Transaktionen.                                                   |
+| **Dokumente und Regeln**   | Ein abgegrenzter B-Plan-Pilot extrahiert belegte Festsetzungen und verbindet sie mit einem deterministischen Prüffall und überprüfbaren Planstellen. Unlesbare/unklare Fälle werden ausdrücklich offen gelassen.                                                                                  | Dokumentimport, Koordinaten/Skalen, Quellenmodell, definierter Geltungsbereich.                  |
+| **Autonomer Entwurf**      | Ein begrenztes Grundstücks-/Baukörper-/Geschoss-/Raum-Szenario erzeugt Varianten und verbessert sie iterativ im gemeinsamen BIM-Modell.                                                                                                                                                           | Mehrgeschossigkeit, Räume, Bauteile, Abhängigkeits- und Prüfregeln, Kapazität für reale Dateien. |
 
 #### Herkunft: docs/performance/A03_COMMIT_VALIDATION.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0434**
 
@@ -9432,18 +8836,15 @@ these appear separately in the report. A slow mount and occasional automation
 timeouts are not hidden: single mount samples are not used to claim improvement.
 Heap fields are post-run JS snapshots affected by GC, not peak/GPU memory evidence.
 
-
 **Q0435**
 
 The file serializer and loader remain unchanged and fully validated. Input copying,
 normalized no-op detection, history limits, redo branching, independent layer
 visibility and stale Application action checks retain their contracts.
 
-
 #### Herkunft: docs/performance/ACTIVE_MOVEMENT_PROFILE.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0436**
 
@@ -9457,7 +8858,6 @@ SVG bounds. Setup and selection time are excluded. Each sample waits at least tw
 frames and verifies rendered first-wall position against the latest observed preview;
 additional frame pairs (bounded to 30) wait for pending React work if necessary.
 
-
 **Q0437**
 
 Synthetic dispatch bypasses hardware input queues and hit testing. Frame callbacks
@@ -9467,7 +8867,6 @@ post-run JS observation, not peak/GPU memory. Image-heavy setup occasionally exc
 automation timeouts; page status was checked before retrying actions. Real user
 projects, dense geometry, contour movement, peak memory and hardware input remain
 open A-01 coverage. A-04 implementation remains open.
-
 
 **Q0438**
 
@@ -9479,11 +8878,9 @@ validation and the existing preview/commit/history path. Repeat these same six
 movement scenarios afterward. The double full-preview validation remains a separate
 measured follow-up, not part of that first bounded cache correction.
 
-
 #### Herkunft: docs/performance/ARCHITECTURE_REVIEW_2026-10-07.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0439**
 
@@ -9494,13 +8891,11 @@ ARCHITECTURE, DEVELOPMENT_GUIDE, den P0/P1/P2-Plan und die erweiterten
 Funktions-/AI-Anforderungen. Er ist keine vollständige Prüfung jeder Funktion,
 Sicherheitsanalyse oder Freigabe beliebiger Projektgrößen.
 
-
 **Q0440**
 
 Das ist eine Weiterentwicklung des vorhandenen Schichtenvertrags. Weder ein
 zweiter Modellkern noch ein Frameworkwechsel sind dafür erforderlich. Der hier
 beschriebene lokale Vorschaupfad ist **noch nicht implementiert**.
-
 
 **Q0441**
 
@@ -9509,7 +8904,6 @@ Der Gruppenadapter wird mit Workspace-Renders erneut gebunden; der PR171-Cache
 ist absichtlich nur ein Ergebnis pro gebundenem Adapter, kein beständiger
 inkrementeller Modellindex. Die Layer-Policy arbeitet auf dem bestätigten Modell;
 ihre Prüfung darf ebenfalls nicht pauschal als Arbeit jedes Mausziels gezählt werden.
-
 
 **Q0442**
 
@@ -9521,7 +8915,6 @@ Antworten Pflicht. Ein `requestAnimationFrame`-Takt kann Zeigerereignisse bünde
 ersetzt aber keine schnelle Berechnung; Klick muss das tatsächliche aktuelle
 Ziel übernehmen, auch wenn ein Anzeige-Frame noch aussteht.
 
-
 **Q0443**
 
 Einmalige lineare Vorbereitung ist zunächst vertretbar; wenn nahezu alle Elemente
@@ -9530,11 +8923,9 @@ Es wird weder konstante Laufzeit für beliebige Projekte noch eine konkrete FPS-
 versprochen. Datei-/Assetgrenzen (A-06), Importzyklus (A-05) und übrige UI-Entlastung
 (A-07) bleiben offen, ebenso die noch fehlenden Produktfunktionen.
 
-
 #### Herkunft: docs/performance/ASSET_INGRESS.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0444**
 
@@ -9546,11 +8937,9 @@ Optimierung ableiten; noch kein Delta-History-/Dateiformatumbau und keine
 Validierung abschalten. K-/V-Wünsche, größere Asset-Kapazität und kleine
 Shift-Diagnose bleiben offen.
 
-
 #### Herkunft: docs/performance/CAPACITY_BASELINE.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0445**
 
@@ -9563,7 +8952,6 @@ Daher keine Aussage „100 Kopien aller Bildbytes“ und keine kausale Heap-Diff
 allein durch History ableiten. Nach Rückgabe wird nur das Endprojekt in die UI
 übernommen; die dortige neue History enthält nicht die 100 Diagnoseschritte.
 
-
 **Q0446**
 
 Die Baseline ist abgeschlossen, eine umfassende Großprojekt-Freigabe bleibt offen:
@@ -9572,18 +8960,15 @@ mehrere 3D-Ansichten, PDF (noch nicht implementiert) und längere Echtbedienung 
 Der harte Dateigrenzenbefund und steigende Vollprojektkosten bei unveränderten
 Bildern rechtfertigen K02 vor einer pauschalen Erhöhung des Limits.
 
-
 **Q0447**
 
 656 Tests, Produkt-/Diagnose-TypeScript, Build und Lint bestanden (0 Fehler,
 6 bekannte Warnungen). K04/K05/K06/K07/K08, kleine Shift-React-Diagnose und V01–V09
 bleiben offen und werden durch diese Diagnose nicht als implementiert markiert.
 
-
 #### Herkunft: docs/performance/COMMIT_PHASE_PROFILE.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0448**
 
@@ -9595,7 +8980,6 @@ Die Diagnose muss bei Änderungen der Commit-Struktur angepasst werden; sie ist
 keine zweite produktive History. Ein lokaler Browserlauf, keine plattformübergreifende
 Garantie. Keine parallelen Builds während des Laufs. Kein RAM-/GPU-/FPS-Nachweis.
 [Rohdaten einschließlich Einzelproben](commit-profile-2026-10-08.json).
-
 
 **Q0449**
 
@@ -9610,11 +8994,9 @@ Mit gleicher Fixture messen, keine vorab garantierte Beschleunigung. Erst nach
 Äquivalenznachweis produktiv ersetzen. Kein History-/Formatumbau und keine weitere
 Optimierung gleichzeitig. Übrige K-/V-Wünsche und Shift-Diagnose bleiben offen.
 
-
 #### Herkunft: docs/performance/CONNECTED_WALLS_PROFILE.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0450**
 
@@ -9625,21 +9007,17 @@ Abhaengigkeitsgrenze gegen Vollpfad mit Fenstern und Fremdendpunkten beweisen;
 bei T-/Mehrfachfaellen konservativer Fallback. Noch keine produktive Anbindung
 oder Lockerung der Bestaetigung/Undo-Regeln.
 
-
 #### Herkunft: docs/performance/DENSE_SNAPPING.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0451**
 
 Nachgewiesener Engpass: AABB-Überlappung allein lässt bei langen schrägen Linien zu viele Nichttreffer zu. Nächster begrenzter Auftrag: konservative Segmentnäheprüfung vor Paarbildung, unter Erhalt numerisch akzeptierter Kontakte und Originalsegmente. Der echte Kreuzungsfall bleibt eine gesonderte Grenze: eine Näheprüfung allein kann tatsächlich nahe Geometrie nicht reduzieren. Keine willkürliche Ergebnisobergrenze oder Identitätszusammenlegung, die Fangprioritäten verändert.
 
-
 #### Herkunft: docs/performance/IMAGE_URL_REUSE.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0452**
 
@@ -9652,14 +9030,12 @@ and import validation remain intact; cached presentation checks cannot replace t
 Cold image processing remains unchanged. The constants are implementation bounds,
 not a new user-facing project or image format limit.
 
-
 **Q0453**
 
 The 5000-PNG path still takes 1603.3 ms median. Two full validations remain per
 recorded target, totaling 841.3 ms median / 883.8 ms P95 in that case. These inclusive
 nested phases cannot be summed or subtracted as independent exclusive costs.
 Wall derivation and rendering remain costly. This correction does not close A-04.
-
 
 **Q0454**
 
@@ -9672,14 +9048,12 @@ contours, peak memory and continuous hardware motion remain open coverage.
 Setup/status automation occasionally timed out for large fixtures; status was
 checked before retrying. These were not failed timing samples.
 
-
 **Q0455**
 
 Practical check: open a project with a PNG/JPEG reference, select several walls,
 choose Auswahl frei bewegen, select an origin and move the pointer. The image must
 stay visible. Escape must leave the project unchanged; repeat, place and verify
 Undo/Redo. Large-model movement is still slow and is the next target below.
-
 
 **Q0456**
 
@@ -9692,11 +9066,9 @@ path, not per-element UI logic. Add regression evidence for reuse/invalidation,
 then repeat the same six movement scenarios and acceptance checks. Broader local
 validation, wall-solid caching and new features remain separate follow-ups.
 
-
 #### Herkunft: docs/performance/LARGE_PLAN_BOUNDS.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0457**
 
@@ -9708,11 +9080,9 @@ Die Vorgaben zu gemeinsamem Modell, zentralen Aktionen und getrennten Ansichten
 passen zu den neuen Funktionen. Ein größeres Dateilimit ohne Speicherprüfung ist
 keine tragfähige Kapazitätsstrategie.
 
-
 #### Herkunft: docs/performance/LOCAL_PROXIMITY.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0458**
 
@@ -9722,21 +9092,17 @@ Zod fehlen. Deshalb bleibt die Änderung ein Draft bis zur Prüfung in der
 vollständigen Projektumgebung. Vor Übernahme: `npm test`, TypeScript-Prüfung,
 Build/Lint und praktische Abnahme von Zeichnen, Segment-Hover und Direct Edit.
 
-
 #### Herkunft: docs/performance/LOCAL_SOURCES.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0459**
 
 Unveränderte produktive UI: Der neue Dienst wird erst im nächsten Schritt integriert. Kein allgemeiner Leistungsnachweis für dichte Kreuzungen oder lange überlappende Segmentboxen. Bei k lokalen Segmenten bleiben k(k−1)/2 Prüfungen möglich; keine Trefferkappung. Quellen-Lookup ist modellweit und unveränderlich; aktive Referenzen werden in diesem Dienst noch nicht ausgewertet. Speicherbedarf und vollständige Browserlatenz sind nicht gemessen.
 
-
 #### Herkunft: docs/performance/MANUAL_MOVEMENT_TRACE.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0460**
 
@@ -9744,23 +9110,19 @@ PR173 ist nach Freigabe mit grüner CI zusammengeführt (`main` 5206295).
 Der nächste begrenzte Diagnoseschritt ist implementiert. Das sporadische
 Shift-Ruckeln bleibt offen; dieser Schritt verändert keine Produktgeometrie.
 
-
 **Q0461**
 
 Diese Bedienprüfung reproduziert noch keinen Shift-Aussetzer. Der separate
 30-Sekunden-Timeouttest lief teilweise parallel zu Build/Tests und ist deshalb
 ausdrücklich keine neue Latenzmessung.
 
-
 #### Herkunft: docs/performance/MODEL_ASSET_CONTRACT.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
 
-
 **Q0462**
 
 ##### Erprobter Vertragsentwurf, noch keine Produktfreigabe
-
 
 **Q0463**
 
@@ -9773,14 +9135,12 @@ vollständige Decoderprüfung. Für Produktion bleibt die geprüfte Importgrenze
 `pack` ist der interne Writer für eigene Dokumente; der externe Vertrauensübergang
 ist `unpack`, das auch in strukturell manipulierten Paketen Hashfehler abweist.
 
-
 **Q0464**
 
 Für Produktion vorgeschlagen: Pool über Present/Past/Future erreichbar halten;
 erst nicht mehr erreichbare Inhalte freigeben. Keine Löschung bloß wegen Entfernen
 einer Referenz im aktuellen Stand. GC, Importabbruch, Pooländerungen, Cache-Eviction,
 Speicheradapter und produktive History sind hier noch nicht implementiert.
-
 
 **Q0465**
 
@@ -9790,11 +9150,9 @@ Erreichbarkeit älterer Snapshots; echte Schema-1-Migration.
 Praktisch: Vergleich starten, `roundtrip: true`, vier logische Assets bei drei
 Payloads prüfen. Die CAD-Anwendung hat noch keine neue Speicherfunktion.
 
-
 #### Herkunft: docs/performance/MODEL_COMPARISON.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0466**
 
@@ -9804,21 +9162,17 @@ oder FPS-Garantie. Die Baseline enthält kleine Diagnose-Zeitmessaufrufe; Zahlen
 sind keine isolierte CPU-Zyklusmessung. Nicht mit älteren Läufen auf anderer Last
 zu einem vermeintlichen Gesamtfaktor verrechnen. Kein Nachweis zu Spitzen-RAM.
 
-
 #### Herkunft: docs/performance/P0_BROWSER_BASELINE.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0467**
 
 A-02 replaces two full-project JSON keys with weakly held immutable project revision and selected kind/ID. Same immutable snapshot and selection retain form drafts; a changed snapshot/selection remounts forms. Layer properties remain controlled. No model/asset is read by the key helper.
 
-
 #### Herkunft: docs/performance/PREPARED_CHAIN_CORNER.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0468**
 
@@ -9828,11 +9182,9 @@ jeweils erneut voll validiert. 100 Elemente: Median 3,65 -> 0,30 ms, Vorbereitun
 Timeraufloesung beachten. [Rohdaten](chain-corner.json).
 Kein DOM-/Renderer-/Frame-Nachweis; sporadisches Shift-Ruckeln bleibt offen.
 
-
 #### Herkunft: docs/performance/PREPARED_ENDPOINT_PILOT.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0469**
 
@@ -9840,7 +9192,6 @@ Der Pilot besitzt absichtlich noch keine produktive Revisions-/Auswahlbindung.
 Änderungen am ursprünglichen Aufruferobjekt verändern seine eigene Basis nicht.
 Vor Produktintegration muss eine veraltete Sitzung abgewiesen werden; der Pilot
 darf deshalb nicht direkt als allgemeine UI-Commit-Funktion verwendet werden.
-
 
 **Q0470**
 
@@ -9853,11 +9204,9 @@ Undo-Schritt erzeugen. Praktischen Maus-/Shift-/Renderer-Test für freie und
 T-Wände durchführen. Keine zweite Interaktionsengine und keine Erweiterung des
 schnellen Geltungsbereichs in demselben Schritt. Andere K-/V-Ziele bleiben offen.
 
-
 #### Herkunft: docs/performance/PREPARED_SELECTION_PREVIEW.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0471**
 
@@ -9867,7 +9216,6 @@ auf eine vorbereitete gemeinsame Aktion um. Modell, Dateiformat, IFC und
 Snapshot-History bleiben erhalten. Einzelne Direct-Edit-Werkzeuge und andere
 Aktionen sind noch nicht auf diese Vorschau umgestellt. A-04 ist insgesamt offen.
 
-
 **Q0472**
 
 Rohdaten: [Pilot](prepared-preview-2026-10-07/),
@@ -9876,7 +9224,6 @@ Rohdaten: [Pilot](prepared-preview-2026-10-07/),
 nicht addiert werden. Gemessen wird synthetische Eingabe bis zu einer bestätigten
 Browser-Frame-Gelegenheit, keine OS-/GPU-Latenz oder garantierte Bildrate.
 Hardware-Eingabe, kontinuierliche Ereignislast und Spitzenspeicher sind nicht erfasst.
-
 
 **Q0473**
 
@@ -9902,7 +9249,6 @@ Hardware-Eingabe, kontinuierliche Ereignislast und Spitzenspeicher sind nicht er
   CI-Status und Commitbezug sind im PR zu prüfen, die Konfiguration allein ist
   kein bestandener Lauf.
 
-
 **Q0474**
 
 **Genau ein nächster begrenzter Auftrag:** Nach praktischer Pilotabnahme die
@@ -9913,11 +9259,9 @@ Modells am Übergang zur History muss erhalten bleiben. Mit denselben Geometrie-
 Vergleichsfällen und genau einem Undo absichern; noch keine breite Migration
 weiterer Werkzeuge. A-01-Messlücken sowie A-05/A-06/A-07 bleiben separat offen.
 
-
 #### Herkunft: docs/performance/PROJECTED_PICKING_PILOT.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0475**
 
@@ -9926,11 +9270,9 @@ ein einzelner Vollscan. Vorteile amortisieren sich erst ueber mehrere Abfragen
 auf derselben Projektion; ein synchroner Aufbau beim Drehen wuerde den gerade
 verbesserten Kamerapfad erneut belasten. Fusspunkt-/Hover-Gesamtpfad bleibt offen.
 
-
 #### Herkunft: docs/performance/SELECTION_EXTRUSION_AB.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0476**
 
@@ -9943,11 +9285,9 @@ React-Verursacher; sie rechtfertigt keinen Rendererwechsel. Hardwareeingaben,
 Compositor-/GPU-Latenz und das sporadische Nutzerproblem sind nicht vollständig
 reproduziert. Gehaltenes synthetisches Shift ersetzt keine manuelle Abnahme.
 
-
 #### Herkunft: docs/performance/SELECTION_PREVIEW_REUSE.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0477**
 
@@ -9959,7 +9299,6 @@ Both validate and commit bypass/clear presentation reuse and derive a fresh mode
 Cancellation clears reuse. Mutable preview output can never become trusted commit
 input. The unchanged model action still performs its full validation.
 
-
 **Q0478**
 
 The common polar resolver now preserves the exact snapped aim when neither angle
@@ -9968,7 +9307,6 @@ small differences (e.g. at 22.8/-15.3), which correctly missed an exact cache ke
 Explicit angle/distance constraints still use their existing projection. Invalid
 or overflowing distances remain rejected. No per-element UI code was added.
 
-
 **Q0479**
 
 Practical check: select several walls (or a supported mixed selection), choose
@@ -9976,11 +9314,9 @@ Auswahl frei bewegen, pick an origin, move and place with a click. Repeat with
 Tab length/angle entry. Escape must discard; Undo/Redo must each operate on the
 whole placement. Hiding a target layer or changing selection cancels the operation.
 
-
 #### Herkunft: docs/performance/SHARED_SOLID_PICKING.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0480**
 
@@ -9990,22 +9326,18 @@ Undo-Eintrag. Escape/Ansichtswechsel beenden die Messung. Flaechen, Winkel und
 persistente Massketten bleiben Folgeumfang. Offene Leistungsgrenzen bleiben
 im Backlog; K07g ist keine pauschale Skalierbarkeitsfreigabe.
 
-
 #### Herkunft: docs/performance/SHARED_WALL_DRAWING.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0481**
 
 Grenzen: keine neue Frame-/Hardwarelatenzmessung. Sporadisches Shift-Ruckeln
 bleibt zur manuellen Abnahme offen. Enger Umfang des Piloten bleibt erhalten.
 
-
 #### Herkunft: docs/performance/SHIFT_REPEAT_INPUT.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0482**
 
@@ -10016,18 +9348,15 @@ strikte Prüfung abzuschwächen. Zwei erneute Shift-Läufe und ein freier Lauf w
 erfolgreich. Ursache dieses einmaligen Fehlers noch nicht geklärt; nicht als bloßer
 Rundungs- oder Hot-Reload-Effekt abtun. PR bleibt bis zur Klärung zur Prüfung offen.
 
-
 #### Herkunft: docs/performance/SHIFT_SELECTION_DIAGNOSIS.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0483**
 
 **Status: offen, kein Produktfix und keine erfolgreiche Fehlerabnahme behauptet.**
 Die Diagnose erweitert ausschließlich den separaten Entwicklungs-Harness.
 Die gemeinsame Fang-/Vorschauarchitektur und Modellprüfung bleiben unverändert.
-
 
 **Q0484**
 
@@ -10045,11 +9374,9 @@ Die gemeinsame Fang-/Vorschauarchitektur und Modellprüfung bleiben unverändert
   Alle ausgeführten Browserfälle bestehen die beschriebenen Geometrie- und
   Bedienprüfungen.
 
-
 #### Herkunft: docs/performance/SOLID_CAMERA_PROFILE.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0485**
 
@@ -10058,7 +9385,6 @@ asynchrone GPU-Ausfuehrung. gl.finish wurde bewusst nicht als Normalpfad benutzt
 Draw umfasst Projektionspacken, GPU-Kommandos und Zustand; keine Raster-/GPUzeit.
 Kein React-/Eingabe-zu-Pixel-Nachweis. 4 Ansichten haben insgesamt vierfache
 Backbufferflaeche. UI, Orientierungsebene und Snap koennen weitere Kosten addieren.
-
 
 **Q0486**
 
@@ -10069,11 +9395,9 @@ Fensteroeffnungen und stabile IDs muessen mit dem bisherigen Pfad uebereinstimme
 mehrere Kontexte, Resize/DPR und Context-Verlust als Grenzen festhalten.
 Bestehendes CPU-Picking bleibt Referenz. Noch keine produktive Umstellung.
 
-
 #### Herkunft: docs/performance/SOLID_LIFECYCLE_PILOT.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0487**
 
@@ -10084,11 +9408,9 @@ nicht nachgewiesen. Kontext-Restoration wurde in diesem Chromium-Browser gepruef
 Auswahlwechsel baut derzeit konservativ auch Shader/Koerper neu auf; Performance
 bei grossen wechselnden Auswahlen ist nicht Gegenstand dieser Kameraoptimierung.
 
-
 #### Herkunft: docs/performance/SOLID_MATRIX_PILOT.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0488**
 
@@ -10101,11 +9423,9 @@ ausserhalb der Messung; Messung ist CPU-Submission und keine GPU-/React-/Gesamt-
 Framezeit. Keine Aussage zur Langzeit-GPU-Speichernutzung oder allen Zielgeraeten.
 Pilot rendert einmalige Snapshotgeometrie, in-place Mutation ist kein Updatevertrag.
 
-
 #### Herkunft: docs/performance/SOLID_RENDERER_INTEGRATION.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0489**
 
@@ -10115,7 +9435,6 @@ bestanden. Bestehende Chunk-/Vitehinweise bleiben.
 ueber Kanalgrenze 8. [Rohdaten](solid-integrated-regression.json). Scope und
 Toleranzen aus K07b bleiben; keine neue Gesamtframe-/GPU-Leistungszusage.
 
-
 **Q0490**
 
 K07e: Isolierter 3D-Picking-Pilot mit pro angezeigter Projektion vorbereiteten
@@ -10124,11 +9443,9 @@ vergleichen, verdeckte Flaechen/Fenster und Kamera-/Sichtbarkeitswechsel einbezi
 Noch keine produktive Picking-Umstellung und kein neuer Modellindex. Andere
 K-/V-Ziele bleiben erhalten.
 
-
 #### Herkunft: docs/performance/VALIDATED_ASSET_HANDLES.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0491**
 
@@ -10136,7 +9453,6 @@ Aktuell erzeugen ausschließlich Diagnose/Test die Handles. Produktiver Import
 und Laden bleiben unverändert. Die kleine gemeinsame Schema-Erweiterung ist
 opt-in; kein Consumer muss eigene Validierungs-/Cachelogik erhalten. Noch keine
 Deduplizierung oder Modell-/Payloadtrennung im Produkt, keine höheren Limits.
-
 
 **Q0492**
 
@@ -10147,7 +9463,6 @@ Undo/Redo stellt denselben Zustand wieder her; jeweils ein History-Eintrag pro
 Keine Aussage über physische Stringkopien, Spitzen-RAM, GPU oder FPS. Die weiterhin
 vollständige JSON-Serialisierung/-Gleichheitsprüfung erklärt einen verbleibenden
 Arbeitsanteil, wurde hier aber nicht isoliert profiliert oder verändert.
-
 
 **Q0493**
 
@@ -10160,11 +9475,9 @@ Dateien. Nach dem Laden Handles neu erzeugen, keine IDs/Hashes als Vertrauensbew
 Varianten. Erst danach Commit-Serialisierung separat bewerten. Übrige K-/V-Ziele
 und Shift-Diagnose bleiben offen.
 
-
 #### Herkunft: docs/performance/WALL_DRAWING_PROFILE.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0494**
 
@@ -10175,11 +9488,9 @@ Nahe/fremde Endpunkte, T-Kandidaten, Fenster und ungueltige Ziele pruefen;
 bei nicht belegten Bedingungen Vollpfad. Noch keine produktive Anbindung,
 keine Wandketten-Ausweitung. Volle Bestaetigung und ein Undo bleiben Pflicht.
 
-
 #### Herkunft: docs/performance/WALL_ENDPOINT_PROFILE.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0495**
 
@@ -10188,98 +9499,79 @@ DOM-Pointerereignisse, React-Rendering oder GPU-/Frame-Latenzen. Keine Aussage,
 dass das frühere sporadische Shift-Ruckeln erledigt wäre. Es bleibt offen.
 [Rohdaten und Einzelwerte](wall-endpoint-2026-10-08.json).
 
-
 #### Herkunft: src/components/cad/BIM_UI.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0496**
 
 `BimPlan` converts model XY coordinates to SVG, derives wall thickness/length and window placement, and fits the view to the model bounds. SVG elements and navigator buttons can both select components. Window outlines are plan symbols. `BimSolidView` renders real wall boundary surfaces with WebGL depth testing. `buildSolid` partitions each wall at window edges, extrudes occupied cells through the wall thickness, and emits only external surfaces, including opening reveals. Overlapping openings are subtracted as a union. Coordinates remain metres and Z is up. The camera uses orthographic projection. No new dependencies are required.
 
-
 **Q0497**
 
 Use Save project to download editable JSON and Open project to restore it. Undo/Redo retains up to 100 model changes in the session. Reload starts the example again; there is no autosave. See [project files](../../lib/bim/PROJECT_FILES.md). Automatic fitting is not a physical print scale. Window overlaps are not checked by the current core; multiple windows can be selected individually in the navigator. The IFC toolbar button exports the current model for exchange; IFC import and free-form AI interpretation remain later work. Local text commands now edit selected elements through a validated preview; see [model commands](../../lib/bim/COMMANDS.md). See [IFC export](../../lib/bim/IFC.md).
-
 
 **Q0498**
 
 The 3D viewport requires WebGL; if it is unavailable, an error explains how to use 2D instead. GPU buffers and programs are released on unmount; context restoration rebuilds the renderer. Walls remain separate solids (no wall-junction union), and windows are openings without frames or glass. The grid is a screen-space guide. 3D wall selection uses the rendered triangles and nearest depth, preserving through openings. Visible window openings are now directly selectable in 3D (including Ctrl/Cmd toggling) and receive depth-tested outlines. Opening hit rectangles do not add glass or export material. Hidden windows retain click-through openings; nearer opaque walls block selection.
 
-
 #### Herkunft: src/lib/bim/COMMANDS.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0499**
 
 Erkanntes Deutsch wird begrenzt normalisiert: Meter/Zentimeter/Millimeter, einfache Zahlwörter null bis zwölf und Dezimalkomma. Komplexe Zahlwörter und freie Formulierungen bleiben außerhalb dieses Schritts. Fehlerhaften Text vor der erneuten Prüfung korrigieren.
 
-
 #### Herkunft: src/lib/bim/IFC.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0500**
 
 Click **IFC** (download icon, **Export IFC**) in the top toolbar to download `novikov-project.ifc`. The export uses the current committed model snapshot; unsaved form edits must first be applied with **Apply dimensions**. Generation takes place locally in the browser. The button is disabled while generating, failures keep the model unchanged, and the UI reports that the download was requested rather than claiming the file was saved to disk.
 
-
 **Q0501**
 
 Walls and windows are contained in the storey. Openings are associated with their host wall and are not separately contained in the storey. The geometry uses metres and Z-up. A rotated wall's placement carries its direction; window coordinates remain relative to its wall, including the sill elevation. The opening's left edge is `position × wallLength − width / 2`.
-
 
 **Q0502**
 
 GlobalIds use 128 bits derived from SHA-256 of the versioned NOVIKOV namespace, project ID, entity kind and source ID, with UUID version-8/variant bits and IFC's 22-character encoding. They remain stable across edits, reordering and repeated exports, including JSON reloads. Project IDs must distinguish independent projects; cloning the same IDs intentionally preserves IFC identity. The full original ID is retained in SourceId even if the display label must be shortened to IFC's limit.
 
-
 #### Herkunft: src/lib/bim/README.md
 
 Status: historische ungeordnete Prüfkandidaten, gegen zentrale aktuelle Einträge abzugleichen.
-
 
 **Q0503**
 
 Window `position` is the dimensionless centre along the wall, from 0 (start) to 1 (end). A value of 0.5 remains centred when either endpoint changes. `windowCentre` derives its XY coordinates. The full opening must fit horizontally and vertically inside the wall, including its nonnegative sill height. Wall edits revalidate all hosted windows.
 
-
 **Q0504**
 
 JSON includes `schemaVersion: 1` and `unit: "m"`. Loading validates structure, IDs, references and geometry; unsupported versions/units are rejected. Serialization does not write files or introduce UI persistence. Window overlap checks and multiple storeys remain outside this core. Rendering and [IFC export](./IFC.md) are separate adapters.
-
 
 **Q0505**
 
 The agreed NOVIKOV CAD roadmap is: component model, connection to the existing UI, real 3D geometry with openings, IFC exchange, then AI and voice commands. The reference case is a 3.00 m long, 0.36 m thick, 2.80 m high wall with a centred 1.20 m wide, 1.35 m high window and a 0.90 m sill. The model is now connected to the wall tool, plan view and properties inspector; see [BIM UI integration](../../components/cad/BIM_UI.md). Real 3D wall geometry and through openings are now derived by `geometry.ts` and rendered in the UI; an [IFC4 export](./IFC.md) now provides the first exchange step. IFC import and AI/voice execution remain later work.
 
-
 #### Lokaler früherer Leitfaden: NOVIKOV_ARCHITEKTUR_REVIEW_UND_FUNKTIONSMAP.md
 
 Historische Quelle; aktuelle Anforderungen und Architektur aus Masterplan haben Vorrang.
-
 
 **Q0506**
 
 Die Engine bietet derzeit Endpunkte, Raster, Achsführungen, Flucht, Lot, Diagonalen, Shift-Winkel und horizontale/vertikale Konstruktionen aus mehreren Hover-Referenzen. Der Kandidatentyp `intersection` bedeutet hier einen Schnittpunkt temporärer Achsführungen. Daraus folgt noch kein allgemeiner Schnittpunktfang zwischen Modellsegmenten. Mittelpunkte und beliebige Richtungsschnittpunkte sind noch nicht implementiert.
 
-
 #### Lokaler früherer Leitfaden: NOVIKOV_ENTWICKLUNGSGUIDE.md
 
 Historische Quelle; aktuelle Anforderungen und Architektur aus Masterplan haben Vorrang.
-
 
 **Q0507**
 
 Berechne die geometrische Grundfläche aus gültigen Polygonen. Kennzeichne sie
 als geometrische Fläche; sie ist noch keine geprüfte Wohnfläche. Beginne mit
 manueller Begrenzung über das gemeinsame Zeichen- und Fangsystem.
-
 
 **Q0508**
 
@@ -10289,22 +9581,20 @@ definierte obere und untere Oberfläche. Berechne deren Höhenunterschied über
 der Raumfläche und leite Höhenlinien beziehungsweise Flächenbereiche ab.
 Ermögliche die Konfiguration im Raumeigenschaftenfenster.
 
-
 **Q0509**
 
-| Entscheidung | Vor Etappe | Vorgeschlagener Start |
-| --- | --- | --- |
-| Ergänzung der abgebrochenen Grid-Anforderung | 2–3 | Gesprächsanforderungen verwenden und als Ergänzung markieren |
-| Hover-Zeit, Fangradius und Richtungen | 3 | Konfigurierbare Werte, im Bedienversuch anpassen |
-| Ebenensichtbarkeit je Ansicht oder gemeinsam | 4 | Eine klare Variante für alle ersten Abläufe festlegen |
-| Strichstärken und Muster in Modell oder Papiermaßen | 5 | Einheiten ausdrücklich dokumentieren |
-| Welche Elemente welche Bearbeitung unterstützen | 6 | Aktionen zunächst für vorhandene Elementtypen |
-| Bedeutung der Maßstabanzeige und unterstützte Importformate | 7 | Ansichts-/Ausgabemaßstab trennen; PDF-Seite und Bild zuerst |
-| Raumkennungen und Umgang mit teiloffenen Grenzen | 8 | Projektweit eindeutige Kennungen und explizite virtuelle Grenzen |
-| Verfügbare Dach- und Deckenquellen | 9 | Automatisch nur aus tatsächlicher Modellgeometrie |
-| Regelprofil, Korrekturen und fachliche Prüfung | 10 | Amtliche Quelle prüfen, Annahmen offen dokumentieren |
-| Konkrete Berichtsvorlage und Berichtsumfang | 11 | Standardvorlage, später bereitgestellte Vorlage übernehmen |
-
+| Entscheidung                                                | Vor Etappe | Vorgeschlagener Start                                            |
+| ----------------------------------------------------------- | ---------- | ---------------------------------------------------------------- |
+| Ergänzung der abgebrochenen Grid-Anforderung                | 2–3        | Gesprächsanforderungen verwenden und als Ergänzung markieren     |
+| Hover-Zeit, Fangradius und Richtungen                       | 3          | Konfigurierbare Werte, im Bedienversuch anpassen                 |
+| Ebenensichtbarkeit je Ansicht oder gemeinsam                | 4          | Eine klare Variante für alle ersten Abläufe festlegen            |
+| Strichstärken und Muster in Modell oder Papiermaßen         | 5          | Einheiten ausdrücklich dokumentieren                             |
+| Welche Elemente welche Bearbeitung unterstützen             | 6          | Aktionen zunächst für vorhandene Elementtypen                    |
+| Bedeutung der Maßstabanzeige und unterstützte Importformate | 7          | Ansichts-/Ausgabemaßstab trennen; PDF-Seite und Bild zuerst      |
+| Raumkennungen und Umgang mit teiloffenen Grenzen            | 8          | Projektweit eindeutige Kennungen und explizite virtuelle Grenzen |
+| Verfügbare Dach- und Deckenquellen                          | 9          | Automatisch nur aus tatsächlicher Modellgeometrie                |
+| Regelprofil, Korrekturen und fachliche Prüfung              | 10         | Amtliche Quelle prüfen, Annahmen offen dokumentieren             |
+| Konkrete Berichtsvorlage und Berichtsumfang                 | 11         | Standardvorlage, später bereitgestellte Vorlage übernehmen       |
 
 **Q0510**
 
@@ -10316,97 +9606,90 @@ Behebe Fehler im aktuellen Umfang. Gib mir anschließend einen kurzen
 Bedienversuch, den ich selbst durchführen kann. Beginne noch keine neue Etappe.
 ```
 
-
 #### Lokaler früherer Leitfaden: NOVIKOV_FUNKTIONSARCHITEKTUR_2026-10-03.md
 
 Historische Quelle; aktuelle Anforderungen und Architektur aus Masterplan haben Vorrang.
-
 
 **Q0511**
 
 Die Produktwünsche stammen aus der PDF. Die technischen Typnamen, Verantwortlichkeiten und Umsetzungsschritte sind Vorschläge. Sie sind noch keine implementierten Module. Als letzter hier geprüfter Repository-Stand gilt `main` mit Commit `dd3e358` vom 3. Oktober 2026; seitdem erfolgte Änderungen wurden für diese Zuordnung nicht erneut geprüft.
 
-
 **Q0512**
 
 Seitenzahlen beziehen sich auf die beigefügte PDF. „Offen“ bezeichnet eine fachliche Entscheidung, keine Aufforderung, den gesamten Fortschritt anzuhalten. Die Zuständigkeiten sind Zielzuordnungen; Codex muss sie mit dem aktuellen Code abgleichen.
 
-
 **Q0513**
 
-| ID | Anforderung | Seite | Zuständigkeit oder Voraussetzung |
-| --- | --- | --- | --- |
-| N01 | Gemeinsames BIM-Modell für komplexe geometrische Entwürfe | 1 | Domain und Geometry; ein Modellzustand |
-| N02 | PDF-Pläne, 3D-Modelle, IFC und DXF exportieren | 1 | Interop; 3D-Format und DXF-Umfang noch festlegen |
-| N03 | Darstellung von 2D/3D ändern, Farbe oder Schraffur | 1 | Render-Stile und ViewOverrides |
-| N04 | Maßstab von Canvas, Grundriss, Schnitt und Ansicht | 1 | Viewport-Zoom und Ausgabemaßstab getrennt |
-| N05 | Schnitt- und Ansichtswerkzeuge erzeugen 2D-Ableitungen | 1 | ModelView und Geometry-Projektion |
-| N06 | Abgeleitete 2D-Dokumente bearbeiten | 1 | Modellaktion oder Dokumentergänzung ausdrücklich unterscheiden |
-| N07 | Fang in 3D und Hilfsflächen für X/Y/Z | 1 | Arbeitsebene, Strahlabfrage, Point3 und Constraints |
-| N08 | Hochwertige Raster und Hilfslinien auf Bedarf | 1 | Gemeinsame Constraints-Engine |
-| N09 | Bewegliches On-Demand-Menü bei Elementauswahl | 1 | UI auf gemeinsamem Selection-Kontext |
-| N10 | Gesamtes Element bewegen | 1 | Application MoveElement |
-| N11 | Punkt einfügen oder vorhandenen Punkt verschieben | 1 | Application mit typabhängiger Topologieprüfung |
-| N12 | Linie knicken oder Polygon um weiteren Eckpunkt erweitern | 1 | Polyline-/Polygonaktionen; kein beliebiger BIM-Punkt |
-| N13 | Ganze Polygonkante versetzen und Fläche verbreitern | 1 | OffsetEdge; gültiges Ergebnis prüfen; nicht für einfache Linien |
-| N14 | Letzte Menüaktion bei kompatibler Geometrie vormerken | 1 | Persönliche Präferenz plus Capability-Prüfung |
-| N15 | Maßstab in unterer Leiste ändern | 1 | UI für Ansichts- und Ausgabemaßstab |
-| N16 | Alle Elementtypen einer Organisationsebene zuordnen | 1 | Domain Layer; auch Texte, Kreise und Möbel berücksichtigen |
-| N17 | Ebenen einzeln, alle oder als Ausnahmeauswahl schalten | 2 | ViewVisibility; Isolate/HideExcept/ShowAll/HideAll |
-| N18 | AI und Sprache als zentraler Bedienzugang | 2 | Adapter auf geprüfte Application-Aktionen |
-| N19 | Wände, Türen, Fenster, Decken, Dächer per Sprache/Text | 2 | Typisierte Erstellungsaktionen und Zielkontext |
-| N20 | Bemaßung per Sprache/Text | 2 | Dimension-Aktionen; konkrete Intents später definieren |
-| N21 | Geschosse im Navigator frei erstellen und Höhen definieren | 2 | Domain Storey; bestehendes Ein-Geschoss-Format migrieren |
-| N22 | Wände, Stützen und andere Bauteile kennen Geschosshöhen | 2 | HeightBinding statt kopierter Höhe ohne Bezug |
-| N23 | Deutsch als erste Programmsprache | 2 | Einheitliche UI-Texte und Eingabeinterpretation |
-| N24 | Modelllängen in Metern | 2 | Gemeinsame Units-Konvention; Dezimalkomma unterstützen |
-| N25 | Ausschließlich 2D-Elemente und importierte PDF-Dateien proportional per Messlinie skalieren | 2 | Scale2DSelection/CalibratePdf; 3D- und BIM-Bauteile ausgeschlossen, auch im Grundriss |
-| N26 | Boolesche Operationen für komplexe 3D-Modelle | 2 | Fachunabhängiger Solid-Kern und Domain-Features |
-| N27 | Wände schneiden und aussparen | 2 | Gehostete CutFeature; validierbare Abhängigkeiten |
-| N28 | Hochgeladene PDFs in 2D-Elemente zerlegen | 2 | Interop-Import; Vektor und Raster unterscheiden |
-| N29 | Modell im Grundriss, Schnitt, Ansicht und 3D bearbeiten | 2 | Gemeinsame ID-basierte Aktionen und View-Kontext |
-| N30 | Wände/Fenster verschieben und Elemente löschen | 2 | Gemeinsame Transform-/Delete-Aktionen |
-| N31 | Räume in geschlossenen oder teiloffenen Wandbereichen | 2 | RoomBoundary; explizite virtuelle Grenzen |
-| N32 | Raumname, Kennung ab R-001 und Fläche | 2 | Room; interne ID getrennt von sichtbarer Kennung |
-| N33 | Lichte Raumhöhen und konfigurierbare Höhenlinien | 2 | HeightField aus unteren/oberen Bezugsflächen |
-| N34 | Messbezug Fußbodenoberkante und Dachunterkante | 2 | Persistente Referenzen auf Höhenquellen |
-| N35 | Wohnfläche mit Nischen, Schornstein- und Vorwandabzügen | 3 | Versionierter Regelservice; amtliche Regeln vor Umsetzung prüfen |
-| N36 | Berichtsvorlage und PDF mit nachvollziehbarem Rechenweg | 3 | Berichtsdaten aus Berechnung; Interop PDF |
-| N37 | Geschossanzahl, Raumzahl, Name und Adresse im Bericht | 3 | Metadaten und Berichtsumfang |
-| N38 | Räume standardmäßig auf Ebene Raum | 3 | Layer-Standardzuordnung |
-| N39 | Rechtecke/Polygone für Gestaltung und Schraffur | 3 | DrawingPolygon/Hatch; Ebene 2D-Ergänzungen |
-| N40 | Optionale Farbe/Kontur, Deckkraft, Muster wie Mauerwerk | 3 | Appearance und Renderer |
-| N41 | Wanddicke und geschossabhängige oder alternative Höhe | 3 | Wall-Parameter und HeightBinding |
-| N42 | Monolithische oder mehrschichtige Wand, eigene Schichten | 3 | Assembly und Materialdefinitionen |
-| N43 | Einzelwand oder fortlaufende Wände mit Doppelklickabschluss | 3 | Tool-Sitzung; gewünschte Undo-Gruppierung festlegen |
-| N44 | Saubere Wandanschlüsse an Ecken und T-Verbindungen | 3 | Domain Join-Regeln und daraus abgeleitete Geometrie |
-| N45 | Verschiebbare Hauptachse im Wandaufbau | 3 | Referenzlinie und Offset; Verhalten beim Umstellen festlegen |
-| N46 | Wände, Fenster und andere Elemente bemaßen, Maßketten | 3 | Assoziative Dimension-Referenzen; Ebene Bemaßung |
-| N47 | Decken mit Schichten, Material, Darstellung, Höhe/Stärke | 3 | Slab und Assembly; Ebene Decke |
-| N48 | Deckendurchbrüche einfügen | 3 | Gehostete Öffnung; Profile und Modellvalidierung |
-| N49 | Text mit Hochstellung, Farbe, Größe, Schrift und Hervorhebung | 3 | TextAnnotation und TextStyle; Ebene Textelemente |
-| N50 | Text mit farbiger Umrandung und Hintergrund | 3 | TextStyle; Dokument-/Modellscope festlegen |
-| N51 | Elemente nach Typ oder Eigenschaften filtern | 4 | Application Query/Selection; gemeinsame Sichtbarkeitsregeln |
-| N52 | Pipette für Farbauswahl im Filter | 4 | UI-Eingabeadapter; fachliche/angezeigte Farbe unterscheiden |
-| N53 | Eine Eigenschaftenleiste für Werkzeugvorgaben und Auswahl | 4 | Schema-/Capability-basierter UI-Adapter |
-| N54 | E bewegen, Strg+E kopieren/bewegen, D drehen, Strg+D drehen | 4 | Shortcut-Router; Unterschied D/Strg+D offen |
-| N55 | Rotation mit Kreis als Fang-/Bedienhilfe | 4 | RotateSession und Constraints; Overlay im Renderer |
-| N56 | Navigator für Geschosse, Schnitte, Ansichten und 3D | 4 | Referenzen auf ModelView und Gebäudestruktur |
-| N57 | Aktualisierbare Abbilder mit eigener Ebenendarstellung | 4–5 | DrawingDocument; keine Bauteilkopie |
-| N58 | Ausschnitte und zusätzliche Gestaltung/Text in Abbildern | 4–5 | ViewOverrides und dokumentbezogene Annotationen |
-| N59 | Abbilder in Master-/Exportlayouts mit A4/A3/A2 und Plankopf | 5 | Layout, MasterLayout und LayoutViewport; eigener Navigatorbereich |
-| N60 | Bildschirm teilen, Fenster aktivieren und Inhalt zuweisen | 5 | ViewportBinding; ausgewähltes Dokument und Kamera je Fenster |
-
+| ID  | Anforderung                                                                                 | Seite | Zuständigkeit oder Voraussetzung                                                      |
+| --- | ------------------------------------------------------------------------------------------- | ----- | ------------------------------------------------------------------------------------- |
+| N01 | Gemeinsames BIM-Modell für komplexe geometrische Entwürfe                                   | 1     | Domain und Geometry; ein Modellzustand                                                |
+| N02 | PDF-Pläne, 3D-Modelle, IFC und DXF exportieren                                              | 1     | Interop; 3D-Format und DXF-Umfang noch festlegen                                      |
+| N03 | Darstellung von 2D/3D ändern, Farbe oder Schraffur                                          | 1     | Render-Stile und ViewOverrides                                                        |
+| N04 | Maßstab von Canvas, Grundriss, Schnitt und Ansicht                                          | 1     | Viewport-Zoom und Ausgabemaßstab getrennt                                             |
+| N05 | Schnitt- und Ansichtswerkzeuge erzeugen 2D-Ableitungen                                      | 1     | ModelView und Geometry-Projektion                                                     |
+| N06 | Abgeleitete 2D-Dokumente bearbeiten                                                         | 1     | Modellaktion oder Dokumentergänzung ausdrücklich unterscheiden                        |
+| N07 | Fang in 3D und Hilfsflächen für X/Y/Z                                                       | 1     | Arbeitsebene, Strahlabfrage, Point3 und Constraints                                   |
+| N08 | Hochwertige Raster und Hilfslinien auf Bedarf                                               | 1     | Gemeinsame Constraints-Engine                                                         |
+| N09 | Bewegliches On-Demand-Menü bei Elementauswahl                                               | 1     | UI auf gemeinsamem Selection-Kontext                                                  |
+| N10 | Gesamtes Element bewegen                                                                    | 1     | Application MoveElement                                                               |
+| N11 | Punkt einfügen oder vorhandenen Punkt verschieben                                           | 1     | Application mit typabhängiger Topologieprüfung                                        |
+| N12 | Linie knicken oder Polygon um weiteren Eckpunkt erweitern                                   | 1     | Polyline-/Polygonaktionen; kein beliebiger BIM-Punkt                                  |
+| N13 | Ganze Polygonkante versetzen und Fläche verbreitern                                         | 1     | OffsetEdge; gültiges Ergebnis prüfen; nicht für einfache Linien                       |
+| N14 | Letzte Menüaktion bei kompatibler Geometrie vormerken                                       | 1     | Persönliche Präferenz plus Capability-Prüfung                                         |
+| N15 | Maßstab in unterer Leiste ändern                                                            | 1     | UI für Ansichts- und Ausgabemaßstab                                                   |
+| N16 | Alle Elementtypen einer Organisationsebene zuordnen                                         | 1     | Domain Layer; auch Texte, Kreise und Möbel berücksichtigen                            |
+| N17 | Ebenen einzeln, alle oder als Ausnahmeauswahl schalten                                      | 2     | ViewVisibility; Isolate/HideExcept/ShowAll/HideAll                                    |
+| N18 | AI und Sprache als zentraler Bedienzugang                                                   | 2     | Adapter auf geprüfte Application-Aktionen                                             |
+| N19 | Wände, Türen, Fenster, Decken, Dächer per Sprache/Text                                      | 2     | Typisierte Erstellungsaktionen und Zielkontext                                        |
+| N20 | Bemaßung per Sprache/Text                                                                   | 2     | Dimension-Aktionen; konkrete Intents später definieren                                |
+| N21 | Geschosse im Navigator frei erstellen und Höhen definieren                                  | 2     | Domain Storey; bestehendes Ein-Geschoss-Format migrieren                              |
+| N22 | Wände, Stützen und andere Bauteile kennen Geschosshöhen                                     | 2     | HeightBinding statt kopierter Höhe ohne Bezug                                         |
+| N23 | Deutsch als erste Programmsprache                                                           | 2     | Einheitliche UI-Texte und Eingabeinterpretation                                       |
+| N24 | Modelllängen in Metern                                                                      | 2     | Gemeinsame Units-Konvention; Dezimalkomma unterstützen                                |
+| N25 | Ausschließlich 2D-Elemente und importierte PDF-Dateien proportional per Messlinie skalieren | 2     | Scale2DSelection/CalibratePdf; 3D- und BIM-Bauteile ausgeschlossen, auch im Grundriss |
+| N26 | Boolesche Operationen für komplexe 3D-Modelle                                               | 2     | Fachunabhängiger Solid-Kern und Domain-Features                                       |
+| N27 | Wände schneiden und aussparen                                                               | 2     | Gehostete CutFeature; validierbare Abhängigkeiten                                     |
+| N28 | Hochgeladene PDFs in 2D-Elemente zerlegen                                                   | 2     | Interop-Import; Vektor und Raster unterscheiden                                       |
+| N29 | Modell im Grundriss, Schnitt, Ansicht und 3D bearbeiten                                     | 2     | Gemeinsame ID-basierte Aktionen und View-Kontext                                      |
+| N30 | Wände/Fenster verschieben und Elemente löschen                                              | 2     | Gemeinsame Transform-/Delete-Aktionen                                                 |
+| N31 | Räume in geschlossenen oder teiloffenen Wandbereichen                                       | 2     | RoomBoundary; explizite virtuelle Grenzen                                             |
+| N32 | Raumname, Kennung ab R-001 und Fläche                                                       | 2     | Room; interne ID getrennt von sichtbarer Kennung                                      |
+| N33 | Lichte Raumhöhen und konfigurierbare Höhenlinien                                            | 2     | HeightField aus unteren/oberen Bezugsflächen                                          |
+| N34 | Messbezug Fußbodenoberkante und Dachunterkante                                              | 2     | Persistente Referenzen auf Höhenquellen                                               |
+| N35 | Wohnfläche mit Nischen, Schornstein- und Vorwandabzügen                                     | 3     | Versionierter Regelservice; amtliche Regeln vor Umsetzung prüfen                      |
+| N36 | Berichtsvorlage und PDF mit nachvollziehbarem Rechenweg                                     | 3     | Berichtsdaten aus Berechnung; Interop PDF                                             |
+| N37 | Geschossanzahl, Raumzahl, Name und Adresse im Bericht                                       | 3     | Metadaten und Berichtsumfang                                                          |
+| N38 | Räume standardmäßig auf Ebene Raum                                                          | 3     | Layer-Standardzuordnung                                                               |
+| N39 | Rechtecke/Polygone für Gestaltung und Schraffur                                             | 3     | DrawingPolygon/Hatch; Ebene 2D-Ergänzungen                                            |
+| N40 | Optionale Farbe/Kontur, Deckkraft, Muster wie Mauerwerk                                     | 3     | Appearance und Renderer                                                               |
+| N41 | Wanddicke und geschossabhängige oder alternative Höhe                                       | 3     | Wall-Parameter und HeightBinding                                                      |
+| N42 | Monolithische oder mehrschichtige Wand, eigene Schichten                                    | 3     | Assembly und Materialdefinitionen                                                     |
+| N43 | Einzelwand oder fortlaufende Wände mit Doppelklickabschluss                                 | 3     | Tool-Sitzung; gewünschte Undo-Gruppierung festlegen                                   |
+| N44 | Saubere Wandanschlüsse an Ecken und T-Verbindungen                                          | 3     | Domain Join-Regeln und daraus abgeleitete Geometrie                                   |
+| N45 | Verschiebbare Hauptachse im Wandaufbau                                                      | 3     | Referenzlinie und Offset; Verhalten beim Umstellen festlegen                          |
+| N46 | Wände, Fenster und andere Elemente bemaßen, Maßketten                                       | 3     | Assoziative Dimension-Referenzen; Ebene Bemaßung                                      |
+| N47 | Decken mit Schichten, Material, Darstellung, Höhe/Stärke                                    | 3     | Slab und Assembly; Ebene Decke                                                        |
+| N48 | Deckendurchbrüche einfügen                                                                  | 3     | Gehostete Öffnung; Profile und Modellvalidierung                                      |
+| N49 | Text mit Hochstellung, Farbe, Größe, Schrift und Hervorhebung                               | 3     | TextAnnotation und TextStyle; Ebene Textelemente                                      |
+| N50 | Text mit farbiger Umrandung und Hintergrund                                                 | 3     | TextStyle; Dokument-/Modellscope festlegen                                            |
+| N51 | Elemente nach Typ oder Eigenschaften filtern                                                | 4     | Application Query/Selection; gemeinsame Sichtbarkeitsregeln                           |
+| N52 | Pipette für Farbauswahl im Filter                                                           | 4     | UI-Eingabeadapter; fachliche/angezeigte Farbe unterscheiden                           |
+| N53 | Eine Eigenschaftenleiste für Werkzeugvorgaben und Auswahl                                   | 4     | Schema-/Capability-basierter UI-Adapter                                               |
+| N54 | E bewegen, Strg+E kopieren/bewegen, D drehen, Strg+D drehen                                 | 4     | Shortcut-Router; Unterschied D/Strg+D offen                                           |
+| N55 | Rotation mit Kreis als Fang-/Bedienhilfe                                                    | 4     | RotateSession und Constraints; Overlay im Renderer                                    |
+| N56 | Navigator für Geschosse, Schnitte, Ansichten und 3D                                         | 4     | Referenzen auf ModelView und Gebäudestruktur                                          |
+| N57 | Aktualisierbare Abbilder mit eigener Ebenendarstellung                                      | 4–5   | DrawingDocument; keine Bauteilkopie                                                   |
+| N58 | Ausschnitte und zusätzliche Gestaltung/Text in Abbildern                                    | 4–5   | ViewOverrides und dokumentbezogene Annotationen                                       |
+| N59 | Abbilder in Master-/Exportlayouts mit A4/A3/A2 und Plankopf                                 | 5     | Layout, MasterLayout und LayoutViewport; eigener Navigatorbereich                     |
+| N60 | Bildschirm teilen, Fenster aktivieren und Inhalt zuweisen                                   | 5     | ViewportBinding; ausgewähltes Dokument und Kamera je Fenster                          |
 
 **Q0514**
 
 Eine Linie mit eingefügtem Punkt wird fachlich zur Polylinie. Bei einem Polygon kann ein zusätzlicher Vertex die Kontur verändern. Eine gerade BIM-Wand darf nicht ohne festgelegte Regel in eine beliebig geknickte Wand verwandelt werden. Dafür sind beispielsweise mehrere verbundene Wände oder ein eigener Wandpfadtyp erforderlich. Das Menü zeigt nur unterstützte Aktionen. Eine vorgemerkte Aktion aktiviert einen Bearbeitungsmodus, führt aber nicht beim Öffnen bereits eine Modelländerung aus.
 
-
 **Q0515**
 
 Die Datenverträge für ModelView, DrawingDocument und ViewportBinding werden vor weiteren Layout-Sonderlösungen festgehalten. Die komplette Schnitt- oder Druckberechnung muss dafür noch nicht implementiert werden.
-
 
 **Q0516**
 
@@ -10414,6 +9697,7 @@ Implementiere noch keine neuen Bauteile, PDF-Zerlegung, Booleschen Operationen
 oder vollständigen Layouteditor. Kein Komplettumbau und keine leeren Klassen
 auf Vorrat. Gib eine verständliche Zusammenfassung der Architekturergänzungen,
 der offenen Entscheidungen und des nächsten begrenzten Auftrags aus.
+
 ```
 
 
@@ -13285,3 +12569,4 @@ PR425 nach CI39657525588 grün in main4020047. Folgebranch fix/shared-oblique-ax
 ### AUD14-04/05 – Isolierter Primitive-Browservergleich, 24.10.2026
 
 24.10.2026: PR438 grün in main658d390 integriert. Isolierter statischer Browservergleich:96 vollständige Phasenvergleiche und1536 geordnete Queries exakt, keine Browserfehler. Einzeländerungen median16–23 % schneller, Vollinvalidierung3–25 % langsamer; Kalt uneinheitlich. Kandidat geparkt, keine Produktübernahme. Typen/Lint/Diagnosebuild bestanden; kein Gesamtframe-/Native-/Peak-Speichernachweis. Nachweis docs/primitive-browser.md. Nächster Einzelauftrag §9: verbleibende Wand-x/y/axis-Pfade abgleichen und messen.
+```

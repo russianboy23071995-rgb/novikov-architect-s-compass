@@ -3,14 +3,14 @@
 ## Status auf einen Blick (29.10.2026; Ansicht auf §9, keine zweite Roadmap – bei jeder §9-Pflege mitziehen)
 
 - **Phase:** Skalierbarkeit und Leistung für das Schulmodell (Nutzerentscheidung 24.10.2026, §9) innerhalb §6 Abschnitt 1–2; je Schritt Änderungskarte → Freigabe → Nachweis.
-- **Letzter Meilenstein:** ML2+ML3 (PR573, [Nachweis](docs/MENGEN.md)): Fenster Bauteilliste mit Reitern, Zeilenauswahl, CSV und Materialauszug; L16 damit umgesetzt; davor ML1 (PR572, [Nachweis](docs/MENGEN.md)): Mengenabfrage je Bauteilart mit Summen und CSV; davor L38 (PR571, [Nachweis](docs/LINT_WARNUNGEN.md)): sieben Lint-Warnungen beseitigt; davor SA4 (PR570, [Nachweis](docs/WANDAUFBAU.md)): Materialschichten im IFC – IfcMaterialLayerSet und -Usage je Wand mit Aufbau; L07 damit umgesetzt, Archicad-Prüfung offen; davor SA3 (PR569, [Nachweis](docs/WANDAUFBAU.md)): Schichten im Schnitt – geschnittene Wände mit Aufbau als Schichtstreifen mit Materialfarbe und Schraffur; davor SA2 (PR568, [Nachweis](docs/WANDAUFBAU.md)): Schichten im Grundriss – Füllung je Material mit Schraffur und Dämm-Zickzack, an Ecken auf der Gehrung; davor SA1 (PR567, [Nachweis](docs/WANDAUFBAU.md)): Wandaufbau – Materialien und Wandaufbauten als Projektbibliothek (Schema 43), Reiter „Wandaufbau“ im Werkzeug- und Elementfenster, Wandstärke folgt den Schichten; davor TR4 (PR566, [Nachweis](docs/TREPPE.md)): Treppenlänge mit der Maus ziehen – Steigungsanzahl bleibt, Auftritt folgt und wird fest gespeichert; Live-Werte mit DIN-Hinweis; davor G2 (PR565, [Nachweis](docs/FENSTER_TUEREN.md)): Mengen an jeder Öffnung (Width/Height/Depth) und immer an Fenstern und Türen im IFC – für die Archicad-Beschriftung; Prüfung in Archicad offen; davor BS2 (PR564, [Nachweis](docs/SCHNITT.md)): Höhenkoten im Maßkettenwerkzeug – im Schnitt-/Ansichts-Tab Lage klicken, Punkte mit Fang, Doppelklick erstellt DIN-Koten (Rohbau/Fertig); auswählen, verschieben, löschen; davor BS1 (PR563, [Nachweis](docs/SCHNITT.md)): Schnitt und Ansicht mit Rand an den Linienenden, Geschosshöhen links und rechts außerhalb als DIN-Höhenkote (Rohbau); davor U2 (PR562, [Nachweis](docs/OBERFLAECHE.md)): Canvas aufgeräumt – keine Knopfleiste oben rechts (auch kein Vollbild), kein px/m-Kästchen, XYZ-Pfeile nur in 3D; davor S4-Nacharbeit (PR561, [Nachweis](docs/TRANSPARENZPAUSE.md)): Wandanfang rastet exakt am Ende einer Pausenwand ein; davor U1 (PR560, [Nachweis](docs/OBERFLAECHE.md)): Oberfläche entschlackt – kein 2D/3D-Umschalter (Tabs), Grid/SNAP nur unten, keine Plakette und kein Infotext im Canvas, kein Ansichtswürfel, KI-Leiste nur Eingabe mit zwei Knöpfen; davor E1 (PR559, [Nachweis](docs/ECKEN.md)): Ecke anklicken bewegt sie sofort – Wandenden und Wandkörperecken per Punktbearbeitung, Stützen und Treppen mit Eckgriffen per Gruppenverschiebung; davor S4 (PR558, [Nachweis](docs/TRANSPARENZPAUSE.md)): Transparenzpause unter dem Navigator – anderes Geschoss (Wände, Stützen) blass unter dem Grundriss, Deckkraft und Farbe, Fang an der Pause; davor S3 (PR557, [Nachweis](docs/LINIEN.md)): Längen-Hilfslinie an gewählten Linien – Länge per Klick auf die Zahl, türkise Pfeile für Ende, Anfang oder beide (Mitte bleibt); davor S2 (PR556, [Nachweis](docs/ANSICHTEN.md)): Ansichtssymbol als Linie mit Blickpfeil ohne Endstriche, Symbolgröße Schnitt/Ansicht 2,5 mm; davor S1 (PR555, [Nachweis](docs/FENSTER_TUEREN.md)): 3D ohne Hintergrundraster, Fenster und Türen mit Element in 3D anwählbar (Auswahlindex kannte Elementteile nicht); davor Fensterflügel FL4 (PR554, [Nachweis](docs/FENSTER_TUEREN.md)): PartitioningType und IfcWindowPanelProperties je Paneel im IFC, Abnahmedatei mit Flügeln; davor Fensterflügel FL3 (PR553, [Nachweis](docs/FENSTER_TUEREN.md)): Öffnungssymbole Dreh/Kipp/Dreh-Kipp nach DIN 1356 in Ansicht und Schnitt, Bandseite aus dem Anschlag, gestrichelt von außen; davor Fensterflügel FL2 (PR552, [Nachweis](docs/FENSTER_TUEREN.md)): Flügelrahmen, Pfosten, Kämpfer und Oberlicht als Körper in 3D, Schnitt und IFC, Grundriss mit allen Scheiben und Hölzern; davor Fensterflügel FL1 (PR551, [Nachweis](docs/FENSTER_TUEREN.md)): Teilungen 1-/2-flüglig und mit Oberlicht, Öffnungsart und Anschlag je Flügel, Passprüfung, Felder im Werkzeug- und Elementfenster; davor Ansichten A1 (PR550, [Nachweis](docs/ANSICHTEN.md)): Werkzeug „Ansicht“, „Vier Ansichten erzeugen“ (N/O/S/W), Ansichtssymbol im Grundriss, Ordner „Ansichten“, Zeichnung ohne Schnitt; davor Fenster/Türen R1 (PR549, [Nachweis](docs/FENSTER_TUEREN.md)): Seite per zweitem Klick beim Platzieren – Außenseite des Fensters bzw. Aufschlagseite der Tür, Vorschau folgt dem Zeiger; davor Fenster/Türen G1 (PR548, [Nachweis](docs/FENSTER_TUEREN.md)): nach Archicad-Rückmeldung (Elemente richtig, Glas grau, Beschriftung 0,00) Oberflächenstile je Elementteil im IFC (Glas 70 % transparent) und durchscheinendes Glas in 3D; davor Fenster/Türen FT4 (PR547, [Nachweis](docs/FENSTER_TUEREN.md)): Elementkörper (SweptSolid je Teil) und Laibung (IfcWindowLiningProperties/IfcDoorLiningProperties am Typ) im IFC, Abnahmedatei für Archicad; davor Fenster/Türen FT3 (PR546, [Nachweis](docs/FENSTER_TUEREN.md)): Grundrisssymbol aus dem Element – Fensterpfosten geschnitten, Glaslinie, Fensterbänke; Zargenpfosten und Türblatt in der lichten Breite; davor Fenster/Türen FT2 (PR545, [Nachweis](docs/FENSTER_TUEREN.md)): Rahmen, Glas, Fensterbänke, Zarge und Türblatt als abgeleitete Körper in 3D (eigene Farben, Auswahl wählt Fenster/Tür) und im Schnitt (Umrisse ohne Schnittfarbe, Glas als Doppellinie); davor Fenster/Türen FT1 (PR544, [Nachweis](docs/FENSTER_TUEREN.md)): Schema 42 – optionales Fenster- bzw. Türelement je Öffnung (Rahmen, Lage, Außenseite, Festverglasung, Fensterbänke; Zarge, Blatt), Passprüfung gegen Öffnung und Wand, Werkzeuge setzen Öffnung und Element zusammen („nur Öffnung“ wählbar), Rubrik im Werkzeug- und Elementfenster; davor Werkzeugleiste WL2 (PR543, [Nachweis](docs/WERKZEUGLEISTE.md)): eigene Piktogramme für Wand, Stütze, Treppe, Fenster, Decke, Dach und Schnitt; davor Werkzeugleiste WL1 (PR542, [Nachweis](docs/WERKZEUGLEISTE.md)): nur noch schmale Leiste, Auswahl oben, Rubriken 3D/2D/Dokumentation, Anordnung im Fenster „Werkzeugleiste anpassen“ frei sortierbar (Ziehen, Pfeiltasten) und im Browser gespeichert; davor Schnitt SC5 (PR541, [Nachweis](docs/SCHNITT.md)): Schnittlinie im Grundriss mit dem Pfeil-Werkzeug auswählen, mit Griffen verschieben, verlängern und kürzen (Shift: nur Länge), Entf löscht, Länge im Fenster; Fenster-/Türkörper im Schnitt nach Nutzerentscheid nicht erfunden, solange es nur Öffnungen gibt; davor Schnitt SC4 (PR540, [Nachweis](docs/SCHNITT.md)): Schnittsymbol im Grundriss mit fester Größe in mm Papier oder m Modell (Vorgabe 5 mm), einstellbar wie beim Text; Bauteile, in denen die Schnittlinie beginnt oder endet, im Schnitt geschlossen und gefüllt; davor Schnitt SC3 (PR539, [Nachweis](docs/SCHNITT.md)): Schnittzeichnung aus dem Gebäudekörper im Schnitt-Tab – geschnittene Bauteile als geschlossene Umrisse in der Schnittfarbe, Ansicht dahinter mit sichtbaren Kanten, Geschosslinien mit Koten, Zoom/Pan; davor Schnitt SC2 (PR538, [Nachweis](docs/SCHNITT.md)): Werkzeug „Schnitt“ mit Klick Anfang/Ende/Blickseite, Schema 41 (Schnitte gehören zum Gebäude, sichtbar in allen Geschossen), Kennung A, B, … oder 1, 2, …, Elementfenster per Doppelklick, Einträge im Ordner „Schnitte“, Schnitt als Canvas-Tab; davor Schnitt SC1 (PR537, [Nachweis](docs/SCHNITT.md)): Canvas-Tabs (Grundriss und 3D-Ansicht, „+“ und ×, jeder Ansichtswechsel öffnet den passenden Tab) und Navigatorordner „Schnitte“; davor Treppe TR3 (PR536, [Nachweis](docs/TREPPE.md)): L- und U-Treppe mit Zwischenpodest, dritter Klick wählt die Wendung, Prüfung Podesttiefe und max. 18 Steigungen je Lauf, 3D mit Podestplatte, IFC mit zwei Läufen und IfcSlab LANDING; davor Treppe TR2 (PR535, [Nachweis](docs/TREPPE.md)): Werkzeug „Treppe“ mit Zeichenachse Mitte/Links/Rechts, Zwei-Klick-Zeichnen mit voller Vorschau, alle Angaben in Leiste/Einstellungs-/Elementfenster mit Live-DIN-Prüfung, Grundriss mit Stufen, Lauflinie, Schnittlinie; davor Treppe TR1 (PR534, [Nachweis](docs/TREPPE.md)): gerade Treppe mit allen Angaben als eigene Werte, Rechnung und Prüfung nach DIN 18065, Schema 40 mit Standardebene Treppe, 3D-Körper, IFC IfcStair/IfcStairFlight; davor Maßketten-Darstellung nach Bauzeichnungs-Praxis (PR533, [Nachweis](docs/MASSKETTE.md)): Begrenzung Schrägstrich/Punkt/Kreis/Pfeil/Kreuz, Maßzahlen m/cm mit hochgestellter 5, Schrifthöhe, Hilfslinien mit Überstand; davor Text-Eingabefeld mit allen Einstellungen und Live-Vorschau (PR532) und Text T2 (PR531, [Nachweis](docs/TEXT.md)): fett/kursiv/unterstrichen, Hinterlegung, Umrandung, Freistellung, Darstellung mit gemessener Textbreite; davor Text T1 (PR530, [Nachweis](docs/TEXT.md)): Textwerkzeug mit Eingabefeld im Plan, Schrift (Systemfamilien), Größe in mm Papier oder m Modell (Umrechnung beim Umschalten), Ausrichtung, Drehung, Farbe; Schema 39; davor Maßkette bearbeiten (PR529, [Nachweis](docs/MASSKETTE.md)): Punkte über das On-Demand-Menü ergänzen/entfernen, Maßlinie verschieben, Menü bereinigt; Fenster mit Laibungs-Fangpunkten; davor Maßkette als 2D-Werkzeug (PR528, [Nachweis](docs/MASSKETTE.md)): Richtung waagerecht/senkrecht, erster Klick Lage der Maßlinie, weitere Klicks Messpunkte mit Fang, Doppelklick ins Leere erstellt die Kette; Schema 38; Fang an Bauteilpunkten auch für Stütze/Maßkette; davor Stützen vollständig (PR525–527, [Nachweis](docs/STUETZEN.md)): P3 (PR527) Verschieben als Ganzes, Fangpunkte Mitte/Ecken/Rand, Pipette, Archicad-Prüfdatei NOVIKOV-Stuetzen-Test.ifc; davor Stützen P2 (PR526, [Nachweis](docs/STUETZEN.md)): Werkzeug Stütze mit Vorgaben in Leiste und Einstellungsfenster (Reiter Stütze, Bauzustand), Grundriss geschnitten in der Schnittfarbe, Eigenschaften und Elementfenster; davor Stützen P1 (PR525, [Nachweis](docs/STUETZEN.md)): Bauteil Stütze (Rechteck/Kreis, Drehung, Geschossbindung oder feste Höhe, Bauzustand), Schema 37 mit Standardebene Stütze, 3D-Prisma, IFC IfcColumn mit parametrischem Profil; davor Glas-Paletten (PR524, [Nachweis](docs/GLAS_PALETTEN.md)): eine durchgehende Zeichenfläche, Werkzeugeigenschaften, Werkzeugkasten und Navigator schweben als Glas darüber, Einpassen im freien Bereich, Navigatorbreite ziehbar; Testliste in package.json testFiles (Windows-Befehlszeilengrenze); davor Bauzustand-Nacharbeit und weiße Zeichenfläche (PR523, [Nachweis](docs/BAUZUSTAND.md)): Doppelklick öffnet das Elementfenster auch im Zeichenwerkzeug ohne laufende Zeichnung, Bauzustand in der Eigenschaftsleiste, Farbschalter im Reiter, Canvas weiß; davor S2 Bauzustand der Wände (PR521, [Nachweis](docs/BAUZUSTAND.md)): Bestand/Neubau/Abbruch als Wand-Eigenschaft (Schema 36), Reiter „Bauzustand“ im Wandwerkzeug (Vorgabe Neubau) und im Wandfenster, farbige Anzeige unter View → Darstellung (Neubau rot, Abbruch gelb, Bestand in der Schnittfarbe), IFC Pset_WallCommon.Status; davor S1 Schnittfarbe (PR520, [Nachweis](docs/SCHNITTDARSTELLUNG.md)): View → „Darstellung…“ mit Grau/Schwarz/Weiß/eigener Farbe für geschnittene Wände und Dachschnitte, im Browser gespeichert; davor Hilfsfenster kompakt (PR519, [Nachweis](docs/HILFSFENSTER.md)): On-Demand-Menü und Eingabefenster Winkel/Länge kleiner, merken die verschobene Position auch nach dem Neuladen, Doppelklick auf die Titelzeile setzt zurück; Eingabefenster ohne Knöpfe und Infotext (Enter, Tab, Esc); davor E2 Einstellungsfenster (PR518, [Nachweis](docs/EINSTELLUNGSFENSTER.md)): jedes Werkzeug mit Vorgabenfenster per Doppelklick, immer nur ein Fenster, einheitliche Lage und Größe, neue Werkzeugreihenfolge; davor E1 (PR517, [Nachweis](docs/EINSTELLUNGSFENSTER.md)): Doppelklick auf Werkzeugknopf öffnet die Vorgaben (Wand, Fenster, Tür, Dach, Raum), Doppelklick auf ein Element in 2D/3D dessen Fenster mit allen Eigenschaften; Regel in AGENTS.md; davor L04b Wände an Dachflächen trimmen vollständig (PR515–516, [Nachweis](docs/TRIMMEN_L04B.md)): Teil 2 (PR516) Trimmen… mit Bestätigung, Trimmung aufheben, Anzeige in den Wand-Eigenschaften, IFC als facettierter Körper, Archicad-Prüfdatei; davor Teil 1 (PR515, [Nachweis](docs/TRIMMEN_L04B.md)): Wände an Dachflächen trimmen – Trimmverweis (Schema 35), Schnitt bei jeder Prüfung aus dem aktuellen Dach abgeleitet, Wand bis zur Dachunterseite geführt und gekappt, Öffnungen über dem Dach abgelehnt; davor K2 Darstellungsreihenfolge (PR514, [Nachweis](docs/DARSTELLUNGSREIHENFOLGE.md)): Ganz nach vorne/nach vorne/nach hinten/ganz nach hinten innerhalb derselben Objektart im Rechtsklickmenü; davor K1 Rechtsklickmenü, Modify-Menü und Zwischenablage (PR513, [Nachweis](docs/KONTEXTMENUE.md)): Rechtsklick in 2D/3D mit Ausschneiden/Kopieren/Einfügen/Löschen/Pipette/Werkzeugeinstellungen, Modify-Menü nur Pipette/Trimmen, Zwischenablage über das Element-Register; davor Raum R4 (PR512, [Nachweis](docs/ROOM_ELEMENT.md)): Raumliste als Abfrage (Organisation → Raumliste, Summen, CSV für Excel), IfcSpace je Raum mit Mengen und Höhenwerten, Archicad-Prüfdatei; Raumwerkzeug R1–R4 damit abgeschlossen; davor Tab-Auswahl bei übereinanderliegenden Elementen (PR511, [Nachweis](docs/TAB_AUSWAHL.md)): knapper Hinweis am Cursor, Tab öffnet die Liste und schaltet durch, dünne türkise Umrandung, Linksklick übernimmt; über das Element-Register für alle (auch künftige) Objektarten; löst die Auswahl eines Raumes unter Dach/Decke; davor Raum R3b (PR510, [Nachweis](docs/ROOM_ELEMENT.md)): Höhenlinien als eigene Einträge mit Höhe, Farbe, Linienart aus den Einstellungen, Unter- und Oberkante (z. B. 2,30 m bis Außenkante Dachhaut), Fläche ab Linie und Anteil, Bearbeitung im Fenster Raum-Einstellungen und je Raum, Schema 34; davor R3 (PR509, [Nachweis](docs/ROOM_ELEMENT.md)): lichte Höhe aus Decken und Dächern des eigenen Geschosses, Höhenlinien 1,00/2,00 m je Raum änderbar, Fläche je Höhenzone, Teile ohne Höhenquelle sichtbar offen, Schema 33; davor R2 (PR508, [Nachweis](docs/ROOM_ELEMENT.md)): Raumwerkzeug mit Leiste und Einstellungsfenster, Raum per Klick zwischen Wänden, Raumstempel, Eigenschaften, Bearbeitung wie Decke; davor R1 (PR507): Raummodell mit Nummer R-001 und optionalem Fußbodenaufbau, Schema 32; davor einflächiges Dach N61 vollständig (PR502–506, [Nachweis](docs/ROOF_ELEMENT.md)); zuletzt D5 (PR506): Übersichten, IFC als IfcRoof/IfcSlab ROOF mit geschlossenem Körper, Archicad-Prüfdatei, Leistung im Schulmodell; davor D4 (PR505): Grundriss mit Schnitt bei 1,00 m (Schnitt wie Wand, darunter dünn, darüber gestrichelt); davor D3 (PR504): Dachwerkzeug (Bezugslinie, Steigseite, Umriss), Leiste und Doppelklick-Fenster, Eigenschaften, Bearbeitung wie Decke; davor D2 (PR503): geschlossener 3D-Körper mit Auswahl; davor D1 (PR502, N61, [Nachweis](docs/ROOF_ELEMENT.md)): Dachmodell mit Flächen- und Abschlussgeometrie, Schema 31; davor drei IFC-Testvarianten für Fenster-/Türmaße in Archicad (PR501, [Nachweis](docs/T_IFC_ACCEPTANCE.md)); davor Sicherungshinweis dezent unten links statt Fenster oben rechts (PR500, [Nachweis](docs/SICHERUNGSHINWEIS.md)); davor Decken C3 Variante A (PR499): Wand und Decke in 3D ohne Flimmern bei gleichem Vorrang; Zielbild Materialvorrang 0–100 festgehalten ([Nachweis](docs/SLAB_ELEMENT.md)); davor Polygon-Regeln vollständig (PR495–498, [Nachweis](docs/POLYGON_REGELN.md)); zuletzt Teil D (PR498): Fangpunkte benannt („Decke · Ecke 3“, „Wand · Anfang“) statt „Endpunkt“; davor Teil C (PR497): Klick auf eine Ecke bewegt sie sofort, Ecke auf eine andere Ecke desselben Elements löscht sie (mind. 3 Ecken), gemeinsame Bausteine für alle Elemente mit Eckenliste; davor Teil B (PR496): Schließen per Klick auf den Startpunkt als gemeinsamer Baustein für alle Klick-für-Klick-Werkzeuge, Startpunkt mit Fangvorrang; davor Teil A (PR495, [Nachweis](docs/POLYGON_REGELN.md)): neue Projekte mit Erdgeschoss und 1. Obergeschoss je 3,00 m, Decke im Grundriss nur als durchgezogene Konturlinie, Decke damit sofort in 3D; davor Deckenumriss im Grundriss bearbeiten (PR494) nach Umzug der Bearbeitungssitzung aus lib/bim (PR493, 19 Architektur-Ausnahmen weniger); davor Übersichten zählen Türen/Decken (PR491) und Arbeitsweise/Browser-Start/Wiederaufnahme gesichert (PR492, `docs/WIEDERAUFNAHME.md`); davor Decken Teil C1: Wandhöhe an Geschoss gebunden (Oberkante = OK Rohfußboden darüber + Zusatzhöhe, auch Attika im obersten Geschoss; Schema 30, PR490, [Nachweis](docs/SLAB_ELEMENT.md)); davor Decken Teil B (PR487–489) und Teil A (PR486).
+- **Letzter Meilenstein:** L09 U1 (PR574, [Nachweis](docs/WALL_JUNCTIONS.md)): Ecke und T-Anschluss mit unterschiedlicher Fußhöhe (Stumpfstoß nach Höhenüberdeckung); davor ML2+ML3 (PR573, [Nachweis](docs/MENGEN.md)): Fenster Bauteilliste mit Reitern, Zeilenauswahl, CSV und Materialauszug; L16 damit umgesetzt; davor ML1 (PR572, [Nachweis](docs/MENGEN.md)): Mengenabfrage je Bauteilart mit Summen und CSV; davor L38 (PR571, [Nachweis](docs/LINT_WARNUNGEN.md)): sieben Lint-Warnungen beseitigt; davor SA4 (PR570, [Nachweis](docs/WANDAUFBAU.md)): Materialschichten im IFC – IfcMaterialLayerSet und -Usage je Wand mit Aufbau; L07 damit umgesetzt, Archicad-Prüfung offen; davor SA3 (PR569, [Nachweis](docs/WANDAUFBAU.md)): Schichten im Schnitt – geschnittene Wände mit Aufbau als Schichtstreifen mit Materialfarbe und Schraffur; davor SA2 (PR568, [Nachweis](docs/WANDAUFBAU.md)): Schichten im Grundriss – Füllung je Material mit Schraffur und Dämm-Zickzack, an Ecken auf der Gehrung; davor SA1 (PR567, [Nachweis](docs/WANDAUFBAU.md)): Wandaufbau – Materialien und Wandaufbauten als Projektbibliothek (Schema 43), Reiter „Wandaufbau“ im Werkzeug- und Elementfenster, Wandstärke folgt den Schichten; davor TR4 (PR566, [Nachweis](docs/TREPPE.md)): Treppenlänge mit der Maus ziehen – Steigungsanzahl bleibt, Auftritt folgt und wird fest gespeichert; Live-Werte mit DIN-Hinweis; davor G2 (PR565, [Nachweis](docs/FENSTER_TUEREN.md)): Mengen an jeder Öffnung (Width/Height/Depth) und immer an Fenstern und Türen im IFC – für die Archicad-Beschriftung; Prüfung in Archicad offen; davor BS2 (PR564, [Nachweis](docs/SCHNITT.md)): Höhenkoten im Maßkettenwerkzeug – im Schnitt-/Ansichts-Tab Lage klicken, Punkte mit Fang, Doppelklick erstellt DIN-Koten (Rohbau/Fertig); auswählen, verschieben, löschen; davor BS1 (PR563, [Nachweis](docs/SCHNITT.md)): Schnitt und Ansicht mit Rand an den Linienenden, Geschosshöhen links und rechts außerhalb als DIN-Höhenkote (Rohbau); davor U2 (PR562, [Nachweis](docs/OBERFLAECHE.md)): Canvas aufgeräumt – keine Knopfleiste oben rechts (auch kein Vollbild), kein px/m-Kästchen, XYZ-Pfeile nur in 3D; davor S4-Nacharbeit (PR561, [Nachweis](docs/TRANSPARENZPAUSE.md)): Wandanfang rastet exakt am Ende einer Pausenwand ein; davor U1 (PR560, [Nachweis](docs/OBERFLAECHE.md)): Oberfläche entschlackt – kein 2D/3D-Umschalter (Tabs), Grid/SNAP nur unten, keine Plakette und kein Infotext im Canvas, kein Ansichtswürfel, KI-Leiste nur Eingabe mit zwei Knöpfen; davor E1 (PR559, [Nachweis](docs/ECKEN.md)): Ecke anklicken bewegt sie sofort – Wandenden und Wandkörperecken per Punktbearbeitung, Stützen und Treppen mit Eckgriffen per Gruppenverschiebung; davor S4 (PR558, [Nachweis](docs/TRANSPARENZPAUSE.md)): Transparenzpause unter dem Navigator – anderes Geschoss (Wände, Stützen) blass unter dem Grundriss, Deckkraft und Farbe, Fang an der Pause; davor S3 (PR557, [Nachweis](docs/LINIEN.md)): Längen-Hilfslinie an gewählten Linien – Länge per Klick auf die Zahl, türkise Pfeile für Ende, Anfang oder beide (Mitte bleibt); davor S2 (PR556, [Nachweis](docs/ANSICHTEN.md)): Ansichtssymbol als Linie mit Blickpfeil ohne Endstriche, Symbolgröße Schnitt/Ansicht 2,5 mm; davor S1 (PR555, [Nachweis](docs/FENSTER_TUEREN.md)): 3D ohne Hintergrundraster, Fenster und Türen mit Element in 3D anwählbar (Auswahlindex kannte Elementteile nicht); davor Fensterflügel FL4 (PR554, [Nachweis](docs/FENSTER_TUEREN.md)): PartitioningType und IfcWindowPanelProperties je Paneel im IFC, Abnahmedatei mit Flügeln; davor Fensterflügel FL3 (PR553, [Nachweis](docs/FENSTER_TUEREN.md)): Öffnungssymbole Dreh/Kipp/Dreh-Kipp nach DIN 1356 in Ansicht und Schnitt, Bandseite aus dem Anschlag, gestrichelt von außen; davor Fensterflügel FL2 (PR552, [Nachweis](docs/FENSTER_TUEREN.md)): Flügelrahmen, Pfosten, Kämpfer und Oberlicht als Körper in 3D, Schnitt und IFC, Grundriss mit allen Scheiben und Hölzern; davor Fensterflügel FL1 (PR551, [Nachweis](docs/FENSTER_TUEREN.md)): Teilungen 1-/2-flüglig und mit Oberlicht, Öffnungsart und Anschlag je Flügel, Passprüfung, Felder im Werkzeug- und Elementfenster; davor Ansichten A1 (PR550, [Nachweis](docs/ANSICHTEN.md)): Werkzeug „Ansicht“, „Vier Ansichten erzeugen“ (N/O/S/W), Ansichtssymbol im Grundriss, Ordner „Ansichten“, Zeichnung ohne Schnitt; davor Fenster/Türen R1 (PR549, [Nachweis](docs/FENSTER_TUEREN.md)): Seite per zweitem Klick beim Platzieren – Außenseite des Fensters bzw. Aufschlagseite der Tür, Vorschau folgt dem Zeiger; davor Fenster/Türen G1 (PR548, [Nachweis](docs/FENSTER_TUEREN.md)): nach Archicad-Rückmeldung (Elemente richtig, Glas grau, Beschriftung 0,00) Oberflächenstile je Elementteil im IFC (Glas 70 % transparent) und durchscheinendes Glas in 3D; davor Fenster/Türen FT4 (PR547, [Nachweis](docs/FENSTER_TUEREN.md)): Elementkörper (SweptSolid je Teil) und Laibung (IfcWindowLiningProperties/IfcDoorLiningProperties am Typ) im IFC, Abnahmedatei für Archicad; davor Fenster/Türen FT3 (PR546, [Nachweis](docs/FENSTER_TUEREN.md)): Grundrisssymbol aus dem Element – Fensterpfosten geschnitten, Glaslinie, Fensterbänke; Zargenpfosten und Türblatt in der lichten Breite; davor Fenster/Türen FT2 (PR545, [Nachweis](docs/FENSTER_TUEREN.md)): Rahmen, Glas, Fensterbänke, Zarge und Türblatt als abgeleitete Körper in 3D (eigene Farben, Auswahl wählt Fenster/Tür) und im Schnitt (Umrisse ohne Schnittfarbe, Glas als Doppellinie); davor Fenster/Türen FT1 (PR544, [Nachweis](docs/FENSTER_TUEREN.md)): Schema 42 – optionales Fenster- bzw. Türelement je Öffnung (Rahmen, Lage, Außenseite, Festverglasung, Fensterbänke; Zarge, Blatt), Passprüfung gegen Öffnung und Wand, Werkzeuge setzen Öffnung und Element zusammen („nur Öffnung“ wählbar), Rubrik im Werkzeug- und Elementfenster; davor Werkzeugleiste WL2 (PR543, [Nachweis](docs/WERKZEUGLEISTE.md)): eigene Piktogramme für Wand, Stütze, Treppe, Fenster, Decke, Dach und Schnitt; davor Werkzeugleiste WL1 (PR542, [Nachweis](docs/WERKZEUGLEISTE.md)): nur noch schmale Leiste, Auswahl oben, Rubriken 3D/2D/Dokumentation, Anordnung im Fenster „Werkzeugleiste anpassen“ frei sortierbar (Ziehen, Pfeiltasten) und im Browser gespeichert; davor Schnitt SC5 (PR541, [Nachweis](docs/SCHNITT.md)): Schnittlinie im Grundriss mit dem Pfeil-Werkzeug auswählen, mit Griffen verschieben, verlängern und kürzen (Shift: nur Länge), Entf löscht, Länge im Fenster; Fenster-/Türkörper im Schnitt nach Nutzerentscheid nicht erfunden, solange es nur Öffnungen gibt; davor Schnitt SC4 (PR540, [Nachweis](docs/SCHNITT.md)): Schnittsymbol im Grundriss mit fester Größe in mm Papier oder m Modell (Vorgabe 5 mm), einstellbar wie beim Text; Bauteile, in denen die Schnittlinie beginnt oder endet, im Schnitt geschlossen und gefüllt; davor Schnitt SC3 (PR539, [Nachweis](docs/SCHNITT.md)): Schnittzeichnung aus dem Gebäudekörper im Schnitt-Tab – geschnittene Bauteile als geschlossene Umrisse in der Schnittfarbe, Ansicht dahinter mit sichtbaren Kanten, Geschosslinien mit Koten, Zoom/Pan; davor Schnitt SC2 (PR538, [Nachweis](docs/SCHNITT.md)): Werkzeug „Schnitt“ mit Klick Anfang/Ende/Blickseite, Schema 41 (Schnitte gehören zum Gebäude, sichtbar in allen Geschossen), Kennung A, B, … oder 1, 2, …, Elementfenster per Doppelklick, Einträge im Ordner „Schnitte“, Schnitt als Canvas-Tab; davor Schnitt SC1 (PR537, [Nachweis](docs/SCHNITT.md)): Canvas-Tabs (Grundriss und 3D-Ansicht, „+“ und ×, jeder Ansichtswechsel öffnet den passenden Tab) und Navigatorordner „Schnitte“; davor Treppe TR3 (PR536, [Nachweis](docs/TREPPE.md)): L- und U-Treppe mit Zwischenpodest, dritter Klick wählt die Wendung, Prüfung Podesttiefe und max. 18 Steigungen je Lauf, 3D mit Podestplatte, IFC mit zwei Läufen und IfcSlab LANDING; davor Treppe TR2 (PR535, [Nachweis](docs/TREPPE.md)): Werkzeug „Treppe“ mit Zeichenachse Mitte/Links/Rechts, Zwei-Klick-Zeichnen mit voller Vorschau, alle Angaben in Leiste/Einstellungs-/Elementfenster mit Live-DIN-Prüfung, Grundriss mit Stufen, Lauflinie, Schnittlinie; davor Treppe TR1 (PR534, [Nachweis](docs/TREPPE.md)): gerade Treppe mit allen Angaben als eigene Werte, Rechnung und Prüfung nach DIN 18065, Schema 40 mit Standardebene Treppe, 3D-Körper, IFC IfcStair/IfcStairFlight; davor Maßketten-Darstellung nach Bauzeichnungs-Praxis (PR533, [Nachweis](docs/MASSKETTE.md)): Begrenzung Schrägstrich/Punkt/Kreis/Pfeil/Kreuz, Maßzahlen m/cm mit hochgestellter 5, Schrifthöhe, Hilfslinien mit Überstand; davor Text-Eingabefeld mit allen Einstellungen und Live-Vorschau (PR532) und Text T2 (PR531, [Nachweis](docs/TEXT.md)): fett/kursiv/unterstrichen, Hinterlegung, Umrandung, Freistellung, Darstellung mit gemessener Textbreite; davor Text T1 (PR530, [Nachweis](docs/TEXT.md)): Textwerkzeug mit Eingabefeld im Plan, Schrift (Systemfamilien), Größe in mm Papier oder m Modell (Umrechnung beim Umschalten), Ausrichtung, Drehung, Farbe; Schema 39; davor Maßkette bearbeiten (PR529, [Nachweis](docs/MASSKETTE.md)): Punkte über das On-Demand-Menü ergänzen/entfernen, Maßlinie verschieben, Menü bereinigt; Fenster mit Laibungs-Fangpunkten; davor Maßkette als 2D-Werkzeug (PR528, [Nachweis](docs/MASSKETTE.md)): Richtung waagerecht/senkrecht, erster Klick Lage der Maßlinie, weitere Klicks Messpunkte mit Fang, Doppelklick ins Leere erstellt die Kette; Schema 38; Fang an Bauteilpunkten auch für Stütze/Maßkette; davor Stützen vollständig (PR525–527, [Nachweis](docs/STUETZEN.md)): P3 (PR527) Verschieben als Ganzes, Fangpunkte Mitte/Ecken/Rand, Pipette, Archicad-Prüfdatei NOVIKOV-Stuetzen-Test.ifc; davor Stützen P2 (PR526, [Nachweis](docs/STUETZEN.md)): Werkzeug Stütze mit Vorgaben in Leiste und Einstellungsfenster (Reiter Stütze, Bauzustand), Grundriss geschnitten in der Schnittfarbe, Eigenschaften und Elementfenster; davor Stützen P1 (PR525, [Nachweis](docs/STUETZEN.md)): Bauteil Stütze (Rechteck/Kreis, Drehung, Geschossbindung oder feste Höhe, Bauzustand), Schema 37 mit Standardebene Stütze, 3D-Prisma, IFC IfcColumn mit parametrischem Profil; davor Glas-Paletten (PR524, [Nachweis](docs/GLAS_PALETTEN.md)): eine durchgehende Zeichenfläche, Werkzeugeigenschaften, Werkzeugkasten und Navigator schweben als Glas darüber, Einpassen im freien Bereich, Navigatorbreite ziehbar; Testliste in package.json testFiles (Windows-Befehlszeilengrenze); davor Bauzustand-Nacharbeit und weiße Zeichenfläche (PR523, [Nachweis](docs/BAUZUSTAND.md)): Doppelklick öffnet das Elementfenster auch im Zeichenwerkzeug ohne laufende Zeichnung, Bauzustand in der Eigenschaftsleiste, Farbschalter im Reiter, Canvas weiß; davor S2 Bauzustand der Wände (PR521, [Nachweis](docs/BAUZUSTAND.md)): Bestand/Neubau/Abbruch als Wand-Eigenschaft (Schema 36), Reiter „Bauzustand“ im Wandwerkzeug (Vorgabe Neubau) und im Wandfenster, farbige Anzeige unter View → Darstellung (Neubau rot, Abbruch gelb, Bestand in der Schnittfarbe), IFC Pset_WallCommon.Status; davor S1 Schnittfarbe (PR520, [Nachweis](docs/SCHNITTDARSTELLUNG.md)): View → „Darstellung…“ mit Grau/Schwarz/Weiß/eigener Farbe für geschnittene Wände und Dachschnitte, im Browser gespeichert; davor Hilfsfenster kompakt (PR519, [Nachweis](docs/HILFSFENSTER.md)): On-Demand-Menü und Eingabefenster Winkel/Länge kleiner, merken die verschobene Position auch nach dem Neuladen, Doppelklick auf die Titelzeile setzt zurück; Eingabefenster ohne Knöpfe und Infotext (Enter, Tab, Esc); davor E2 Einstellungsfenster (PR518, [Nachweis](docs/EINSTELLUNGSFENSTER.md)): jedes Werkzeug mit Vorgabenfenster per Doppelklick, immer nur ein Fenster, einheitliche Lage und Größe, neue Werkzeugreihenfolge; davor E1 (PR517, [Nachweis](docs/EINSTELLUNGSFENSTER.md)): Doppelklick auf Werkzeugknopf öffnet die Vorgaben (Wand, Fenster, Tür, Dach, Raum), Doppelklick auf ein Element in 2D/3D dessen Fenster mit allen Eigenschaften; Regel in AGENTS.md; davor L04b Wände an Dachflächen trimmen vollständig (PR515–516, [Nachweis](docs/TRIMMEN_L04B.md)): Teil 2 (PR516) Trimmen… mit Bestätigung, Trimmung aufheben, Anzeige in den Wand-Eigenschaften, IFC als facettierter Körper, Archicad-Prüfdatei; davor Teil 1 (PR515, [Nachweis](docs/TRIMMEN_L04B.md)): Wände an Dachflächen trimmen – Trimmverweis (Schema 35), Schnitt bei jeder Prüfung aus dem aktuellen Dach abgeleitet, Wand bis zur Dachunterseite geführt und gekappt, Öffnungen über dem Dach abgelehnt; davor K2 Darstellungsreihenfolge (PR514, [Nachweis](docs/DARSTELLUNGSREIHENFOLGE.md)): Ganz nach vorne/nach vorne/nach hinten/ganz nach hinten innerhalb derselben Objektart im Rechtsklickmenü; davor K1 Rechtsklickmenü, Modify-Menü und Zwischenablage (PR513, [Nachweis](docs/KONTEXTMENUE.md)): Rechtsklick in 2D/3D mit Ausschneiden/Kopieren/Einfügen/Löschen/Pipette/Werkzeugeinstellungen, Modify-Menü nur Pipette/Trimmen, Zwischenablage über das Element-Register; davor Raum R4 (PR512, [Nachweis](docs/ROOM_ELEMENT.md)): Raumliste als Abfrage (Organisation → Raumliste, Summen, CSV für Excel), IfcSpace je Raum mit Mengen und Höhenwerten, Archicad-Prüfdatei; Raumwerkzeug R1–R4 damit abgeschlossen; davor Tab-Auswahl bei übereinanderliegenden Elementen (PR511, [Nachweis](docs/TAB_AUSWAHL.md)): knapper Hinweis am Cursor, Tab öffnet die Liste und schaltet durch, dünne türkise Umrandung, Linksklick übernimmt; über das Element-Register für alle (auch künftige) Objektarten; löst die Auswahl eines Raumes unter Dach/Decke; davor Raum R3b (PR510, [Nachweis](docs/ROOM_ELEMENT.md)): Höhenlinien als eigene Einträge mit Höhe, Farbe, Linienart aus den Einstellungen, Unter- und Oberkante (z. B. 2,30 m bis Außenkante Dachhaut), Fläche ab Linie und Anteil, Bearbeitung im Fenster Raum-Einstellungen und je Raum, Schema 34; davor R3 (PR509, [Nachweis](docs/ROOM_ELEMENT.md)): lichte Höhe aus Decken und Dächern des eigenen Geschosses, Höhenlinien 1,00/2,00 m je Raum änderbar, Fläche je Höhenzone, Teile ohne Höhenquelle sichtbar offen, Schema 33; davor R2 (PR508, [Nachweis](docs/ROOM_ELEMENT.md)): Raumwerkzeug mit Leiste und Einstellungsfenster, Raum per Klick zwischen Wänden, Raumstempel, Eigenschaften, Bearbeitung wie Decke; davor R1 (PR507): Raummodell mit Nummer R-001 und optionalem Fußbodenaufbau, Schema 32; davor einflächiges Dach N61 vollständig (PR502–506, [Nachweis](docs/ROOF_ELEMENT.md)); zuletzt D5 (PR506): Übersichten, IFC als IfcRoof/IfcSlab ROOF mit geschlossenem Körper, Archicad-Prüfdatei, Leistung im Schulmodell; davor D4 (PR505): Grundriss mit Schnitt bei 1,00 m (Schnitt wie Wand, darunter dünn, darüber gestrichelt); davor D3 (PR504): Dachwerkzeug (Bezugslinie, Steigseite, Umriss), Leiste und Doppelklick-Fenster, Eigenschaften, Bearbeitung wie Decke; davor D2 (PR503): geschlossener 3D-Körper mit Auswahl; davor D1 (PR502, N61, [Nachweis](docs/ROOF_ELEMENT.md)): Dachmodell mit Flächen- und Abschlussgeometrie, Schema 31; davor drei IFC-Testvarianten für Fenster-/Türmaße in Archicad (PR501, [Nachweis](docs/T_IFC_ACCEPTANCE.md)); davor Sicherungshinweis dezent unten links statt Fenster oben rechts (PR500, [Nachweis](docs/SICHERUNGSHINWEIS.md)); davor Decken C3 Variante A (PR499): Wand und Decke in 3D ohne Flimmern bei gleichem Vorrang; Zielbild Materialvorrang 0–100 festgehalten ([Nachweis](docs/SLAB_ELEMENT.md)); davor Polygon-Regeln vollständig (PR495–498, [Nachweis](docs/POLYGON_REGELN.md)); zuletzt Teil D (PR498): Fangpunkte benannt („Decke · Ecke 3“, „Wand · Anfang“) statt „Endpunkt“; davor Teil C (PR497): Klick auf eine Ecke bewegt sie sofort, Ecke auf eine andere Ecke desselben Elements löscht sie (mind. 3 Ecken), gemeinsame Bausteine für alle Elemente mit Eckenliste; davor Teil B (PR496): Schließen per Klick auf den Startpunkt als gemeinsamer Baustein für alle Klick-für-Klick-Werkzeuge, Startpunkt mit Fangvorrang; davor Teil A (PR495, [Nachweis](docs/POLYGON_REGELN.md)): neue Projekte mit Erdgeschoss und 1. Obergeschoss je 3,00 m, Decke im Grundriss nur als durchgezogene Konturlinie, Decke damit sofort in 3D; davor Deckenumriss im Grundriss bearbeiten (PR494) nach Umzug der Bearbeitungssitzung aus lib/bim (PR493, 19 Architektur-Ausnahmen weniger); davor Übersichten zählen Türen/Decken (PR491) und Arbeitsweise/Browser-Start/Wiederaufnahme gesichert (PR492, `docs/WIEDERAUFNAHME.md`); davor Decken Teil C1: Wandhöhe an Geschoss gebunden (Oberkante = OK Rohfußboden darüber + Zusatzhöhe, auch Attika im obersten Geschoss; Schema 30, PR490, [Nachweis](docs/SLAB_ELEMENT.md)); davor Decken Teil B (PR487–489) und Teil A (PR486).
 - **Aktiver Einzelauftrag:** Fenster-/Türelemente (Nutzervorgabe 01.11.2026, docs/FENSTER_TUEREN.md): FT1 Datenmodell und Einstellungen erledigt (PR544, Schema 42), FT2 Körper in 3D und Schnitt erledigt (PR545), FT3 Grundrisssymbol erledigt (PR546), FT4 IFC erledigt (PR547) und in Archicad bestätigt, G1 Glas/Farben erledigt (PR548) und in Archicad 26 bestätigt; R1 Seite per Klick erledigt (PR549); Ansichten A1 erledigt (PR550, docs/ANSICHTEN.md); Fensterflügel FL1 (PR551) und FL2 Flügelkörper (PR552) und FL3 Öffnungssymbole (PR553) und FL4 IFC (PR554) erledigt, Archicad-Prüfung offen (ifc-abnahme/FL4-Fensterfluegel.ifc, Händigkeit der Paneele angenommen); G2 Beschriftung „0,00 x 0,00“ offen – Archicad 26 erkennt die Fenster als Fenster mit richtigen Maßen, nur der Marker zeigt 0,00 (Prüfung der Markereinstellung durch den Nutzer), später Flügel und Öffnungsarten; Werkzeugleiste (Nutzervorgabe 01.11.2026, docs/WERKZEUGLEISTE.md): WL1 Rubriken und eigene Anordnung erledigt (PR542), WL2 Piktogramme erledigt (PR543, Bewertung durch den Nutzer offen), als Nächstes Fenster-/Türelemente in den Öffnungen (eigene Änderungskarte); L11 Werkzeug „Schnitt“ (Nutzerauftrag 01.11.2026, SC1–SC5, docs/SCHNITT.md): SC1 Canvas-Tabs und Ordner „Schnitte“ erledigt (PR537), SC2 Werkzeug mit Name/Kennung erledigt (PR538, Schema 41), SC3 Schnittzeichnung erledigt (PR539), SC4 Symbolgröße und geschlossene Schnittumrisse am Linienende erledigt (PR540), SC5 Schnittlinie auswählen/verschieben/verlängern erledigt (PR541); Fenster-/Türkörper erst mit eigenen Fenster-/Türelementen; später Fenster-/Türkörper, Tiefenbegrenzung, Bemaßung und Ablage als Abbild; Raumwerkzeug in vier PRs (Reihenfolge K1 → K2 Darstellungsreihenfolge → L04b Wände an Dach trimmen mit Bestätigung; Einstellungsfenster für jedes Werkzeug (Nutzervorgabe 31.10.2026): E1 und E2 erledigt; Hilfsfenster kompakt erledigt (PR519, Piktogramme folgen vom Nutzer); L05 Stützen (Nutzerauftrag 31.10.2026, drei PRs): P1–P3 erledigt (PR525–527), offen nur die Archicad-Prüfung durch den Nutzer; L12 Bemaßung nach Nutzervorgabe 31.10.2026 als 2D-Maßkettenwerkzeug: Logik (PR528) und Bearbeiten über das On-Demand-Menü (PR529) erledigt; Texte (Nutzervorgabe 31.10.2026): T1 (PR530) und T2 Gestaltung (PR531) erledigt, später freie Schriften mit Zustimmung; Text-Eingabefeld (PR532) und Maßketten-Darstellung (PR533) erledigt; später AI-Ketten nach Bemaßungsregeln; L06 Treppen (Nutzerauftrag 31.10.2026, alle Angaben langfristig im Einstellungsfenster): TR1 (PR534), TR2 Werkzeug/Grundriss (PR535) und TR3 L/U-Podesttreppen (PR536) erledigt, später gewendelte Stufen/Wendeltreppe; Wanddarstellung (Nutzervorgabe 31.10.2026): S1 Schnittfarbe (PR520) und S2 Bauzustand (PR521) erledigt, offen nur die Archicad-Prüfung des IFC-Status; nächster Auftrag nach Nutzerwahl, Vorschläge L21 Fenster/Türen im IFC, L17 Modell befragen ([Nachweis](docs/TRIMMEN_L04B.md)); Raumwerkzeug R1–R4 abgeschlossen und in Archicad bestätigt, [Plan](docs/ROOM_ELEMENT.md)). Dach N61 abgeschlossen; in Archicad sauber, aber als Objekt nicht bearbeitbar.
 - **Nächster Produktmeilenstein:** AUD14-Reste nach Nutzerentscheidung bearbeiten oder als bekannte Grenzen führen ([Kandidaten](docs/AUD14_ABGLEICH.md)), danach das nächste Fachbauteil aus §6 Abschnitt 2.
 - **Blocker 1:** Release-Gates ohne Testumgebung: echte Quota, echte Mehr-Tab-Fälle, Lauf ≥ 2 h, Native-/GPU-/Prozessspeicher (AUD14-03/06/07; [Nachweis](docs/AUD14_ABGLEICH.md)).
 - **Blocker 2 (zurückgestellt):** IFC-Fenster/-Türen ohne Maße in Archicad (RB 0,00 x 0,00). Drei Testvarianten (PR501) helfen nicht (Nutzer 29.10.2026); Nutzerentscheidung: Export bleibt bei Öffnungen, Maße kommen mit echten Fenster-/Türbauteilen ([Nachweis](docs/T_IFC_ACCEPTANCE.md)).
 - **Blocker 3:** Speicher-/Lade-Brücke aus `lib/bim/model.ts` wartet auf die Nutzerentscheidung zur interop-Grenze (§9).
 
-Geprüfte Code-Basis: 01.11.2026, main `10625c0` nach PR573 (ML2+ML3, Bauteilliste), main `99dc966` nach PR572 (ML1, Mengenabfrage), main `214dd92` nach PR571 (L38, Lint-Warnungen), main `ee113f8` nach PR570 (SA4, Wandaufbau im IFC), main `2b6f96a` nach PR569 (SA3, Schichten im Schnitt), main `0f39c1e` nach PR568 (SA2, Schichten im Grundriss), main `28562d3` nach PR567 (SA1, Wandaufbau-Datenmodell), main `ca554c3` nach PR566 (TR4, Treppe ziehen), main `0405ea9` nach PR565 (G2, IFC-Mengen), main `0a291ca` nach PR564 (BS2, Höhenkoten), main `b71107b` nach PR563 (BS1, Rand und Geschosskoten), main `bbd1ce3` nach PR562 (U2, Canvas aufgeräumt), main `0260a3d` nach PR561 (S4-Nacharbeit, Pausenfang), main `92bc4ce` nach PR560 (U1, Oberfläche entschlackt), main `933be24` nach PR559 (E1, Ecken anklicken), main `d7ece9b` nach PR558 (S4, Transparenzpause), main `39fe3e4` nach PR557 (S3, Längen-Hilfslinie), main `80b0713` nach PR556 (S2, Ansichtssymbol und Symbolgröße), main `47bde33` nach PR555 (S1, 3D-Raster und Anwählbarkeit), main `e85e4aa` nach PR554 (Fensterflügel FL4), main `a76744f` nach PR553 (Fensterflügel FL3), main `b8433d1` nach PR552 (Fensterflügel FL2), main `bd80015` nach PR551 (Fensterflügel FL1), main `4bea234` nach PR550 (Ansichten A1), main `a964126` nach PR549 (Fenster/Türen R1, Seite per Klick), main `8eabd68` nach PR548 (Fenster/Türen G1, Glas und Farben), main `f76e429` nach PR547 (Fenster/Türen FT4, IFC), main `fdd82d1` nach PR546 (Fenster/Türen FT3, Grundrisssymbol), main `082af26` nach PR545 (Fenster/Türen FT2, Körper in 3D und Schnitt), main `b4823e3` nach PR544 (Fenster/Türen FT1, Schema 42), main `ff0053f` nach PR543 (Werkzeugleiste WL2, Piktogramme), main `8fdd5f4` nach PR542 (Werkzeugleiste WL1), main `e8da0fb` nach PR541 (Schnitt SC5, Schnittlinie bearbeiten), main `be4a7a3` nach PR540 (Schnitt SC4, Symbolgröße, Schnittumrisse), main `8d8eb16` nach PR539 (Schnitt SC3, Schnittzeichnung), main `4f3f936` nach PR538 (Schnitt SC2, Werkzeug, Schema 41), main `214df0c` nach PR537 (Schnitt SC1, Canvas-Tabs), PR536 (Treppe TR3, L/U mit Podest), PR535 (Treppe TR2, Werkzeug und Grundriss), PR534 (Treppe TR1, Schema 40), PR533 (Maßketten-Darstellung), PR532 (Text-Eingabefeld), PR531 (Text T2), PR530 (Text T1, Schema 39), PR529 (Maßkette bearbeiten, Fensterfang), PR528 (Maßkette, Schema 38), PR527 (Stützen P3), PR526 (Stützen P2), PR525 (Stützen P1, Schema 37), PR524 (Glas-Paletten), PR523 (Bauzustand-Nacharbeit, Canvas weiß), PR522 (Archicad-Prüfdatei Bauzustand) und PR521, 14-Modell-Hash neu 089f79e4…97017b3 (nur IFC-Status je Wand; Körper ohne IFC bitgleich); AUD14-Abgleich am Stand 07f88e1 (docs/AUD14_ABGLEICH.md). In main integriert: PR447–PR573 (mit PR453; PR462 über PR463) – zuletzt Wartezeit Teil B (PR464), Wandanschlüsse (PR465), Treffertoleranz (PR466), 3D/Autosicherung (PR467), schräge T-Anschlüsse (PR468) schräge Ecke an einer T-Hauptwand (PR469) T-Anschluss automatisch in jedem Winkel (PR470) Sicherungsprüfungen gezielt vermeiden (PR471) Picking-Index je Geschoss (PR472) Versatz-Befehl ohne Serialisieren (PR473) Sichtbarkeitsprüfung beim Fangen mit Index (PR474) Autosicherung prüft nur geänderte Bilder (PR475) Autosicherung prüft das Modell nicht mehrfach (PR476) IFC-Abnahme der T-Anschlüsse vorbereitet (PR477) IFC-Dateibeschreibung vom Aufrufer (PR478) kleine AUD14-07-Reste (PR479) erweiterter Schullauf (PR480) Z-/XY-Bewegung ohne Gesamtprüfung beim Übernehmen (PR481) schnellerer Start der Gruppenbewegung (PR482) Undo/Redo mit Wiederverwendung von Geschossteil und Wandfuß-Fangquellen (PR483) Umzug des Geschosskörpers aus lib/bim (PR484) Ersatzzeichen-Reparatur mit erweiterter Kodierungsprüfung (PR485) Decke als Bauteil Teil A (PR486) und Teil B: 3D (PR487), IfcSlab (PR488), Bearbeiten (PR489), Wandhöhe an Geschoss gebunden (PR490), Übersichten mit Türen/Decken (PR491), Arbeitsweise und Wiederaufnahme (PR492), Bearbeitungssitzung aus lib/bim (PR493), Deckenumriss bearbeiten (PR494), Polygon-Regeln A: Standardgeschosse und Decke als Konturlinie (PR495), Polygon-Regeln B: Schließen am Startpunkt (PR496), Polygon-Regeln C: Ecken bewegen/löschen (PR497), Polygon-Regeln D: Fangpunkte benennen (PR498), Decken C3 Variante A (PR499), Sicherungshinweis unten links (PR500), IFC-Testvarianten Fenster/Türen (PR501), Dach D1 Modell (PR502), D2 3D-Körper (PR503), D3 Werkzeug (PR504), D4 Grundriss (PR505), D5 IFC/Abschluss (PR506), Raum R1 Modell (PR507), Raum R2 Werkzeug (PR508), Raum R3 Höhen (PR509), Raum R3b Höhenlinien (PR510), Tab-Auswahl (PR511), Raum R4 Raumliste/IfcSpace (PR512), K1 Rechtsklickmenü/Zwischenablage (PR513), K2 Darstellungsreihenfolge (PR514), L04b Teil 1 Trimmen (PR515), L04b Teil 2 Bedienung/IFC (PR516), E1 Einstellungsfenster (PR517), E2 Einstellungsfenster einheitlich (PR518). PR318 als überholt durch PR371 geschlossen. Keine offenen PRs. Einziger aktiver Folgeauftrag §9.
+Geprüfte Code-Basis: 02.11.2026, main `eaae513` nach PR574 (L09 U1, Fußhöhen an Anschlüssen), main `10625c0` nach PR573 (ML2+ML3, Bauteilliste), main `99dc966` nach PR572 (ML1, Mengenabfrage), main `214dd92` nach PR571 (L38, Lint-Warnungen), main `ee113f8` nach PR570 (SA4, Wandaufbau im IFC), main `2b6f96a` nach PR569 (SA3, Schichten im Schnitt), main `0f39c1e` nach PR568 (SA2, Schichten im Grundriss), main `28562d3` nach PR567 (SA1, Wandaufbau-Datenmodell), main `ca554c3` nach PR566 (TR4, Treppe ziehen), main `0405ea9` nach PR565 (G2, IFC-Mengen), main `0a291ca` nach PR564 (BS2, Höhenkoten), main `b71107b` nach PR563 (BS1, Rand und Geschosskoten), main `bbd1ce3` nach PR562 (U2, Canvas aufgeräumt), main `0260a3d` nach PR561 (S4-Nacharbeit, Pausenfang), main `92bc4ce` nach PR560 (U1, Oberfläche entschlackt), main `933be24` nach PR559 (E1, Ecken anklicken), main `d7ece9b` nach PR558 (S4, Transparenzpause), main `39fe3e4` nach PR557 (S3, Längen-Hilfslinie), main `80b0713` nach PR556 (S2, Ansichtssymbol und Symbolgröße), main `47bde33` nach PR555 (S1, 3D-Raster und Anwählbarkeit), main `e85e4aa` nach PR554 (Fensterflügel FL4), main `a76744f` nach PR553 (Fensterflügel FL3), main `b8433d1` nach PR552 (Fensterflügel FL2), main `bd80015` nach PR551 (Fensterflügel FL1), main `4bea234` nach PR550 (Ansichten A1), main `a964126` nach PR549 (Fenster/Türen R1, Seite per Klick), main `8eabd68` nach PR548 (Fenster/Türen G1, Glas und Farben), main `f76e429` nach PR547 (Fenster/Türen FT4, IFC), main `fdd82d1` nach PR546 (Fenster/Türen FT3, Grundrisssymbol), main `082af26` nach PR545 (Fenster/Türen FT2, Körper in 3D und Schnitt), main `b4823e3` nach PR544 (Fenster/Türen FT1, Schema 42), main `ff0053f` nach PR543 (Werkzeugleiste WL2, Piktogramme), main `8fdd5f4` nach PR542 (Werkzeugleiste WL1), main `e8da0fb` nach PR541 (Schnitt SC5, Schnittlinie bearbeiten), main `be4a7a3` nach PR540 (Schnitt SC4, Symbolgröße, Schnittumrisse), main `8d8eb16` nach PR539 (Schnitt SC3, Schnittzeichnung), main `4f3f936` nach PR538 (Schnitt SC2, Werkzeug, Schema 41), main `214df0c` nach PR537 (Schnitt SC1, Canvas-Tabs), PR536 (Treppe TR3, L/U mit Podest), PR535 (Treppe TR2, Werkzeug und Grundriss), PR534 (Treppe TR1, Schema 40), PR533 (Maßketten-Darstellung), PR532 (Text-Eingabefeld), PR531 (Text T2), PR530 (Text T1, Schema 39), PR529 (Maßkette bearbeiten, Fensterfang), PR528 (Maßkette, Schema 38), PR527 (Stützen P3), PR526 (Stützen P2), PR525 (Stützen P1, Schema 37), PR524 (Glas-Paletten), PR523 (Bauzustand-Nacharbeit, Canvas weiß), PR522 (Archicad-Prüfdatei Bauzustand) und PR521, 14-Modell-Hash neu 089f79e4…97017b3 (nur IFC-Status je Wand; Körper ohne IFC bitgleich); AUD14-Abgleich am Stand 07f88e1 (docs/AUD14_ABGLEICH.md). In main integriert: PR447–PR574 (mit PR453; PR462 über PR463) – zuletzt Wartezeit Teil B (PR464), Wandanschlüsse (PR465), Treffertoleranz (PR466), 3D/Autosicherung (PR467), schräge T-Anschlüsse (PR468) schräge Ecke an einer T-Hauptwand (PR469) T-Anschluss automatisch in jedem Winkel (PR470) Sicherungsprüfungen gezielt vermeiden (PR471) Picking-Index je Geschoss (PR472) Versatz-Befehl ohne Serialisieren (PR473) Sichtbarkeitsprüfung beim Fangen mit Index (PR474) Autosicherung prüft nur geänderte Bilder (PR475) Autosicherung prüft das Modell nicht mehrfach (PR476) IFC-Abnahme der T-Anschlüsse vorbereitet (PR477) IFC-Dateibeschreibung vom Aufrufer (PR478) kleine AUD14-07-Reste (PR479) erweiterter Schullauf (PR480) Z-/XY-Bewegung ohne Gesamtprüfung beim Übernehmen (PR481) schnellerer Start der Gruppenbewegung (PR482) Undo/Redo mit Wiederverwendung von Geschossteil und Wandfuß-Fangquellen (PR483) Umzug des Geschosskörpers aus lib/bim (PR484) Ersatzzeichen-Reparatur mit erweiterter Kodierungsprüfung (PR485) Decke als Bauteil Teil A (PR486) und Teil B: 3D (PR487), IfcSlab (PR488), Bearbeiten (PR489), Wandhöhe an Geschoss gebunden (PR490), Übersichten mit Türen/Decken (PR491), Arbeitsweise und Wiederaufnahme (PR492), Bearbeitungssitzung aus lib/bim (PR493), Deckenumriss bearbeiten (PR494), Polygon-Regeln A: Standardgeschosse und Decke als Konturlinie (PR495), Polygon-Regeln B: Schließen am Startpunkt (PR496), Polygon-Regeln C: Ecken bewegen/löschen (PR497), Polygon-Regeln D: Fangpunkte benennen (PR498), Decken C3 Variante A (PR499), Sicherungshinweis unten links (PR500), IFC-Testvarianten Fenster/Türen (PR501), Dach D1 Modell (PR502), D2 3D-Körper (PR503), D3 Werkzeug (PR504), D4 Grundriss (PR505), D5 IFC/Abschluss (PR506), Raum R1 Modell (PR507), Raum R2 Werkzeug (PR508), Raum R3 Höhen (PR509), Raum R3b Höhenlinien (PR510), Tab-Auswahl (PR511), Raum R4 Raumliste/IfcSpace (PR512), K1 Rechtsklickmenü/Zwischenablage (PR513), K2 Darstellungsreihenfolge (PR514), L04b Teil 1 Trimmen (PR515), L04b Teil 2 Bedienung/IFC (PR516), E1 Einstellungsfenster (PR517), E2 Einstellungsfenster einheitlich (PR518). PR318 als überholt durch PR371 geschlossen. Keine offenen PRs. Einziger aktiver Folgeauftrag §9.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -41,17 +41,17 @@ Wände, Öffnungen, Linien, Schraffuren, Räume und spätere Bauteile existieren
 
 ### A02 – Zuständigkeiten und Abhängigkeiten
 
-| Schicht | Verantwortung | Grenze |
-| --- | --- | --- |
-| Core | IDs, technische Verträge, spätere Transaktionen/Abhängigkeiten | Kein React, IFC, Bauteil- oder Sprachwissen |
-| Geometry | Punkte, Vektoren, Segmente, Polygone, Projektion, Schnitt, Transformation, Toleranzen, spätere Solids | Keine Wand-/Raumklassen, UI oder Dateiformate |
-| Domain | Fachmodell, Bauteile, Beziehungen, Geschosse, Höhen, Ebenen, Ansichts-/Dokumentdefinitionen und Invarianten | Keine React-, Renderer-, IFC- oder Dienstanbieterobjekte |
-| Application | Actions/Queries, Auswahl, Bearbeitungssitzungen, Kontextprüfung, Vorschau, Veröffentlichung, History und Fähigkeiten | Keine zweite Fachgeometrie pro Eingabekanal |
-| Constraints | Gemeinsamer Fang, Referenzen, Hilfslinien, Richtung und präzise Eingabe | Wiederverwendung allgemeiner Geometrie; Modellquellen über Adapter |
-| Rendering | Projektion, SVG/WebGL, Picking, Anzeige- und GPU-Caches | Darstellungsdaten bleiben ableitbar und wegwerfbar |
-| Interop/Plattformadapter | Import/Export, Persistenz, lokale Speicherorte, Dialoge, OS, Bibliotheksablage | Domain importiert keine Austausch- oder Plattformimplementierung |
-| AI/Text/Voice | Absichten/Transkripte, strukturierte Parameter, Planung und Werkzeuge | Ruft Application auf, verändert kein JSON/React-State/Mesh direkt |
-| UI/App | Bedienung, Darstellung, flüchtiger Zustand, Routing/Bootstrap | Keine permanente Fachlogik in CadWorkspace oder Komponenten |
+| Schicht                  | Verantwortung                                                                                                        | Grenze                                                             |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Core                     | IDs, technische Verträge, spätere Transaktionen/Abhängigkeiten                                                       | Kein React, IFC, Bauteil- oder Sprachwissen                        |
+| Geometry                 | Punkte, Vektoren, Segmente, Polygone, Projektion, Schnitt, Transformation, Toleranzen, spätere Solids                | Keine Wand-/Raumklassen, UI oder Dateiformate                      |
+| Domain                   | Fachmodell, Bauteile, Beziehungen, Geschosse, Höhen, Ebenen, Ansichts-/Dokumentdefinitionen und Invarianten          | Keine React-, Renderer-, IFC- oder Dienstanbieterobjekte           |
+| Application              | Actions/Queries, Auswahl, Bearbeitungssitzungen, Kontextprüfung, Vorschau, Veröffentlichung, History und Fähigkeiten | Keine zweite Fachgeometrie pro Eingabekanal                        |
+| Constraints              | Gemeinsamer Fang, Referenzen, Hilfslinien, Richtung und präzise Eingabe                                              | Wiederverwendung allgemeiner Geometrie; Modellquellen über Adapter |
+| Rendering                | Projektion, SVG/WebGL, Picking, Anzeige- und GPU-Caches                                                              | Darstellungsdaten bleiben ableitbar und wegwerfbar                 |
+| Interop/Plattformadapter | Import/Export, Persistenz, lokale Speicherorte, Dialoge, OS, Bibliotheksablage                                       | Domain importiert keine Austausch- oder Plattformimplementierung   |
+| AI/Text/Voice            | Absichten/Transkripte, strukturierte Parameter, Planung und Werkzeuge                                                | Ruft Application auf, verändert kein JSON/React-State/Mesh direkt  |
+| UI/App                   | Bedienung, Darstellung, flüchtiger Zustand, Routing/Bootstrap                                                        | Keine permanente Fachlogik in CadWorkspace oder Komponenten        |
 
 Richtung: UI/AI → Application → Domain → Geometry/Core. Rendering und Interop verwenden Domain/Geometry; Domain hängt nicht von ihnen ab. Constraints verwenden Geometry und geeignete lesende Quelladapter. `src/lib/bim` ist Übergangsstruktur. Keine große Neuschreibung, kein Ordnerumbau auf Vorrat, keine leeren Frameworks; funktionierende vertikale Abläufe schrittweise erhalten.
 
@@ -206,6 +206,8 @@ Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, 
 31.10.2026: PR519 (feature/ondemand-menue): Hilfsfenster nach Nutzervorgabe. On-Demand-Menü 144 px mit Kennungen data-command für spätere Piktogramme, Eingabefenster Winkel/Länge 170 px ohne Übernehmen/Maus/Abbrechen und ohne Infotext (Enter, Tab, Esc; Hinweise im Tooltip); beide merken die Position im Browser (P1), Doppelklick auf den Titel setzt zurück. 1374 Tests, Hash unverändert, Browser-Abnahme. main cfbc8b1.
 
 31.10.2026: PR520 (feature/schnittfarbe): S1 Schnittfarbe nach Nutzervorgabe. View → „Darstellung…“ (bisher Canvas-Darstellung) mit Grau (Vorgabe), Schwarz, Weiß (nur Kontur), eigener Farbe für Wände und Dachschnitte im Grundriss; Darstellungseinstellung im Browser. 1377 Tests, Hash unverändert, Browser-Abnahme. main 2977512. Nächster Schritt S2 Bauzustand.
+
+02.11.2026: PR574 (feat/l09-u1-base-heights): L09 Schritt U1: Ecke mit unterschiedlicher Fußhöhe als Stumpfstoß (überdeckende Wand läuft durch), Teilüberdeckung abgelehnt; T-Anschluss bei gemeinsamer Höhe erlaubt; Anschlussknoten über zwei Fußhöhen. 1488 Tests, Hash unverändert, junction-equality 5/5. main eaae513.
 
 01.11.2026: PR573 (feat/l16-ml2-element-list): L16 Schritt 2: Organisation → Bauteilliste, Reiter je Bauteilart und Materialien, Summen je Geschoss/Projekt, CSV je Reiter, Browser-Abnahme. 1487 Tests, Hash unverändert. main 10625c0.
 
@@ -539,31 +541,29 @@ Aktuelle Kurzfassung und offene Grenzen: siehe Statusmatrix in §9 (Codeabgleich
 
 Bewertung aus 99 Repository-Dokumenten, Schema-/Modell-/History-/Kontextcode und vorhandenen Testpfaden zum genannten Commit. Keine vollständige Laufzeitprüfung in diesem Konsolidierungsauftrag. Letzter dokumentierter Code-Nachweis: 796 Tests, Typprüfung einschließlich Benchmarks und Build erfolgreich, Lint 0 Fehler/6 bekannte Warnungen; Quelle Kopf des bisherigen Entwicklungsplans. Diese Zahlen sind keine hier neu ausgeführten Tests.
 
-| Bereich | In main vorhanden | Grenze/offen |
-| --- | --- | --- |
-| Stack | TypeScript, React/TSX, Vite; SVG-Plan, WebGL-3D, Zod-Schema; package.json und bun.lock | Kein ausgewähltes Desktop-Framework, kein garantiertes Windows/macOS-Installationspaket |
-| Fachmodell | Schema 16 (historischer Stand; heute Mehrgeschossmodell, siehe §4 und Status auf einen Blick): ein Geschoss, Wände/Fenster, Linien/Polylinien, Schraffuren, PNG/JPEG-Referenzen, Muster/Stifte/Arbeitsansicht | Keine freie Geschossanlage, Räume, Türen, Decken, Dächer, Stützen/Treppen |
-| Präzision/Bearbeitung | Gemeinsamer Fang/Hover/Guides, numerische Eingabe, Shift-Richtung, Direct Edit und Auswahlbewegung, Wandketten | Kein kompletter allgemeiner Solid-/Boolean-Kernel; nicht jede Vorschau lokal vorbereitet |
-| Wandanschlüsse | Persistente Ecken und begrenzte T-Verbindungen, Öffnungen, gemeinsamer Plan/3D/IFC-Ableitungspfad | Unterschiedliche Querschnitte und allgemeine Anschlussnetze offen; Regeln je Topologie beachten |
-| 3D | Auswahlumrandung für Wände, sichtbare Fußpunkte, z=0-Bearbeitung vorhandener Wandaktionen, gemeinsame Projektion | Keine allgemeine freie XYZ-Arbeitsebene, First Person, Perspektivwahl oder Live-Schnitt |
-| Leistung | Vorbereitete Auswahlbewegung inkl. Nachbarn, ausgewählte Endpunkt-/Zeichen-/Kettenpfade, wiederverwendbare Plananteile, GPU-Kamerabuffer, gemeinsamer Picking-Index | K02/K03/K04/K05/K06/K08 nicht insgesamt abgeschlossen; volle Commit-/Dateiprüfung und restliche Consumer |
-| Ebenen/UI | Ebenenzuordnung/Filter, getrennte Sichtbarkeitshistory, gemeinsame nicht-modale Fenster, Auswahl-/Werkzeugeigenschaften | Allgemeine Capabilities für weitere Typen/Settings-Struktur noch wachsen lassen |
-| Zeichnen/Bibliotheken | 2D-Linien/Polylinien, vier Schraffurkonturmodi, Creator, globale lokale Bibliotheken, Inventar, portable Muster/Stifte, Musterwinkel und Modell-/Papiergrößen | Upload/PAT-Import offen; globale Bibliothek ist browserprofil-/originlokal, keine Gerätecloud |
-| Live-Messung | Temporäre 2D-Strecken-, Flächen- und Winkelmessung | Kein Raum-/WoFlV-Modell und keine gespeicherten assoziativen Maßketten |
-| Maßstab | Selector/Persistenz 1:100 mit Presets/individuell, Modell-/Papiermuster Schema16, gemeinsamer validierter Arbeitskontext | Text/Bemaßung als spätere Consumer; Druck/PDF-Maßhaltigkeit noch kein Nachweis |
-| Dateien/Austausch | JSON Save/Open mit strikten Migrationen und 100 Snapshot-History-Schritten; PNG/JPEG-Import/Kalibrierung; IFC-Wände/Fenster-Export | 10 MiB Gesamtlimit; Bilder inline Base64; keine Recovery-/Autosaveproduktion, PDF/DXF/DWG/IFC-Import |
-| AI/Sprache | Begrenzte deutsche Befehle, Auswahl-/Revisionsbindung, Vorschau/Annahme und Sprachadapter vorhandener Aktionen | Keine generative AI/B-Plan-Engine, kein gesamter Fähigkeitskatalog; reale Transkriptqualität gesondert prüfen |
-| Produkt/Release | Anforderungen in diesen zwei Dateien aufgenommen | Keine Lizenzverwaltung, fertige SBOM, signierte Distribution, Homepage oder geprüfte Public-Beta-Freigabe |
+| Bereich               | In main vorhanden                                                                                                                                                                                             | Grenze/offen                                                                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Stack                 | TypeScript, React/TSX, Vite; SVG-Plan, WebGL-3D, Zod-Schema; package.json und bun.lock                                                                                                                        | Kein ausgewähltes Desktop-Framework, kein garantiertes Windows/macOS-Installationspaket                       |
+| Fachmodell            | Schema 16 (historischer Stand; heute Mehrgeschossmodell, siehe §4 und Status auf einen Blick): ein Geschoss, Wände/Fenster, Linien/Polylinien, Schraffuren, PNG/JPEG-Referenzen, Muster/Stifte/Arbeitsansicht | Keine freie Geschossanlage, Räume, Türen, Decken, Dächer, Stützen/Treppen                                     |
+| Präzision/Bearbeitung | Gemeinsamer Fang/Hover/Guides, numerische Eingabe, Shift-Richtung, Direct Edit und Auswahlbewegung, Wandketten                                                                                                | Kein kompletter allgemeiner Solid-/Boolean-Kernel; nicht jede Vorschau lokal vorbereitet                      |
+| Wandanschlüsse        | Persistente Ecken und begrenzte T-Verbindungen, Öffnungen, gemeinsamer Plan/3D/IFC-Ableitungspfad                                                                                                             | Unterschiedliche Querschnitte und allgemeine Anschlussnetze offen; Regeln je Topologie beachten               |
+| 3D                    | Auswahlumrandung für Wände, sichtbare Fußpunkte, z=0-Bearbeitung vorhandener Wandaktionen, gemeinsame Projektion                                                                                              | Keine allgemeine freie XYZ-Arbeitsebene, First Person, Perspektivwahl oder Live-Schnitt                       |
+| Leistung              | Vorbereitete Auswahlbewegung inkl. Nachbarn, ausgewählte Endpunkt-/Zeichen-/Kettenpfade, wiederverwendbare Plananteile, GPU-Kamerabuffer, gemeinsamer Picking-Index                                           | K02/K03/K04/K05/K06/K08 nicht insgesamt abgeschlossen; volle Commit-/Dateiprüfung und restliche Consumer      |
+| Ebenen/UI             | Ebenenzuordnung/Filter, getrennte Sichtbarkeitshistory, gemeinsame nicht-modale Fenster, Auswahl-/Werkzeugeigenschaften                                                                                       | Allgemeine Capabilities für weitere Typen/Settings-Struktur noch wachsen lassen                               |
+| Zeichnen/Bibliotheken | 2D-Linien/Polylinien, vier Schraffurkonturmodi, Creator, globale lokale Bibliotheken, Inventar, portable Muster/Stifte, Musterwinkel und Modell-/Papiergrößen                                                 | Upload/PAT-Import offen; globale Bibliothek ist browserprofil-/originlokal, keine Gerätecloud                 |
+| Live-Messung          | Temporäre 2D-Strecken-, Flächen- und Winkelmessung                                                                                                                                                            | Kein Raum-/WoFlV-Modell und keine gespeicherten assoziativen Maßketten                                        |
+| Maßstab               | Selector/Persistenz 1:100 mit Presets/individuell, Modell-/Papiermuster Schema16, gemeinsamer validierter Arbeitskontext                                                                                      | Text/Bemaßung als spätere Consumer; Druck/PDF-Maßhaltigkeit noch kein Nachweis                                |
+| Dateien/Austausch     | JSON Save/Open mit strikten Migrationen und 100 Snapshot-History-Schritten; PNG/JPEG-Import/Kalibrierung; IFC-Wände/Fenster-Export                                                                            | 10 MiB Gesamtlimit; Bilder inline Base64; keine Recovery-/Autosaveproduktion, PDF/DXF/DWG/IFC-Import          |
+| AI/Sprache            | Begrenzte deutsche Befehle, Auswahl-/Revisionsbindung, Vorschau/Annahme und Sprachadapter vorhandener Aktionen                                                                                                | Keine generative AI/B-Plan-Engine, kein gesamter Fähigkeitskatalog; reale Transkriptqualität gesondert prüfen |
+| Produkt/Release       | Anforderungen in diesen zwei Dateien aufgenommen                                                                                                                                                              | Keine Lizenzverwaltung, fertige SBOM, signierte Distribution, Homepage oder geprüfte Public-Beta-Freigabe     |
 
 **PR238 abgeschlossen:** am 10.10.2026 normal in main zusammengeführt (`927dfcf`, geprüfter Head `54d3e98`, GitHub Checks erfolgreich). Gespeicherte bearbeitbare Grundriss-Abbilder, Navigator/Ordner, eigene Maßstäbe/Filter und Ausgangszoom, Schema20. Das gesamte Modell bleibt ohne Clip erreichbar; Linien und Schraffuren aus Abbildern sind gemeinsame Geschosszeichnungen. V19-Dateien werden ohne Geometrieverlust migriert. 808 Tests, Typprüfung, Build und Browserprüfung bestanden.
 
 **Begrenzter Abschluss Abbildverwaltung (`feat/document-context-management`):** Rechtsklick bietet Umbenennen, Ordnerzuordnung einschließlich „Ohne Ordner“ und Abbild löschen. Gemeinsame validierte `DocumentAction` mit stabilen IDs und Projekt-Undo; keine Modellkopie oder separate History. 809 Tests, beide Typechecks und Build bestanden; Lint ohne Fehler (6 bestehende Warnungen). Browser: Ordnerwechsel/Undo/Redo, aktives Abbild löschen und per Undo wiederherstellen, Modell unverändert; keine Konsolenfehler. Beleg: `outputs/abbild-context-menu.png` im lokalen Aufgabenordner. Ordnerlöschung bleibt bis zur Nutzerentscheidung zum nichtleeren Ordner offen.
 
-**Nutzerergänzung Abbildmenü (10.10.2026, `feat/document-settings-menu`):** PR240 nach Freigabe zusammengeführt. Statt automatisch persistierte Leerordner anzulegen ist die angebotene Alternative umgesetzt: Rechtsklick im leeren Verzeichnis sowie auf Einträgen bietet „Neues Abbild“ und „Neuer Ordner“. Abbilder bieten zusätzlich Einstellungen (Name, Maßstab, Ordner) und Löschen. Einstellungen sind eine atomare validierte Application-Aktion mit einem Projekt-Undo. Leere Ordner sind löschbar, nichtleere bis zur offenen Nutzerentscheidung geschützt. Bestehender Startzoom und Ebenenfilter bleiben erhalten; Ebenensteuerung weiterhin über den Ebenenumschalter. 811 Tests, Typecheck, Build, fokussiertes Lint und Browserabnahme erfolgreich; Browserbeleg `outputs/abbild-settings-menu.png` im lokalen Aufgabenordner.  Drag-and-drop-Ergänzung in PR241: Abbilder auf Ordner ziehen; Ziel wird hervorgehoben und nach Ablage geöffnet. Dieselbe assign-folder-Aktion mit ursprünglichem Projektkontext, ein Undo-Schritt; Abbruch und gleicher Zielordner erzeugen keine Änderung. Browsernachweis Quelle → Ziel → Undo → Quelle → Redo erfolgreich. 14 fokussierte Abbildtests, Typecheck, Lint und Build bestanden. Danach bleibt der einzelne P0-Auftrag aus §9 maßgeblich.
+**Nutzerergänzung Abbildmenü (10.10.2026, `feat/document-settings-menu`):** PR240 nach Freigabe zusammengeführt. Statt automatisch persistierte Leerordner anzulegen ist die angebotene Alternative umgesetzt: Rechtsklick im leeren Verzeichnis sowie auf Einträgen bietet „Neues Abbild“ und „Neuer Ordner“. Abbilder bieten zusätzlich Einstellungen (Name, Maßstab, Ordner) und Löschen. Einstellungen sind eine atomare validierte Application-Aktion mit einem Projekt-Undo. Leere Ordner sind löschbar, nichtleere bis zur offenen Nutzerentscheidung geschützt. Bestehender Startzoom und Ebenenfilter bleiben erhalten; Ebenensteuerung weiterhin über den Ebenenumschalter. 811 Tests, Typecheck, Build, fokussiertes Lint und Browserabnahme erfolgreich; Browserbeleg `outputs/abbild-settings-menu.png` im lokalen Aufgabenordner. Drag-and-drop-Ergänzung in PR241: Abbilder auf Ordner ziehen; Ziel wird hervorgehoben und nach Ablage geöffnet. Dieselbe assign-folder-Aktion mit ursprünglichem Projektkontext, ein Undo-Schritt; Abbruch und gleicher Zielordner erzeugen keine Änderung. Browsernachweis Quelle → Ziel → Undo → Quelle → Redo erfolgreich. 14 fokussierte Abbildtests, Typecheck, Lint und Build bestanden. Danach bleibt der einzelne P0-Auftrag aus §9 maßgeblich.
 
 **Einheitliche Einstellungsansicht (Nutzerauftrag 10.10.2026, PR241):** Gemeinsamer UI-Baustein `SettingsSections` innerhalb des bestehenden verschiebbaren, nichtmodalen `FloatingPanel`. Linke vertikale Tabspalte, rechts scrollbar, kompakte Buttons/Schrift. Zunächst nur Abbild-Erstellung/Einstellungen: Allgemein (Name, Maßstab, Ordner, Startzoom), Ebenensichtbarkeit (aktive Ebenen oben, alle vorhandenen mit Status darunter), Tab2–5 als explizite Platzhalter. Ebenenstatus gehört zum adressierten Abbild; Umschalter bleibt zuständig für Änderungen und History. Kein globaler Umbau bestehender Werkzeuge/Systemfenster. Browser: Tabwechsel erhält Entwurf, Speichern funktioniert, eigener Filter mit null aktiven Ebenen korrekt; keine Konsolenfehler. Typecheck, fokussiertes Lint, Build und 14 Abbildtests geprüft. Künftige Einstellungsfenster verwenden diese Struktur; Fachinhalte und Aktionen bleiben getrennt.
-
-
 
 Abbildaufnahme-Präzisierung (10.10.2026, PR241): Die Anwendung ergänzt beim Start/Öffnen einen leeren Ordner „Abbilder“, wenn keine Ordner existieren; strikte Altdateiparser bleiben unverändert, IDs kollisionsfrei. Hinzufügen startet ausschließlich Abbildanlage; Ordneranlage bleibt eigener Rechtsklickbefehl. Zusammenfassung: Name, Maßstab, vorausgewählter vorhandener Ordner und zum Start erfasste aktive Ebenen; keine Typauswahl/Zoomanzeige. Erstellung erst beim Bestätigen, unveränderte Snapshot-Prüfung schützt vor veraltetem Entwurf. Canvas erhält eine 700-ms-Hervorhebung (reduced-motion berücksichtigt). Browser bestätigt Standardordner, Zusammenfassung und Erstellen im Zielordner. 812 Tests, Typecheck, fokussiertes Lint und Build bestanden. Bestehende Projekte werden beim Öffnen nur um den fehlenden Ordner ergänzt, vorhandene Ordner bleiben erhalten.
 
@@ -703,6 +703,7 @@ Kein Performancegewinn behauptet. Nächster Pilot begrenzt auf exakte Handle-Ide
 und identische Hashbytes. Nachweis: ASSET_RECOVERY_PILOT.md, recovery-hash-input.json.
 
 ### Hashinput-Puffer (12.10.2026, Folgepilot nach PR298)
+
 PR298 zusammengeführt. Registrierte unveränderliche Bildhandles schreiben dieselben
 Hashbytes direkt in einen Puffer; unregistrierte Werte behalten JSON/UTF-8-Fallback.
 922 Tests, Typecheck, fokussiertes ESLint, Diagnose- und Produktionsbuild bestanden.
@@ -711,6 +712,7 @@ Einzelmessungen, keine Kapazitätsgarantie; Storage separat und schwankend. Expo
 bytegleich, keine Browserfehler. Nachweis: docs/performance/ASSET_RECOVERY_PILOT.md.
 
 ### Konsolidierte Recovery-Abnahme (12.10.2026, nach PR299)
+
 PR299 nach grüner CI zusammengeführt (b621023). Drei frische Tabs auf demselben
 Diagnose-Produktionsbuild: bounded restore 745,1–794,8 ms, Hashinput 128,4–153,9 ms;
 alle drei 101,96-MiB-Exporte bytegleich. Wandhöhe 3,1→3,2, Undo/Redo, neuer Snapshot,
@@ -720,6 +722,7 @@ unverändertem PR299, erfolgreiche GitHub-CI. Kein Crash-/Kaltstart-/Kapazitäts
 Rohdaten und Reproduktion: docs/performance/ASSET_RECOVERY_PILOT.md.
 
 ### Nutzerpriorität: Speichererweiterung zurückgestellt (12.10.2026)
+
 Nach Abnahme des rund 102-MiB-Recoveryablaufs stellt der Nutzer die nächste
 Kapazitätserweiterung ausdrücklich zurück. Produktgrenze 128 MiB bleibt bestehen.
 Der vorhandene 252,57-MiB-Servicepilot und der Abgleich mit aktuellen Produktadaptern
@@ -731,6 +734,7 @@ IFC nutzt bisher die Geschoss-ID als Label. ModelView bindet bereits stabile sto
 Nächster CAD-Schritt: Geschossnamen als kleiner nutzbarer Einstieg in R26-03/N21.
 
 ### Geschossname (13.10.2026, feat/storey-name)
+
 PR300 nach ausdrücklicher Freigabe und grüner CI zusammengeführt. Geschossnamen in
 Schema21 gespeichert; alte Projektdateien und Recovery-Stände erhalten beim geprüften
 Lesen Level 01. Gemeinsame Aktion renameStorey mit stabilen Projekt-/Geschoss-IDs,
@@ -759,17 +763,17 @@ Leistungsprofil wiederverwenden: 100/1.000/5.000 Elemente, viele Polygonpunkte, 
 
 Priorität ist Risikostufe, keine Aufforderung zu paralleler Umsetzung. AI-Anschlussfähigkeit A03/A11 gilt ab jetzt in jeder Stufe. Nach jeder abgeschlossenen Aufgabe genau einen begrenzten Folgeauftrag wählen; ein belegter Datenverlust-/Security-Blocker darf die Reihenfolge vorziehen.
 
-| Abschnitt | Priorität | Ergebnis und Abnahme | Bezug |
-| --- | --- | --- | --- |
-| 0 – Geordneten Stand sichern | historischer Auftrag; aktuell §9 AUD14 | Abbild-PR238 war Teil der früheren Reihenfolge. Aktuell gelten AUD14-01 bis AUD14-07; keine Doppelimplementierung. Zwei Abbilder desselben Modells behalten eigene Maßstäbe/Filter und Dateirundlauf. | MS-04c, N57/N60 |
-| 1 – Daten und Kapazität | P0 | Persistenz-/Recovery-Pilot mit letztem gültigen Stand, Absturz, vollem Datenträger, Berechtigungen und Migration. Anschließend gemessenes Projekt-/Assetbudget, verknüpfte und portable Referenzen mit Umzug/fehlenden Quellen. Reihenfolge nach akutem Befund. | R26-01/02, K02/03, RC07/SB |
-| 2 – Fachmodell | P1 | Mehrgeschossigkeit und feste/gebundene Höhen, dann passende Bauteile einzeln: Türen/Decken/Dächer/Stützen/Treppen, Schichtaufbau, Räume. Jede Fachfähigkeit mit Action/Query, Abhängigkeiten, Undo, Migration und gemeinsamen Ansichten. | R26-03, N21/22/31–35/42/47/48, V09 |
-| 3 – Dokumentation | P1 | Abbilder zu Schnitt/Ansicht erweitern, Scope für Text/assoziative Maße, Papier-/Modellgrößen, Layout/Master/Plankopf, maßhaltiger PDF-/Drucknachweis. | R26-04/07, N05/06/20/46/49/50/57–60, MS |
-| 4 – Auswertung | P1 | Räume/Höhenfelder → versionierte fachlich geprüfte WoFlV-Regeln inkl. Korrekturen → nachvollziehbarer Bericht und Mengen-/Bauteillisten. Polygonfläche nicht als Wohnfläche verkaufen. | R26-05, Guide-F01–04/F18–22 |
-| 5 – Begrenzte AI-Piloten | strategischer Vorrang, schrittweise | Strukturierte Modellbefragung, wenige kontrollierte Änderungsaktionen, markierter Skizzenbereich; danach quellengebundener B-Plan-Pilot. Ein früher Pilot darf vorhandene Aktionen nutzen, bevor das gesamte Gebäude komplett ist. | AI03/04/09/10/23/26/31–35, V02 |
-| 6 – Autonomer Entwurf | Hauptziel | Grundstück/Bruttoziel/Geschosse/Raumprogramm/B-Plan → zwei editierbare Varianten → CAD-Prüfung → Iteration → Gesamt-Diff/Übernahme/Undo. Unlösbare/unklare Bedingungen sichtbar. | AI01/02/05/06/07/17/19/35 |
-| 7 – Austausch/Koordination | P2, früher bei Pilotblocker | Konkretes IFC-Import-/Referenzprofil, PDF-Vektor/Raster, DXF/DWG, 3D-Export; QA, Planrevision, BCF und IDS nur bei realem Bedarf. | R26-06/07/08, N02/28, AI20/21/22/28 |
-| Begleitend – Produktverantwortung | P0 vor externer Verteilung | Sechs Register, reale Dependency-/Assetrechte, Security/Datenschutz, buildgebundene SBOM, sichere Updates, passende Beta-/Lizenz-/Homepagebedingungen, Offline-Lese/Export/Druck nach Ablauf. | RC01–10, SB01–07, HP01–05 |
+| Abschnitt                         | Priorität                              | Ergebnis und Abnahme                                                                                                                                                                                                                                            | Bezug                                   |
+| --------------------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| 0 – Geordneten Stand sichern      | historischer Auftrag; aktuell §9 AUD14 | Abbild-PR238 war Teil der früheren Reihenfolge. Aktuell gelten AUD14-01 bis AUD14-07; keine Doppelimplementierung. Zwei Abbilder desselben Modells behalten eigene Maßstäbe/Filter und Dateirundlauf.                                                           | MS-04c, N57/N60                         |
+| 1 – Daten und Kapazität           | P0                                     | Persistenz-/Recovery-Pilot mit letztem gültigen Stand, Absturz, vollem Datenträger, Berechtigungen und Migration. Anschließend gemessenes Projekt-/Assetbudget, verknüpfte und portable Referenzen mit Umzug/fehlenden Quellen. Reihenfolge nach akutem Befund. | R26-01/02, K02/03, RC07/SB              |
+| 2 – Fachmodell                    | P1                                     | Mehrgeschossigkeit und feste/gebundene Höhen, dann passende Bauteile einzeln: Türen/Decken/Dächer/Stützen/Treppen, Schichtaufbau, Räume. Jede Fachfähigkeit mit Action/Query, Abhängigkeiten, Undo, Migration und gemeinsamen Ansichten.                        | R26-03, N21/22/31–35/42/47/48, V09      |
+| 3 – Dokumentation                 | P1                                     | Abbilder zu Schnitt/Ansicht erweitern, Scope für Text/assoziative Maße, Papier-/Modellgrößen, Layout/Master/Plankopf, maßhaltiger PDF-/Drucknachweis.                                                                                                           | R26-04/07, N05/06/20/46/49/50/57–60, MS |
+| 4 – Auswertung                    | P1                                     | Räume/Höhenfelder → versionierte fachlich geprüfte WoFlV-Regeln inkl. Korrekturen → nachvollziehbarer Bericht und Mengen-/Bauteillisten. Polygonfläche nicht als Wohnfläche verkaufen.                                                                          | R26-05, Guide-F01–04/F18–22             |
+| 5 – Begrenzte AI-Piloten          | strategischer Vorrang, schrittweise    | Strukturierte Modellbefragung, wenige kontrollierte Änderungsaktionen, markierter Skizzenbereich; danach quellengebundener B-Plan-Pilot. Ein früher Pilot darf vorhandene Aktionen nutzen, bevor das gesamte Gebäude komplett ist.                              | AI03/04/09/10/23/26/31–35, V02          |
+| 6 – Autonomer Entwurf             | Hauptziel                              | Grundstück/Bruttoziel/Geschosse/Raumprogramm/B-Plan → zwei editierbare Varianten → CAD-Prüfung → Iteration → Gesamt-Diff/Übernahme/Undo. Unlösbare/unklare Bedingungen sichtbar.                                                                                | AI01/02/05/06/07/17/19/35               |
+| 7 – Austausch/Koordination        | P2, früher bei Pilotblocker            | Konkretes IFC-Import-/Referenzprofil, PDF-Vektor/Raster, DXF/DWG, 3D-Export; QA, Planrevision, BCF und IDS nur bei realem Bedarf.                                                                                                                               | R26-06/07/08, N02/28, AI20/21/22/28     |
+| Begleitend – Produktverantwortung | P0 vor externer Verteilung             | Sechs Register, reale Dependency-/Assetrechte, Security/Datenschutz, buildgebundene SBOM, sichere Updates, passende Beta-/Lizenz-/Homepagebedingungen, Offline-Lese/Export/Druck nach Ablauf.                                                                   | RC01–10, SB01–07, HP01–05               |
 
 Keine Kalendertermine oder garantierten Kapazitäten festgesetzt. First Person, Live-Schnitt, Kontextaktionen, Hotkeys, Perspektive, ungleiche Wandanschlüsse und Settings bleiben im Register, statt zwischen diesen größeren Etappen verloren zu gehen.
 
@@ -789,19 +793,19 @@ Homepage soll Produkt, Beta, Unterstützungsumfang, Support/Sicherheit, Rechtehi
 
 ## 8. Offene Entscheidungen – rechtzeitig, nicht pauschal jetzt
 
-| Entscheidung | Klären vor |
-| --- | --- |
-| Browser/Desktop, Packaging/Dateiendung, unterstützte OS/Browser-Versionen | Persistenzgarantien und erster extern verteilter Build |
-| Kapazitätsziel/Referenzhardware und Gesamtpixel-/RAM-/GPUbudgets | Produktionsformat-/Limitänderung |
-| Linked-/Embedded-Vertrag, portable Weitergabe, Pfade/Zugriff/Recovery | Bildverknüpfungsimplementation |
-| Konten/Lizenzen/Geräte/Offlinefrist und kommerzielle Konditionen | Lizenzimplementation/Public-Beta-Bedingungen |
-| D vs. Ctrl+D; zulässiges Kopieren/Spiegeln, 3D-Reihenfolge | Jeweiliger Action-/Shortcut-Pilot |
-| Allgemeine Perspektive/Kameraparameter, freie 3D-Arbeitsebene | Jeweiliger Navigations-/3D-Pilot |
-| Ungleiche Wandquerschnitte | Anschluss-Fachregel |
-| Raumkennungen, virtuelle Grenzen, WoFlV-Profil/Rundung und Berichtsvorlage | Raum-/Wohnflächenauftrag |
-| PAT/Schraffurimportformat/Rechte, andere Austauschprofile/3D-Format | Jeweiliger Import/Export |
-| Settings-Besitzer: Benutzer/Projekt/Ansicht/Werkzeug, Pane-Persistenz | Einstellungsübersicht |
-| AI-Anbieter/Datenfreigabe/Autonomieumfang/Fachregelprofil | Erster entsprechender AI-Pilot |
+| Entscheidung                                                               | Klären vor                                             |
+| -------------------------------------------------------------------------- | ------------------------------------------------------ |
+| Browser/Desktop, Packaging/Dateiendung, unterstützte OS/Browser-Versionen  | Persistenzgarantien und erster extern verteilter Build |
+| Kapazitätsziel/Referenzhardware und Gesamtpixel-/RAM-/GPUbudgets           | Produktionsformat-/Limitänderung                       |
+| Linked-/Embedded-Vertrag, portable Weitergabe, Pfade/Zugriff/Recovery      | Bildverknüpfungsimplementation                         |
+| Konten/Lizenzen/Geräte/Offlinefrist und kommerzielle Konditionen           | Lizenzimplementation/Public-Beta-Bedingungen           |
+| D vs. Ctrl+D; zulässiges Kopieren/Spiegeln, 3D-Reihenfolge                 | Jeweiliger Action-/Shortcut-Pilot                      |
+| Allgemeine Perspektive/Kameraparameter, freie 3D-Arbeitsebene              | Jeweiliger Navigations-/3D-Pilot                       |
+| Ungleiche Wandquerschnitte                                                 | Anschluss-Fachregel                                    |
+| Raumkennungen, virtuelle Grenzen, WoFlV-Profil/Rundung und Berichtsvorlage | Raum-/Wohnflächenauftrag                               |
+| PAT/Schraffurimportformat/Rechte, andere Austauschprofile/3D-Format        | Jeweiliger Import/Export                               |
+| Settings-Besitzer: Benutzer/Projekt/Ansicht/Werkzeug, Pane-Persistenz      | Einstellungsübersicht                                  |
+| AI-Anbieter/Datenfreigabe/Autonomieumfang/Fachregelprofil                  | Erster entsprechender AI-Pilot                         |
 
 Entschieden 29.10.2026 (Nutzer, Dach-Auftrag N61): Dachtrimmen wird als geschossübergreifende Eingabe aufgelöst – die Wand hält einen Trimmverweis auf das Dach, der Schnitt wird jeweils aus dem aktuellen Dach abgeleitet (A08), „Trimmung aufheben“ entfernt den Verweis. Das erste Dach (N61) trimmt nicht; Umsetzung im eigenen Trimm-Auftrag (V09).
 
@@ -818,6 +822,7 @@ Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisi
 Gilt **ab jetzt für jede Funktion, Aufgabe, Korrektur und Erweiterung**, auch für reine UI-Arbeit; Tiefe der Prüfung folgt dem Risiko. Eine Korrektur ohne Nutzerwunsch bekommt als Ziel das bisherige beobachtbare Verhalten. Sie wird nur umgesetzt, wenn sie den unten dokumentierten Vertrag einhält. Genau ein begrenzter Implementierungsschritt ist aktiv; unverbundene Fixes werden nicht in denselben PR gemischt. Ein P0-Befund zu Datenverlust/falschem Ergebnis zieht jederzeit vor.
 
 **Vor dem ersten Code-Edit – kurze Änderungskarte im Auftrag oder PR:**
+
 1. **Kundenwunsch und Abnahme:** Wer soll was tun können? Zwei konkrete normale/grenzwertige Szenarien, ausgeschlossene Fälle und betroffene Register-IDs. Unklare fachliche Entscheidungen mit dem Nutzer klären; die technische Platzierung trifft Codex anhand des Codes.
 2. **Eigentümer und Datenquelle:** Welche Schicht besitzt die Regel und den veränderbaren Zustand? Stabile IDs, Geschoss/Host, Maßeinheit und Sichtbarkeits-/Maßstabskontext benennen. Nur ein autoritatives BIM-Modell; kein zweites editierbares Modell in React, SVG, WebGL, Datei- oder AI-Adaptern.
 3. **Gemeinsamer Weg:** Welche typisierte Application-Aktion/Query verwenden Maus, Eigenschaften, Text, Sprache und später AI? Wie funktionieren vorbereitete Vorschau, Abbruch, endgültige Validierung, ein Undo-Schritt und veralteter Kontext? Neue Werkzeuge schließen an bestehende Snap-/ToolInteraction-Verträge an.
@@ -826,13 +831,13 @@ Gilt **ab jetzt für jede Funktion, Aufgabe, Korrektur und Erweiterung**, auch f
 
 **Verantwortungsvertrag (Zielrichtung; bestehende Übergänge als explizite Abbaukandidaten behandeln):**
 
-| Baustein | Darf besitzen | Darf nicht besitzen |
-| --- | --- | --- |
-| `domain/`, `geometry/`, `constraints/` | Modellinvarianten, Maße und Fachgeometrie, Fangregeln | React, Renderer, Datei-/Browseradapter oder Application-Orchestrierung |
-| `application/` | Geprüfte Aktionen/Queries, Auswahlkontext, Vorschau/Commit/Undo und Port-Verträge | Eigenes Rendering oder speicherspezifische Browsertechnik als Fachregel |
-| `rendering/`, `components/` | Abgeleitete Anzeige, Pointer-/Formulareingabe, flüchtigen Ansichtsstatus | Autoritative Bauteilregeln, zweite Projektkopie oder werkzeugeigene History |
-| `interop/` | Format-, Recovery-, IFC- und Plattformadapter | Eigenmächtige Modellmutation; nur nötige Application-Port-Verträge importieren |
-| `lib/bim/` | Vorhandene Übergangsbausteine bis zur gezielten Migration | Neue generische CAD-Subsysteme oder zusätzliche Gegenabhängigkeiten |
+| Baustein                               | Darf besitzen                                                                     | Darf nicht besitzen                                                            |
+| -------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `domain/`, `geometry/`, `constraints/` | Modellinvarianten, Maße und Fachgeometrie, Fangregeln                             | React, Renderer, Datei-/Browseradapter oder Application-Orchestrierung         |
+| `application/`                         | Geprüfte Aktionen/Queries, Auswahlkontext, Vorschau/Commit/Undo und Port-Verträge | Eigenes Rendering oder speicherspezifische Browsertechnik als Fachregel        |
+| `rendering/`, `components/`            | Abgeleitete Anzeige, Pointer-/Formulareingabe, flüchtigen Ansichtsstatus          | Autoritative Bauteilregeln, zweite Projektkopie oder werkzeugeigene History    |
+| `interop/`                             | Format-, Recovery-, IFC- und Plattformadapter                                     | Eigenmächtige Modellmutation; nur nötige Application-Port-Verträge importieren |
+| `lib/bim/`                             | Vorhandene Übergangsbausteine bis zur gezielten Migration                         | Neue generische CAD-Subsysteme oder zusätzliche Gegenabhängigkeiten            |
 
 **Nach jedem begrenzten Schritt – Abschlusskarte vor Merge:** Geänderte Module/Importpfeile und tatsächliche Verantwortung gegen die Änderungskarte prüfen; neue Laufzeitzyklen, Schicht-Rückgriffe und Modellkopien ausschließen. Ergebnis der passenden Tests, Typecheck/Lint/Build, gegebenenfalls Produktbrowser, Export-Dateivergleich, Recovery und Laufzeitmessung mit Basis/Commit nennen. Ein Szenario mit Nachbarn, ungültiger Eingabe, Abbruch und Undo prüfen, sofern das Werkzeug sie berührt. Fehlende Native-/Langsession-Gates offen lassen. Nur wenn Ziel, Code, Prüfbeleg und Dokumentationsstatus übereinstimmen, den PR abschließen; sonst denselben Auftrag korrigieren, nicht ein neues Feature beginnen.
 
@@ -842,13 +847,13 @@ Gilt **ab jetzt für jede Funktion, Aufgabe, Korrektur und Erweiterung**, auch f
 
 Diese Befunde sind nach Risiko geordnet, aber **keine parallelen aktiven Implementierungsaufträge**; die einzige sofortige Aufgabe steht darunter. Reproduzierter Datenverlust, falsche Maße oder ein fehlerhafter Commit haben unabhängig von der Liste P0-Vorrang.
 
-| Priorität | Konkreter Befund / Zustand | Verbindliche Behandlung und Abnahme |
-| --- | --- | --- |
-| P0 bei Befund; vor Release zwingend | Recovery-Startsicherung nach PR384 vorhanden. Echte Quota, versteckte/konkurrierende Tabs, Abbruch während aktiver Arbeit, Langsession und Prozess-/GPU-Spitzen nicht vollständig abgenommen. | Schutz erhalten; isolierte Testdaten, kontrollierte Kaltstarts und reale Fortsetzungs-/Exportnachweise. Keine pauschale Dateigrößenfreigabe. |
-| P1 Dokumentationsintegrität | README enthielt weiterhin die Anweisung „keine echte CAD-Engine“; Register N21/N22 waren trotz Mehrgeschossmodell und Wandhöhenbindung auf Schema21/„geplant“ stehengeblieben; Kopfstände Masterplan/Register widersprachen main. | In diesem Dokumentationsschritt korrigieren. Künftig bei jeder einschlägigen Änderung Kopf, §4/§9 und **betroffene live Registereinträge** synchronisieren; historische Kapseln als datierte Evidenz belassen. Laufend gegen Code/PR prüfen, nie aus Text allein ableiten. |
-| P1 interaktive Skalierung | Auf main baut der neue T-Fangkontakt einen Patch für alle Wände/Fenster des Geschosses; offene PR394 beschleunigt nur wiederholte identische Ziele, nicht erste/geänderte Ziele oder Komposition. | PR394 integriert; Vorher-/Nachher-Abhängigkeitsmenge einschließlich gelöster stationärer Nachbarn und Fenster im Folgebranch begrenzt, praktische Abnahme folgt. Exakte Projekt-/Flächengleichheit und Gesamtframe messen. |
-| P1 Großmodell-Pfade | Commit validiert sowohl neuen als auch vorherigen Projektstand vollständig; Projektprüfung läuft über alle Geschosse. Vorschaufensterfilter und Fensterzuordnung beim freien Wandkörperaufbau sind weitere lineare/verschachtelte Arbeit. | Profil pro Phase an schulähnlicher Fixture; nur nachgewiesene heiße Abschnitte indizieren/vorbereiten. Vollständige endgültige Validierung, Größenbudget, atomaren Undo und unabhängigen Commit erhalten. |
-| P2 Wartbarkeit | CadWorkspace (1852 Zeilen, Stand 27.10.2026), BimSolidView (887) koordinieren viele Wege; doppelter Testeintrag prepared-endpoint.test.ts am 27.10.2026 entfernt; sechs bekannte Lintwarnungen. | Bei konkreter Fachänderung kleine Zuständigkeiten in vorhandene Application-/Renderdienste verlagern und doppelte Testliste bereinigen; kein breiter Rewrite allein wegen Dateilänge. |
+| Priorität                           | Konkreter Befund / Zustand                                                                                                                                                                                                                | Verbindliche Behandlung und Abnahme                                                                                                                                                                                                                                        |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P0 bei Befund; vor Release zwingend | Recovery-Startsicherung nach PR384 vorhanden. Echte Quota, versteckte/konkurrierende Tabs, Abbruch während aktiver Arbeit, Langsession und Prozess-/GPU-Spitzen nicht vollständig abgenommen.                                             | Schutz erhalten; isolierte Testdaten, kontrollierte Kaltstarts und reale Fortsetzungs-/Exportnachweise. Keine pauschale Dateigrößenfreigabe.                                                                                                                               |
+| P1 Dokumentationsintegrität         | README enthielt weiterhin die Anweisung „keine echte CAD-Engine“; Register N21/N22 waren trotz Mehrgeschossmodell und Wandhöhenbindung auf Schema21/„geplant“ stehengeblieben; Kopfstände Masterplan/Register widersprachen main.         | In diesem Dokumentationsschritt korrigieren. Künftig bei jeder einschlägigen Änderung Kopf, §4/§9 und **betroffene live Registereinträge** synchronisieren; historische Kapseln als datierte Evidenz belassen. Laufend gegen Code/PR prüfen, nie aus Text allein ableiten. |
+| P1 interaktive Skalierung           | Auf main baut der neue T-Fangkontakt einen Patch für alle Wände/Fenster des Geschosses; offene PR394 beschleunigt nur wiederholte identische Ziele, nicht erste/geänderte Ziele oder Komposition.                                         | PR394 integriert; Vorher-/Nachher-Abhängigkeitsmenge einschließlich gelöster stationärer Nachbarn und Fenster im Folgebranch begrenzt, praktische Abnahme folgt. Exakte Projekt-/Flächengleichheit und Gesamtframe messen.                                                 |
+| P1 Großmodell-Pfade                 | Commit validiert sowohl neuen als auch vorherigen Projektstand vollständig; Projektprüfung läuft über alle Geschosse. Vorschaufensterfilter und Fensterzuordnung beim freien Wandkörperaufbau sind weitere lineare/verschachtelte Arbeit. | Profil pro Phase an schulähnlicher Fixture; nur nachgewiesene heiße Abschnitte indizieren/vorbereiten. Vollständige endgültige Validierung, Größenbudget, atomaren Undo und unabhängigen Commit erhalten.                                                                  |
+| P2 Wartbarkeit                      | CadWorkspace (1852 Zeilen, Stand 27.10.2026), BimSolidView (887) koordinieren viele Wege; doppelter Testeintrag prepared-endpoint.test.ts am 27.10.2026 entfernt; sechs bekannte Lintwarnungen.                                           | Bei konkreter Fachänderung kleine Zuständigkeiten in vorhandene Application-/Renderdienste verlagern und doppelte Testliste bereinigen; kein breiter Rewrite allein wegen Dateilänge.                                                                                      |
 
 Dokumentationsstruktur: AGENTS.md kurz, dieser Masterplan mit ausschließlich §9 als Live-Auftrag, Register als ID-Quelle; `ARCHITECTURE.md`, `DEVELOPMENT_PLAN.md` und die vielen datierten `docs/`-Nachweise sind historische/verlinkte Quellen. Stand 20.10.: 104 Markdown-Dateien im Repo (81 unter `docs/`, null unter `.github/`); die Anzahl ist kein automatischer Lesefehler. Widersprüchliche Live-Status und überlange Volllektüre sind das Risiko. Vor einem Zusammenführen: je Datei Verantwortlichkeit, einzigartige Anforderungen, Quellenkennung und historische Belege inventarisieren; danach Redundanz markieren/indexieren, keine ungesicherten Löschungen. Keine dritte aktive Roadmap und kein einziger noch größerer Volltext.
 
@@ -879,6 +884,7 @@ AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Wo
 Abgeschlossener Prüfauftrag (Nachweis PR384, kein zweiter aktiver Auftrag): Nach PR383 wurden EG/OG/KG, Fenster, feste und gebundene Anschlüsse, signierte Versätze, Geschossänderung, Konfliktatomarität, ein Undo/Redo, JSON-Dateirundlauf, produktive Recovery und IFC-Höhen/Zuordnung geprüft. Die frühere Formatfehlermeldung „Version 1 bis 25“ wurde an den gemeinsamen aktuellen Vertrag für Schema26 angepasst. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Fälle ohne oberes Geschoss und Einfügen zwischen gebundene Geschosse bleiben gesperrt und brauchen eine eigene Fachentscheidung.
 
 **Danach diese Korrekturfolge ohne erneute Startfreigabe fortsetzen, jeweils nur ein begrenzter Implementierungsschritt aktiv:**
+
 1. Erledigt/in main: Architekturgrenzen-Gate PR402. Exakte Altlasten und Negativprobe; keine automatische Erweiterung der Ausnahmenliste.
 2. Erledigt/in main: PR403 löst contour/offset über die gemeinsame Leseabfrage; null Laufzeitzyklen, gültige/ungültige Pfade und Browser-/Dateivergleich belegt. Weitere lib/bim-Rückgriffe bleiben gesonderte Schuld.
 3. AUD14-03/04: verbleibende globale 3D-Vorschaukomposition/Bounds/Gruppierung messen und begrenzt korrigieren. Codeorte selection-move-preview.ts, solid-buffer.ts und BimSolidView; feste kleine Auswahl bei wachsendem Restgebäude. Bestehendes Shader-/Pufferreuse erhalten; keine erneute Gesamtgeometrie oder Fachregeln pro Werkzeug implementieren. Unveränderte Flächen/Indexe teilen, gemeinsame Patchgrenze verwenden. Vorbereitung, Pointerarbeit, Uploads und Gesamtframes getrennt belegen.
@@ -890,15 +896,15 @@ Abgeschlossener Prüfauftrag (Nachweis PR384, kein zweiter aktiver Auftrag): Nac
 
 **Aktueller AUD14-Status (27.10.2026, Abgleich am Code von main 07f88e1, Nachweis docs/AUD14_ABGLEICH.md; frühere Fassung vom 21.10. im Git-Verlauf):**
 
-| ID | Status | Verbleibende Arbeit |
-| --- | --- | --- |
-| AUD14-01 | erfüllt (PR319: aggregiertes Pixelbudget an Import/Commit/Recovery, Übergangsvertrag) | Echte Quota nur simuliert – unter AUD14-06 geführt |
-| AUD14-02 | erfüllt (PR320, danach PR440–445) | – |
-| AUD14-03 | teilweise: Ressourcen-/Patch-Reuse belegt (PR385/386, PR404–411), Türziehen ≈ 16 ms je Bild | Native-/GPU-/Dauerframe-Gate; Kaltaufbau/Partitionswechsel; Vollupload bei Topologiewechsel; Kontextverlust nicht in CI |
-| AUD14-04 | teilweise: Ansichtskontext und Validierung ohne Wiederholung (PR440–445, PR463/464, PR472) | Wand x/y/axis (zurückgestellt 24.10.2026); restlicher Fangindex-Neuaufbau; Frame-/Native-Gates |
-| AUD14-05 | teilweise: lokale Suchen indiziert (PR344–346, PR474), Abhängigkeitsmenge belegt (PR391–400) | Große Anschlussgruppen neu messen; Kamerawechsel-Vorbereitung; Einzelbelege Radiusrand/große Koordinaten/Keller |
-| AUD14-06 | teilweise: Aufbewahrung, Slots, CAS, Transaktionsabbruch, Vorgängerschutz (PR347–361, PR384, PR461, PR475/476) | Echte Quota, echte Mehr-Tab-Fälle, Lauf ≥ 2 h, Prozess-/GPU-Spitzen (Testumgebung fehlt) |
-| AUD14-07 | teilweise: Schullauf s/l/x auf main bestanden, mit Z, IFC-Export, Inhaltsvergleich und Kalt/Warm (PR480); Umlaute, doppelter Testeintrag und Tabelle korrigiert, Register-PR-Angaben geklärt (Konvention „Vorgänger gemergt“, keine Korrektur nötig; fix/aud14-07-small) | Native-/Peak-Speicher, Browserprozess-Neustart, weitere Browser/Hardware (Umgebung) |
+| ID       | Status                                                                                                                                                                                                                                                                   | Verbleibende Arbeit                                                                                                     |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| AUD14-01 | erfüllt (PR319: aggregiertes Pixelbudget an Import/Commit/Recovery, Übergangsvertrag)                                                                                                                                                                                    | Echte Quota nur simuliert – unter AUD14-06 geführt                                                                      |
+| AUD14-02 | erfüllt (PR320, danach PR440–445)                                                                                                                                                                                                                                        | –                                                                                                                       |
+| AUD14-03 | teilweise: Ressourcen-/Patch-Reuse belegt (PR385/386, PR404–411), Türziehen ≈ 16 ms je Bild                                                                                                                                                                              | Native-/GPU-/Dauerframe-Gate; Kaltaufbau/Partitionswechsel; Vollupload bei Topologiewechsel; Kontextverlust nicht in CI |
+| AUD14-04 | teilweise: Ansichtskontext und Validierung ohne Wiederholung (PR440–445, PR463/464, PR472)                                                                                                                                                                               | Wand x/y/axis (zurückgestellt 24.10.2026); restlicher Fangindex-Neuaufbau; Frame-/Native-Gates                          |
+| AUD14-05 | teilweise: lokale Suchen indiziert (PR344–346, PR474), Abhängigkeitsmenge belegt (PR391–400)                                                                                                                                                                             | Große Anschlussgruppen neu messen; Kamerawechsel-Vorbereitung; Einzelbelege Radiusrand/große Koordinaten/Keller         |
+| AUD14-06 | teilweise: Aufbewahrung, Slots, CAS, Transaktionsabbruch, Vorgängerschutz (PR347–361, PR384, PR461, PR475/476)                                                                                                                                                           | Echte Quota, echte Mehr-Tab-Fälle, Lauf ≥ 2 h, Prozess-/GPU-Spitzen (Testumgebung fehlt)                                |
+| AUD14-07 | teilweise: Schullauf s/l/x auf main bestanden, mit Z, IFC-Export, Inhaltsvergleich und Kalt/Warm (PR480); Umlaute, doppelter Testeintrag und Tabelle korrigiert, Register-PR-Angaben geklärt (Konvention „Vorgänger gemergt“, keine Korrektur nötig; fix/aud14-07-small) | Native-/Peak-Speicher, Browserprozess-Neustart, weitere Browser/Hardware (Umgebung)                                     |
 
 **Abschluss- und Arbeitsregeln:** Die Freigabe umfasst Diagnose, begrenzte Fehlerbehebung, Codebereinigung und passende Verifikation. Nach einem belegten Abschluss unmittelbar den nächsten offenen Schritt beginnen. Reproduzierter Sicherungsverlust/falsche Maße/fehlerhafter Commit-Erfolg ist P0 und zieht vor. Erfolgreiche CI ist erforderlich, ersetzt aber keine praktische Abnahme. Mikrobenchmark, Programmlauf, Browserframe, CPU-Sampling und tatsächliche native Geste getrennt benennen. Referenzhardware/Browser/Commit, Fixtures und Grenzen mitführen. Kein Compiler-/Renderer-/Frameworkwechsel, keine pauschale Grenzerhöhung und keine Kürzung fachlicher Prüfungen auf Verdacht.
 
@@ -915,6 +921,7 @@ GitHub bleibt die technische Quelle. Für kommende Arbeitsaufträge genügen die
 > **Historisches Statusprotokoll ab hier:** Datierte Nachweise und damalige Nutzerentscheidungen bleiben erhalten. Frühere Formulierungen „aktiv“, „nächster Auftrag“, „noch kein …“ und frühere PR-Zuordnungen gelten ausschließlich für ihren damaligen Stand. Aktuelle Verfügbarkeit und ausführbare Reihenfolge bestimmt allein §9.
 
 ### Ergänzung zum aktiven Geschossauftrag (Nutzerentscheidung 13.10.2026)
+
 Der Architekturauftrag aus §9 berücksichtigt den neuen Nutzervertrag unter
 R26-03/N21/N22/N56 im Register: „Gebäudestruktur“ mit Doppelklick-Einstellungen,
 Geschosse oberhalb/unterhalb per Kontextmenü, individuelle Höhen, Standardnamen
@@ -923,6 +930,7 @@ Keine Mehrgeschossimplementierung vor dem begrenzten Migrations-/Höhenvertrag;
 die noch offenen Einfüge- und Höhenfortschreibungsregeln ausdrücklich ausweisen.
 
 ### Status 13.10.2026 – Autosicherungsanzeige und Geschossvertrag
+
 UI-Anzeige links unten ersetzt „Model coordinates“ (grün aktiv, rot aus/pausiert).
 Bestehenden Recovery-Controller unverändert weiterverwendet. Höhen-/Migrationsvertrag
 mit geprüftem Codeinventar, Zuständigkeiten, bestätigter Rohfußboden-EG-Basis und
@@ -934,6 +942,7 @@ rotes Symbol beim Ausschalten, grünes Symbol beim Einschalten, Öffnen der best
 Recovery-Palette über das Symbol. Ausgangszustand aktiv wiederhergestellt.
 
 ### Status 13.10.2026 – Gemeinsamer Geschosskontext
+
 PR301/302 mit ausdrücklicher Freigabe zusammengeführt. Gemeinsame typisierte Query
 in application/storeys/context.ts für Arbeitsansichten und Abbilder implementiert;
 Maßstabsaktionen und Ansichtskontexte angebunden. 27 gezielte Regressionstests,
@@ -942,6 +951,7 @@ Bedienung unverändert. Die übrigen direkten Geschosszugriffe bleiben im dokume
 Migrationsumfang; dies ist keine abgeschlossene Mehrgeschossumstellung.
 
 ### Status 13.10.2026 – Höhenregeln bestätigt
+
 PR303 mit ausdrücklicher Freigabe und grüner CI zusammengeführt (main 9a14b0a).
 Nutzer bestätigt Rohfußboden-zu-Rohfußboden, EG als festen Bezug, Fortschreibung
 oberhalb nach oben/unterhalb nach unten und zusätzliche Höhe beim Einfügen.
@@ -949,6 +959,7 @@ Formeln, konkrete Keller-/Obergeschossbeispiele, Migration und genau ein EG/OG-P
 im Register dokumentiert. Nur Dokumentation geändert; keine neue Höhenfunktion.
 
 ### Status 13.10.2026 – Höhenrechenkern, EG/OG-Pilot noch offen
+
 Domainberechnung, Höhenänderung und Einfügen mit festem EG-Bezug implementiert.
 Acht neue Domainfälle, insgesamt 934 Tests, TypeScript, fokussiertes Lint und Build
 bestanden. Noch keine Schema-/UI-/3D-/IFC-Anbindung. Nach Codeinventur von 218 direkten
@@ -956,6 +967,7 @@ Einzelgeschosszugriffen als überprüfbaren ersten Teil isoliert; die vollständ
 vertikale Abnahme bleibt ausdrücklich offen. PR303 ist bereits gemergt, PR304 offen.
 
 ### Status 13.10.2026 – Geschosshöhe im Modell und Settings
+
 PR304/305 zusammengeführt. Schema22 speichert die zunächst unbekannte Geschosshöhe;
 gemeinsame Application-Aktion mit Undo/Redo und strikter Datei-/Recoverymigration.
 Gebäudestruktur per Doppelklick öffnet gemeinsame Settings-Hülle mit direkter
@@ -963,6 +975,7 @@ Höheneingabe. 936 Tests, beide Typechecks, Lint, Build und Browserprüfung best
 Weiterhin ein Geschoss: Sammlung, Geschosswahl und 3D/IFC-Z-Anbindung bleiben offen.
 
 ### Status 13.10.2026 – Schnittskizze vorgezogen
+
 Auf Nutzerwunsch Gebäudeeinstellungen als schematischen Rohdecken-Schnitt ergänzt:
 EG-Kote 0,00 m, bearbeitbare obere Kote und Geschosshöhe, Tab „Allgemeine
 Gebäudestruktur“. Bestehenden Modelldatenfluss wiederverwendet; keine zweite
@@ -970,6 +983,7 @@ Geschossebene/Decke erzeugt. 13 gezielte Tests, TypeScript, Lint, Build und beid
 Eingabe-/Undo-Browserprüfung bestanden. Nächster aktiver Auftrag bleibt §9.
 
 ### Status 13.10.2026 – Bearbeitbare EG-Kote
+
 Nutzerpräzisierung umgesetzt: obere Kote = OK EG-Rohdecke + Geschosshöhe.
 Schema23 speichert groundDatum (Altdateien: 0 m); gemeinsame validierte Aktion
 mit Modell-Undo und Datei-/Recoverymigration. Änderung des Bezugs erhält die
@@ -981,6 +995,7 @@ Mehrgeschossdarstellung und gemeinsame 3D-/IFC-Höhenanbindung bleiben der näch
 begrenzte EG/OG-Pilot aus §9. Kein weiterer Parallelauftrag.
 
 ### Nutzerergänzung / Status 13.10.2026 – Mitwachsende Gebäudeskizze
+
 Skizze auf wiederholbare, über stabile IDs gebundene Geschossabschnitte umgestellt.
 Eingaben bleiben lesbar; lange Listen nutzen den vorhandenen Settings-Scrollbereich.
 Keine zweite Geschossverwaltung in React. Derzeit weiterhin nur das bestehende EG
@@ -994,6 +1009,7 @@ Bearbeitung, History und konsistenter 3D-/IFC-Auflösung. Keine erneute Skizzenp
 Einzelgeschossdarstellung im Browser geprüft. Mehrgeschoss-Abnahme bleibt offen.
 
 ### Status 13.10.2026 – Geschosse direkt in der Skizze anlegen
+
 PR306–309 nach ausdrücklicher Freigabe zusammengeführt. Oberhalb/unterhalb jedes
 Geschosses lassen sich echte Geschosse mit eigener Höhe anlegen, auch zwischen
 bestehenden Geschossen. Namen und Koten sind bearbeitbar; Standardnamen für OG/KG,
@@ -1009,6 +1025,7 @@ Grenze dieses Piloten: Zeichnen und 3D/Picking bleiben beim bisherigen EG. Neue
 Geschosse sind zunächst leer; die aktive Geschosswahl ist der einzige nächste Auftrag.
 
 ### Status 14.10.2026 – Aktives Geschoss zum Zeichnen und Bearbeiten
+
 PR310 nach erfolgreicher CI und ausdrücklicher Freigabe in main übernommen.
 Navigatorwahl setzt über selectWorkingStorey den gemeinsamen Arbeitskontext.
 workingStoreyId ist eine optionale, additive Schema24-Ansichtseinstellung; alte
@@ -1030,6 +1047,7 @@ gezieltes ESLint und Produktionsbuild erfolgreich. Browser-Wiederöffnung stellt
 das aktive OG wieder her; Dateiübersicht zählt Bauteile aller Geschosse.
 
 ### Status 14.10.2026 – Gemeinsame 3D-Gebäudeansicht
+
 PR311 nach erfolgreicher CI und ausdrücklicher Freigabe in main übernommen.
 Alle Geschosse liefern ihre Wandkörper und Fensteröffnungen in dieselbe abgeleitete
 3D-Szene, auf den gemeinsam aufgelösten Höhen. Die Arbeitsgeschosswahl filtert diese
@@ -1046,6 +1064,7 @@ noch nicht freigegeben; ein erklärender Hinweis erhält die bisherige Auswahl.
 Dies ist der nächste einzelne Auftrag; normale Mehrfachauswahl im Geschoss bleibt.
 
 ### Status 14.10.2026 – Geschossübergreifende Auswahl und atomare XY-Bewegung
+
 PR312 mit erfolgreicher CI und Freigabe übernommen. Gemeinsamer Auswahlindex umfasst
 alle Geschosse. Strg/Cmd-Klick in 3D erweitert/entfernt Ziele geschossübergreifend.
 Der bestehende Gruppenbewegungs-Adapter teilt Ziele auf ihre echten Geschosscontainer
@@ -1060,11 +1079,12 @@ Grenze: Maus-Gruppenbewegung startet noch im Grundriss. Die direkte 3D-Vorschau/
 ist der nächste einzelne Auftrag, kein bereits abgeschlossener Bestandteil dieses Piloten.
 
 ### Status 14.10.2026 – Direkte XY-Gruppenbewegung in 3D
+
 PR313 mit erfolgreicher CI nach ausdrücklicher Freigabe nach main übernommen.
 Auswahl frei bewegen bleibt in 3D: sichtbarer Wandfußpunkt im Arbeitsgeschoss als
 Ursprung, sofortige Hilfsreferenz, gemeinsamer ToolInteraction-/Fang-/Shift-/Tab-Pfad.
 X/Y und Gegenrichtungen sowie tatsächliche Achsen ausgewählter Wände schreiben in
- dieselbe Hilfseingabe. XYZ-Richtungsvertrag vorhanden; Z ist ausdrücklich gesperrt.
+dieselbe Hilfseingabe. XYZ-Richtungsvertrag vorhanden; Z ist ausdrücklich gesperrt.
 Vorbereitete Geometriepatches je Geschoss liefern Wandkörper und Fensterflächen auf
 ihren unveränderten Höhen. Kein vollständiges Project-Materialisieren im Gruppen-
 Pointerpfad; ein Patch wird je Ziel für Körper und Fenster gemeinsam ausgewertet.
@@ -1078,6 +1098,7 @@ oder Großprojekt-Performance-Nachweis. Aktive Fanggeometrie und Ursprung bleibe
 an die horizontale Arbeitsebene gebunden. Nächster Einzelauftrag siehe §9.
 
 ### Ergänzung 14.10.2026 – Frei gewählter Bewegungsursprung in 3D
+
 Nutzerkorrektur zum offenen PR314: Nach Auswahl und On-Demand-Bewegungsaktion wird
 zuerst ein eigener Ursprung gewählt. Sichtbare reale Wandecken aller Geschosse,
 auch obere Ecken, werden bildschirmbezogen gefangen und mit einem Ring angezeigt.
@@ -1094,6 +1115,7 @@ identische XY-Translation und unveränderte Fensterparameter. Z-Höhenvertrag bl
 nächster Auftrag nach Abnahme dieser Bedienkorrektur.
 
 ### Ergänzung 14.10.2026 – Sichtbare Bewegungsachsen am Ursprung
+
 Nach bestätigter Ursprungswahl zeigt die gemeinsame 3D-Fangvorschau X/Y als
 beschriftete Richtungspfeile. Z wird ausdrücklich nur zur Orientierung dargestellt;
 keine Höhenbewegung. Die Achsen stammen aus WORLD_MOVEMENT_AXES, werden mit der
@@ -1106,6 +1128,7 @@ X ergibt in beiden Geschossen exakt gleichen X-Versatz bei unverändertem Y.
 PR314 enthält diese Bedienergänzung. Nächster Auftrag bleibt Z-Höhenvertrag nach Abnahme.
 
 ### Ergänzung 14.10.2026 – Gemeinsame Bewegung auch für Einzelziele
+
 Nutzervertrag: Die 3D-Ursprungs-/Achsen-/Fangbedienung ist eine gemeinsame Fähigkeit
 für Bewegungen, unabhängig von der Anzahl ausgewählter Elemente. Einzelwand
 „Element frei bewegen“ verwendet jetzt denselben SelectionMove-Einstieg wie Gruppen:
@@ -1125,6 +1148,7 @@ Fensteradapters. Nächster Auftrag bleibt der Z-Höhenvertrag nach Abnahme von P
 Nachweis Einzelziele: 955 Tests vollständig bestanden, App-Typecheck, gezieltes Lint und Produktionsbuild erfolgreich.
 
 ### Ergänzung 14.10.2026 – Unabhängige 3D-Kameranavigation
+
 Gedrückte mittlere Maustaste verschiebt die Kamera in Bildschirmrichtungen;
 Strg/Cmd + mittlere Taste rotiert um die Mitte der ausgewählten sichtbaren Bauteile,
 ohne Auswahl um die aktuelle Ansichtsmitte. Drehpunkt wird pro Geste festgehalten;
@@ -1140,6 +1164,7 @@ Mausrad-Drag-Kombination ist noch praktisch durch den Nutzer abzunehmen.
 Nächster Auftrag bleibt nach Bedienabnahme der Z-Höhenvertrag.
 
 ### Ergänzung 14.10.2026 – Orientierung von unten und künftige 3D-Darstellung
+
 Beim Orbit unter die Nullebene (negative Kameraneigung der orthografischen Kamera)
 liegt die dekorative Z=0-Fläche mit 28 % Deckkraft über dem Modell; von oben bleibt
 sie mit 14 % hinter dem Modell. Kein Fangziel, keine Auswahl- oder Modelländerung.
@@ -1151,10 +1176,12 @@ weitere Darstellungsmodi noch nicht festgelegt. Kontursteuerung 3D ist noch offe
 Nachweis: Typecheck, gezieltes Lint und Produktionsbuild bestanden. Browser-Unteransicht mit grauer Überlagerung geprüft.
 
 ### Höhenvertrag Z-Bewegung – freigegeben am 14.10.2026
+
 PR #314 ist mit grünem GitHub-Check in main übernommen (93e7c2e).
 Dieser Schritt ist ein Code-/Vertragsabgleich, noch keine Z-Freischaltung.
 
 **Verbindliche Nutzerentscheidungen:**
+
 - Z-Bewegung behält die Geschosszuordnung und verändert einen relativen Höhenversatz.
   Änderungen der Geschosslage nehmen das Bauteil einschließlich Versatz mit.
 - Gemeinsam bewegte Wände behalten ihre gegenseitigen Anschlüsse. Anschlüsse zu
@@ -1171,6 +1198,7 @@ beschriftet absolute Höhen, verschiebt aber keine lokale Geometrie.
 Die Anschlussauflösung prüft bisher XY-Endpunkte; das reicht für versetzte Wände nicht.
 
 **Begrenzter technischer Entwurf:**
+
 - Gemeinsame Domain-Höhenauflösung: Wandfuß = lokale Geschosslage + baseOffset;
   Wandkopf = Wandfuß + bestehende feste Wandhöhe; Fensterunterkante = Wandfuß +
   sillHeight. Absolute Höhenanzeige addiert groundDatum genau einmal.
@@ -1200,6 +1228,7 @@ Prüfnachweis dieses Dokumentationsschritts: genannte Codepfade gelesen; keine n
 Laufzeittests erforderlich, da keine Implementierung geändert wurde.
 
 ### 14.10.2026 – Gemeinsame Wand-Höhenauflösung implementiert
+
 PR315 (Höhenvertrag) mit erfolgreichem Check in main übernommen, d10c74a.
 Format25 ergänzt optionales baseOffset in Metern; fehlend bedeutet exakt 0.
 Die explizite Migration V24→V25 erhält alte Geometrie ohne zusätzliche Nullfelder;
@@ -1229,11 +1258,10 @@ Commit-Vergleich. Geschoss/IDs erhalten, interne Anschlüsse erhalten, externe e
 beim Commit lösen, Fenster einmal mitnehmen, stale-Kontext ablehnen, ein Undo.
 UI-Achsenanbindung folgt auf die geprüfte Aktion, ohne parallele Modelllogik.
 
-
 Ergänzung 14.10.2026: Wand-Werkzeugeigenschaften besitzen jetzt das Feld Z-Versatz zum Geschoss (m), bezogen auf OK Rohdecke. Signierte Werte mit Dezimalkomma/-punkt, Übernahme per Enter/Blur über PropertyForm und updateWall, keine separate Modelllogik. Fenster folgen. Browser: +0,5 m und ein Undo geprüft; 8 Höhentests, Typecheck, gezieltes Lint und Build bestanden. Ungleiche Anschlussfußhöhen bleiben vorerst abgewiesen; nächste Aktion löst externe Anschlüsse gemäß Vertrag.
 
-
 ### 14.10.2026 – Gemeinsame Z-Auswahlaktion
+
 PR316 mit erfolgreichem GitHub-Check in main übernommen (8e3bb6b).
 `application/selection/z-translation.ts` bereitet eine snapshotgebundene Z-Aktion
 für eine oder mehrere Wände über Geschossgrenzen vor. Mit ausgewählte Fenster werden
@@ -1257,8 +1285,8 @@ Keine neue werkzeugspezifische Höhenlogik; praktische Abnahme erfolgt dann im C
 
 Nachweis Z-Aktion: 968 Tests bestanden; App-/Benchmark-Typecheck, gezieltes Lint und Produktionsbuild erfolgreich. Keine Browserabnahme behauptet: noch keine neue UI-Anbindung.
 
-
 ### AUD14-01 – begrenzter P0-Fix und Nachweis (14.10.2026)
+
 Basis main 7621765, separater Zweig fix/recovery-resource-contract; PR318 bleibt
 unverändert offen. Reproduktion mit neun echten, verschiedenfarbigen RGB-PNGs,
 je 4000×4000 Pixel, bestätigte den Fehler: 646.910 Bytes portable Datei,
@@ -1300,7 +1328,6 @@ reale Browser-Quota und schweres Gesamtprofil nicht neu simuliert; Langzeitaufbe
 und kombinierte Abnahme bleiben AUD14-06/07. AUD14-01: implementiert und fokussiert
 geprüft, PR-Abnahme offen. Nächster aktiver Auftrag AUD14-02.
 
-
 ### AUD14-02 – gemeinsame Bewegungssnapshots ohne Payload-JSON (15.10.2026)
 
 - `prepared-snapshot.ts` besitzt die validierte, eingefrorene Basis für XY und Z.
@@ -1337,7 +1364,6 @@ geprüft, PR-Abnahme offen. Nächster aktiver Auftrag AUD14-02.
 - Nächster Einzelauftrag AUD14-03: unveränderte 3D-Ressourcen bei Auswahl und
   Bewegung wiederverwenden, zunächst Ressourcen-/Uploadzähler und Auswahlwechsel.
 
-
 ### AUD14-03 – stabile 3D-Ressourcen und begrenzte Uploads (15.10.2026)
 
 - `solid-renderer.ts` hält ein Programm und zwei Puffer über Auswahl-/Geometriewechsel
@@ -1354,10 +1380,10 @@ geprüft, PR-Abnahme offen. Nächster aktiver Auftrag AUD14-02.
   und Konturribbons bleiben unverändert. Keine vollständige lokale CPU-/GPU-Pipeline behauptet.
 - Vorher/Nachher am Commit `a585b68`: Windows Node 24.19.0, WebGL-Befehlsrekorder,
   100/1.000/5.000 einfache Quad-Wände, feste kleine Auswahl; initial + sechs Auswahlwechsel
-  + sechs Bewegungsupdates. Bei 5.000 Wänden: Programme 13 → 1, Puffer 26 → 2;
-  Upload 9.360.000 Byte → 720.000 Byte initial plus 2.592 Byte Updates.
-  Warme CPU-Mediane (fünf Updates nach erster Ausführung): Auswahl 16,903 → 0,035 ms,
-  Bewegung 18,123 → 2,798 ms. Rekorderzahlen sind keine GPU-/Framezeiten.
+  - sechs Bewegungsupdates. Bei 5.000 Wänden: Programme 13 → 1, Puffer 26 → 2;
+    Upload 9.360.000 Byte → 720.000 Byte initial plus 2.592 Byte Updates.
+    Warme CPU-Mediane (fünf Updates nach erster Ausführung): Auswahl 16,903 → 0,035 ms,
+    Bewegung 18,123 → 2,798 ms. Rekorderzahlen sind keine GPU-/Framezeiten.
 - Chromium 155, echte WebGL-Ausgabe: **36 exakte Pixelvergleiche** zwischen wiederverwendetem
   und frischem Renderer bestanden (Wände mit Anschluss/Fenster, Auswahl, Vorschau, Abbruch,
   Sichtbarkeit, DPR1/2, Blick von oben/unten, Ursprung bei 1e9). Kontextverlust und
@@ -1370,7 +1396,6 @@ geprüft, PR-Abnahme offen. Nächster aktiver Auftrag AUD14-02.
   und stehende Nachbarwand müssen unverändert aussehen. Danach mit Shift platzieren und Undo.
 - Nächster Einzelauftrag AUD14-04: Aufruf-/Kopierarbeit bei Geschoss-/Ansichtswechsel
   messen und unveränderte Gebäudeableitungen wiederverwenden.
-
 
 ### AUD14-04, Teil 1 – Gebäudeableitung über Arbeitsgeschosswechsel teilen (15.10.2026)
 
@@ -1408,7 +1433,6 @@ geprüft, PR-Abnahme offen. Nächster aktiver Auftrag AUD14-02.
   bestehende Snapshot-Ownership und Identitätscache-Mutationsannahme absichern und
   doppelte Validierung an Ansichtseinstellungsgrenzen messen/begrenzt reduzieren.
   Danach verbleibende 3D-Vorschaupfade/Schraffurprüfungen; erst dann AUD14-05.
-
 
 ### AUD14-04, Teil 2 – Geprüfte Snapshot-Ownership und sicherer Gebäude-Cache (15.10.2026)
 
@@ -1448,7 +1472,6 @@ geprüft, PR-Abnahme offen. Nächster aktiver Auftrag AUD14-02.
   Sichtbarkeit müssen aktuell bleiben; Vergleich mit vollständigem Pfad und Messung.
   Anschließend verbleibende direkte 3D-Vorschau-/Schraffurprüfungen; AUD14-05 noch nicht starten.
 
-
 ### AUD14-04, Teil 3 – Stabile Modellbasis für 3D-Abfragen (15.10.2026)
 
 - PR323 nach grüner CI freigegeben und als `819cef9` in main zusammengeführt.
@@ -1486,7 +1509,6 @@ geprüft, PR-Abnahme offen. Nächster aktiver Auftrag AUD14-02.
   und Fenster messen, globalen Prüf-/Ableitungspfad eingrenzen und ersten begrenzten
   vorbereiteten Pfad gegen vollständige Validierung vergleichen. Danach verbleibende
   Schraffurprüfung; AUD14-05/06/07 bleiben offen.
-
 
 ### AUD14-04, Teil 4 – Vorbereitete Fenster-Achsvorschau (15.10.2026)
 
@@ -1605,16 +1627,16 @@ beide Enden, Kürzen/schräg, T/Doppel-T/Ecke, Mehrgeschosse/Höhenversatz, frem
 T-Fang, ungültige/stale Ziele, Abbruch und Undo. Chromium155: 16 exakte Pixel-/Achsenvergleiche.
 
 Vollaktion + Gebäudeableitung gegen Patch + Komposition, warme Mediane:
+
 - start, 502 Wände/Fenster: 34.12 → 12.32 ms.
 - shorten, 502 Wände/Fenster: 32.78 → 10.05 ms.
 - oblique, 502 Wände/Fenster: 30.49 → 9.15 ms.
-Methodik/Rohdaten: benchmarks/shared-endpoints-results.json. Ein erster und acht warme Werte
-je Profil, Reihenfolge alterniert; Vorbereitung separat. Kein historischer Commitvergleich,
-kein GPU-/Heap-/Gesamtframenachweis. Frühere Pilotmessung separat erhalten.
-Einziger Folgeauftrag: verbleibende Schraffur-Geometrieprüfungen im Pointerpfad messen und
-sicher vorbereiten (AUD14-04). Weitere Wandgesten bleiben dokumentierte Migrationsschuld;
-AUD14-05/06/07 sind weiterhin offen.
-
+  Methodik/Rohdaten: benchmarks/shared-endpoints-results.json. Ein erster und acht warme Werte
+  je Profil, Reihenfolge alterniert; Vorbereitung separat. Kein historischer Commitvergleich,
+  kein GPU-/Heap-/Gesamtframenachweis. Frühere Pilotmessung separat erhalten.
+  Einziger Folgeauftrag: verbleibende Schraffur-Geometrieprüfungen im Pointerpfad messen und
+  sicher vorbereiten (AUD14-04). Weitere Wandgesten bleiben dokumentierte Migrationsschuld;
+  AUD14-05/06/07 sind weiterhin offen.
 
 ### AUD14-04 Teil 7 – Räumliche Konturprüfung (15.10.2026)
 
@@ -1648,7 +1670,6 @@ unveränderter Schraffuren im vollständigen Legacy-Projektpfad bleiben offen.
 Einziger Folgeauftrag: direkte Schraffur-Punktvorschau über gemeinsamen vorbereiteten
 Application-Einstieg begrenzen; Vollpfad-/Commit-/Undo-Gleichheit und Pointerarbeit
 messen. AUD14-04 bleibt offen, AUD14-05/06/07 folgen danach. A04 gilt weiter.
-
 
 ### AUD14-04 Teil 8 – Vorbereitete Schraffur-Punktvorschau (15.10.2026)
 
@@ -1684,7 +1705,6 @@ ein Undo stellt die Ausgangskontur wieder her.
 Einziger Folgeauftrag: bereits vorhandene vorbereitete Prüfung veränderter Polygonkanten
 für die Schraffur-Punktvorschau auf sichere Wiederverwendung prüfen, integrieren und mit
 vollständiger Konturvalidierung vergleichen/messen. AUD14-04 bleibt offen; danach 05/06/07.
-
 
 ### AUD14-04 Teil 9 – Veränderte Schraffurkanten prüfen (15.10.2026)
 
@@ -1724,7 +1744,6 @@ Einziger Folgeauftrag: Seitenstrecken von Schraffuren auf denselben vorbereitete
 Application-Vertrag begrenzen, einschließlich Cap/Vorschau und Vollpfadvergleich.
 AUD14-04 bleibt aktiv; AUD14-05/06/07 folgen weiterhin danach.
 
-
 ### AUD14-04 Teil 10 – Vorbereitete Schraffur-Seitenstreckung (15.10.2026)
 
 PR331 nach expliziter Freigabe und grüner CI gemergt (1834600).
@@ -1752,11 +1771,12 @@ und kein neuer visueller Browsernachweis für diesen internen Vorschaufix behaup
 Rohdaten: benchmarks/hatch-edge-results.json. Node, unabhängige Sitzungs-/Cap-Caches
 für beide Pfade, wechselnde Reihenfolge, ein erster und acht warme Zielwerte;
 Vorbereitung separat, Cap-Arbeit eingeschlossen. Warme Mediane Vollpfad → Vorschau:
+
 - eine 500-Punkt-Schraffur: 18,62 → 10,52 ms; Vorbereitung 12,10 ms.
 - 100 Schraffuren mit je 100 Punkten: 77,69 → 1,71 ms; Vorbereitung 45,90 ms.
 - 500 Vierecke: 16,25 → 0,12 ms; Vorbereitung 8,17 ms.
-Keine Gesamtframe-/GPU-Garantie. Konturgröße, Kontakt-/Cap-Ereignisse, Projektmaterialisierung
-und Darstellung bleiben Kosten. Der dichte Cap-Fall wird nicht als konstant schnell erklärt.
+  Keine Gesamtframe-/GPU-Garantie. Konturgröße, Kontakt-/Cap-Ereignisse, Projektmaterialisierung
+  und Darstellung bleiben Kosten. Der dichte Cap-Fall wird nicht als konstant schnell erklärt.
 
 Abnahme: Seite einer spitzen/konkaven Musterschraffur weit über den zulässigen Bereich
 ziehen; Vorschau bleibt am bisherigen Cap, Zurückziehen funktioniert. Abbrechen oder
@@ -1764,7 +1784,6 @@ platzieren und einmal Undo. Muster und andere Elemente müssen erhalten bleiben.
 Einziger Folgeauftrag: Offset-Vorschau von Schraffuren über denselben vorbereiteten
 Application-Vertrag begrenzen, vorhandene Mindestgröße/Cap-Regel und Vollpfad vergleichen.
 AUD14-04 bleibt aktiv; AUD14-05/06/07 folgen danach.
-
 
 ### AUD14-04 Teil 11 – Vorbereitete Schraffur-Offsetvorschau (15.10.2026)
 
@@ -1792,18 +1811,18 @@ am Rendering und keine neue visuelle Browserabnahme behauptet.
 Rohdaten benchmarks/hatch-offset-results.json: unabhängige Sitzungs-/Cap-Caches,
 Vorbereitung separat, ein erster und acht warme Werte mit wechselnder Reihenfolge;
 exakte Projektgleichheit je Ziel. Warme Mediane Vollpfad → vorbereitete Projektvorschau:
+
 - einzelne 500-Punkt-Kontur: 5,12 → 1,39 ms; Vorbereitung 14,35 ms.
 - 100 Schraffuren mit je 100 Punkten: 69,17 → 0,27 ms; Vorbereitung 43,26 ms.
 - 500 Vierecke: 16,61 → 0,03 ms; Vorbereitung 8,81 ms.
-Keine Gesamtframe-/GPU-Garantie. Vollständige Zielkonturprüfung, materialisierte
-Projektansicht und Darstellung bleiben Kosten; keine konstante Komplexität behauptet.
+  Keine Gesamtframe-/GPU-Garantie. Vollständige Zielkonturprüfung, materialisierte
+  Projektansicht und Darstellung bleiben Kosten; keine konstante Komplexität behauptet.
 
 Abnahme: Musterschraffur nach innen über die Mindestgröße ziehen, wieder nach außen,
 abbrechen oder platzieren und einmal Undo; Musterlage und übrige Elemente erhalten.
 Einziger Folgeauftrag: Schraffur-„Knicken“ (Punkt einfügen) im gemeinsamen vorbereiteten
 Vertrag begrenzen; Punktanzahlgrenze und vollständige Kontur-/Commitprüfung erhalten.
 AUD14-04 bleibt aktiv, AUD14-05/06/07 folgen danach. Andere Legacy-Pfade bleiben offen.
-
 
 ### AUD14-04 Teil 12 – Vorbereitete Schraffur-Knickvorschau (15.10.2026)
 
@@ -1826,11 +1845,12 @@ Keine neue visuelle Browserabnahme behauptet; der Renderer bleibt unverändert.
 Rohdaten: benchmarks/hatch-insert-results.json. Node; Vorbereitung separat,
 ein erster und acht warme Werte mit wechselnder Reihenfolge und exakter Projektgleichheit.
 Warme Mediane Vollpfad → vorbereitete Vorschau:
+
 - eine 500-Punkt-Kontur: 6,53 → 1,17 ms; Vorbereitung 13,45 ms.
 - 100 Schraffuren mit je 100 Punkten: 76,41 → 0,30 ms; Vorbereitung 55,28 ms.
 - 500 Vierecke: 15,61 → 0,03 ms; Vorbereitung 8,62 ms.
-Keine Gesamtframe-/GPU-Garantie. Vollständige Zielkonturprüfung und Projektmaterialisierung
-bleiben Kosten. Weitere Legacy-Vorschauen sind noch nicht durchgehend vorbereitet.
+  Keine Gesamtframe-/GPU-Garantie. Vollständige Zielkonturprüfung und Projektmaterialisierung
+  bleiben Kosten. Weitere Legacy-Vorschauen sind noch nicht durchgehend vorbereitet.
 
 Abnahme: Musterschraffur auswählen, an erster/letzter Seite „Knicken“ starten,
 Punkt verschieben, abbrechen beziehungsweise platzieren und einmal Undo.
@@ -1839,24 +1859,23 @@ mit einer konkreten Pfad-/Kostenliste und priorisiertem Restbefund. Dabei keine 
 Werkzeugmigrationen beginnen; daraus den nächsten begrenzten Fix oder AUD14-05 ableiten.
 AUD14-04 bleibt bis zu dieser Prüfung offen; AUD14-05/06/07 bleiben erhalten.
 
-
 ### AUD14-04 Teil 13 – Restpfade und Priorisierung (15.10.2026)
 
 PR334 nach ausdrücklicher Freigabe und grüner CI gemergt (bbcefef).
 Dies ist eine Bestandsprüfung, keine neue Werkzeugmigration und kein Abschluss des
 Gesamtpunkts. Produktionscode und Bedienung bleiben unverändert.
 
-| Pfad | Codebeleg | Aktueller Restaufwand / Einordnung |
-| --- | --- | --- |
-| Schraffur Punkt/Seite/Offset/Knicken | application/direct-edit/prepared-preview.ts, prepared-hatch.ts | Vorbereitet; Zielkonturprüfung bleibt. BimPlan erhält eine materialisierte Projektansicht. |
-| Linienpunkt, auch geschlossene Polylinie | lib/bim/direct-edit.ts → application/direct-edit/transforms.ts → lib/bim/model.ts:updateLine | Kein registrierter vorbereiteter Adapter; validateProject prüft alle unveränderten Elemente mit. Gemessener stärkster Restengpass dieses Vergleichs. |
-| Fenster entlang Achse | prepared-preview.ts, prepared-window.ts, controller.ts | 3D erhält lokalen Patch; projectView beendet Registrierung vor dem Fensteradapter. Direkte 2D-Vorschau läuft deshalb noch vollständig. |
-| Wandachsende | prepared-wall.ts, prepared-endpoint.ts, controller.ts | Exakte Achsgriffe vorbereitet; neue T-Ziele/fremde Endkontakte können absichtlich zum Vollpfad führen. Fremdpunktliste wird linear geprüft, Anschlussgruppe kann groß sein: AUD14-05. |
-| Wandkörpergriff / Strecken | prepared-wall.ts, lib/bim/direct-edit.ts | Kein allgemeiner vorbereiteter Adapter. Stretch hier direkt über EditSession gemessen; tatsächliche Menü-/Interaktionshäufigkeit nicht erhoben. |
-| Freie Auswahlbewegung XY/Z | application/selection/move.ts, storey-translation.ts, z-translation.ts | Gemeinsamer vorbereiteter Auswahlpfad vorhanden, nicht mit jedem noch vorhandenen direkten move/x/y-Legacypfad gleichsetzen. Kein erneuter Gesamt-Performancebeleg in dieser Prüfung. |
-| Linien-Knicken/Seite/Offset, direkte Schraffurbewegung/-stretch | contour.ts, offset.ts, transforms.ts | Registrierungsgrenze bleibt; vollständige updateLine/previewHatch-Pfade. Nicht separat vermessen; keine pauschale Übertragung der Punktmessung. |
-| Wand zeichnen/Kette | application/drawing/wall-chain.ts:previewWallChain | Erster Abschnitt/erste Ecke teilweise vorbereitet; übrige Ketten/Startkandidaten nutzen appendWallChain. ID-Sammlung bleibt pro Abfrage. Separat vermessen, bevor weitere Optimierung beauftragt wird. |
-| Grundrissableitung | components/cad/BimPlan.tsx, rendering/viewport/plan-scene.ts | Direkter Edit ersetzt shown; derivePlanScene erzeugt Maps, Wandkörper und Konturen erneut. Auswahlbewegung hat bereits separate Patch-Komposition. Kein Rendererwechsel erforderlich. |
+| Pfad                                                            | Codebeleg                                                                                    | Aktueller Restaufwand / Einordnung                                                                                                                                                                     |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Schraffur Punkt/Seite/Offset/Knicken                            | application/direct-edit/prepared-preview.ts, prepared-hatch.ts                               | Vorbereitet; Zielkonturprüfung bleibt. BimPlan erhält eine materialisierte Projektansicht.                                                                                                             |
+| Linienpunkt, auch geschlossene Polylinie                        | lib/bim/direct-edit.ts → application/direct-edit/transforms.ts → lib/bim/model.ts:updateLine | Kein registrierter vorbereiteter Adapter; validateProject prüft alle unveränderten Elemente mit. Gemessener stärkster Restengpass dieses Vergleichs.                                                   |
+| Fenster entlang Achse                                           | prepared-preview.ts, prepared-window.ts, controller.ts                                       | 3D erhält lokalen Patch; projectView beendet Registrierung vor dem Fensteradapter. Direkte 2D-Vorschau läuft deshalb noch vollständig.                                                                 |
+| Wandachsende                                                    | prepared-wall.ts, prepared-endpoint.ts, controller.ts                                        | Exakte Achsgriffe vorbereitet; neue T-Ziele/fremde Endkontakte können absichtlich zum Vollpfad führen. Fremdpunktliste wird linear geprüft, Anschlussgruppe kann groß sein: AUD14-05.                  |
+| Wandkörpergriff / Strecken                                      | prepared-wall.ts, lib/bim/direct-edit.ts                                                     | Kein allgemeiner vorbereiteter Adapter. Stretch hier direkt über EditSession gemessen; tatsächliche Menü-/Interaktionshäufigkeit nicht erhoben.                                                        |
+| Freie Auswahlbewegung XY/Z                                      | application/selection/move.ts, storey-translation.ts, z-translation.ts                       | Gemeinsamer vorbereiteter Auswahlpfad vorhanden, nicht mit jedem noch vorhandenen direkten move/x/y-Legacypfad gleichsetzen. Kein erneuter Gesamt-Performancebeleg in dieser Prüfung.                  |
+| Linien-Knicken/Seite/Offset, direkte Schraffurbewegung/-stretch | contour.ts, offset.ts, transforms.ts                                                         | Registrierungsgrenze bleibt; vollständige updateLine/previewHatch-Pfade. Nicht separat vermessen; keine pauschale Übertragung der Punktmessung.                                                        |
+| Wand zeichnen/Kette                                             | application/drawing/wall-chain.ts:previewWallChain                                           | Erster Abschnitt/erste Ecke teilweise vorbereitet; übrige Ketten/Startkandidaten nutzen appendWallChain. ID-Sammlung bleibt pro Abfrage. Separat vermessen, bevor weitere Optimierung beauftragt wird. |
+| Grundrissableitung                                              | components/cad/BimPlan.tsx, rendering/viewport/plan-scene.ts                                 | Direkter Edit ersetzt shown; derivePlanScene erzeugt Maps, Wandkörper und Konturen erneut. Auswahlbewegung hat bereits separate Patch-Komposition. Kein Rendererwechsel erforderlich.                  |
 
 Messverfahren: benchmarks/remaining-preview-profile.ts mit Node TypeScript ausführen.
 Rohdaten remaining-preview-results.json: je Profil erster + acht warme Werte, Reihenfolge
@@ -1864,12 +1883,12 @@ Projekt/Patch wechselnd, Vorbereitungszeit separat. Vorschau-Projekt für jedes 
 mit editAtPointer verglichen; Gleichheitsprüfung außerhalb der Messzeit. Keine neuen
 Behauptungen zur Patchgleichheit über die bereits vorhandenen Adaptertests hinaus.
 
-| Direkter Pfad | Kleine / große Szene | Vorschau warm klein → groß | Planableitung groß | Patch groß / Patch-Plan groß |
-| --- | --- | --- | --- | --- |
-| Schraffurpunkt | 10 / 100 Schraffuren à 100 Punkte | 0,072 → 0,042 ms | 0,029 ms | 0,035 / 0,015 ms |
-| Linienpunkt | dieselben unveränderten Schraffuren + eine Linie | 3,85 → 35,89 ms | 0,030 ms | nicht vorhanden |
-| Fensterachse | 5 Geschosse, 50 / 500 Wände und ebenso viele Fenster | 0,54 → 3,16 ms | 0,622 ms | 0,110 / 0,018 ms |
-| Wand-Strecken | dieselben Gebäude | 0,55 → 3,10 ms | 0,518 ms | nicht vorhanden |
+| Direkter Pfad  | Kleine / große Szene                                 | Vorschau warm klein → groß | Planableitung groß | Patch groß / Patch-Plan groß |
+| -------------- | ---------------------------------------------------- | -------------------------- | ------------------ | ---------------------------- |
+| Schraffurpunkt | 10 / 100 Schraffuren à 100 Punkte                    | 0,072 → 0,042 ms           | 0,029 ms           | 0,035 / 0,015 ms             |
+| Linienpunkt    | dieselben unveränderten Schraffuren + eine Linie     | 3,85 → 35,89 ms            | 0,030 ms           | nicht vorhanden              |
+| Fensterachse   | 5 Geschosse, 50 / 500 Wände und ebenso viele Fenster | 0,54 → 3,16 ms             | 0,622 ms           | 0,110 / 0,018 ms             |
+| Wand-Strecken  | dieselben Gebäude                                    | 0,55 → 3,10 ms             | 0,518 ms           | nicht vorhanden              |
 
 Die kleine/große Schraffurpunktzeit ist kein Skalierungsgesetz (JIT/Messstreuung).
 Unverbundene synthetische Gebäude, keine großen Anschlussnetze, DOM/GPU, Fangabfrage,
@@ -1890,7 +1909,6 @@ Exakte Projekt-/Planszenenvergleiche inklusive ungültiger Ziele, Linienarten un
 unbetroffener ungültiger Elemente; wieder dieselbe 10/100-Schraffuren-Messung.
 Keine Renderer-Typabfrage, keine neuen Eingabe-/Fangregeln und kein Ausweiten auf
 Linien-Offset/Seitenstreckung in diesem Einzelauftrag.
-
 
 ### AUD14-04 Teil 14 – Vorbereitete Linienpunkt-Vorschau (15.10.2026)
 
@@ -1919,14 +1937,15 @@ Schraffur geprüft. Keine neue visuelle Browserabnahme behauptet.
 Messung: benchmarks/line-point-profile.ts / line-point-results.json, gleiche Szenen
 wie Teil 13. Erster und acht warme Werte, Projekt-/Patch-Reihenfolge alterniert,
 Vollaktion separat danach gemessen, Ergebnisgleichheit außerhalb der Zeiten.
+
 - 10 Schraffuren à 100 Punkte: Vollaktion 4,42 ms, Projektvorschau 0,014 ms,
   Vorbereitung separat 4,66 ms.
 - 100 Schraffuren à 100 Punkte: Vollaktion 38,14 ms, Projektvorschau 0,015 ms,
   Vorbereitung separat 40,88 ms.
-Keine Gesamtframe-/GPU-Garantie. Vorbereitung skaliert weiterhin mit der Basis;
-Punktkopie und Linienprüfung mit der Pfadlänge, Projektmaterialisierung mit der Anzahl
-Linien im Geschoss. Globale Planableitung bleibt bestehen. Andere Profilfälle dienen
-als Kontext; daraus keine neuen Optimierungsbehauptungen ableiten.
+  Keine Gesamtframe-/GPU-Garantie. Vorbereitung skaliert weiterhin mit der Basis;
+  Punktkopie und Linienprüfung mit der Pfadlänge, Projektmaterialisierung mit der Anzahl
+  Linien im Geschoss. Globale Planableitung bleibt bestehen. Andere Profilfälle dienen
+  als Kontext; daraus keine neuen Optimierungsbehauptungen ableiten.
 
 Abnahme: offene Linie und geschlossene Polylinie mit eigener Linienart zeichnen;
 ersten/letzten Punkt bewegen, abbrechen beziehungsweise platzieren und einmal Undo.
@@ -1937,7 +1956,6 @@ direkte 2D-Projektvorschau nutzbar machen (gemeinsame Registrierung/Materialisie
 Keine zweite Fensterlogik; Hostgrenzen, T-Anschlüsse, Höhen, Musterfremdinhalte,
 Kontextwechsel und Commit/Undo gegen Vollpfad prüfen; 50/500-Wände-Szenen vergleichen.
 AUD14-04 bleibt offen, übrige Restpfade aus Teil 13 und AUD14-05/06/07 bleiben erhalten.
-
 
 ### AUD14-04 Teil 15 – Gemeinsame Fenster-Achsvorschau in 2D (15.10.2026)
 
@@ -1961,14 +1979,15 @@ bleiben geprüft. Kein Rendering geändert, keine neue visuelle Browserabnahme b
 Rohdaten benchmarks/window-plan-results.json, Runner window-plan-profile.ts:
 ein erster und acht warme Werte, Vollpfad/Vorschau-Reihenfolge alterniert,
 Vorbereitung und Planableitung separat, Projektgleichheit außerhalb der Zeitmessung.
+
 - 5 Geschosse, 50 Wände + 50 Fenster: Vollpfad 0,80 → Vorschau 0,18 ms;
   Vorbereitung 1,88 ms, Planableitung 0,17 ms.
 - 5 Geschosse, 500 Wände + 500 Fenster: Vollpfad 3,28 → Vorschau 0,13 ms;
   Vorbereitung 5,99 ms, Planableitung 0,43 ms.
-Unverbundene synthetische Gebäude; keine Garantie für Gesamtframes, GPU, Fangarbeit
-oder große Anschlussnetze. Letztere bleiben AUD14-05. Die materialisierte Fensterliste
-und globale Planableitung bleiben Kosten; die vorhandene Anschlussgruppe wird weiter
-pro Ziel vollständig geprüft.
+  Unverbundene synthetische Gebäude; keine Garantie für Gesamtframes, GPU, Fangarbeit
+  oder große Anschlussnetze. Letztere bleiben AUD14-05. Die materialisierte Fensterliste
+  und globale Planableitung bleiben Kosten; die vorhandene Anschlussgruppe wird weiter
+  pro Ziel vollständig geprüft.
 
 Abnahme: Fenster in 2D über zwei T-Anschlüsse und bis über beide Wandenden ziehen.
 Es bleibt auf seiner Wand, begrenzt an deren zulässigen Endpositionen. Abbruch,
@@ -1982,7 +2001,6 @@ unveränderten Schraffur-Hintergrundlast messen. Kein neuer Renderer-/Fangzweig.
 Diese Aktion nutzt laut Teil 13 noch updateLine mit globaler Validierung; ihre genaue
 Kostenhöhe ist vor Umsetzung zu messen, nicht aus der Linienpunktmessung zu behaupten.
 AUD14-04 bleibt offen; andere Restpfade und AUD14-05/06/07 bleiben erhalten.
-
 
 ### AUD14-04 Teil 16 – Vorbereitete Polylinien-Seitenstreckung (15.10.2026)
 
@@ -2009,12 +2027,13 @@ bezeichnet dort den Controller-Legacy-Fallback). Bei 100 Schraffuren à 100 Punk
 in line-edge-results.json, Runner line-edge-profile.ts. Unabhängige Sitzungscaches,
 Vollpfad/Vorschau-Reihenfolge alterniert, erster + acht warme Werte, Cap-Arbeit enthalten,
 Vorbereitung separat, exakte Projektgleichheit je Ziel außerhalb der Zeitmessung:
+
 - 100 Schraffuren à 100 Punkte: Vollpfad 39,00 → Vorschau 1,74 ms; Vorbereitung 40,38 ms.
 - 10 Schraffuren à 100 Punkte: Vollpfad 8,82 → Vorschau 2,24 ms; Vorbereitung 5,19 ms.
 - eine Schraffur und Polylinie mit 500 Konturpunkten: 15,84 → 9,08 ms; Vorbereitung 9,87 ms.
-Vorher/Nachher-Werte sind einzelne Läufe mit Streuung, keine garantierte Skalierung.
-Cap-Ereignisse, große Konturen, Linienprüfung, Materialisierung und Planableitung bleiben
-Kosten. Keine Gesamtframe-/GPU-Garantie; insbesondere 500 Punkte bleiben merklich teuer.
+  Vorher/Nachher-Werte sind einzelne Läufe mit Streuung, keine garantierte Skalierung.
+  Cap-Ereignisse, große Konturen, Linienprüfung, Materialisierung und Planableitung bleiben
+  Kosten. Keine Gesamtframe-/GPU-Garantie; insbesondere 500 Punkte bleiben merklich teuer.
 
 Abnahme: Seite einer spitzen/konkaven geschlossenen Polylinie über die zulässige Grenze
 ziehen und zurück, abbrechen/platzieren, einmal Undo; Schließpunkt und Linienart erhalten.
@@ -2023,7 +2042,6 @@ vorbereiten, gemeinsame offsetContourPoints-/Cap-Berechnung wiederverwenden. Kon
 und Mindestgrößenregeln sowie vollständige Zielkontur-/Linienprüfung erhalten; kleine
 Formen, beide Umlaufrichtungen, Kontext und Commit/Undo gegen Vollpfad vergleichen/messen.
 AUD14-04 bleibt offen; übrige Restpfade und AUD14-05/06/07 bleiben erhalten.
-
 
 ### AUD14-04 Teil 17 – Vorbereiteter Polylinien-Offset (15.10.2026)
 
@@ -2053,17 +2071,19 @@ Abbruch, Commit und Undo. Keine neue visuelle Browserabnahme behauptet.
 Messung line-offset-profile.ts / line-offset-results.json: unabhängige Sitzungscaches,
 erster und acht warme Ziele, alternierende Reihenfolge, Vorbereitung separat, exakte
 Projektgleichheit außerhalb der Messzeit. Vollpfad → Vorschau:
+
 - 100 Schraffuren à 100 Punkte: 44,77 → 0,316 ms; Vorbereitung 44,89 ms.
 - 10 Schraffuren à 100 Punkte: 4,33 → 0,301 ms; Vorbereitung 5,08 ms.
 - 500 Konturpunkte mit einer Hintergrundschraffur: 3,65 → 1,41 ms; Vorbereitung 11,31 ms.
-Vollständige Zielkontur-/Linienprüfung, Materialisierung und Planableitung bleiben Kosten.
-Keine Gesamtframe-/GPU-Garantie, keine pauschale Skalierungszusage.
+  Vollständige Zielkontur-/Linienprüfung, Materialisierung und Planableitung bleiben Kosten.
+  Keine Gesamtframe-/GPU-Garantie, keine pauschale Skalierungszusage.
 
 Abnahme: geschlossene konvexe Polylinie mit eigener Linienart nach innen über den Cap
 ziehen und zurück; Schließpunkt/Darstellung erhalten, platzieren und einmal Undo.
 
 Ab jetzt enthalten Abschlussberichte drei nächste Schritte (AGENTS angepasst).
 Nur Schritt 1 ist aktiv; 2 und 3 sind Ausblick, keine parallelen Aufträge:
+
 1. Knicken/Punkt einfügen bei geschlossenen Polylinien im vorhandenen Linienadapter
    vorbereiten; gemeinsame Kontureinfügung, Punktanzahl einschließlich Schließpunkt,
    Vollpfad-/Commit-/Undo-Vergleich und Hintergrundlast messen.
@@ -2071,8 +2091,7 @@ Nur Schritt 1 ist aktiv; 2 und 3 sind Ausblick, keine parallelen Aufträge:
    Körpergriffe vor einer Erweiterung des gemeinsamen Endpunktadapters vergleichen.
 3. Lokale räumliche 3D-Fangsuche (AUD14-05), sobald AUD14-04 samt Restbefunden abgenommen
    ist; Quellen-/Kamera-/Sichtbarkeitskontext und vollständige Anschlussgruppe bewahren.
-AUD14-04 bleibt offen. Restpfade aus Teil 13 und AUD14-06/07 werden nicht gestrichen.
-
+   AUD14-04 bleibt offen. Restpfade aus Teil 13 und AUD14-06/07 werden nicht gestrichen.
 
 ### AUD14-04 Teil 18 – Vorbereitetes Polylinien-Knicken (15.10.2026)
 
@@ -2098,16 +2117,18 @@ Keine neue visuelle Browserabnahme behauptet.
 Rohdaten line-insert-results.json / Runner line-insert-profile.ts. Ein erster und acht
 warme Werte, alternierende Vollpfad-/Vorschaureihenfolge, Vorbereitung separat, exakte
 Projektgleichheit je Ziel außerhalb der Zeitmessung. Vollpfad → Vorschau:
+
 - 100 Schraffuren à 100 Punkte: 37,83 → 0,294 ms; Vorbereitung 40,59 ms.
 - 10 Schraffuren à 100 Punkte: 4,24 → 0,275 ms; Vorbereitung 3,96 ms.
 - 500 Konturpunkte + eine Hintergrundschraffur: 4,65 → 1,20 ms; Vorbereitung 8,49 ms.
-Zielkontur-/Linienprüfung, Vorbereitung, Materialisierung und Planableitung bleiben
-Kosten; keine Frame-/GPU-Garantie oder universelle Skalierungszusage.
+  Zielkontur-/Linienprüfung, Vorbereitung, Materialisierung und Planableitung bleiben
+  Kosten; keine Frame-/GPU-Garantie oder universelle Skalierungszusage.
 
 Abnahme: geschlossene Polylinie → Knicken an erster/letzter Seite → Punkt bewegen →
 abbrechen oder platzieren → einmal Undo; Schließpunkt und eigene Linienart erhalten.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. Direktes Wand-Strecken messen und den gemeinsamen Endpunktadapter dafür erweitern,
    soweit die Geometrie-/Abhängigkeitsvergleiche das tragen. Fenster, gelöste Anschlüsse,
    Nachbarwände, Körpergriffe und fremde Endpunkte gegen den Vollpfad prüfen.
@@ -2115,8 +2136,7 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
    verbleibenden AUD14-04-Befunde; Kamera-/Sichtbarkeitskontext und Rangfolge erhalten.
 3. AUD14-06: Langsitzungs-Speicher und Recovery-Aufbewahrung prüfen; gültige Sicherungen,
    Undo-Stände und konkurrierende Schreiber bei jeder Bereinigung schützen.
-AUD14-04 bleibt offen. Weitere Restpfade aus Teil 13 sowie AUD14-07 bleiben dokumentiert.
-
+   AUD14-04 bleibt offen. Weitere Restpfade aus Teil 13 sowie AUD14-07 bleiben dokumentiert.
 
 ### AUD14-04 Teil 19 – Direktes Wand-Strecken (15.10.2026)
 
@@ -2139,25 +2159,26 @@ Runner wall-stretch-profile.ts, Rohdaten wall-stretch-before.json und wall-stret
 Fünf Geschosse plus T-Paar mit Fenstern; erster und acht warme Ziele, alternierende
 Reihenfolge, exakte Projektgleichheit außerhalb der Messung, Vorbereitung separat.
 Im Nachherlauf Vollpfad → vorbereitete Projektvorschau (warme Mediane):
+
 - 52 Wände, Anfang/Ende: 2,064 → 1,349 ms / 1,381 → 0,813 ms.
 - 502 Wände, Anfang/Ende: 4,157 → 0,796 ms / 4,361 → 0,703 ms.
-Vorbereitung bei 502 Wänden: 6,980 / 4,669 ms. Vorherlauf ohne Capability:
-502 Wände, Vorschau 5,055 / 3,426 ms. Messstreuung beachten; keine Frame-/GPU-Garantie.
-Lineare Fremdpunktprüfung, große vollständige Anschlussgruppen, Projektmaterialisierung
-und anschließende Planableitung bleiben Kosten. Freie Wandkörper-Eckbewegung bleibt ein
-expliziter Legacy-Pfad; die Streckoptimierung deckt diese andere Aktion nicht automatisch ab.
+  Vorbereitung bei 502 Wänden: 6,980 / 4,669 ms. Vorherlauf ohne Capability:
+  502 Wände, Vorschau 5,055 / 3,426 ms. Messstreuung beachten; keine Frame-/GPU-Garantie.
+  Lineare Fremdpunktprüfung, große vollständige Anschlussgruppen, Projektmaterialisierung
+  und anschließende Planableitung bleiben Kosten. Freie Wandkörper-Eckbewegung bleibt ein
+  expliziter Legacy-Pfad; die Streckoptimierung deckt diese andere Aktion nicht automatisch ab.
 
 Praktische Abnahme: angeschlossene Wand mit Fenstern an beiden Enden strecken, auch schräg;
 Nachbaranschlüsse und Fenster beobachten; abbrechen, platzieren, einmal Undo vergleichen.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. Freie Wandkörper-Eckbewegung messen und im gemeinsamen Endpunktadapter vorbereiten.
    Körperoffset, beide Enden, schräge Achsen, Fenster/Nachbarn und Vollcommit vergleichen.
 2. AUD14-05: lokale räumliche 3D-Fangsuche und große Anschlussgruppen nach verbleibender
    AUD14-04-Abnahme; Kontext und Fangrangfolge erhalten.
 3. AUD14-06: Langsitzungs-Speicher und Recovery-Aufbewahrung sicher begrenzen.
-AUD14-04 bleibt offen; weitere Restpfade aus Teil 13 und AUD14-07 bleiben dokumentiert.
-
+   AUD14-04 bleibt offen; weitere Restpfade aus Teil 13 und AUD14-07 bleiben dokumentiert.
 
 ### AUD14-04 Teil 20 – Freie Wandkörper-Eckbewegung (15.10.2026)
 
@@ -2179,25 +2200,26 @@ wall-body-point-profile.ts sowie before/results.json enthalten fünf Geschosse p
 T-Paar mit Fenstern. Tatsächlicher Griff aus wallBody.corner; erster und acht warme
 Ziele, Reihenfolge alternierend, exakte Projektgleichheit außerhalb der Messung.
 Nachherlauf Vollpfad → vorbereitete Projektansicht, Anfang/Ende:
+
 - 52 Wände: 0,970 → 0,253 ms / 0,557 → 0,184 ms.
 - 502 Wände: 3,439 → 0,191 ms / 3,507 → 0,220 ms.
-Vorbereitung bei 502 Wänden separat 5,932 / 5,070 ms. Vorherige Vorschau ohne Capability
-4,183 / 3,523 ms. Synthetische Node-Messung, keine Bildschirm-/GPU-/p95-Garantie.
-Fremdpunktliste, große vollständige Anschlussgruppen, Materialisierung und Planableitung
-bleiben Kosten; übrige Altpfade aus Teil 13 werden nicht dadurch als erledigt behandelt.
+  Vorbereitung bei 502 Wänden separat 5,932 / 5,070 ms. Vorherige Vorschau ohne Capability
+  4,183 / 3,523 ms. Synthetische Node-Messung, keine Bildschirm-/GPU-/p95-Garantie.
+  Fremdpunktliste, große vollständige Anschlussgruppen, Materialisierung und Planableitung
+  bleiben Kosten; übrige Altpfade aus Teil 13 werden nicht dadurch als erledigt behandelt.
 
 Abnahme: Körperkante einer Wand mit Fenster greifen, frei seitlich und längs bewegen,
 auch bei schräger Achse und T-/Eckanschluss; Vorschau/Platzierung/Undo vergleichen.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. AUD14-04 zusammenhängend abnehmen: aktuelles Mehrgeschoss-/Browserprofil und Restpfade
    mit dem heutigen Stand abgleichen, verbleibende Engpässe messen und Übergang begründen.
    Keine weitere pauschale Werkzeugmigration ohne gemessenen Befund.
 2. AUD14-05 lokale räumliche 3D-Ursprungsfangsuche; große Anschlussgruppen, Kamera- und
    Sichtbarkeitskontext sowie Fangrangfolge ausdrücklich mitprüfen.
 3. AUD14-06 Langsitzungs-Speicher und Recovery-Aufbewahrung sicher begrenzen.
-AUD14-04 ist bis zur Restabnahme nicht geschlossen; AUD14-07 bleibt Abschlussgate.
-
+   AUD14-04 ist bis zur Restabnahme nicht geschlossen; AUD14-07 bleibt Abschlussgate.
 
 ### AUD14-04 Teil 21 – Zusammenhängender Vergleich und Übergang (15.10.2026)
 
@@ -2218,15 +2240,16 @@ keine flächendeckende Abnahme sämtlicher Verdeckungs-/Sichtbarkeitsfälle.
 
 remaining-preview-profile.ts unverändert erneut ausgeführt; alte Ergebnisse erhalten,
 aktuelle Daten preview-block-node-results.json. Große Szene, warme Mediane in ms:
-| Pfad | Projektvorschau | volle Planableitung | Geometriepatch |
-| --- | --- | --- | --- |
-| Schraffurpunkt, 100 Konturen à 100 Punkte | 0,049 | 0,037 | 0,033 |
-| Linienpunkt, gleicher Hintergrund | 0,020 | 0,048 | 0,011 |
-| Fensterachse, 500 Wände/500 Fenster | 0,132 | 0,663 | 0,124 |
-| Wand-Strecken, gleicher Hintergrund | 0,129 | 0,548 | 0,121 |
-Erster + acht warme Ziele, Vorbereitung separat, exakte Projektgleichheit außerhalb
-Zeitmessung. Synthetische Befunde ohne p95-/Frame-/GPU-Garantie. Die historischen
-Globalprüfungsengpässe dieser vier Pfade sind im heutigen Profil nicht mehr vorhanden.
+
+| Pfad                                                                                   | Projektvorschau | volle Planableitung | Geometriepatch |
+| -------------------------------------------------------------------------------------- | --------------- | ------------------- | -------------- |
+| Schraffurpunkt, 100 Konturen à 100 Punkte                                              | 0,049           | 0,037               | 0,033          |
+| Linienpunkt, gleicher Hintergrund                                                      | 0,020           | 0,048               | 0,011          |
+| Fensterachse, 500 Wände/500 Fenster                                                    | 0,132           | 0,663               | 0,124          |
+| Wand-Strecken, gleicher Hintergrund                                                    | 0,129           | 0,548               | 0,121          |
+| Erster + acht warme Ziele, Vorbereitung separat, exakte Projektgleichheit außerhalb    |
+| Zeitmessung. Synthetische Befunde ohne p95-/Frame-/GPU-Garantie. Die historischen      |
+| Globalprüfungsengpässe dieser vier Pfade sind im heutigen Profil nicht mehr vorhanden. |
 
 Restabgleich: registrierte Linie/Schraffur Punkt/Seite/Offset/Knicken sowie Fensterachse
 und Wandpunkt/-stretch vorbereitet. Fremde Endkontakte und T-Ziele verwenden absichtlich
@@ -2244,15 +2267,15 @@ stabile Gleichstandreihenfolge und classifyAnchorVisibility anwenden. Kontextän
 (Kamera/Viewport/Sichtbarkeit/Modell) dürfen keine veralteten Kandidaten liefern.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. AUD14-05: lokale 3D-Ursprungsfangabfrage mit vollständigem linearen Vergleichsorakel,
    dichter/verteilter Geometrie, kalter Vorbereitung und warmen Abfragen.
 2. AUD14-05: große Anschlussgruppen und lineare Fremdendpunktprüfung separat messen;
    betroffene Menge nur bei nachgewiesener fachlicher Gleichheit begrenzen.
 3. AUD14-06: Langsitzungs-Speicher und Recovery-Aufbewahrung prüfen.
-AUD14-04-Restschuld und AUD14-07 bleiben ausdrücklich offen.
+   AUD14-04-Restschuld und AUD14-07 bleiben ausdrücklich offen.
 
 Prüfabschluss Teil 21: 1048 Tests, App-/Benchmark-Typecheck, gezieltes ESLint und Build bestanden.
-
 
 ### AUD14-05 Teil 1 – Lokale 3D-Ursprungsfangabfrage (15.10.2026)
 
@@ -2276,11 +2299,12 @@ Windows IAB Chrome/155; local-origin-browser-results.json. Bestehende Kontexttes
 local-origin-profile.ts / local-origin-results.json: 50/500 Wände, Zoom 1 und 0,02,
 40 alternierende Abfragen je Fall, erste zwei nicht im Median, Gleichheitsprüfung außerhalb
 Messung. 500 Wände, Vollscan → lokal in ms:
+
 - Leerer Suchbereich, Zoom 1: 1,237 → 0,0029; Zoom 0,02: 1,228 → 0,0025.
 - Gemischte Treffer, Zoom 1: 13,989 → 12,830.
 - Dichte Projektion, Zoom 0,02: 15,254 → 15,815, also kein Gesamtgewinn.
-Vorbereitung separat protokolliert, aber sequenziell mit gemeinsam erwärmter Geometrie;
-kein fairer Kaltstartvergleich. Keine Frame-/p95-/universelle Beschleunigungsgarantie.
+  Vorbereitung separat protokolliert, aber sequenziell mit gemeinsam erwärmter Geometrie;
+  kein fairer Kaltstartvergleich. Keine Frame-/p95-/universelle Beschleunigungsgarantie.
 
 Die räumliche Kandidatenbegrenzung ist fachlich abgesichert, AUD14-05 insgesamt bleibt offen.
 Codebefund: nearestWallSurface projiziert für die Verdeckungsprüfung weiterhin alle Flächen
@@ -2289,12 +2313,12 @@ Phasenmessung muss den Anteil vor der nächsten Optimierung separat bestätigen.
 Kandidatenmenge und Vorbereitung bleiben ebenso zu messen. Kein unzulässiger Kandidatencap.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. Verdeckungsprüfung messen und als gemeinsamen vorbereiteten räumlichen Tiefenquery
    begrenzen; identische Treffer/Toleranz/Reihenfolge, Kamera-/Sichtbarkeitswechsel prüfen.
 2. Große Anschlussgruppen und Fremdendpunktprüfung separat messen und fachlich sicher begrenzen.
 3. Langsitzungs-Speicher und Recovery-Aufbewahrung prüfen (AUD14-06).
-AUD14-04-Restschuld sowie AUD14-07-Gesamtabnahme bleiben offen.
-
+   AUD14-04-Restschuld sowie AUD14-07-Gesamtabnahme bleiben offen.
 
 ### AUD14-05 Teil 2 – Vorbereitete Verdeckungsprüfung (15.10.2026)
 
@@ -2324,22 +2348,23 @@ Runner depth-profile.ts / depth-results.json: 20 Tiefenabfragen, Vollpfad jeweil
 Median 11,589 → 0,059 ms, einmalige Vorbereitung 76,417 ms separat. Reihenfolge nicht
 alterniert, keine p95-/Kaltstart-Zusage. Gesamtquery mit unverändertem local-origin-profile.ts,
 40 alternierende Ziele und Gleichheitsprüfung außerhalb Messung (depth-origin-results.json):
+
 - 500 Wände, gemischte Treffer Zoom 1: linear 13,759 → vorbereitet 0,069 ms.
 - Dichte Projektion Zoom 0,02: 15,265 → 4,927 ms.
 - Leerer Suchbereich Zoom 1: 1,467 → 0,004 ms.
-Gesamtquery-Vorbereitung ist sequenziell mit geteilten Caches protokolliert, kein fairer
-Kaltstartvergleich. Vorbereitung bei Kamerawechsel und dichte überlappende Kandidaten
-bleiben relevante Kosten; keine pauschale Skalierungs-/Framerate-Zusage. Rund 76 ms
-Vorbereitung sind ausdrücklich kein flüssiger Gesamtframe-Nachweis.
+  Gesamtquery-Vorbereitung ist sequenziell mit geteilten Caches protokolliert, kein fairer
+  Kaltstartvergleich. Vorbereitung bei Kamerawechsel und dichte überlappende Kandidaten
+  bleiben relevante Kosten; keine pauschale Skalierungs-/Framerate-Zusage. Rund 76 ms
+  Vorbereitung sind ausdrücklich kein flüssiger Gesamtframe-Nachweis.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. Große Anschlussgruppen und Fremdendpunktprüfung messen; sichere räumliche Eingrenzung
    nur bei erhaltenen Fenster-/Nachbar-/Anschlussabhängigkeiten und Vollcommitvergleich.
 2. AUD14-06 Langsitzungs-Speicher und Recovery-Aufbewahrung prüfen.
 3. AUD14-07 verbleibende Restschuld, Kamerawechselkosten und gemischtes Schulmodellprofil
    zusammenhängend abnehmen; Dokumentations-/Zuständigkeitsbefunde einschließen.
-AUD14-05 insgesamt sowie AUD14-04-Restschuld bleiben bis zur jeweiligen Abnahme offen.
-
+   AUD14-05 insgesamt sowie AUD14-04-Restschuld bleiben bis zur jeweiligen Abnahme offen.
 
 ### AUD14-05 Teil 3 – Anschlussgruppen und fremde Endpunkte (15.10.2026)
 
@@ -2363,13 +2388,14 @@ connection-group-profile.ts mit Vorher-/Nachher-Rohdaten connection-group-before
 connection-group-results.json: sieben Ziele, erstes nicht im warmen Median, Projektgleichheit
 außerhalb Messung, vorbereitet jeweils vor Vollpfad. Node, keine Frame-/p95-Garantie.
 Warme Vorschau vorher → nachher:
+
 - Zwei verbundene Wände ohne fremde: 1,324 → 1,235 ms.
 - Zwei verbundene Wände plus 1000 fremde: 1,014 → 0,878 ms; Vorbereitung 9,007 → 15,874 ms.
 - Elf verbundene Wände plus 100 fremde: 3,289 → 3,298 ms.
 - 51 verbundene Wände plus 100 fremde: 14,930 → 14,618 ms.
-Der Fremdpunktindex begrenzt Suche, beschleunigt große Anschlussgruppen aber nicht wesentlich.
-Keine Behauptung, dieser dominante Rest sei gelöst. Messstreuung und nicht alternierende
-Reihenfolge beachten; kleiner Zeitunterschied ist kein allgemeiner Leistungsbeweis.
+  Der Fremdpunktindex begrenzt Suche, beschleunigt große Anschlussgruppen aber nicht wesentlich.
+  Keine Behauptung, dieser dominante Rest sei gelöst. Messstreuung und nicht alternierende
+  Reihenfolge beachten; kleiner Zeitunterschied ist kein allgemeiner Leistungsbeweis.
 
 Fachliche Grenze: wallDependencyClosure behält absichtlich alle Eck-/T-Partner. Ohne
 inkrementellen Validierungsvertrag darf man entfernte Gruppenmitglieder nicht abschneiden:
@@ -2380,14 +2406,14 @@ AUD14-05-Rest benötigt gesonderte inkrementelle Prüfung, kein willkürliches G
 von AUD14-05. Restbefund bleibt verbindlich für AUD14-07 und den späteren Architekturreview.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. AUD14-06 Langsitzung mit 1/10/50/100 History-Ständen, Bildwechseln und Recovery-Slots
    vermessen; gehaltene Referenzen und konkurrierende Schreiber vor Bereinigung erfassen.
 2. Aus Messung sichere Aufbewahrung/Bereinigung ableiten; gültige aktuelle/vorherige Stände,
    Migration und andere Projekte/Tabs schützen, Quota-/Abbruchfälle nachweisen.
 3. AUD14-07 gemischtes Schulprofil einschließlich großer Anschlussgruppen/Kamerawechsel
    prüfen und offene Leistungs-/Architekturbefunde als Abschlussgate behandeln.
-AUD14-04-Restschuld, großer Anschlussgruppenrest und AUD14-07 bleiben ausdrücklich offen.
-
+   AUD14-04-Restschuld, großer Anschlussgruppenrest und AUD14-07 bleiben ausdrücklich offen.
 
 ### AUD14-06 Teil 1 – History- und Recovery-Aufbewahrung (15.10.2026)
 
@@ -2400,6 +2426,7 @@ das andere ersetzt es alle zehn Schritte durch ein neues synthetisches 256×256-
 Beide Projekte teilen zunächst denselben Bildinhalt. Messpunkte 1/10/50/100/110.
 
 Browsernachweis session-retention-results.json (Windows IAB Chrome/155): PASS.
+
 - Unverändertes Bild: ein gemeinsamer Handle/Payload bei allen History-Tiefen.
 - Bildwechsel: bei 110 Änderungen 100 frühere Stände plus Gegenwart, elf unterschiedliche
   Bildhandles in dieser History; der älteste Bildstand ist aus dieser History gefallen.
@@ -2436,6 +2463,7 @@ Das genaue API und ein Produktions-Auslösezeitpunkt sind noch Entwurfsentscheid
 keine automatische Produktionsbereinigung in diesem Schritt freigegeben/implementiert.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. Isolierten transaktionalen V2-Bereinigungspiloten implementieren: geteilte Bilder über
    mehrere Slots, current/previous, unbekannte/beschädigte Heads, Schreiberkonkurrenz und
    Wiederbereitstellung eines aus Undo stammenden Bilds prüfen; Produktionsdaten unberührt.
@@ -2443,7 +2471,6 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
    Langlaufnachweisen begrenzt abnehmen; Auslösezeitpunkt und Rest-Speicherprofil festlegen.
 3. AUD14-07 Schulprofil inklusive großer Anschlussgruppen, Kamerawechselkosten und offener
    Architektur-/Statuskorrekturen abnehmen. AUD14-04/05-Restschuld bleibt sichtbar.
-
 
 ### AUD14-06 Teil 2 – Transaktionaler Bereinigungspilot (15.10.2026)
 
@@ -2470,6 +2497,7 @@ Commit rollt die Transaktion zurück; Erfolg wird erst mit oncomplete gemeldet.
 
 Browser: recovery-retention.html/.ts, Rohbericht recovery-retention-results.json,
 Windows IAB Chrome/155, 16 bestandene Assertions mit zwei echten IDB-Verbindungen:
+
 - Vier unterschiedliche Bildpayloads über zwei Projektslots → genau ein verwaistes Bild
   gelöscht, drei durch current/previous/fremden Slot benötigte Bilder erhalten.
 - Beschädigter current und previous, unbekannte Version, V1-Präsenz verhindern Löschung.
@@ -2492,6 +2520,7 @@ Kopien sind vor Aktivierung zu messen; der spätere Auslösezeitpunkt bleibt Ent
 Kein Wechsel zu Delta-History, kein Rendererumbau und keine Aufweichung der Sicherungsgrenze.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. Gemeinsamen Bereinigungspiloten auf produktives Store-Layout übertragen und weiterhin
    isoliert mit echten V1-Migrationsoriginalen, unbekannten Altständen und größeren Heads
    prüfen; Vorbereitungskosten messen und begrenzten Auslösezeitpunkt begründen.
@@ -2499,7 +2528,6 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
    Bildentfernung/Undo/Reload abschließen. Gültige letzte Sicherung bleibt unangetastet.
 3. AUD14-07 Schulprofil, große Anschlussgruppen/Kamerawechsel und Architektur-/Statuskorrekturen
    abnehmen. AUD14-04/05-Restschuld und AUD14-06-Gesamtabnahme bleiben offen.
-
 
 ### AUD14-06 Teil 3 – Produktives Layout und Migrationsschutz (15.10.2026)
 
@@ -2536,13 +2564,13 @@ Zeichen-/Vorschaupfade; keine automatische Endlosschleife bei Konflikt oder Quot
 noch keine Zusage, dass synchrone Teilphasen ruckelfrei sind; deren Pausen vor UI-Abnahme messen.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. Explizite abbrechbare Wartungsaktion über gemeinsamen Application-/Storage-Port anbinden;
    Status/Fehler, letzte Sicherung und Quota-/Abbruchfälle absichern, nicht pro Autosave.
 2. Längere Sitzungen mit Bildwechsel/Entfernung, Undo, Reload und gemischtem Speicherprofil
    prüfen; synchrone Pausen und Speicherbereiche getrennt ausweisen.
 3. AUD14-07 Schulprofil und verbleibende Anschlussgruppen-/Kamera-/Architekturbefunde abnehmen.
-AUD14-06 und AUD14-04/05-Restschuld bleiben offen; keine automatische Nutzerbereinigung.
-
+   AUD14-06 und AUD14-04/05-Restschuld bleiben offen; keine automatische Nutzerbereinigung.
 
 ### AUD14-06 Teil 4 – Wartungssteuerung vorbereitet, Aktivierung blockiert (15.10.2026)
 
@@ -2570,11 +2598,11 @@ IDB-Abnahme aus Teil 3 bleibt Grundlage, wurde in diesem reinen Steuerungsschrit
 
 Einziger aktiver Auftrag bleibt die vollständige kontrollierte Wartungsanbindung; nur der
 nicht löschende Teil ist erledigt. Nächste drei Schritte:
+
 1. Nach ausdrücklicher Aktivierungsfreigabe geprüften Storage-Port und RecoveryPanel anbinden;
    echte Quota-/Abbruch-/Letzte-Sicherung-Fälle prüfen, keine automatische Bereinigung.
 2. Langsitzungs-/Bildwechsel-/Undo-/Reload- und Speicherprofil abschließen.
 3. AUD14-07 Gesamtabnahme mit offenen Anschlussgruppen-/Kamera-/Architekturbefunden.
-
 
 ### AUD14-06 Teil 5 – Manuelle Produktanbindung ausdrücklich freigegeben (15.10.2026)
 
@@ -2610,6 +2638,7 @@ Frame-/p95-/Peakgarantie. Ein expliziter Wartungslauf kann weiterhin synchrone P
 „abbrechbar“ heißt an den vorhandenen asynchronen Grenzen, nicht Unterbrechung eines JS-Aufrufs.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. Längere Sitzungen mit Bildwechsel/Entfernung, Undo/Reload und realistischen Speicherlasten
    prüfen; Quota-Injektion und tatsächlich erreichte Speichergrenze unterscheiden.
 2. Synchrone Pausen, Heap/Prozess-/Rasterbedarf auswerten und nur gemessene Engpässe begrenzen.
@@ -2634,6 +2663,7 @@ bedarfsabhängig nach erfolgreicher Sicherung, kein Start während aktiver Bearb
 automatischer Retry bei Fehler/Konflikt. Bedienpause allein genügt nicht gegen synchrone Pausen.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. Langsitzungen mit Bildwechsel, Undo/Reload, Speicherlast und synchronen Wartungspausen messen.
 2. Bedarfsgesteuerte automatische Wartung über denselben Port mit Bearbeitungssperre/Abbruch
    umsetzen, sobald die Belastungsprüfung eine vertretbare Ausführung belegt.
@@ -2663,11 +2693,12 @@ Framezeit-/Großmodellgarantie und nicht jedes mögliche Flackern (z.B. überlap
 Praktische Abnahme am Nutzerbeispiel bleibt erforderlich. Prüfharness verändert keine Nutzerdaten.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. Korrigierten langsamen Orbit am Nutzerbeispiel abnehmen; bei Restflackern dessen Darstellung
    gezielt erfassen, statt den gesamten Renderer umzubauen.
 2. Langsitzungen mit Bildwechsel/Undo/Reload und synchronen Wartungspausen prüfen.
 3. Nach Belastungsnachweis bedarfsabhängige automatische Wartung über gemeinsamen Port anbinden.
-AUD14-07 Schulprofil bleibt anschließend vorgemerkt.
+   AUD14-07 Schulprofil bleibt anschließend vorgemerkt.
 
 Validierung des Kamera-Teilfixes: 1067 Tests, Typecheck, gezieltes ESLint und Build bestanden.
 
@@ -2718,10 +2749,11 @@ Undo-Inhalt, führt aber kein UI-Undo aus. Kein echter Quota-Vollzustand, keine 
 Peakmessung. Automatische Wartung bleibt bis zu deren Nachweis aus. Keine Nutzerdaten bereinigt.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. Reale längere Sitzung mit Application-Undo/Redo und vollständigem Reload ergänzen.
 2. Heap-/Prozess-/Rasterspitzen und Speichergrenzen getrennt messen; nur belegte Engpässe beheben.
 3. Bedarfsgesteuerte automatische Wartung über bestehenden Port nach bestandenen Gates anbinden.
-AUD14-07 großes Schulprofil bleibt anschließend offen.
+   AUD14-07 großes Schulprofil bleibt anschließend offen.
 
 ### AUD14-06 – Application-History und vollständiger Seitenreload (15.10.2026)
 
@@ -2742,6 +2774,7 @@ die vorherige Prüfung mit Rauschbildern bleibt ergänzender Lastnachweis. Stund
 Quota-Vollzustand und Heap-/Prozessspitzen bleiben offen. Automatische Wartung bleibt aus.
 
 Nächste drei Schritte (nur Schritt 1 aktiv):
+
 1. Längeren Belastungslauf mit Bildwechsel und getrennten Heap-/Prozess-/Rastermessungen vorbereiten und ausführen.
 2. Aus Messungen sichere Wartungsauslöser und Speichergrenzen ableiten; nur belegte Engpässe korrigieren.
 3. Bedarfsgesteuerte automatische Wartung über den bestehenden Port nach bestandenen Gates anbinden.
@@ -2767,6 +2800,7 @@ Stunden-Dauertest. Testdatenbank bleibt isoliert bestehen. Produktionscode unver
 Typecheck, gezieltes ESLint und Build bestanden. Automatische Wartung bleibt aus.
 
 Nächste drei Schritte (nur Schritt 1 aktiv):
+
 1. Wartung bei mehreren gespeicherten Projekten isoliert messen; Heap-Zuordnung und Abbruchverhalten prüfen.
 2. Aus belastbaren Daten bedarfsabhängige Auslöser und Grenzen festlegen; verbleibende Messlücken ausdrücklich behandeln.
 3. Automatische Wartung über den gemeinsamen Port anbinden und praktisch abnehmen.
@@ -2791,10 +2825,11 @@ Keine Prozess-/GPU-Spitze, kein Stunden-/Quota-Test. Ergebnis recovery-multiple-
 Typecheck, gezieltes ESLint und Build bestanden. Keine Produktionslogik geändert.
 
 Nächste drei Schritte (nur Schritt 1 aktiv):
+
 1. Begrenzte Auslöse-/Abbruchregeln für automatische Wartung aus bisherigen Nachweisen festlegen (Ruhephase, kein paralleler Lauf, begrenzte Wiederholung, keine Zwangsbereinigung bei unlesbaren Sicherungen).
 2. Diese Steuerung über den gemeinsamen Wartungsport mit deterministischen Tests implementieren; grobe Heap-Werte nicht als Auslöser verwenden.
 3. Integration praktisch auf Unterbrechung, Wiederanlauf und unveränderte Sicherungen abnehmen; Stunden-/Quota-/Prozessmessungen als offene Belastungsnachweise weiterführen.
-Automatische Wartung bleibt in diesem Schritt aus.
+   Automatische Wartung bleibt in diesem Schritt aus.
 
 ### AUD14-06 – Vertrag für automatische Wartung, erster Pilot (15.10.2026)
 
@@ -2804,6 +2839,7 @@ aktiviert und keine Produktionsdatei geändert. Die folgenden Zeiten sind konser
 Pilotparameter, keine aus zwei Browserläufen abgeleiteten Leistungsgrenzen.
 
 **Verbindliche Architektur und Sicherheitsgrenze:**
+
 - Ein Application-Koordinator je laufender Anwendung verwaltet manuelle und automatische
   Wartung über denselben RecoveryMaintenanceStorage-Port. Keine zweite Löschlogik und
   keine Wartung pro Werkzeug, Projektkomponente oder geöffnetem Einstellungsfenster.
@@ -2827,6 +2863,7 @@ Pilotparameter, keine aus zwei Browserläufen abgeleiteten Leistungsgrenzen.
   gesondert zu prüfender Adapterbedarf. Keine Parallelitätsgarantie über Prozesse behaupten.
 
 **Pilotregeln für Auslösung und Wiederholung:**
+
 1. Nach einem tatsächlich erfolgreich publizierten V2-Sicherungsstand Bedarf vormerken.
    Kein Bedarf aus Pointer-Preview, No-op-Save, fehlgeschlagenem Save oder bloßem Start.
    Ereignis nach publish/Commit liefern, nicht aus busy=false ableiten (auch Fehler/No-op).
@@ -2864,6 +2901,7 @@ Kontextwechsel, verspäteter Erfolg, manueller Konkurrenzstart, begrenzter Retry
 Sperre und erfolgreiche manuelle Entsperrung. Prüfen, dass alle Pfade denselben Port nutzen.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. Gemeinsamen Koordinator gemäß obigem Vertrag implementieren und deterministisch testen.
 2. Autosave-Commit-Ereignis und zentrale UI-Aktivität anbinden; manuellen Dialog als Consumer
    derselben Instanz betreiben. Automatik erst nach bestandenen Integrationstests aktivieren.
@@ -2893,6 +2931,7 @@ V2-Publishes; No-op-/Fehlerfilter und reale Busy-/Aktivitätssignale sind Integr
 Keine tabübergreifende Laufzeit-Sperre oder neue Speichergrenzen implementiert.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. Erfolgreiches V2-Publish-Signal sowie zentrale Aktivität/Busy-Zustände und manuellen
    Dialog an genau eine langlebige Koordinatorinstanz anbinden; Integrationstests für
    No-op/Fehler, Dialogwechsel und Save-Priorität. Automatik erst nach deren Bestehen aktivieren.
@@ -2929,6 +2968,7 @@ zeigt erfolgreichen manuellen Lauf. Keine echte automatische Datenbankwartung du
 Browserabnahme behauptet; Nutzerprojekt nicht für Tests verändert.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. Automatischen 30-s-Ruheablauf mit echtem Recovery-Service/Storage in isolierter
    Browser-Testdatenbank prüfen: Eingabe/Save/Abbruch, neuer Versuch, alle Sicherungsinhalte.
 2. Mehrtab-Konkurrenz, längere Sitzungen und Quota-/Prozessgrenzen gezielt prüfen;
@@ -2959,6 +2999,7 @@ weiterhin deterministische Testabdeckung. Kein Prozessneustart, Mehrtab-/Stunden
 Volltest und keine Prozess-/GPU-Messung. Kein globaler Abschluss der Belastungsnachweise.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. Zwei gleichzeitige Recovery-Sitzungen auf derselben isolierten Browserdatenbank prüfen:
    konkurrierender Save/Wartung, Root-Wechsel, unveränderte Current/Previous/Fremdprojekte.
 2. Offene Stunden-/Quota-/Prozess-Nachweise nach Risiko eingrenzen und getrennt planen;
@@ -2986,6 +3027,7 @@ Durchsatz. Sicherheitsmechanismus bewiesen für diesen Ablauf; globale Deduplizi
 nicht implementiert. Keine Nutzerdaten, Quota-Vollzustände oder Stundenmessungen.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. Offene Recovery-Nachweise risikobasiert einordnen: echte Mehrtab-Lifecyclefälle,
    Stunden-/Quota-/Prozessmessungen mit klaren Abnahmekriterien und Release-Zuordnung;
    keine weitere Speichererweiterung allein wegen fehlender Extremmessungen beginnen.
@@ -3000,13 +3042,13 @@ Dokumentation/Planung auf Basis des Codes und vorhandener Belege, keine neue Lau
 AUD14-06 ist funktional weitgehend umgesetzt, aber nicht pauschal vollständig abgenommen.
 Keine neue Speichergrenze und kein erneuter Ausbau des vom Nutzer zurückgestellten Umfangs.
 
-| Offener Nachweis | Risiko / bisheriger Beleg | Zeitpunkt und konkrete Abnahme |
-| --- | --- | --- |
-| Echter Zwei-Tab-Lifecycle | Root-Wechsel, veralteter Writer und parallele Collector-Verbindungen sind geprüft; getrennte Dokumente mit Fokus/Visibility/Schließen nicht. | Einziger unmittelbarer Folgeauftrag. Zwei Tabs derselben isolierten Origin/UUID-DB, konkurrierende Saves und Wartung, Hintergrundwechsel, Schließen einer Sitzung. Gewinner, gültiger Vorgänger und fremdes Projekt unverändert; Konflikt verständlich; kein Retry-Sturm. |
-| Längere Sitzung | 162-s-Lastlauf und 30-s-Ruheablauf bestanden, keine Stundenbehauptung. | Vor Public Beta: reproduzierbarer mindestens zweistündiger Lauf als initiales Prüfprofil (Testvorgabe, keine Produktspezifikation), periodisch Bildwechsel/Undo/Save/Wartung/Reload. Kein Verlust geschützter Stände; Retention bleibt am erwarteten Root-Satz, Wiederherstellung am Ende vollständig vergleichbar. Wachstum separat dem Harness/History/Storage/Renderer zuordnen. |
-| Tatsächliche Quota-Erschöpfung | Injizierte Quota-/Storage-Fehler und Fail-closed-Pfade vorhanden; echter Browser-Quota-Zustand fehlt. | Vor Public Beta nur in wegwerfbarem Testprofil bzw. kontrollierter Testumgebung, niemals Nutzer-Origin oder Systemdatenträger absichtlich füllen. Fehlender Platz darf keine bestehende gültige Sicherung überschreiben; Meldung, kein automatischer Retry-/Löschsturm, nach Freigabe von Testplatz manueller Wiederanlauf. Ist die Umgebung nicht verfügbar, bleibt Gate offen. |
-| Prozess-/Raster-/GPU-Spitzen | Grobe JS-Heap-Werte und rechnerische Rasterpuffer sind keine Prozessmessungen. | Mit AUD14-07 auf dokumentierter Zielhardware vor Kapazitäts-/Leistungsfreigabe messen. Projektgröße, logische Pixel, Prozesszuordnung, Lade-/Bearbeitungs-/Wartungsphasen und Messwerkzeug angeben. Keine Produktgrenze allein aus optionaler performance.memory-API ableiten. |
-| Tabübergreifende Laufzeit-Deduplizierung | Pro Instanz Single-flight, Storage-Transaktionen schützen Daten auch bei zwei Collectoren. Keine globale Sperre. | Kein Architekturumbau auf Verdacht. Erst beim Zwei-Tab-Test entscheiden, ob reproduzierte Ressourcen-/Lifecycleprobleme einen gemeinsamen Plattform-Lock erfordern. Sicherheitsregeln bleiben unabhängig davon zwingend. |
+| Offener Nachweis                         | Risiko / bisheriger Beleg                                                                                                                    | Zeitpunkt und konkrete Abnahme                                                                                                                                                                                                                                                                                                                                                      |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Echter Zwei-Tab-Lifecycle                | Root-Wechsel, veralteter Writer und parallele Collector-Verbindungen sind geprüft; getrennte Dokumente mit Fokus/Visibility/Schließen nicht. | Einziger unmittelbarer Folgeauftrag. Zwei Tabs derselben isolierten Origin/UUID-DB, konkurrierende Saves und Wartung, Hintergrundwechsel, Schließen einer Sitzung. Gewinner, gültiger Vorgänger und fremdes Projekt unverändert; Konflikt verständlich; kein Retry-Sturm.                                                                                                           |
+| Längere Sitzung                          | 162-s-Lastlauf und 30-s-Ruheablauf bestanden, keine Stundenbehauptung.                                                                       | Vor Public Beta: reproduzierbarer mindestens zweistündiger Lauf als initiales Prüfprofil (Testvorgabe, keine Produktspezifikation), periodisch Bildwechsel/Undo/Save/Wartung/Reload. Kein Verlust geschützter Stände; Retention bleibt am erwarteten Root-Satz, Wiederherstellung am Ende vollständig vergleichbar. Wachstum separat dem Harness/History/Storage/Renderer zuordnen. |
+| Tatsächliche Quota-Erschöpfung           | Injizierte Quota-/Storage-Fehler und Fail-closed-Pfade vorhanden; echter Browser-Quota-Zustand fehlt.                                        | Vor Public Beta nur in wegwerfbarem Testprofil bzw. kontrollierter Testumgebung, niemals Nutzer-Origin oder Systemdatenträger absichtlich füllen. Fehlender Platz darf keine bestehende gültige Sicherung überschreiben; Meldung, kein automatischer Retry-/Löschsturm, nach Freigabe von Testplatz manueller Wiederanlauf. Ist die Umgebung nicht verfügbar, bleibt Gate offen.    |
+| Prozess-/Raster-/GPU-Spitzen             | Grobe JS-Heap-Werte und rechnerische Rasterpuffer sind keine Prozessmessungen.                                                               | Mit AUD14-07 auf dokumentierter Zielhardware vor Kapazitäts-/Leistungsfreigabe messen. Projektgröße, logische Pixel, Prozesszuordnung, Lade-/Bearbeitungs-/Wartungsphasen und Messwerkzeug angeben. Keine Produktgrenze allein aus optionaler performance.memory-API ableiten.                                                                                                      |
+| Tabübergreifende Laufzeit-Deduplizierung | Pro Instanz Single-flight, Storage-Transaktionen schützen Daten auch bei zwei Collectoren. Keine globale Sperre.                             | Kein Architekturumbau auf Verdacht. Erst beim Zwei-Tab-Test entscheiden, ob reproduzierte Ressourcen-/Lifecycleprobleme einen gemeinsamen Plattform-Lock erfordern. Sicherheitsregeln bleiben unabhängig davon zwingend.                                                                                                                                                            |
 
 **Stop-/Fortsetzungsregel:** Reproduzierter Verlust einer gültigen Sicherung, falscher
 Erfolg bei fehlgeschlagenem Commit oder unbegrenzter Wiederholungszyklus ist P0 und stoppt
@@ -3025,6 +3067,7 @@ Abbruch und Listener-Lifecycle prüfen. Sicherheitsfehler im selben begrenzten A
 beheben; andernfalls Nachweis dokumentieren und Recovery-Schleife beenden.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. Echten Zwei-Tab-Lifecycle-Test gemäß obigem Auftrag ausführen.
 2. AUD14-07 beginnen: aktuellen Schul-/Mehrgeschoss-Prüfbestand und noch offene große
    Anschlussgruppen-/Kamera-/Workspace-Kosten zusammenführen; einen repräsentativen,
@@ -3056,6 +3099,7 @@ geeigneten Browserumgebung zu prüfen. Kein beobachteter Sicherheitsfehler, kein
 für einen vorsorglichen globalen Lock oder weiteren Speicherausbau.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. AUD14-07 Bestand zusammenführen: Schul-/Mehrgeschoss-Fixtures und verbleibende
    Anschlussgruppen-/Kamera-/Workspace-Kosten prüfen und genau einen repräsentativen
    Gesamtprüflauf festlegen. Offene Recovery-Lifecycle-Gates ausdrücklich übernehmen.
@@ -3073,15 +3117,15 @@ Nachweisabgleich, keine neue Leistungs- oder Browserabnahme. Maßgeblich für de
 Auftrag ist dieser Abschnitt; die frühere Recovery-Folgeaufgabe ist abgeschlossen bzw.
 mit ihren ausdrücklich offenen Lifecycle-Gates abgegrenzt.
 
-| Wiederverwendbarer Bestand | Nachweis und konkrete Grenze |
-| --- | --- |
-| building-view-fixture/profile.ts | Fünf Geschosse mit getrennten Wänden/Fenstern, Geschosswechsel und gemeinsame Solid-Ableitung; kein schulähnlicher Anschlussgrundriss. |
-| connection-group-fixture/profile.ts | Parametrisierte T-Gruppe, Fenster und fremde Wände; exakter Vergleich prepareEndpoint gegen editAtPointer. 51-Wand-Gruppe bisher Node-, nicht vollständiger Workspace-Nachweis. |
-| translation-content.test.ts und selection-move-oracle.ts | XY-Vollpfadvergleich, Z-Kontextschutz, genau ein Undo, Datei-/Recovery-Roundtrip. Kleine Mehrgeschoss-Fixture ersetzt keinen Gebäudelasttest. |
-| preview-block-browser.ts / Ergebnisse zu #342 | 502 Wände, fünf Geschosse, Pixel-/Projektvergleiche; keine vollständige React-/Eingabe-/Framezeit und kein schwerer Bildmix. |
-| camera-frame.tsx | Reale BimSolidView und Matrix-/GL-Kontrolle, kleines Beispiel. Kein Nachweis großer Gebäude bei Kamerawechsel. |
-| production-workspace.tsx/.config.ts | Echter CadWorkspace, isolierter Produktionsbuild auf Port 8085, Longtasks und optionale Phasentraces; geeigneter UI-Prüfträger, kein Ersatz durch vereinfachten Renderer. |
-| Recovery-Harnesses bis #363 | Inhaltsschutz, CAS und Wartung belegt; Hintergrundwechsel, aktiver Tab-Abbruch, Mehrtab-Automatik, zwei Stunden, echte Quota und Prozess-/GPU-Spitzen weiterhin offen. |
+| Wiederverwendbarer Bestand                               | Nachweis und konkrete Grenze                                                                                                                                                    |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| building-view-fixture/profile.ts                         | Fünf Geschosse mit getrennten Wänden/Fenstern, Geschosswechsel und gemeinsame Solid-Ableitung; kein schulähnlicher Anschlussgrundriss.                                          |
+| connection-group-fixture/profile.ts                      | Parametrisierte T-Gruppe, Fenster und fremde Wände; exakter Vergleich prepareEndpoint gegen editAtPointer. 51-Wand-Gruppe bisher Node-, nicht vollständiger Workspace-Nachweis. |
+| translation-content.test.ts und selection-move-oracle.ts | XY-Vollpfadvergleich, Z-Kontextschutz, genau ein Undo, Datei-/Recovery-Roundtrip. Kleine Mehrgeschoss-Fixture ersetzt keinen Gebäudelasttest.                                   |
+| preview-block-browser.ts / Ergebnisse zu #342            | 502 Wände, fünf Geschosse, Pixel-/Projektvergleiche; keine vollständige React-/Eingabe-/Framezeit und kein schwerer Bildmix.                                                    |
+| camera-frame.tsx                                         | Reale BimSolidView und Matrix-/GL-Kontrolle, kleines Beispiel. Kein Nachweis großer Gebäude bei Kamerawechsel.                                                                  |
+| production-workspace.tsx/.config.ts                      | Echter CadWorkspace, isolierter Produktionsbuild auf Port 8085, Longtasks und optionale Phasentraces; geeigneter UI-Prüfträger, kein Ersatz durch vereinfachten Renderer.       |
+| Recovery-Harnesses bis #363                              | Inhaltsschutz, CAS und Wartung belegt; Hintergrundwechsel, aktiver Tab-Abbruch, Mehrtab-Automatik, zwei Stunden, echte Quota und Prozess-/GPU-Spitzen weiterhin offen.          |
 
 **Genau ein ausführbarer Folgeauftrag: Gesamtprüfprofil S1 erstellen und ausführen.**
 Ein deterministischer Generator mit manifestierten IDs erzeugt ein schulähnliches
@@ -3135,6 +3179,7 @@ keinen Rendererwechsel oder vorsorglichen Architekturumbau. Aktuelle Restschuld 
 Am Ende AUD14-01 bis -07 einzeln auf Befund/Beleg/Restgrenze abgleichen.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. S1-Generator und gemeinsamen Prüflauf gemäß obigem Vertrag umsetzen und ausführen.
 2. Den daraus höchstpriorisierten reproduzierten Fehler beheben, falls vorhanden;
    andernfalls Audit-Abnahme mit offenen Release-/Kapazitätsgrenzen dokumentieren.
@@ -3177,12 +3222,12 @@ Deshalb kein kontrollierter Viewport-/Gerätevergleich. Keine Prozess-/GPU-Spitz
 Rohdaten: s1-node-results, s1-browser-g/gb-results, s1-workspace-g/gb-results,
 s1-group-results und s1-ui-recovery-results (je .json im benchmarks-Verzeichnis).
 
-| Browseraktion | G | GB | Aussage |
-| --- | --- | --- | --- |
-| XY T-Gruppe, warme Pointer Median / Maximum | 2,35 / 3,20 ms | 1,40 / 17,50 ms | Zehn warme Application-Proben, keine Framezeit; Reihenfolge/JIT/GC nicht kontrolliert. |
-| XY T-Gruppe, warmer Commit Median / Maximum | 42,95 / 49,10 ms | 24,70 / 46,20 ms | Vollprüfung bleibt erhalten; kein Nachweis, dass Bilder beschleunigen. |
-| Geschosswechsel, beobachtete lange Tasks | 90–118 ms | 120–206 ms | Je fünf Wechsel, zeitlich dem Klick zugeordnet; Ursache noch nicht phasenweise isoliert. |
-| Frühe lange Tasks | bis 289 ms | bis 2024 ms | GB enthält PNG-Erzeugung im Harness; nicht als Dateiladezeit ausgeben. |
+| Browseraktion                               | G                | GB               | Aussage                                                                                  |
+| ------------------------------------------- | ---------------- | ---------------- | ---------------------------------------------------------------------------------------- |
+| XY T-Gruppe, warme Pointer Median / Maximum | 2,35 / 3,20 ms   | 1,40 / 17,50 ms  | Zehn warme Application-Proben, keine Framezeit; Reihenfolge/JIT/GC nicht kontrolliert.   |
+| XY T-Gruppe, warmer Commit Median / Maximum | 42,95 / 49,10 ms | 24,70 / 46,20 ms | Vollprüfung bleibt erhalten; kein Nachweis, dass Bilder beschleunigen.                   |
+| Geschosswechsel, beobachtete lange Tasks    | 90–118 ms        | 120–206 ms       | Je fünf Wechsel, zeitlich dem Klick zugeordnet; Ursache noch nicht phasenweise isoliert. |
+| Frühe lange Tasks                           | bis 289 ms       | bis 2024 ms      | GB enthält PNG-Erzeugung im Harness; nicht als Dateiladezeit ausgeben.                   |
 
 **Offene S1-Abnahme:** zehn wiederholte UI-Gesten je Fall, kontrollierter Kaltstart,
 Maus/Shift-Vergleich der Gruppenbewegungen XY/Z und Endpunkt im realen Workspace,
@@ -3208,6 +3253,7 @@ nicht erzeugen; unveränderte Suite außerhalb der Sandbox erfolgreich. Keine Te
 als Produktfehler interpretiert. Ein neuer S1-Regressionstest ist Teil von `npm test`.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. Geschoss-/Abbildwechsel in S1 phasenweise instrumentieren (Application, Ableitung,
    React/DOM und Bilddarstellung), wiederholt mit festem Viewport messen. Genau den
    dominanten reproduzierten Pfad korrigieren, sofern isoliert; sonst Diagnose begrenzen.
@@ -3217,6 +3263,7 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
    Speichererweiterung zurückgestellt, Langzeit-/Quota-/Mehrtab-Release-Gates offen.
 
 ### AUD14-07 – Geschosswechsel: geprüfte Basis weiterverwenden (15.10.2026)
+
 PR #365 nach grüner CI gemergt, Basis 694fd2f. Bounded Fix an der gemeinsamen
 Snapshot-/Sichtbarkeitsschicht, keine neue Renderer- oder Werkzeugsonderlogik.
 
@@ -3241,12 +3288,12 @@ benchmarks/storey-switch-before.json und storey-switch-after.json. Auswertungsfe
 erster Geschossklick bis letzter Geschossklick +180 ms. Zeiten sind inklusive verschachtelter
 Aufrufe und dürfen nicht summiert werden; Komponentenzeiten sind keine React-/DOM-Gesamtzeit.
 
-| Phase über 20 Wechsel | Vorher | Nachher |
-| --- | --- | --- |
-| Vollvalidierung Anzahl / Summe | 40 / 533,4 ms | 1 / 14,8 ms |
-| working-storey Reducer Summe / Maximum | 286,0 / 18,4 ms | 17,1 / 16,5 ms |
-| Grundrissableitung Summe | 25,3 ms | 20,3 ms |
-| Lange Tasks Anzahl / Summe / Maximum | 19 / 1198 / 75 ms | 3 / 181 / 77 ms |
+| Phase über 20 Wechsel                  | Vorher            | Nachher         |
+| -------------------------------------- | ----------------- | --------------- |
+| Vollvalidierung Anzahl / Summe         | 40 / 533,4 ms     | 1 / 14,8 ms     |
+| working-storey Reducer Summe / Maximum | 286,0 / 18,4 ms   | 17,1 / 16,5 ms  |
+| Grundrissableitung Summe               | 25,3 ms           | 20,3 ms         |
+| Lange Tasks Anzahl / Summe / Maximum   | 19 / 1198 / 75 ms | 3 / 181 / 77 ms |
 
 Einmalige Besitzübernahme beim ersten Wechsel bleibt absichtlich erhalten. Die lange
 Maximum-Spitze ist nicht behoben; kein Beleg für durchgehend flüssige Frames. Fangindex
@@ -3263,13 +3310,15 @@ Benchmarks, gezieltes ESLint, regulärer und isolierter Diagnosebuild bestanden.
 Teststart fand einen doppelten Import im ergänzten Test; korrigiert, volle Suite grün.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. **Unmittelbar:** S1 GB und Abbildwechsel mit denselben Phasen nachprüfen, verbleibende
    lange Tasks eingrenzen; keine weiteren Optimierungen ohne Nachweis.
 2. Offene S1-Gruppen-/Shift-UI-Abnahme und IFC-Höhen-/Containment-Nachweis abschließen.
 3. Recovery-Zusammenfassung für alle Geschosse korrigieren und Audit-/Folgeauftrag abgleichen.
-Langzeit/Quota/Mehrtab und Gesamt-GPU-Gates bleiben offen; Speichererweiterung zurückgestellt.
+   Langzeit/Quota/Mehrtab und Gesamt-GPU-Gates bleiben offen; Speichererweiterung zurückgestellt.
 
 ### AUD14-07 – S1 GB und Abbildwechsel nach #366 (15.10.2026)
+
 PR #366 nach erfolgreicher GitHub-CI ausdrücklich freigegeben und gemergt: 67518da.
 Dieser Folgeauftrag ändert ausschließlich Diagnoseharness und Prüfnachweise, keine
 Produktlogik. Das Harness kann den Messbereich nach Initialisierung neu starten und
@@ -3281,14 +3330,14 @@ Messbeginn als aktuell abgewartet. Keine Recovery-Daten gelöscht oder manuell �
 Nutzeranwendung Port8080 bleibt unberührt. Initiale Bildgenerierung ist nicht Teil der
 Messung. Viewportoverride anschließend zurückgesetzt.
 
-| Sequenz (je 20 Wechsel OG/EG) | Vollprüfungen | Geschoss-Reducer Summe | Lange Tasks |
-| --- | --- | --- | --- |
-| GB Geschosse, erster Wechsel inklusive | 1 / 25,6 ms | 26,7 ms | 11, Maximum 149 ms |
-| GB Abbilder, bereits warme Basis/Bilder | 0 | 0,3 ms | 20, 54–76 ms |
-| G Abbilder, erste Öffnung inklusive | 2 / 48,1 ms | 27,2 ms | 3, Maximum 106 ms |
+| Sequenz (je 20 Wechsel OG/EG)           | Vollprüfungen | Geschoss-Reducer Summe | Lange Tasks        |
+| --------------------------------------- | ------------- | ---------------------- | ------------------ |
+| GB Geschosse, erster Wechsel inklusive  | 1 / 25,6 ms   | 26,7 ms                | 11, Maximum 149 ms |
+| GB Abbilder, bereits warme Basis/Bilder | 0             | 0,3 ms                 | 20, 54–76 ms       |
+| G Abbilder, erste Öffnung inklusive     | 2 / 48,1 ms   | 27,2 ms                | 3, Maximum 106 ms  |
 
 Rohdaten: benchmarks/storey-switch-gb.json, document-switch-gb.json und
- document-switch-g.json. Auswertung innerhalb measurementStart/measurementEnd.
+document-switch-g.json. Auswertung innerhalb measurementStart/measurementEnd.
 20 working-storey-Reducerereignisse je Sequenz, 20 dblclick-Ereignisse je Abbildsequenz.
 G erster Abbildwechsel validiert zweimal: vorbereitender selectWorkingStorey-Aufruf
 in CadWorkspace verwirft sein Ergebnis, danach Reducer. Weitere Wechsel nutzen die
@@ -3318,13 +3367,15 @@ in diesem reinen Harness-/Nachweisauftrag nicht erneut ausgeführt. Keine neue A
 zur vollständigen S1-/GPU-/Langzeitabnahme.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. **Unmittelbar:** verbleibende bildbezogene Abbildwechselpausen auf DOM-/Bilddarstellung
    eingrenzen; erst nach isolierter Ursache ein begrenzter Fix, kein Rendererwechsel.
 2. S1-Gruppen-/Shift-UI-Abnahme und IFC-Höhen-/Containment-Nachweis abschließen.
 3. Recovery-Zusammenfassung für alle Geschosse korrigieren und Auditfolge abgleichen.
-Speichererweiterung bleibt zurückgestellt; Langzeit/Quota/Mehrtab-Gates bleiben offen.
+   Speichererweiterung bleibt zurückgestellt; Langzeit/Quota/Mehrtab-Gates bleiben offen.
 
 ### AUD14-07 – DOM-Zuweisung und Bild-Gegenversuche (15.10.2026)
+
 #367 nach grüner CI gemergt, Basis e0f90ae. Nur Diagnoseharness erweitert; keine
 Produktlogik und keine Datei-/Speicherformate verändert.
 
@@ -3334,11 +3385,11 @@ Nutzer-Port8080 unberührt. Native Element.setAttribute-Zeit nur für SVG image 
 im isolierten Harness gemessen; nur Dauer und Zeichenanzahl, keine Bildpayloads im Log.
 Keine Messung von späterem Browser-Decoding oder GPU-Arbeit durch diesen Wrapper.
 
-| Kontrollversuch | Lange Tasks | Spannweite | 80 native href-Zuweisungen zusammen |
-| --- | --- | --- | --- |
-| Produktions-Data-URLs, sichtbar | 20 | 51–82 ms | 8,6 ms |
-| Identische Bildbytes als temporäre Blob-URLs | 13 | 50–69 ms | 3,7 ms |
-| Data-URLs, SVG-Bilder per display:none | 15 | 50–68 ms | 10,0 ms |
+| Kontrollversuch                              | Lange Tasks | Spannweite | 80 native href-Zuweisungen zusammen |
+| -------------------------------------------- | ----------- | ---------- | ----------------------------------- |
+| Produktions-Data-URLs, sichtbar              | 20          | 51–82 ms   | 8,6 ms                              |
+| Identische Bildbytes als temporäre Blob-URLs | 13          | 50–69 ms   | 3,7 ms                              |
+| Data-URLs, SVG-Bilder per display:none       | 15          | 50–68 ms   | 10,0 ms                             |
 
 Rohdaten benchmarks/image-dom-switch.json, image-blob-switch.json und
 image-hidden-switch.json. Baseline vor Ergänzung der Variantenmetadaten erstellt:
@@ -3370,13 +3421,15 @@ laufen lassen. Screenshot outputs/s1-blob-proof.png zeigt die weiterhin sichtbar
 Referenzbilder des Blob-Gegenversuchs. Viewportoverride zurückgesetzt.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. **Unmittelbar:** Browser-Hauptthread-Aufzeichnung für einen warmen Abbildwechsel
    mit Skript-/Commit-/Layout-Zuordnung und Messwerkzeugkontrolle; erst dann Produktfix.
 2. S1-Gruppen-/Shift-UI-Abnahme und IFC-Höhen-/Containment-Nachweis abschließen.
 3. Recovery-Zusammenfassung für alle Geschosse korrigieren und Auditfolge abgleichen.
-Langzeit/Quota/Mehrtab/GPU-Gates und zurückgestellte Speichererweiterung bleiben erhalten.
+   Langzeit/Quota/Mehrtab/GPU-Gates und zurückgestellte Speichererweiterung bleiben erhalten.
 
 ### AUD14-07 – Browser-Frame-Zuordnung, begrenzter Diagnoseabschluss (15.10.2026)
+
 #368 nach grüner CI auf 3894c53 gemergt. Diagnoseharness erfasst zusätzlich Long Animation
 Frames mit Browser-Skriptzuordnung, erzwungener Layoutzeit und Renderstart. Unterstützungs-
 flag wird mitgespeichert; fehlende API darf nicht als null Aufwand interpretiert werden.
@@ -3415,12 +3468,14 @@ Diagnosebuild bestanden; #368 CI grün. Keine Produktänderung, Vollsuite lokal 
 ausgeführt. Screenshot outputs/s1-attribution.png; Viewportoverride zurückgesetzt.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. **Unmittelbar:** S1-Gruppenbewegungen XY/Z mit und ohne Shift im echten Workspace
    vergleichen; Anschlüsse, Fenster und genau einen Undo-Schritt praktisch prüfen.
 2. IFC-Höhen/Containment für mehrere Geschosse nachweisen.
 3. Recovery-Zusammenfassung für alle Geschosse korrigieren und offene Audit-Gates abgleichen.
 
 ### AUD14-07 – Praktische Gruppenprüfung: XY-Teilnachweis, Z-Anbindung fehlt (15.10.2026)
+
 #369 nach erfolgreicher CI in main übernommen (55bf7a9). Der wechselhafte Performance-
 Restbefund beim Abbildwechsel wird NICHT geschlossen. Vor Gesamtfreigabe erneut kontrolliert
 reproduzieren und bei Auftreten per CPU-Sampling einschließlich Commit untersuchen; ein
@@ -3428,6 +3483,7 @@ unauffälliger Einzellauf oder die Funktionsprüfung ist kein Behebungsnachweis.
 
 Isolierter Produktions-Workspace Port8085, S1 G mit fünf Geschossen, 300 Wänden und
 200 Fenstern; Nutzerprojekt Port8080 unberührt. Beleg benchmarks/s1-group-ui-evidence.json.
+
 - 2D: s0-w0/w1 auswählen, Ursprung klicken, 90 Grad und 0,2 m eingeben, Enter.
 - 3D: s4-w0/w1 per Klick/Strg-Klick wählen, Ursprung klicken, X wählen, 0,2 m, Enter.
 - Jeweils genau zwei Wände versetzt, interner T-Anschluss bleibt, neun externe T-Anschlüsse
@@ -3451,6 +3507,7 @@ numerische Eingabe darf diesen Nachweis nicht ersetzen. S1 bleibt teilweise offe
 Keine Produktänderung; kein erneuter lokaler Vollsuite-/Build-Lauf für diesen Prüfbericht.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. **Unmittelbar:** Z-Gruppenbewegung an bestehende gemeinsame 3D-Interaktion anbinden;
    numerische Eingabe, Vorschau, Platzieren/Abbruch, Fenster/Anschlüsse und ein Undo prüfen.
 2. Verbleibende S1-Maus-/Shift-Gruppenabnahme und IFC-Höhen/Containment abschließen.
@@ -3458,6 +3515,7 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
    Nachweise abgleichen. Speichererweiterung bleibt wie vereinbart zurückgestellt.
 
 ### AUD14-07 – Z-Aktion im gemeinsamen 3D-Ablauf (15.10.2026)
+
 #370 mit erfolgreicher CI nach main übernommen (a097d4b). Die vorhandene vorbereitete
 Z-Aktion ist jetzt über selectionZInteraction in useSelectionMove/useToolInteraction
 angebunden. Für einzelne Wände und Wandgruppen: Ursprung auswählen, Z wählen, Mausziel
@@ -3497,12 +3555,14 @@ Wahl. Kontinuierliche Shift-Mausbewegung, GB-Gruppentest und Abbildwechsel-Restb
 offen; Shift-Klick ist KEIN kontinuierlicher Shift-Test. Release-Gates unverändert offen.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. **Unmittelbar:** S1-Gruppen-/Shift-Abnahme einschließlich GB und Vorschauvergleich vervollständigen.
 2. IFC-Höhen und Geschosszuordnung für mehrere Geschosse nachweisen.
 3. Recovery-Zusammenfassung aller Geschosse korrigieren und offene Performance-/Release-
    Nachweise abgleichen. Keine Freigabe als lagfrei; Speichererweiterung bleibt zurückgestellt.
 
 ### AUD14-07 – GB-Teilabnahme und unterbrochene Testumgebung (15.10.2026)
+
 PR #371 nach erfolgreicher CI mit Nutzerfreigabe nach main übernommen (2d450e3).
 Im isolierten Produktions-Workspace (8085, variant=GB, unveränderte production-data-
 Bildreferenzen) wurden s0-w0/w1 in 2D um 0,2 m in Y und s4-w0/w1 in 3D um 0,5 m
@@ -3528,13 +3588,14 @@ Keine Produktänderung; #371 CI grün. Für diese Dokumentationsänderung keine 
 Vollsuite/Build. Abbildwechsel-Restbefund und Release-Gates weiterhin offen.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. **Unmittelbar:** Restliche S1-Abnahme: kontinuierlicher Shift-Maustest und isolierter
    Vorschauvergleich ohne große Bilddaten-Ausgabe. Kein Abschluss als lagfrei.
 2. IFC-Höhen und Geschosszuordnung für mehrere Geschosse nachweisen.
 3. Recovery-Zusammenfassung aller Geschosse und offene Performance-/Release-Gates prüfen.
 
-
 ### AUD14-07 – Isolierter Vorschauvergleich abgeschlossen (15.10.2026)
+
 #372 nach erfolgreicher CI und ausdrücklicher Freigabe gemergt (c17c0c6).
 benchmarks/s1-export-preview-check.ts vergleicht die zuvor im echten S1-GB-Workspace
 exportierten Projekte: Baseline, XY (+0,2 m Y für s0-w0/w1), Z (+0,5 m für s4-w0/w1).
@@ -3562,12 +3623,14 @@ node --max-old-space-size=768 --experimental-strip-types benchmarks/s1-export-pr
 Die drei Eingaben sind Exporte des beschriebenen Testablaufs, keine beliebigen Nutzerprojekte.
 
 Nächste drei Schritte, nur Schritt 1 als nächster technischer Auftrag:
+
 1. **Unmittelbar:** IFC-Höhen und Geschosszuordnung für mehrere Geschosse nachweisen;
    praktische Shift-Rückmeldung parallel offen halten.
 2. Recovery-Zusammenfassung aller Geschosse prüfen und gegebenenfalls korrigieren.
 3. Abbildwechsel-Performancebefund und verbleibende S1-/Release-Gates gezielt abarbeiten.
 
 ### AUD14-07 – IFC-Höhen/Zuordnung und korrigierte Z-Abnahme (15.10.2026)
+
 PR #373 nach erfolgreicher CI ausdrücklich freigegeben und gemergt (11029aa).
 Nutzer bestätigt wiederholte Z-Verschiebung zweier angewinkelt verbundener Wände sowie
 Einzelbewegung mit gelöster Verbindung. Z wurde über die Hilfseingabe ausdrücklich
@@ -3591,11 +3654,13 @@ Abnahme in Archicad oder einem unabhängigen IFC-Validator. Bestehende externe A
 bleiben erhalten, werden aber nicht auf diese neue Testkombination übertragen.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. **Unmittelbar:** Recovery-Zusammenfassung über alle Geschosse prüfen und bei Bedarf korrigieren.
 2. Offenen Abbildwechsel-Performancebefund gezielt messen und eingrenzen.
 3. Verbleibende S1-/Release-Gates abgleichen; praktische XY-Shift-Abnahme separat nachtragen.
 
 ### AUD14-07 – Recovery-Zusammenfassung über alle Geschosse (15.10.2026)
+
 PR #374 nach erfolgreicher CI und ausdrücklicher Freigabe gemergt (10ed3a9).
 Befund: RecoveryPanel zeigte bei „Stand prüfen“ nur Wände/Fenster des aktiven Geschosses.
 Die gespeicherten Daten enthielten bereits das gesamte Projekt; kein Datenverlustbefund.
@@ -3614,11 +3679,13 @@ Praktische Abnahme: Projekt mit mehreren Geschossen sichern → Lokale Wiederher
 Stand prüfen. Die Gesamtzahl muss auch bei leerem aktivem Geschoss stimmen.
 
 Nächste drei Schritte, nur Schritt 1 aktiv:
+
 1. **Unmittelbar:** Abbildwechsel-Performancebefund mit isoliertem Testprojekt erneut messen und eingrenzen.
 2. Aus der Messung eine begrenzte Korrektur ableiten und gegen unveränderte Modell-/Ansichtsdaten prüfen.
 3. Verbleibende S1-/Release-Gates abgleichen; mausgesteuerte XY-Shift-Abnahme separat nachtragen.
 
 ### AUD14-07 – Abbildwechsel: Diagnosegrenze erneut geprüft (16.10.2026)
+
 PR #375 nach erfolgreicher CI und Nutzerfreigabe gemergt (818a096).
 Vor erneuten Messserien wurden die Belege aus #367/#368 und der aktuelle Öffnungspfad
 (CadWorkspace.onOpenDocument → selectWorkingStorey/working-storey → Ansichtskontext)
@@ -3635,6 +3702,7 @@ Laufzeitmessung. Nutzerprojekt, Browserzustand und lokale Sicherungen unverände
 Nur Dokumentation; keine Tests oder Builds erneut ausgeführt.
 
 Genau nächster Auftrag ist ein CPU-Profil des reproduzierten warmen Abbildwechsels:
+
 - Isolierten S1-GB-Produktionsworkspace verwenden, EG/OG-Abbilder vorwärmen.
 - DevTools Performance-Aufnahme starten, mehrfach zwischen den Abbildern wechseln,
   danach stoppen. Während der Messung keine Automationsabfragen durchführen.
@@ -3643,15 +3711,17 @@ Genau nächster Auftrag ist ein CPU-Profil des reproduzierten warmen Abbildwechs
   gemessene Phasen ineinander verschachtelt sind.
 - Erst bei belegter Ursache einen begrenzten Fix auswählen. Ein Lauf ohne Pause ist
   kein Behebungsnachweis. Kein Hochladen privater Projektinhalte für diesen Nachweis.
-Diese Aufzeichnung benötigt eine verfügbare Profilerschnittstelle oder eine vom Nutzer
-lokal erstellte Aufnahme; beides liegt derzeit nicht vor. Befund bleibt P2 offen.
+  Diese Aufzeichnung benötigt eine verfügbare Profilerschnittstelle oder eine vom Nutzer
+  lokal erstellte Aufnahme; beides liegt derzeit nicht vor. Befund bleibt P2 offen.
 
 Nächste drei Schritte:
+
 1. **Unmittelbar:** CPU-Aufnahme eines ruckelnden warmen Abbildwechsels beschaffen und auswerten.
 2. Nur auf Basis der identifizierten Ursache eine begrenzte Korrektur mit Gegenmessung umsetzen.
 3. Übrige S1-/Release-Gates abgleichen; XY-Shift-Nutzerabnahme bleibt separat offen.
 
 ### AUD14-07 – Recovery-Vergleich nach Nutzer-CPU-Trace (16.10.2026)
+
 #376 gemergt (04ae601). Nutzerdatei 2Trace-20261016T144019.json ist gzip-komprimiert;
 41 Doppelklicks, davon 39 langsame Ereignisse mit ca. 56–115 ms. CPU-Funktion po im
 exakt passenden Bundle styles-CI2XsJYD.js entspricht sameRecoveryContent. Rund 55 %
@@ -3683,13 +3753,14 @@ Dies sind Node-Vergleichszeiten, keine Browser-Framezeiten. Die alte Browser-Sam
 und diese Node-Messung dürfen nicht als direkter Vorher/Nachher-Framevergleich gelten.
 
 Nächste drei Schritte:
+
 1. **Unmittelbar:** Diagnose-Seite neu laden und Abbildwechsel mit DevTools erneut aufnehmen;
    CPU-Zeit/Frames mit dem Nutzertrace vergleichen. P2 bis dahin offen.
 2. Verbleibende Kosten anhand dieser Gegenmessung eingrenzen, nur bei Befund weiter korrigieren.
 3. S1-/Release-Gates einschließlich separater XY-Shift-Abnahme abgleichen.
 
-
 ### AUD14-07 – Wiederholte Bildressourcen im dritten Nutzertrace (16.10.2026)
+
 Die gzip-Datei 3Trace-20261016T144923.json gehört zum Diagnosebuild mit Recovery-Fix
 (styles-BrSjtsLt.js / s1-workspace-DM3qbuE6.js). 32 Doppelklickereignisse; viele liegen
 bei 22–28 ms, neun bei 67–77 ms, einmal 471,557 ms. Das erste lange Ereignis ist
@@ -3722,6 +3793,7 @@ Spannen und Payload-Redaktion. Beide bestanden. Keine Produktänderung, daher ke
 Produktbuild oder vollständiger Regressionstest wiederholt. #377 ist noch nicht gemergt.
 
 Nächste drei Schritte:
+
 1. **Unmittelbar / einziger Implementierungsauftrag:** begrenzter Bildressourcen-Pilot
    im Rendering-/Plattformadapter. Stabile Blob-URLs aus geprüften unveränderlichen
    Assets statt wiederholter großer Data-URLs untersuchen; explizite Freigabe bei
@@ -3735,8 +3807,8 @@ Nächste drei Schritte:
 3. P2-Restbefund und übrige S1-Gates abgleichen; initialen Ausreißer sowie praktische
    XY-Shift-Abnahme getrennt offenhalten.
 
-
 ### AUD14-07 – Begrenzter Bildressourcen-Pilot (16.10.2026)
+
 #377 (42bd85b) und #378 (4bdbd1a) nach expliziter Freigabe mit grünen Checks per
 Merge-Commit in main übernommen. Kein Rewrite veröffentlichter Historie.
 
@@ -3778,6 +3850,7 @@ Clear/mehrfache Freigabe und Allokationsfehler. Insgesamt 1099 Tests bestanden;
 TypeScript einschließlich Benchmarks, fokussierter ESLint, Produkt- und Pilotbuild bestanden.
 
 Nächste drei Schritte:
+
 1. **Unmittelbar / einziger Folgeauftrag:** kontrollierte CPU-/Frame-Gegenmessung
    desselben S1-GB-Abbildablaufs mit und ohne imageResources=bounded. Alle fünf
    Abbilder vorwärmen; Kaltkonvertierung separat, keine Automationsabfragen während
@@ -3787,8 +3860,8 @@ Nächste drei Schritte:
 3. Restkosten einschließlich initialem Ausreißer und separater XY-Shift-Abnahme prüfen;
    P2 erst nach belastbarem Nachweis schließen.
 
-
 ### AUD14-07 – Bildressourcen-Gegenmessung B-A-A-B (16.10.2026)
+
 #379 nach ausdrücklicher Freigabe und grüner CI in main gemergt (c65455f).
 benchmarks/image-switch-comparison.ts ergänzt ausschließlich die isolierte S1-Seite:
 25 synthetische Doppelklicks durch den echten Abbild-Öffnungshandler, EG/OG1/OG2/OG3/OG4
@@ -3806,11 +3879,11 @@ s1-workspace-C_3dw2co.js; Pilot nur per Query aktiv. Aggregat und Rohmesswerte o
 Projekt-/Bildpayloads in benchmarks/image-switch-comparison-evidence.json.
 
 | Lauf | Warmer Median / p95 / Maximum bis zwei RAF (ms) | Lange Tasks / lange Frames im warmen Zeitfenster |
-| --- | --- | --- |
-| B1 | 39,8 / 55,2 / 66,7 | 0 / 0 |
-| A1 | 42,8 / 64,3 / 119,7 | 4 / 4 |
-| A2 | 42,3 / 51,4 / 75,1 | 1 / 2 |
-| B2 | 39,0 / 58,9 / 73,7 | 1 / 2 |
+| ---- | ----------------------------------------------- | ------------------------------------------------ |
+| B1   | 39,8 / 55,2 / 66,7                              | 0 / 0                                            |
+| A1   | 42,8 / 64,3 / 119,7                             | 4 / 4                                            |
+| A2   | 42,3 / 51,4 / 75,1                              | 1 / 2                                            |
+| B2   | 39,0 / 58,9 / 73,7                              | 1 / 2                                            |
 
 20 warme Samples pro Lauf. Erstpass-Maxima B1 170,6; A1 175,5; A2 175,1; B2 207,3 ms.
 In beiden Pilotläufen genau 20 Ressourcenanlagen, 84 Wiederverwendungen, 47.127.963
@@ -3833,6 +3906,7 @@ bestanden. Kein Produktcode geändert; volle Produkttests/Produktbuild nicht wie
 1099 bestandene Tests gehören zum unveränderten Vorgänger #379, nicht zu einem neuen Lauf.
 
 Nächste drei Schritte:
+
 1. **Unmittelbar / einziger Folgeauftrag:** Native-Eingabe-/CPU-Aufnahmen beider Varianten
    am gleichen Diagnosebuild vergleichen (fünf Abbilder vorwärmen, gleiche Reihenfolge).
    Insbesondere lange Pilotframes und erneutes PNG-Decoding lokalisieren. Dafür wird ein
@@ -3844,6 +3918,7 @@ Nächste drei Schritte:
    ihre jeweiligen Nachweise tatsächlich vorliegen.
 
 ### N22 – Wandoberkante bis UK Rohdecke (16.10.2026)
+
 Verbindliche Nutzerentscheidung: optional bis **Unterkante** Rohdecke, nicht Oberkante.
 Vorläufige Rohdeckenstärke 0,20 m; sie ist eine fachliche Annahme, keine erzeugte Decke.
 Gemeinsame Berechnung: Oberkante Wand = OK obere Rohdecke − Stärke + oberer Versatz;
@@ -3871,6 +3946,7 @@ auf Nutzerwunsch vertagt. Vorhandene Nachweise und offene P2-/Abnahmegates bleib
 bestehen. Frühere nächste Aufträge sind hierdurch ersetzt, nicht als bestanden markiert.
 
 Nächste drei Schritte:
+
 1. **Unmittelbar / einziger Folgeauftrag:** persistierten Höhenvertrag und zentrale
    Modellauflösung integrieren, mit Altdatei-Migration, Fenster-/Anschlussprüfung und
    Gleichheit von Geometrie/IFC; noch keine breite UI-Erweiterung.
@@ -3882,6 +3958,7 @@ ESLint und Produktbuild bestanden. Keine Browserabnahme erforderlich: keine UI-
 oder produktive Verhaltensänderung, reine Domain-Vorbereitung.
 
 ### N22 – Gespeicherte Wandhöhenbindung (16.10.2026)
+
 #381 nach grüner CI und ausdrücklicher Nutzerfreigabe in main (542bc7e).
 Schema 26 erweitert Wände optional um topBinding: kind slab-underside, stabile obere
 Geschoss-ID, slabThickness in m (Vorgabe 0,20), topOffset in m. Die Stärke ist vorläufig
@@ -3924,6 +4001,7 @@ keine Aussage über AUD14 oder gesamte Framezeiten. Gesamte Modellvalidierung be
 Vorbereitung/Commit bleibt bewusst projektweit.
 
 Nächste drei Schritte:
+
 1. **Unmittelbar / einziger Folgeauftrag:** Wahl feste Höhe/UK Rohdecke, Ziel und Versatz
    in Werkzeugeigenschaften an die geprüfte gemeinsame Höhenaktion anbinden.
 2. Mehrgeschossigen Ablauf mit Fenster, Anschlüssen, Undo, Datei und IFC praktisch abnehmen.
@@ -3938,6 +4016,7 @@ Bestehende Migrationserwartungen sind lediglich von Version 25 auf 26 angehoben.
 Praktische Abnahme folgt nach der UI-Anbindung; kein bereits bedienbarer Schalter behauptet.
 
 ### N22 – Höhenbindung in Werkzeugeigenschaften (17.10.2026)
+
 #382 nach grüner CI und ausdrücklicher Freigabe in main (f58daba).
 WallHeightProperties ist ein kleiner UI-Adapter für setWallHeightRule. Feste Höhe
 und UK Rohdecke werden ausschließlich dort bearbeitet; die bisherige direkte
@@ -3970,6 +4049,7 @@ Undo prüfen, anschließend feste Höhe wählen. Mehrfachauswahl-Eigenschaften b
 unverändert; die Application-Aktion unterstützt bereits atomare mehrere Ziele.
 
 Nächste drei Schritte:
+
 1. **Unmittelbar / einziger Folgeauftrag:** mehrgeschossigen Gesamtworkflow im Produkt
    mit Fenster, Anschlüssen, Höhenänderung, Undo/Redo, Datei und IFC abnehmen.
 2. Verhalten ohne oberes Geschoss und beim Einfügen zwischen gebundene Geschosse mit
@@ -3978,6 +4058,7 @@ Nächste drei Schritte:
    mit stabilen ausgewählten Wand- und Geschoss-IDs.
 
 ### N22 – Mehrgeschossiger Gesamtworkflow (17.10.2026)
+
 PR #383 nach bestandener GitHub-CI und ausdrücklicher Freigabe in main übernommen.
 Reproduzierbare Fixture: benchmarks/bound-height-workspace.html (separater Port 8087,
 keine Nutzung des Projekts/Recovery auf 8080), gemeinsame Fixture mit Regressionstest.
@@ -4008,6 +4089,7 @@ Daher keine uneingeschränkte Aussage „Browser fehlerfrei“. Keine spekulativ
 am Pointer-/Inference-Pfad aufgrund dieses einzelnen Protokolleintrags.
 
 Nächste drei Schritte:
+
 1. **Unmittelbar / einziger Folgeauftrag:** den protokollierten 3D-Update-Fehler ohne
    HMR im Produktbuild reproduzieren und eingrenzen; bei Nachweis gezielt beheben,
    mit bestehender gemeinsamer Inference-/Preview-Architektur.
@@ -4020,6 +4102,7 @@ Validierung dieses Nachweises: 1110/1110 Tests bestanden, Benchmark-/Produkt-Typ
 fokussierter ESLint, git diff --check und Produktbuild bestanden. #383 Merge: 0fe21549.
 
 ### §9 Korrekturauftrag – Höhenworkflow und P0-Startschutz (17.10.2026)
+
 Quelle: aktueller main a1df84b; mit vorhandenem PR384 zusammengeführt, beide
 Register-Ergänzungen erhalten. Keine Freigabe/Übernahme von PR318 oder PR384 behauptet.
 
@@ -4061,6 +4144,7 @@ Keine Langsession-/Framegarantie aus diesem kleinen funktionalen Beispiel.
 Fortsetzung ausschließlich §9; kein eigener neuer Featureauftrag.
 
 ### AUD14-03/04 – begrenzte Bounds-Korrektur nach Höhenabnahme (17.10.2026)
+
 Nach Abschluss der Höhen-/Recovery-Korrektur unmittelbar gemäß §9 begonnen.
 Basis 1c9416e, Windows, AMD Ryzen 5 3600, Node 24.19.0. Reproduzierbar:
 node --experimental-strip-types benchmarks/preview-composition.ts.
@@ -4097,7 +4181,7 @@ für diese geometrisch äquivalente Bounds-Änderung behauptet.
 
 Branch `perf/preview-surface-sharing`, Basis main `ac11f33` (PR384/385 gemergt).
 `surface-patch.ts` hält abgeleitete immutable Basisindizes per WeakMap und maximal
- eine stationäre Partition pro Basis. Die flache Flächenliste wird erst für
+eine stationäre Partition pro Basis. Die flache Flächenliste wird erst für
 bestehende Verbraucher aufgebaut. BimSolidView filtert die stabile Basis einmal
 pro Modell-/Sichtbarkeitskontext, neue Patchflächen mit derselben Sichtbarkeitsregel.
 Pufferaktualisierung betrachtet die Vereinigung vorheriger/neuer Ersatz- und
@@ -4122,7 +4206,6 @@ Ersatzmengen dürfen die Basis noch filtern. Die flache Liste für Picking/Umran
 ist weiterhin linear und nicht als insgesamt begrenzter Pointerpfad freigegeben.
 CI und praktische Abnahme des Folge-PR bleiben eigenständige Gates. §9 ist die
 alleinige aktive Fortsetzung.
-
 
 ### AUD14-03/04 – Browserprüfung nach PR386 (17.10.2026)
 
@@ -4158,7 +4241,6 @@ Diese unterschiedlichen Frequenzen nicht als einen gemeinsamen Pointerbefund
 vermischen. Nächster Auftrag ausschließlich §9: begrenzte Umrandungsabfrage über
 den vorhandenen gemeinsamen Index, keine neue werkzeugspezifische Geometrie.
 
-
 ### AUD14-03/04 – indexierte Auswahlumrandung (17.10.2026)
 
 Basis main b691e6e nach genehmigtem Merge PR387. Branch perf/indexed-selection-outline.
@@ -4190,7 +4272,6 @@ Vorschauframe sei unabhängig von der Gebäudegröße. Browserabnahme aus PR387 
 Basisnachweis, keine neue praktische Abnahme dieser Änderung. Aktive Fortsetzung
 nur §9; danach Anschlussgruppen/Legacy und CPU-/Native-Bildressourcenvergleich.
 
-
 ### AUD14-03/04 – Leeranzeige und Orbit-Pivot ohne Gesamtflächenzugriff (17.10.2026)
 
 Basis main bba1443 nach genehmigtem Merge PR388, Branch perf/viewport-surface-queries.
@@ -4218,7 +4299,6 @@ Rohlog lokal outputs/surface-queries-measurement.jsonl. Keine Aussage über
 Gesamtframes, native Shift-Gesten oder GPU-Zeit; keine neue Browser-Abnahme.
 Fenster-Pivot-Scan bleibt unverändert und ist nicht durch diese Wandmessung belegt.
 Aktiver Folgeauftrag ausschließlich §9: große Anschlussgruppen/Legacy-Rest.
-
 
 ### AUD14-04/05 – Anschlussgruppen erneut geprüft (17.10.2026)
 
@@ -4261,7 +4341,6 @@ vollständig behandeln. Vollständiger confirm und atomare History bleiben Pflic
 Die Messung/Assertions, Typecheck und gezieltes Lint bestanden. Produktcode blieb
 unverändert; kein erneuter Produktbuild oder Volltestsuite für diesen Diagnose-
 und Planungsauftrag behauptet. Aktive Reihenfolge ausschließlich §9.
-
 
 ### AUD14-04/05 – vorbereitete Endpunkt-Extrusion wiederverwenden (17.10.2026)
 
@@ -4353,10 +4432,10 @@ Vergleiche und Referenzextrusion außerhalb der Messintervalle. Reihenfolge-/JIT
 Einfluss möglich, keine statistische oder Browserframe-Garantie.
 
 | Fremde Wände | Vorschau Median/p95 ms | Komposition Median ms | Vollbewegung Median ms | T-Verbindung Median ms |
-| --- | --- | --- | --- | --- |
-| 0 | 0.72 / 1.08 | 0.68 | 0.13 | 0.55 |
-| 100 | 2.21 / 5.02 | 1.12 | 0.64 | 1.52 |
-| 1000 | 19.25 / 22.70 | 7.36 | 5.73 | 11.90 |
+| ------------ | ---------------------- | --------------------- | ---------------------- | ---------------------- |
+| 0            | 0.72 / 1.08            | 0.68                  | 0.13                   | 0.55                   |
+| 100          | 2.21 / 5.02            | 1.12                  | 0.64                   | 1.52                   |
+| 1000         | 19.25 / 22.70          | 7.36                  | 5.73                   | 11.90                  |
 
 Vorschau ersetzt trotz gleichen Ziels 6/106/1006 IDs (Wände und Fenster).
 Die neue Verbindung führt nach editAtPointer in previewTConnection erneut eine
@@ -4485,7 +4564,6 @@ Die automatisierte Flächengleichheit der Vorschau ersetzt diese offenen Gates n
 Keine Änderung am Produktpfad oder der vollständigen Commitvalidierung.
 Einziger nächster Auftrag in §9: erste/geänderte T-Ziele phasenweise messen.
 
-
 ### AUD14-04/05 – Kosten erstmaliger und wechselnder T-Ziele (20.10.2026)
 
 PR396 nach grünem CI-Lauf 39478689937 in main 8201f8d übernommen.
@@ -4498,10 +4576,10 @@ new-host und gewechseltes Ziel alternate-host, jeweils zusätzlicher identischer
 „Erstes Ziel“ bedeutet kalt innerhalb der Sitzung, nicht kalter Prozess/Browser.
 
 | Fremdwände | Erstes evaluate, Median ms | Hostwechsel, Median ms |
-| --- | --- | --- |
-| 0 | 2,256 | 2,304 |
-| 100 | 4,321 | 4,622 |
-| 1000 | 29,071 | 28,914 |
+| ---------- | -------------------------- | ---------------------- |
+| 0          | 2,256                      | 2,304                  |
+| 100        | 4,321                      | 4,622                  |
+| 1000       | 29,071                     | 28,914                 |
 
 Bei 1000 Fremdwänden Phasenmediane: editAtPointer 5,953 ms,
 connectSnappedT 12,690 ms, createProjectSnapshot 6,797 ms,
@@ -4524,7 +4602,6 @@ Phasenanteil; Codebefund previewTConnection enthält zwei validateProject-Aufruf
 anschließende Ownership-Übernahme prüft erneut. Das rechtfertigt einen gezielten
 Vertrag für bereits geprüfte Eingaben, aber keinen Verzicht auf endgültige fachliche
 Prüfung. Einziger nächster Auftrag in §9. Native-/Frame-Gates bleiben offen.
-
 
 ### AUD14-04/05 – Geprüfte Snapshots im T-Anschluss wiederverwenden (20.10.2026)
 
@@ -4561,7 +4638,6 @@ Frames übertragen: Node-CPU, feste Messreihenfolge, mögliche JIT-/GC-Einflüss
 keine neue Browserabnahme. Erste/geänderte Ziele bleiben deutlich teurer als
 identische Warmtreffer. Praktische Abnahme ist der einzige nächste Auftrag in §9.
 
-
 ### AUD14-04/05 – Browserabnahme der Snapshot-Wiederverwendung (20.10.2026)
 
 PR398 nach grünem Lauf 39488219431 in main 5c709ee übernommen.
@@ -4586,7 +4662,6 @@ UI-Platzierung im Grundriss und statische 3D-Darstellung; keine kontinuierliche
 Die 1132 Tests, Typprüfung, Lint und Produktbuild aus PR398/CI bleiben gültige
 Basis; für diesen reinen Dokumentationsschritt nicht erneut ausgeführt.
 Nächster begrenzter Auftrag ausschließlich §9.
-
 
 ### AUD14-04/05 – Bewegung und Snapshot gemeinsam prüfen (20.10.2026)
 
@@ -4618,9 +4693,9 @@ Vier-Prüfungen-Pfad. Identische Patches gegen beide Vergleichspfade; drei Fenst
 Anschlüsse, begrenzte Ersatz-IDs und unveränderte Basis geprüft.
 
 | 1000 Fremdwände, Median ms | bisher / neu Lauf 1 | bisher / neu Lauf 2 |
-| --- | --- | --- |
-| Erstes T-Ziel | 24,537 / 15,584 | 25,276 / 20,546 |
-| Wechselndes T-Ziel | 20,443 / 17,211 | 27,821 / 15,656 |
+| -------------------------- | ------------------- | ------------------- |
+| Erstes T-Ziel              | 24,537 / 15,584     | 25,276 / 20,546     |
+| Wechselndes T-Ziel         | 20,443 / 17,211     | 27,821 / 15,656     |
 
 Rohdaten: benchmarks/t-target-owned-move-results.json und
 benchmarks/t-target-owned-move-repeat-results.json; reproduzierbar über
@@ -4632,7 +4707,6 @@ Ausführungen; Phasenmediane nicht addieren. Erste Ziele sind sitzungs-, nicht
 prozesskalt. Zwei volle Modellprüfungen und Restscans bleiben globale Arbeit.
 Keine neue Browser-, Native-, Shift- oder Frameabnahme. Aktiver Folgeauftrag §9.
 
-
 ### AUD14-04/05 – Browser- und Architekturabnahme PR400 (21.10.2026)
 
 PR400 nach grüner CI 39621656423 am geprüften Head dc385a1 in main b567902
@@ -4643,6 +4717,7 @@ bestanden. Frischer statischer Abnahmebuild mit height-acceptance.config.ts;
 bekannter Chunkgrößenhinweis, keine neue Produktwarnung.
 
 Änderungskarte / Abschlusskarte zum neuen §9 (auch im PR vor Merge dokumentiert):
+
 - Nutzerziel AUD14-04/05: dieselbe T-Endpunktbewegung mit weniger Doppelprüfung.
   Normal: wall-2 von wall-1 auf new-host. Grenzfall: zurück zum alten Host,
   gelöste Nachbarn/Fenster, Abbruch und ein Undo/Redo. Keine neue Funktion.
@@ -4675,7 +4750,6 @@ kein kontinuierlicher Mousemove-/Shift-/Native-/Frame-Nachweis; UI-Platzierung
 ist kein direkter Beleg jedes Zwischenframes. Kein neuer IFC- oder Recovery-
 Rundlauf, da deren Code/Format unverändert; bestehende Nachweise erhalten.
 Keine pauschale AUD14-Gesamtfreigabe. Nächster Einzelauftrag ausschließlich §9.
-
 
 ### Architekturgrenzen-Gate – Änderungskarte und Nachweis (21.10.2026)
 
@@ -4735,7 +4809,6 @@ Produktdateien unverändert; neuer Checker importiert nur Node/TypeScript, keine
 Produktabhängigkeit auf den Checker. Bekannter contour/offset-Zyklus bewusst
 nicht behoben; nächster Einzelauftrag §9.
 
-
 ### Architekturvertrag / AUD14-04 – Konturzyklus entfernt (21.10.2026)
 
 Basis main 6314460 (PR402); Branch refactor/contour-source. Änderungskarte vor
@@ -4774,7 +4847,6 @@ Recoverycode und Schema unberührt; keine neue Native-/Frame-/Recovery-Abnahme.
 Bestehende automatisierte Ableitungs-/Exportprüfungen grün. Weitere AUD14-Gates
 bleiben offen; genau ein nächster Auftrag ausschließlich §9.
 
-
 ### AUD14-03/04 – Globale 3D-Vorschaudienste gemessen (21.10.2026)
 
 Änderungskarte vor Umsetzung: Basis main 738ce18/PR403, Branch
@@ -4794,10 +4866,10 @@ Feste Fall-/Phasenreihenfolge; GC/JIT und Betriebssystemlast begrenzen Aussagen.
 Vorbereitung ist sitzungskalt, nicht prozesskalt für jeden Fall.
 
 | Warmer Median, zusätzliche Fenster mitwachsend | 2 Fenster Lauf1/2 | 102 Fenster Lauf1/2 | 1002 Fenster Lauf1/2 |
-| --- | --- | --- | --- |
-| Gebäude-Fensterbasis neu (ms) | 0,0150 / 0,0145 | 0,1413 / 0,1721 | 1,1134 / 1,1071 |
-| Wandflächen-Komposition (ms) | 0,0521 / 0,0738 | 0,0532 / 0,0532 | 0,0296 / 0,0302 |
-| Wandpuffer-Update (ms) | 0,1036 / 0,1050 | 0,1026 / 0,1038 | 0,1079 / 0,1102 |
+| ---------------------------------------------- | ----------------- | ------------------- | -------------------- |
+| Gebäude-Fensterbasis neu (ms)                  | 0,0150 / 0,0145   | 0,1413 / 0,1721     | 1,1134 / 1,1071      |
+| Wandflächen-Komposition (ms)                   | 0,0521 / 0,0738   | 0,0532 / 0,0532     | 0,0296 / 0,0302      |
+| Wandpuffer-Update (ms)                         | 0,1036 / 0,1050   | 0,1026 / 0,1038     | 0,1079 / 0,1102      |
 
 1002 Fenster: Fensterbasis P95 2,433/2,253 ms. Diagnose mit einmalig
 vorbereiteter Fensterbasis: verbleibende Listenkomposition 0,0295/0,0329 ms
@@ -4836,7 +4908,6 @@ Pointerereignis-, GPU-/Native-/Gesamtframezeiten; tatsächliche Sichtbarkeit,
 Closure-/Topologiewechsel und komplette S1-Szene nicht als gemessen darstellen.
 Keine allgemeine Performancefreigabe; AUD14 bleibt teilweise offen. §9 führt
 allein den nächsten ausführbaren Auftrag.
-
 
 ### AUD14-03/04 – Stabile Fensterbasis und Objektvertrag (21.10.2026)
 
@@ -4883,7 +4954,6 @@ erneute Auswahl, Fensterebene aus und über Ebenen-Undo wieder ein. Vorschau ern
 begonnen und abgebrochen; Position 0,725 erhalten, keine Konsolenfehler. Screenshot
 outputs/stable-window-browser.png. Kein kontinuierlicher Pointer-/Mehrfachwand-
 oder Exportvergleich in diesem Smoke; kombinierte Abnahme ist nächster §9-Auftrag.
-
 
 ### AUD14-03/04 – Kombinierte Fensterbasis-Browserabnahme (21.10.2026)
 
@@ -4955,19 +5025,19 @@ addierbaren Teilzeiten** des zuvor gemessenen initialen Puffers.
 
 Median in ms, größter Fall, owned; Lauf 1 / Lauf 2:
 
-| Abschnitt | Lauf 1 | Lauf 2 |
-| --- | ---: | ---: |
-| Szenen-Solid | 111,519 | 112,249 |
-| Initialer Puffer | 108,739 | 91,188 |
-| Erste Aktionsvorbereitung A | 1,682 | 1,380 |
-| Erste Flächenkomposition A | 3,463 | 3,405 |
-| Gleiche Ersatzmenge A, neues Ziel | 0,068 | 0,065 |
-| Andere Ersatzmenge B | 3,347 | 3,150 |
-| Rückwechsel A | 3,087 | 2,717 |
-| Erste Pufferaktualisierung A | 0,157 | 0,134 |
-| Unabhängige Packprobe | 94,492 | 86,702 |
-| Unabhängige Gruppierung | 3,035 | 3,051 |
-| Unabhängiges Zusammenkopieren | 1,468 | 1,416 |
+| Abschnitt                         |  Lauf 1 |  Lauf 2 |
+| --------------------------------- | ------: | ------: |
+| Szenen-Solid                      | 111,519 | 112,249 |
+| Initialer Puffer                  | 108,739 |  91,188 |
+| Erste Aktionsvorbereitung A       |   1,682 |   1,380 |
+| Erste Flächenkomposition A        |   3,463 |   3,405 |
+| Gleiche Ersatzmenge A, neues Ziel |   0,068 |   0,065 |
+| Andere Ersatzmenge B              |   3,347 |   3,150 |
+| Rückwechsel A                     |   3,087 |   2,717 |
+| Erste Pufferaktualisierung A      |   0,157 |   0,134 |
+| Unabhängige Packprobe             |  94,492 |  86,702 |
+| Unabhängige Gruppierung           |   3,035 |   3,051 |
+| Unabhängiges Zusammenkopieren     |   1,468 |   1,416 |
 
 Die öffentliche mutable Aktionsvorbereitung kostet im selben Größenfall
 11–15 ms; owned dagegen rund 1,2–1,7 ms. Diese beiden Provenienzen nicht
@@ -4996,8 +5066,8 @@ Float32-Ergebnis exakt vergleichbar ist. Der etwas größere Solidaufbau enthäl
 mehrere fachliche Ableitungen und bleibt ausdrücklich separat offen. Aktiver
 Einzelauftrag ausschließlich §9.
 
-
 ### AUD14-03 – Direkte CPU-Pufferpackung (21.10.2026)
+
 Änderungskarte vor Code: PR407 d0b21a4, nach grüner CI 39631732272 in main
 bb53387 integriert. Ziel: gleiche sichtbare Geometrie mit weniger Packarbeit;
 normaler Quad/Fensterbestand sowie mehrseitige Flächen, Auswahlfarben und große
@@ -5027,14 +5097,14 @@ zu Chunkgröße, vite-tsconfig-paths und inlineDynamicImports bleiben.
 
 Zwei abschließende serielle cold-preview-profile-Läufe nach Test/Build, gleiche
 Methode wie PR407; Rohdaten direct-packing-results.json und
- direct-packing-repeat-results.json. Frühere mit Tests überlappende Messungen
+direct-packing-repeat-results.json. Frühere mit Tests überlappende Messungen
 verworfen. Bei 1004 Wänden/1002 Fenstern, owned-Median in ms:
 
-| CPU-Abschnitt | Vorher (PR407, zwei Läufe) | Nachher (zwei Läufe) |
-| --- | --- | --- |
-| Initialer Puffer | 108,739 / 91,188 | 19,123 / 22,027 |
-| Unabhängige Packprobe | 94,492 / 86,702 | 18,941 / 16,909 |
-| Gebäude-Solid | 111,519 / 112,249 | 107,107 / 103,003 |
+| CPU-Abschnitt         | Vorher (PR407, zwei Läufe) | Nachher (zwei Läufe) |
+| --------------------- | -------------------------- | -------------------- |
+| Initialer Puffer      | 108,739 / 91,188           | 19,123 / 22,027      |
+| Unabhängige Packprobe | 94,492 / 86,702            | 18,941 / 16,909      |
+| Gebäude-Solid         | 111,519 / 112,249          | 107,107 / 103,003    |
 
 Rund 76–82 % weniger initiale Puffer-CPU-Zeit im jeweiligen Laufvergleich;
 keine statistische oder Framegarantie. Unabhängige Proben sind keine addierbaren
@@ -5049,8 +5119,8 @@ müssen unverändert sein. Exakte Pufferprüfung ersetzt keine Gesamtframeabnahm
 Abschlusskarte: tatsächlicher Produktdiff nur der Packer; keine neuen
 Abhängigkeiten/Zyklen oder Modellkopien. Aktiver Einzelauftrag ausschließlich §9.
 
-
 ### AUD14-03/04 – Gebäudeaufbau phasenweise gemessen (21.10.2026)
+
 Änderungskarte: Basis PR408 7bcfad3, nach grüner CI 39632694692 in main
 1471a31 integriert. Diagnosecode unter benchmarks, keine Produktänderung.
 Ziel: feste kleine verbundene Wandgruppe plus 0/100/1000 freie Restwände,
@@ -5075,16 +5145,16 @@ Rohdaten: benchmarks/building-phase-results.json und building-phase-repeat-resul
 Reproduktion: node --experimental-strip-types benchmarks/building-phase-profile.ts.
 Median in ms bei 1004 Wänden/1002 Fenstern, Lauf 1 / 2:
 
-| Abschnitt | Lauf 1 | Lauf 2 |
-| --- | ---: | ---: |
-| Instrumentierter Gesamtaufbau | 105,403 | 113,236 |
+| Abschnitt                         |  Lauf 1 |  Lauf 2 |
+| --------------------------------- | ------: | ------: |
+| Instrumentierter Gesamtaufbau     | 105,403 | 113,236 |
 | Uninstrumentierter Kontrollaufbau | 101,744 | 107,512 |
-| Anschlussableitung | 1,889 | 2,311 |
-| Fensterzuordnung filter + map | 71,093 | 73,154 |
-| Wandloop ohne Fensterzuordnung | 22,998 | 25,930 |
-| Höhenversatz | 0,249 | 0,263 |
-| Aggregation | 0,454 | 0,503 |
-| Abschließendes Freeze | 10,813 | 11,620 |
+| Anschlussableitung                |   1,889 |   2,311 |
+| Fensterzuordnung filter + map     |  71,093 |  73,154 |
+| Wandloop ohne Fensterzuordnung    |  22,998 |  25,930 |
+| Höhenversatz                      |   0,249 |   0,263 |
+| Aggregation                       |   0,454 |   0,503 |
+| Abschließendes Freeze             |  10,813 |  11,620 |
 
 Bei gleich vielen Wänden und nur zwei Fenstern: Gesamt 10,661/9,677 ms,
 Fensterzuordnung 0,422/0,429 ms. Die freie Wandextrusion durchsucht pro Wand
@@ -5106,8 +5176,8 @@ kein p95-/Browser-/GPU-/Frame-/Native-Nachweis. Keine neue IFC-/Recoveryabnahme.
 Abschlusskarte: keine produktiven Importkanten oder Modellkopien; Testquellen
 nach Ausführung entfernt. Einziger aktiver Folgeauftrag ausschließlich §9.
 
-
 ### AUD14-03/04 – Ableitungs-lokale Fenster-Hostgruppierung (21.10.2026)
+
 Änderungskarte vor Code: Basis PR409 6258a2c, grün nach main 84114d1 übernommen.
 Ziel: unveränderte freie Wandextrusion ohne Fenster-Gesamtscan je Wand. Normale
 mehrfenstrige Wand, leere Hosts, Neuzuordnung sowie überlappende Öffnungen im
