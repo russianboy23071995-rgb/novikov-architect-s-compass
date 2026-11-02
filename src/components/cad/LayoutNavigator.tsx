@@ -2,7 +2,6 @@ import { useRef, useState, type ReactNode } from "react";
 import { ChevronDown, ChevronRight, File, FileStack, Folder } from "lucide-react";
 import type { Project } from "@/domain/project/schema";
 import {
-  DEFAULT_MASTER_LAYOUTS,
   LAYOUT_COLLECTION_ID,
   projectLayoutFolders,
   projectLayouts,
@@ -10,6 +9,7 @@ import {
   type LayoutFolder,
 } from "@/domain/views/layouts";
 import { changeLayouts, type LayoutAction } from "@/application/views/layouts";
+import { LayoutSettingsWindow, type LayoutDraftTarget } from "./LayoutSettingsWindow";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -61,6 +61,24 @@ export function LayoutNavigator({
   const [error, setError] = useState("");
   const dragged = useRef<{ base: Project; id: string; kind: "folder" | "layout" } | null>(null);
   const [dropFolder, setDropFolder] = useState<string | null>(null);
+  const [windowTarget, setWindowTarget] = useState<LayoutDraftTarget | null>(null);
+  const newLayout = (folderId: string) =>
+    setWindowTarget({
+      kind: "layout",
+      folderId,
+      name: freeName(
+        "Layout",
+        layouts.map((l) => l.name),
+      ),
+    });
+  const newMaster = () =>
+    setWindowTarget({
+      kind: "master",
+      name: freeName(
+        "Masterlayout",
+        masters.map((m) => m.name),
+      ),
+    });
 
   const apply = (action: LayoutAction, base = project) => {
     try {
@@ -73,40 +91,11 @@ export function LayoutNavigator({
       return false;
     }
   };
-  const create = (kind: Kind, folderId = LAYOUT_COLLECTION_ID) => {
-    const id = crypto.randomUUID();
-    const name =
-      kind === "folder"
-        ? "Neuer Ordner"
-        : kind === "master"
-          ? freeName(
-              "Masterlayout",
-              masters.map((m) => m.name),
-            )
-          : freeName(
-              "Layout",
-              layouts.map((l) => l.name),
-            );
-    const action: LayoutAction =
-      kind === "folder"
-        ? { kind: "create-folder", id, name, parentId: folderId }
-        : kind === "master"
-          ? {
-              kind: "create-master",
-              id,
-              name,
-              sheet: masters[0]?.sheet ?? DEFAULT_MASTER_LAYOUTS[0]!.sheet,
-            }
-          : masters.length
-            ? { kind: "create-layout", id, name, folderId, masterId: masters[0]!.id }
-            : {
-                kind: "create-layout",
-                id,
-                name,
-                folderId,
-                masterId: null,
-                sheet: DEFAULT_MASTER_LAYOUTS[0]!.sheet,
-              };
+  const createFolder = (folderId = LAYOUT_COLLECTION_ID) => {
+    const id = crypto.randomUUID(),
+      name = "Neuer Ordner",
+      kind: Kind = "folder";
+    const action: LayoutAction = { kind: "create-folder", id, name, parentId: folderId };
     if (!apply(action)) return;
     setSelected(id);
     setClosed((ids) => ids.filter((v) => v !== folderId));
@@ -297,8 +286,8 @@ export function LayoutNavigator({
 
   const createItems = (folderId: string) => (
     <>
-      <ContextMenuItem onSelect={() => create("layout", folderId)}>Neues Layout</ContextMenuItem>
-      <ContextMenuItem onSelect={() => create("folder", folderId)}>Neuer Ordner</ContextMenuItem>
+      <ContextMenuItem onSelect={() => newLayout(folderId)}>Neues Layout</ContextMenuItem>
+      <ContextMenuItem onSelect={() => createFolder(folderId)}>Neuer Ordner</ContextMenuItem>
     </>
   );
   const moveMenu = (id: string, kind: "folder" | "layout") => (
@@ -363,6 +352,19 @@ export function LayoutNavigator({
                   "layout",
                   depth + 1,
                   <>
+                    <ContextMenuItem
+                      onSelect={() =>
+                        setWindowTarget({
+                          kind: "layout",
+                          id: l.id,
+                          folderId: l.folderId,
+                          name: l.name,
+                        })
+                      }
+                    >
+                      Layouteinstellungen …
+                    </ContextMenuItem>
+                    <ContextMenuSeparator />
                     {createItems(folder.id)}
                     <ContextMenuSeparator />
                     {moveMenu(l.id, "layout")}
@@ -395,9 +397,12 @@ export function LayoutNavigator({
                   "master",
                   0,
                   <>
-                    <ContextMenuItem onSelect={() => create("master")}>
-                      Neues Masterlayout
+                    <ContextMenuItem
+                      onSelect={() => setWindowTarget({ kind: "master", id: m.id, name: m.name })}
+                    >
+                      Masterlayout-Einstellungen …
                     </ContextMenuItem>
+                    <ContextMenuItem onSelect={newMaster}>Neues Masterlayout</ContextMenuItem>
                     <ContextMenuItem
                       disabled={users > 0}
                       onSelect={() => apply({ kind: "delete-master", id: m.id })}
@@ -416,7 +421,7 @@ export function LayoutNavigator({
           </section>
         </ContextMenuTrigger>
         <ContextMenuContent onCloseAutoFocus={menuClosed}>
-          <ContextMenuItem onSelect={() => create("master")}>Neues Masterlayout</ContextMenuItem>
+          <ContextMenuItem onSelect={newMaster}>Neues Masterlayout</ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
       <ContextMenu>
@@ -429,6 +434,23 @@ export function LayoutNavigator({
           {createItems(LAYOUT_COLLECTION_ID)}
         </ContextMenuContent>
       </ContextMenu>
+      {windowTarget && (
+        <LayoutSettingsWindow
+          key={(windowTarget.id ?? "new") + windowTarget.kind}
+          project={project}
+          target={windowTarget}
+          folders={flatFolders}
+          onApply={(action) => {
+            changeLayouts(project, project, action);
+            onLayoutAction(project, action);
+            setError("");
+            setSelected(action.id);
+            if (action.kind === "create-layout" || action.kind === "layout-settings")
+              setClosed((ids) => ids.filter((v) => v !== action.folderId));
+          }}
+          onClose={() => setWindowTarget(null)}
+        />
+      )}
       {error && (
         <p role="alert" className="px-1.5 pt-2 text-destructive">
           {error}
