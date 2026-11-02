@@ -63,3 +63,21 @@ Nachweis U1: 1488 Tests grün (neu: Ecke mit Sockelwand gleich dem Stumpfstoß e
 Browser (Startprojekt): Wand mit mittiger Achse an das linke Ende von wall-1 gezeichnet → Gehrung (Konturen ±0,18). Neue Wand auf 2,0 m Höhe und 0,5 m Z-Versatz → Stumpfstoß: wall-1 läuft bis −0,18, die neue Wand beginnt an der Innenfläche +0,18. Z-Versatz 1,0 (1,0–3,0 m gegen 0–2,8 m) → Meldung „Eine Wand muss die andere in der Höhe ganz überdecken“. Eine Wand mit Achslage Außen am rechten Ende wurde als T-Anschluss erkannt; Z-Versatz 0,5 angenommen, Z-Versatz 3 (keine gemeinsame Höhe) → Meldung „… in der Höhe überschneiden“. 3D im Browser nicht eigens angesehen; der Körper ist durch den Test belegt.
 
 Grenze: Nach einer abgelehnten Eingabe zeigt das Feld „Z-Versatz“ weiter den eingegebenen Wert, bis die Wand neu gewählt wird (bestehendes Verhalten des Eingabefelds).
+
+## L09 U2 – T-Stoß mit Schichten nach Vorrang, im Grundriss (02.11.2026)
+
+Entscheidung des Nutzers: U2 nur im Grundriss. Die Umsetzung in der Kontur hätte Wandkonturen mit mehr als vier Ecken gebraucht (Aussparung in der Hauptwand); Ecken, T-Anschlüsse, Öffnungsprüfung, Fensterbereich, Fang, Räume und Schnitt rechnen heute mit vier Ecken.
+
+- **Regel:** Haben beide Wände eines T-Anschlusses einen Aufbau mit tragender Schicht, läuft der Kern der Nebenwand (von ihrer ersten bis zur letzten tragenden Schicht, mit allem dazwischen) durch die Schichten der Hauptwand, die auf der Anschlussseite vor deren tragender Schicht liegen, z. B. Innenputz oder Putz und Dämmung. Der Kern wird in Material, Schraffur und mit seinen Trennlinien über diese Schichten gezeichnet; zwischen den beiden Kernen steht keine Linie, die Umrisslinie am Stoß war schon fugenlos.
+- Ohne Aufbau oder ohne tragende Schicht an einer der Wände bleibt der Stoß wie bisher. Trockenbau markiert in den Vorgaben die Ständerebene (Dämmung) als tragend; diese Schicht läuft daher wie ein Kern durch.
+- Wird die Bauzustandsfarbe einer der Wände angezeigt (Neubau/Abbruch), entfällt die Schichtzeichnung und damit auch der Durchlauf.
+- Code: `tJunctionLayerJoints` in `src/rendering/viewport/wall-layers.ts` (Fläche im Wandsystem der Nebenwand, auch bei schrägem T), `layerJoints` in `plan-scene.ts`, gezeichnet in `PlanSceneRun.tsx` nach allen Wänden mit `WallLayerGraphic` (neu: `edges` für die Außenkanten des Kerns).
+
+Nachweis U2: 1490 Tests grün (neu in `src/rendering/viewport/wall-layers.test.ts`: KS 24 an KS 17,5 + WDVS 16 von der Putzseite 1,5 cm tief, von der Dämmseite 17 cm; ohne Aufbau an einer Wand kein Durchlauf; Trockenbau mit Ständerebene; ausgeblendete Wand), Typprüfung beider Projekte, Architektur, Lint, Formatierung sauber, 14-Modell-Prüfsumme unverändert (`e42aa36e…`).
+
+Browser (Startprojekt): Wand mit mittiger Achse als T an wall-1 gezeichnet, „KS 24 innen“ und „KS 17,5 + WDVS 16“ zugewiesen. Die Nebenwand kommt auf der Dämmseite an: Kern läuft 17 cm durch Putz und Dämmung bis an den Kalksandstein. Nach „Aufbau spiegeln“ an wall-1 kommt sie auf der Putzseite an: 1,5 cm, der Innenputz ist am Stoß unterbrochen, die Kalksandsteine gehen ohne Linie ineinander über.
+
+### Grenzen U2
+
+- Nur Grundriss: Konturen, 3D, IFC, Schnitt und Mengen behalten den einfachen Stoß. Der Materialauszug zählt den Putz der Hauptwand am Stoß weiter mit (je Stoß Kernbreite × Putzdicke × Höhe, z. B. 0,24 × 0,015 × 2,8 m ≈ 0,01 m³).
+- Ecken mit ungleichen Aufbauten werden nicht nach Vorrang verschnitten.

@@ -57,7 +57,7 @@ Offen: Archicad-Prüfung der Testdatei durch den Nutzer (wird die Wand als Mehrs
 
 ## Grenzen von L07 insgesamt
 
-- Keine Verschneidung der Schichten nach Vorrang an T-Stößen und an Ecken mit ungleichen Aufbauten.
+- Keine Verschneidung der Schichten nach Vorrang an Ecken mit ungleichen Aufbauten. T-Stöße: im Grundriss seit L09 U2 (docs/WALL_JUNCTIONS.md), in 3D, IFC und Schnitt nicht.
 - 3D zeigt die Wand weiter als einen Körper in einer Farbe.
 - Decken und Dächer haben noch keinen Aufbau.
 - Schraffur im Grundriss in Bildschirmgröße (Papiergröße mit dem Planexport L14).

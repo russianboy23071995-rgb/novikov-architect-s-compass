@@ -127,6 +127,11 @@ export function PlanSceneContent({
     lines: kind === "line" ? ids.map((id) => scene.lines.get(id)!) : [],
   };
   const outlines = scene.outlines;
+  // Layers of the build-up (docs/WANDAUFBAU.md, SA2); a shown Neubau/Abbruch colour wins.
+  const shownLayers = (wall: (typeof plan.walls)[number]) =>
+    showRenovation && wall.renovation && wall.renovation !== "existing"
+      ? undefined
+      : scene.wallLayers.get(wall.id);
   const selectProps = (kind: ElementTarget["kind"], id: string) => ({
     role: "button",
     "data-plan-pick": "",
@@ -464,11 +469,7 @@ export function PlanSceneContent({
             { x: length, y: wall.thickness / 2 },
             { x: 0, y: wall.thickness / 2 },
           ];
-        // Layers of the build-up (docs/WANDAUFBAU.md, SA2); a shown Neubau/Abbruch colour wins.
-        const bands =
-          showRenovation && wall.renovation && wall.renovation !== "existing"
-            ? undefined
-            : scene.wallLayers.get(wall.id);
+        const bands = shownLayers(wall);
         return (
           <g
             key={wall.id}
@@ -644,6 +645,31 @@ export function PlanSceneContent({
                 </g>
               );
             })}
+          </g>
+        );
+      })}
+      {scene.layerJoints.map((joint) => {
+        // Incoming core through the host's cover layers at a T joint (L09 U2), drawn above both
+        // walls; only where both walls show their layers.
+        const wall = scene.walls.get(joint.wallId),
+          host = scene.walls.get(joint.hostWallId);
+        if (!wall || !host || !shownLayers(wall) || !shownLayers(host)) return null;
+        const body = wallBody(wall);
+        const angle =
+          (-Math.atan2(wall.end.y - wall.start.y, wall.end.x - wall.start.x) * 180) / Math.PI;
+        return (
+          <g
+            key={`${joint.hostWallId}>${joint.wallId}`}
+            aria-label={`Schichtstoß ${joint.wallId}`}
+            transform={`translate(${body.start.x} ${-body.start.y}) rotate(${angle})`}
+          >
+            <WallLayerGraphic
+              profile={joint.profile}
+              bands={joint.bands}
+              pixelsPerMetre={pixelsPerMetre}
+              lineWidth={wallOutlineWidth}
+              edges
+            />
           </g>
         );
       })}
