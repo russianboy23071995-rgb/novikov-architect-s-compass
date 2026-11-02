@@ -129,3 +129,14 @@ Nachweis: 1508 Tests grün (neu: Ecken von Papier und Randrahmen als Fangpunkte 
 Nutzerwunsch: Der Knopf „SNAP“ heißt „**Rasterengine**“; der Rasterfang ist standardmäßig aus. Die Rasterengine bleibt der Hauptschalter für jeden Fang: Ecken, Endpunkte, Mitten, Schnittpunkte, Verlängerungen, Kanten (Tooltip am Knopf). Der Rasterfang (Sprünge im eingestellten Schritt: 0,1 m im Grundriss, 1 mm auf Papier) ist eine Zusatzoption daneben und startet jetzt aus, im Grundriss wie auf Papier. „Grid“ blendet nur die Hintergrundlinien ein und fängt nichts.
 
 Nachweis: 1508 Tests grün, Typprüfung, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert. Browser: Statusleiste zeigt „Grid · Rasterengine · Rasterfang aus · 0.1 m · Ortho“.
+
+## KA1 – Eigene Kamera je Ansicht (02.11.2026)
+
+Nutzermeldung: Beim Wechsel zwischen Layout und Gebäudestruktur/Erdgeschoss änderte sich jedes Mal der Zoom. Ursache: Die Planansicht wurde bei jedem Wechsel neu aufgebaut und neu eingepasst.
+
+- Jede Ansicht merkt sich Zoom und Ausschnitt für die laufende Sitzung: der Grundriss (eine Kamera für alle Geschosse, wie bisher), jedes Layout und Masterlayout, jeder Plankopf und jedes Abbild. Beim Zurückwechseln steht die Ansicht genau wie verlassen.
+- Neu eingepasst wird nur, wenn eine Ansicht zum ersten Mal geöffnet wird, über „Alles anzeigen“ oder wenn sich das Papierformat eines Layouts bzw. Plankopfs ändert. In geteilten Ansichten hat jedes Feld eine eigene Kamera.
+- Nicht in der Projektdatei, kein neues Schema. Nach dem Neuladen passt jede Ansicht einmal neu ein. Gemerkt werden höchstens 200 Ansichten, die ältesten gehen zuerst (so verschwindet auch die Kamera eines gelöschten Layouts).
+- Code: `src/components/cad/view-cameras.ts`, `CadViewport.tsx` (`cameraKey`), Ansichtsschlüssel `viewKey` in `CadWorkspace.tsx`.
+
+Nachweis: 1515 Tests grün (neu `view-cameras.test.ts`), Typprüfung, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert. Browser: Layout auf 150 %, Grundriss auf 400 %, dreimal hin und her über die Tabs und über Gebäudestruktur → Erdgeschoss. Zoom und Ausschnitt blieben jedes Mal exakt gleich (vorher: Layout zurück auf 65 %, Grundriss auf 198 %).

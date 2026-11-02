@@ -10,6 +10,7 @@ import { assertWorkingViewCurrent } from "@/application/views/working-context";
 import { useEffect, useRef, useState } from "react";
 import { fitPlanInset, zoomPlan, type ScreenInsets } from "@/rendering/viewport/plan-camera";
 import type { PlanCamera } from "@/rendering/viewport/plan-camera";
+import { recallCamera, rememberCamera } from "./view-cameras";
 import { planBounds } from "./bim-view";
 import { BimSolidView } from "./BimSolidView";
 import { initialCamera } from "@/lib/bim/geometry";
@@ -33,6 +34,8 @@ type CadViewportProps = BimPlanProps & {
   startupNotice?: React.ReactNode;
   /** Stage parts covered by floating palettes (docs/GLAS_PALETTEN.md); single view only. */
   safe?: ScreenInsets | undefined;
+  /** The view's own camera for this session (KA1); without a key every opening fits anew. */
+  cameraKey?: string | undefined;
   index: number;
   mode: ViewMode;
   grid: boolean;
@@ -84,6 +87,7 @@ export function CadViewport({
   zoomSlot,
   startupNotice,
   safe,
+  cameraKey,
   index,
   mode,
   grid,
@@ -129,7 +133,11 @@ export function CadViewport({
   );
   const savedFraming = useRef(documentFraming);
   const [size, setSize] = useState({ width: 800, height: 400 });
-  const [planCamera, setPlanCamera] = useState<PlanCamera | null>(null);
+  // A view that was open before comes back as it was left (KA1).
+  const [planCamera, setPlanCamera] = useState<PlanCamera | null>(() => recallCamera(cameraKey));
+  useEffect(() => {
+    if (cameraKey && planCamera) rememberCamera(cameraKey, planCamera);
+  }, [cameraKey, planCamera]);
   useEffect(() => {
     const element = surface.current;
     if (!element) return;
@@ -348,8 +356,11 @@ export function ViewportManager({
   onPlanCapture,
   startupNotice,
   safe,
+  cameraKey,
   ...model
 }: BimPlanProps & {
+  /** Names the view whose cameras are kept (KA1); one per split pane. */
+  cameraKey?: string | undefined;
   startupNotice?: React.ReactNode;
   safe?: ScreenInsets | undefined;
   documentFraming?: DocumentFraming | undefined;
@@ -380,6 +391,7 @@ export function ViewportManager({
           startupNotice={startupNotice}
           safe={layout === "single" ? safe : undefined}
           documentFraming={documentFraming}
+          cameraKey={cameraKey && `${cameraKey}#${index}`}
           {...model}
           index={index}
           mode={mode}
