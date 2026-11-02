@@ -20,6 +20,7 @@ export function CanvasTabs({
   active,
   storeyName,
   sections,
+  layouts = [],
   onSelect,
   onClose,
 }: {
@@ -27,6 +28,8 @@ export function CanvasTabs({
   active: CanvasView;
   storeyName: string;
   sections: readonly { id: string; name: string }[];
+  /** Layouts and master layouts, for the names of layout tabs. */
+  layouts?: readonly { id: string; name: string }[];
   onSelect: (view: CanvasView) => void;
   onClose: (view: CanvasView) => void;
 }) {
@@ -37,7 +40,7 @@ export function CanvasTabs({
       className="flex max-w-full items-center gap-0.5 overflow-x-auto rounded-md border border-border bg-popover/60 p-0.5 text-[11px] shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-2xl"
     >
       {tabs.map((view) => {
-        const label = canvasTabLabel(view, storeyName, sections);
+        const label = canvasTabLabel(view, storeyName, sections, layouts);
         return (
           <div
             key={view}

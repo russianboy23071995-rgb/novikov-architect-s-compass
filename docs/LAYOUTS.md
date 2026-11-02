@@ -55,3 +55,18 @@ Nicht im Browser geprüft: Ziehen und Ablegen (die Testmaus löst kein HTML-Zieh
 - Code: `src/components/cad/LayoutSettingsWindow.tsx`, Anbindung in `LayoutNavigator.tsx`.
 
 Nachweis LA3: 1495 Tests grün, Typprüfung beider Projekte, Architektur, Lint, Formatierung sauber, 14-Modell-Prüfsumme unverändert. Browser: „Neues Layout“ zeigt die gesperrten Werte von „Standard A3 quer“ (420 × 297 mm, Ränder 10/10/10/20); Häkchen aus, DIN A4 Hochformat, Rand oben 15 mm, Name „Detail A4“ → angelegt; „Layouteinstellungen …“ zeigt die gespeicherten Werte (A4, hoch, 210 × 297, oben 15, links 20, ohne Master); Rand links 200 mm → Meldung „keinen Platz“; Häkchen wieder an → übernommen, das Masterlayout zeigt „1 Layout folgt“.
+
+## LA4 – Layout als Tab
+
+- **Doppelklick** (oder Enter) auf ein Layout oder Masterlayout im Navigator öffnet es als eigenen **Tab** auf der Zeichenfläche, neben „Grundriss …“ und den Schnitten. Der Tab trägt den Namen des Layouts; ein gelöschtes Layout verliert seinen Tab (auch nach Rückgängig). Das geöffnete Layout ist im Navigator markiert.
+- Der Tab zeigt das **Blatt maßstäblich in mm**: weißes Papier mit Schatten und dem gestrichelten **Randrahmen**. Darüber eine Zeile mit Art und Name, Größe, Format, Maßen, Rändern und – bei Layouts – „folgt Masterlayout …“ bzw. „ohne Masterlayout“.
+- **Mausrad** zoomt um den Mauszeiger, **Ziehen** verschiebt, **Einpassen** zeigt das ganze Blatt. **Einstellungen …** öffnet das Fenster aus LA3 für dieses Layout bzw. Masterlayout. Ändert sich das Blatt (z. B. das Masterlayout auf A2), folgt der Tab sofort.
+- Der Tab ist Sitzungszustand (wie die Schnitt-Tabs), nicht Teil der Projektdatei und kein Rückgängig-Schritt. Die Zeichnung des Masterlayouts und platzierte Zeichnungen kommen in späteren Schritten auf das Blatt; der Plankopf wird im Masterlayout gezeichnet (Plankopfplaner).
+- Navigator: Beim Doppelklick wird in der Zeile kein Text mehr markiert.
+- Code: `src/components/cad/LayoutSheetView.tsx`, Tab-Art `layout:<id>` in `src/application/views/canvas-tabs.ts` (`layoutTab`, `tabLayoutId`, Name und Aufräumen), `CanvasTabs.tsx`, Anbindung in `CadWorkspace.tsx`; `layoutFolderTree` in `src/domain/views/layouts.ts` für Navigator und Fenster.
+
+Nachweis LA4: 1496 Tests grün (neu: Layout-Tabs in `canvas-tabs.test.ts`, Ordnerbaum in `layouts.test.ts`), Typprüfung beider Projekte, Architektur, Lint, Formatierung sauber, 14-Modell-Prüfsumme unverändert. Browser: Doppelklick auf „Standard A3 quer“ öffnet den Tab mit A3 quer 420 × 297 mm und Rändern 10/10/10/20; „Einstellungen …“ → A2 → der Tab zeigt sofort 594 × 420 mm; neues Layout über das Fenster angelegt und per Doppelklick geöffnet („folgt Masterlayout“); Mausrad zoomt; Wechsel zurück auf „Grundriss Erdgeschoss“ zeigt den Grundriss, die Layout-Tabs bleiben offen.
+
+## Stand L13
+
+LA1–LA4 erledigt: leere Layouts mit Masterlayouts, Ordnern, Blatteinstellungen und eigenem Tab. Offen für die nächsten Schritte: Zeichnen im Masterlayout (Plankopf, Plankopfplaner mit automatischen Texten), Platzieren von Abbildern/Zeichnungen auf Layouts, maßhaltiger PDF-Export und Druck (L14).

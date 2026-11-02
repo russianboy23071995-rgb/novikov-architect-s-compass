@@ -6,6 +6,8 @@ import {
   canvasViewOf,
   closeCanvasTab,
   existingCanvasTabs,
+  layoutTab,
+  tabLayoutId,
   sectionTab,
   tabSectionId,
   withCanvasTab,
@@ -42,4 +44,17 @@ test("sections open as tabs named after the section; removed sections lose their
   );
   assert.deepEqual(existingCanvasTabs(tabs, new Set()), ["plan"]);
   assert.deepEqual(existingCanvasTabs(tabs, new Set(["s1"])), tabs);
+});
+
+test("layouts open as tabs named after the layout; removed layouts lose their tab (LA4)", () => {
+  const tabs = withCanvasTab(withCanvasTab(["plan"], sectionTab("s1")), layoutTab("l1"));
+  assert.deepEqual(tabs, ["plan", "section:s1", "layout:l1"]);
+  assert.equal(tabLayoutId("layout:l1"), "l1");
+  assert.equal(tabLayoutId("section:s1"), null);
+  assert.equal(
+    canvasTabLabel("layout:l1", "EG", [], [{ id: "l1", name: "Grundriss EG" }]),
+    "Grundriss EG",
+  );
+  assert.deepEqual(existingCanvasTabs(tabs, new Set(["s1"])), ["plan", "section:s1"]);
+  assert.deepEqual(existingCanvasTabs(tabs, new Set(["s1"]), new Set(["l1"])), tabs);
 });
