@@ -81,6 +81,7 @@ const REAL_EVENTS = new Set<EditingEvent["type"]>([
   "rename-storey",
   "document",
   "layout",
+  "title-block",
   "working-storey",
 ]);
 

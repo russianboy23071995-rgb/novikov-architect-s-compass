@@ -114,7 +114,16 @@ export function CadViewport({
       setSolidFrame(createProjectionFrame(buildBuildingSolid(model.project)));
   }, [is3D, solidFrame, model.project]);
   const surface = useRef<HTMLDivElement>(null);
-  const initialBounds = useRef(planBounds(model.project, model.viewContext.visibility));
+  // The Plankopfplaner fits its paper underlay (docs/PLANKOPF.md, PK3).
+  const underlayBounds = (u: NonNullable<BimPlanProps["underlay"]>) => {
+    const pad = 0.04 * Math.max(u.paper.x1 - u.paper.x0, u.paper.y1 - u.paper.y0);
+    return `${u.paper.x0 - pad} ${-u.paper.y1 - pad} ${u.paper.x1 - u.paper.x0 + 2 * pad} ${u.paper.y1 - u.paper.y0 + 2 * pad}`;
+  };
+  const initialBounds = useRef(
+    model.underlay
+      ? underlayBounds(model.underlay)
+      : planBounds(model.project, model.viewContext.visibility),
+  );
   const savedFraming = useRef(documentFraming);
   const [size, setSize] = useState({ width: 800, height: 400 });
   const [planCamera, setPlanCamera] = useState<PlanCamera | null>(null);
@@ -163,7 +172,12 @@ export function CadViewport({
               center: { ...savedFraming.current.center },
               pixelsPerMetre: savedFraming.current.pixelsPerMetre,
             }
-          : fitPlan(planBounds(model.project, model.viewContext.visibility), size),
+          : fitPlan(
+              model.underlay
+                ? underlayBounds(model.underlay)
+                : planBounds(model.project, model.viewContext.visibility),
+              size,
+            ),
       );
   };
   const zoom = (factor: number) =>
@@ -288,7 +302,12 @@ export function CadViewport({
                       center: { ...savedFraming.current.center },
                       pixelsPerMetre: savedFraming.current.pixelsPerMetre,
                     }
-                  : fitPlan(planBounds(model.project, model.viewContext.visibility), size),
+                  : fitPlan(
+                      model.underlay
+                        ? underlayBounds(model.underlay)
+                        : planBounds(model.project, model.viewContext.visibility),
+                      size,
+                    ),
               );
           }}
         >

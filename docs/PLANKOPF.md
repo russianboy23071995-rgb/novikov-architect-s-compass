@@ -32,3 +32,21 @@ Nachweis PK1: 1499 Tests grün (3 neu in `src/application/views/title-blocks.tes
 Nachweis PK2: 1502 Tests grün (3 neu in `src/application/views/title-block-space.test.ts`: Lens nur mit dem Zeichenblatt, 1:1 und stabil; Linie landet im Plankopf, Gebäude und Maßstab unverändert, Rückgängig nimmt sie heraus, Verlassen des Raums; Rückgängig des Anlegens schließt den Raum), Typprüfung beider Projekte, Architektur, Lint, Formatierung sauber, 14-Modell-Prüfsumme unverändert. Browser: Organisation → Plankopfplaner legt „Plankopf“ an und öffnet den Tab (Maßstab 1:1, Gebäudewerkzeuge ausgegraut); Linie gezeichnet; im Tab „Grundriss Erdgeschoss“ nur die Wand, keine Linie; zurück im Plankopf ist die Linie da; Text „Bauvorhaben“ gesetzt und mit Rückgängig entfernt, der Plankopf-Tab bleibt aktiv.
 
 Grenze PK2: Die Ansicht ist noch nicht auf Papiergröße eingepasst und es gibt noch keine Unterlage (PK3).
+
+## PK3 – Unterlage, Einpassen, Planköpfe im Navigator
+
+- **Papierunterlage** im Plankopfplaner: weißes Blatt in echter Größe (1:1) mit gestricheltem Randrahmen, unter der Zeichnung und ohne Klicks. Der **Bezugspunkt** (Nullpunkt) ist die rechte untere Ecke des Randrahmens; dort sitzt die rechte untere Ecke des Plankopfs (`titleBlockUnderlay`).
+- Beim Öffnen und bei jeder Änderung der Unterlage wird die Ansicht auf das Blatt **eingepasst**; „Alles anzeigen“ passt ebenfalls auf das Blatt ein.
+- **Leiste im Tab** „Plankopf Name · Unterlage [DIN A0–A5] [Hoch-/Querformat] · Maße · Bezugspunkt“. Jede Änderung der Unterlage ist ein Rückgängig-Schritt am Plankopf.
+- **Reiter „Layouts“ → Bereich „Planköpfe“** (zwischen Masterlayouts und Layoutsammlung): Rechtsklick „Neuer Plankopf“ (Name „Plankopf“, „Plankopf 2“ … sofort zum Überschreiben markiert), „Im Plankopfplaner öffnen“, „Umbenennen“ (auch F2), „Plankopf löschen“; **Doppelklick** oder Enter öffnet den Tab. Der geöffnete Plankopf ist markiert. Löschen schließt seinen Tab.
+- Neues Ereignis `title-block` im Bearbeitungsablauf: Plankopf-Aktionen wirken immer auf das echte Projekt, auch aus dem Zeichenraum heraus.
+- Code: `titleBlockUnderlay` in `src/application/views/title-blocks.ts`, `underlay` in `BimPlan.tsx` und Einpassen in `CadViewport.tsx`, `src/components/cad/TitleBlockBar.tsx`, Bereich „Planköpfe“ in `LayoutNavigator.tsx`, Anbindung in `ProjectNavigator.tsx` und `CadWorkspace.tsx`, Ereignis in `src/application/direct-edit/controller.ts`.
+
+Nachweis PK3: 1503 Tests grün (neu: Lage der Unterlage A3 quer zum Bezugspunkt), Typprüfung beider Projekte, Architektur, Lint, Formatierung sauber, 14-Modell-Prüfsumme unverändert. Browser: Organisation → Plankopfplaner öffnet „Plankopf“ mit eingepasster A3-quer-Unterlage und Randrahmen; Linie vom Randrahmen nach links gezeichnet: 0,20 m; Unterlage auf A4 → Hochformat: Blatt eingepasst, die 20-cm-Linie ragt über den 180 mm breiten Randrahmen hinaus; im Reiter „Layouts“ Bereich „Planköpfe“ mit „Plankopf“; „Neuer Plankopf“ → „Plankopf Ausführung“; Doppelklick öffnet einen eigenen Tab mit eigener A3-Unterlage.
+
+## Stand und Grenzen
+
+- Plankopf zeichnen, ablegen (mit dem Projekt speichern) und bearbeiten ist umgesetzt (PK1–PK3).
+- Der **Rasterfang** steht wie im Grundriss auf 0,1 m; für Plankopf-Maße empfiehlt sich ein feineres Raster (unten in der Statusleiste) oder die Eingabe von Länge/Winkel.
+- Eingaben in m (0,18 = 18 cm), Maßstab fest 1:1.
+- Noch offen: automatische Texte (nächster Schritt), der Plankopf im Masterlayout/Layout.

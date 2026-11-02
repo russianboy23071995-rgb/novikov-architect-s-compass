@@ -1,5 +1,5 @@
 import { useRef, useState, type ReactNode } from "react";
-import { ChevronDown, ChevronRight, File, FileStack, Folder } from "lucide-react";
+import { ChevronDown, ChevronRight, File, FileStack, Folder, PanelBottom } from "lucide-react";
 import type { Project } from "@/domain/project/schema";
 import {
   LAYOUT_COLLECTION_ID,
@@ -10,6 +10,7 @@ import {
   type LayoutFolder,
 } from "@/domain/views/layouts";
 import { changeLayouts, type LayoutAction } from "@/application/views/layouts";
+import { changeTitleBlocks, type TitleBlockAction } from "@/application/views/title-blocks";
 import { LayoutSettingsWindow, type LayoutDraftTarget } from "./LayoutSettingsWindow";
 import {
   ContextMenu,
@@ -27,9 +28,13 @@ export type LayoutNavigation = {
   /** Double click on a layout or master layout (opens it as a canvas tab, LA4). */
   onOpenLayout?: (id: string) => void;
   activeLayoutId?: string | null;
+  /** Title blocks (docs/PLANKOPF.md, PK3): create, rename, delete; double click opens. */
+  onTitleBlockAction?: (base: Project, action: TitleBlockAction) => void;
+  onOpenTitleBlock?: (id: string) => void;
+  activeTitleBlockId?: string | null;
 };
 
-type Kind = "folder" | "layout" | "master";
+type Kind = "folder" | "layout" | "master" | "block";
 type Renaming = { id: string; kind: Kind; name: string };
 
 /** „Name“, „Name 2“, … – the first name not yet in use. */
@@ -51,6 +56,9 @@ export function LayoutNavigator({
   onLayoutAction,
   onOpenLayout,
   activeLayoutId = null,
+  onTitleBlockAction,
+  onOpenTitleBlock,
+  activeTitleBlockId = null,
 }: LayoutNavigation & { project: Project }) {
   const folders = projectLayoutFolders(project),
     layouts = projectLayouts(project),
@@ -103,7 +111,33 @@ export function LayoutNavigator({
     // The menu returns focus when it closes; the rename field takes it then.
     pendingRename.current = { id, kind, name };
   };
+  const blocks = project.titleBlocks ?? [];
+  const blockAction = (action: TitleBlockAction) => {
+    try {
+      changeTitleBlocks(project, project, action);
+      onTitleBlockAction?.(project, action);
+      setError("");
+      return true;
+    } catch (cause) {
+      setError((cause as Error).message);
+      return false;
+    }
+  };
+  const newBlock = () => {
+    const id = crypto.randomUUID(),
+      name = freeName(
+        "Plankopf",
+        blocks.map((b) => b.name),
+      );
+    if (!blockAction({ kind: "create", id, name })) return;
+    setSelected(id);
+    pendingRename.current = { id, kind: "block", name };
+  };
   const rename = (target: Renaming) => {
+    if (target.kind === "block") {
+      if (blockAction({ kind: "rename", id: target.id, name: target.name })) setRenaming(null);
+      return;
+    }
     const action: LayoutAction =
       target.kind === "folder"
         ? { kind: "rename-folder", id: target.id, name: target.name }
@@ -162,7 +196,15 @@ export function LayoutNavigator({
       setError("");
       setRenaming({ id, kind, name });
     };
-    const Icon = kind === "folder" ? Folder : kind === "master" ? FileStack : File;
+    const Icon =
+      kind === "folder"
+        ? Folder
+        : kind === "master"
+          ? FileStack
+          : kind === "block"
+            ? PanelBottom
+            : File;
+    const open = () => (kind === "block" ? onOpenTitleBlock?.(id) : onOpenLayout?.(id));
     return (
       <ContextMenu key={id}>
         <ContextMenuTrigger asChild>
@@ -170,7 +212,7 @@ export function LayoutNavigator({
             role="treeitem"
             aria-label={name}
             aria-level={depth + 1}
-            aria-selected={selected === id || activeLayoutId === id}
+            aria-selected={selected === id || activeLayoutId === id || activeTitleBlockId === id}
             aria-expanded={kind === "folder" ? extra.open : undefined}
             tabIndex={0}
             // Only this row's menu opens, not the one of the surrounding area as well.
@@ -221,7 +263,7 @@ export function LayoutNavigator({
               if (kind === "folder") toggle(id);
             }}
             onDoubleClick={() => {
-              if (kind !== "folder") onOpenLayout?.(id);
+              if (kind !== "folder") open();
             }}
             onKeyDown={(e) => {
               if (e.key === "F2") {
@@ -231,7 +273,7 @@ export function LayoutNavigator({
               if (e.key === "Enter") {
                 e.preventDefault();
                 if (kind === "folder") toggle(id);
-                else onOpenLayout?.(id);
+                else open();
               }
             }}
           >
@@ -420,6 +462,42 @@ export function LayoutNavigator({
           <ContextMenuItem onSelect={newMaster}>Neues Masterlayout</ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
+      {onTitleBlockAction && (
+        <ContextMenu>
+          <ContextMenuTrigger asChild>
+            <section aria-label="Planköpfe" className="border-t border-border pb-2 pt-2">
+              <p className="px-1.5 pb-1 text-[11px] font-semibold uppercase text-muted-foreground">
+                Planköpfe
+              </p>
+              <div role="tree" aria-label="Planköpfe">
+                {blocks.map((b) =>
+                  row(
+                    b.id,
+                    b.name,
+                    "block",
+                    0,
+                    <>
+                      <ContextMenuItem onSelect={() => onOpenTitleBlock?.(b.id)}>
+                        Im Plankopfplaner öffnen
+                      </ContextMenuItem>
+                      <ContextMenuItem onSelect={newBlock}>Neuer Plankopf</ContextMenuItem>
+                      <ContextMenuItem onSelect={() => blockAction({ kind: "delete", id: b.id })}>
+                        Plankopf löschen
+                      </ContextMenuItem>
+                    </>,
+                  ),
+                )}
+                {!blocks.length && (
+                  <p className="px-1.5 text-muted-foreground">Rechtsklick: Neuer Plankopf</p>
+                )}
+              </div>
+            </section>
+          </ContextMenuTrigger>
+          <ContextMenuContent onCloseAutoFocus={menuClosed}>
+            <ContextMenuItem onSelect={newBlock}>Neuer Plankopf</ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
+      )}
       <ContextMenu>
         <ContextMenuTrigger asChild>
           <div role="tree" aria-label="Layouts" className="min-h-40 border-t border-border pt-2">
