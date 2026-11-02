@@ -47,6 +47,7 @@ import {
   projectV41Schema,
   projectV42Schema,
   projectV43Schema,
+  projectV44Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
@@ -265,6 +266,14 @@ export function migrateProjectData(value: unknown): Project {
   if (value.schemaVersion === 36)
     return migrateProjectData(
       withColumnLayer(withoutBoundHeights({ ...projectV36Schema.parse(value), schemaVersion: 37 })),
+    );
+  // Schema 44 files carry no title blocks; the strict v44 schema rejects smuggled ones.
+  if (value.schemaVersion === 44)
+    return validateProject(
+      withoutBoundHeights({
+        ...projectV44Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
     );
   // Schema 43 files carry no layouts; the strict v43 schema rejects smuggled ones.
   if (value.schemaVersion === 43)
