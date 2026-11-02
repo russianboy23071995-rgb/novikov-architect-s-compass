@@ -415,7 +415,7 @@ test("plain numeric target exactly on the axis connects automatically; invalid o
   );
   const changed = updateWall(a.session.base, "host", { height: 3 });
   assert.throws(() => previewEdit(a.session, changed, a.target, result.point, result.candidate));
-  const invalid = aiming(updateWall(pair(), "host", { baseOffset: 0.2 }));
+  const invalid = aiming(updateWall(pair(), "host", { baseOffset: 3 }));
   const snap = resolveToolSnap(
     invalid.adapter.snapping,
     { x: 3, y: 0 },

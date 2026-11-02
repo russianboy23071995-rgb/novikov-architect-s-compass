@@ -1,4 +1,4 @@
-import { assertSameWallBase } from "./heights.ts";
+import { assertWallsOverlapVertically } from "./heights.ts";
 import type { CornerEnd } from "./corner.ts";
 import type { Point2 } from "../../../geometry/primitives/point.ts";
 import { wallBody } from "./body.ts";
@@ -17,7 +17,6 @@ export const PARALLEL_T_MESSAGE = "Parallele Wände können keinen T-Anschluss b
  * Callers must verify those project-level preconditions before using this result.
  */
 export function deriveTJunction(host: CornerEnd["wall"], incoming: CornerEnd) {
-  assertSameWallBase(host, incoming.wall);
   if (!host.id.trim() || !incoming.wall.id.trim() || host.id === incoming.wall.id)
     throw new Error("Zwei unterschiedliche Wand-IDs erforderlich.");
   if (incoming.endpoint !== 0 && incoming.endpoint !== 1)
@@ -40,6 +39,7 @@ export function deriveTJunction(host: CornerEnd["wall"], incoming: CornerEnd) {
     )
       throw new Error("Ungültige Wandmaße für den T-Anschluss.");
   }
+  assertWallsOverlapVertically(host, incoming.wall);
   // Thickness and height may differ (user decision 26.10.2026): the incoming wall ends at the
   // host side face and each wall keeps its own height (docs/WALL_JUNCTIONS.md).
 

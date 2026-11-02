@@ -1,5 +1,5 @@
 import { openingNoun, storeyOpenings } from "./openings.ts";
-import { wallBase, assertSameWallBase } from "./heights.ts";
+import { wallBase, cornerHeightRule } from "./heights.ts";
 import { storeyOf, replaceStorey } from "../../storeys/access.ts";
 import type { WallGeometry } from "../../project/geometry-scope.ts";
 import { tConnectionContours } from "./t-relations.ts";
@@ -42,7 +42,8 @@ export function reconcileWallJoins(
         (w) =>
           w.id !== changedId &&
           !excludedPartners.includes(w.id) &&
-          wallBase(w) === wallBase(changed),
+          // Only a pair that can form a corner joins (L09 U1); partly overlapping walls stay free.
+          cornerHeightRule(w, changed) !== null,
       )
       .flatMap((w) =>
         ([0, 1] as const)
@@ -96,11 +97,12 @@ function deriveConnectedWallContours(project: WallGeometry) {
     const a = walls.get(join.first.wallId),
       b = walls.get(join.second.wallId);
     if (!a || !b || a.id === b.id) throw new Error("Ungültige Wandverbindung.");
-    assertSameWallBase(a, b);
     const node = point(a, join.first.endpoint);
     if (!same(point(a, join.first.endpoint), point(b, join.second.endpoint)))
       throw new Error("Verbundene Achsenden müssen übereinstimmen.");
-    if (counts.get(JSON.stringify([node.x, node.y, wallBase(a)])) !== 2)
+    // Ends at one point and foot height form a node; a join may link two feet (L09 U1).
+    const nodeKeys = new Set([a, b].map((w) => JSON.stringify([node.x, node.y, wallBase(w)])));
+    if ([...nodeKeys].reduce((n, k) => n + (counts.get(k) ?? 0), 0) !== 2)
       throw new Error("Mehrfachanschluss noch nicht unterstützt.");
     for (const end of [join.first, join.second]) {
       if (occupied.has(key(end))) throw new Error("Ein Achsende darf nur einmal verbunden sein.");

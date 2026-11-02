@@ -2,6 +2,7 @@ import { PROJECT_SCHEMA_VERSION } from "../../project/format.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { wallBase, wallHeights } from "./heights.ts";
+import { deriveWallCorner } from "./corner.ts";
 import { serializeProject, deserializeProject } from "../../../lib/bim/model.ts";
 import { createProject } from "../../../application/projects/create.ts";
 import { addWindow } from "../../../application/windows/actions.ts";
@@ -96,7 +97,7 @@ test("offset follows OG and KG storey levels while absolute datum remains annota
   p = setGroundDatum(p, p, { projectId: p.id, storeyId: "eg", elevation: 100 });
   assert.deepEqual(buildBuildingSolid(p), before);
 });
-test("equal elevated corner keeps geometry; unequal foot heights reject and do not autojoin", () => {
+test("equal elevated corner keeps geometry; partly overlapping heights reject and do not autojoin", () => {
   let p = fixture(0.5);
   p = addWall(p, {
     id: "b",
@@ -108,10 +109,11 @@ test("equal elevated corner keeps geometry; unequal foot heights reject and do n
   });
   assert.equal(storeyOf(p).wallJoins.length, 1);
   assert.equal(buildSolid(p).min[2], 0.5);
-  assert.throws(() => updateWall(p, "b", { baseOffset: 0.6 }), /Fußhöhen/);
+  // w 0,5–3,3 m and b 0,6–3,4 m: neither covers the other (L09 U1).
+  assert.throws(() => updateWall(p, "b", { baseOffset: 0.6 }), /ganz überdecken/);
   const raw = structuredClone(p);
   storeyOf(raw).walls[1]!.baseOffset = 0.6;
-  assert.throws(() => validateProject(raw), /Fußhöhen/);
+  assert.throws(() => validateProject(raw), /ganz überdecken/);
   let free = fixture(0.5);
   free = addWall(free, {
     id: "b",
@@ -147,7 +149,7 @@ test("IFC wall placement carries signed offset once and opening stays relative t
   assert.ok(Math.abs(openingZ - 0.2) < 1e-10);
 });
 
-test("T connections require matching bases; equal signed offsets retain cut bodies", () => {
+test("T connections require overlapping heights; equal signed offsets retain cut bodies", () => {
   let p = fixture(-0.5);
   p = addWall(p, {
     id: "b",
@@ -161,8 +163,11 @@ test("T connections require matching bases; equal signed offsets retain cut bodi
   storeyOf(raw).wallTJunctions = [{ hostWallId: "w", incoming: { wallId: "b", endpoint: 1 } }];
   const connected = validateProject(raw);
   assert.equal(buildSolid(connected).min[2], -0.5);
+  // Different feet are fine while the walls share some height (L09 U1).
   storeyOf(raw).walls[1]!.baseOffset = 0;
-  assert.throws(() => validateProject(raw), /Fußhöhen/);
+  assert.equal(storeyOf(validateProject(raw)).wallTJunctions.length, 1);
+  storeyOf(raw).walls[1]!.baseOffset = 2.3;
+  assert.throws(() => validateProject(raw), /in der Höhe überschneiden/);
 });
 test("prepared XY move ignores coincident join nodes at different heights", () => {
   let p = fixture();
@@ -659,4 +664,36 @@ test("roof trim across storeys: an EG gable trimmed by the roof of the OG", () =
   const gable = trimmed.storeys.find((s) => s.id === "eg")!.walls[0]!;
   // OG floor at 3,00 m + 0,50 m → 3,50 m above the EG wall foot at y = 0.
   assert.ok(close(gable.trimPlane!.bottom, 3.5) && close(gable.trimPlane!.top, 3.5 + 6 * tan30));
+});
+
+test("corner with different feet: the wall covering the other's height runs through (L09 U1)", () => {
+  const w = { id: "w", start: { x: 3, y: 0 }, end: { x: 0, y: 0 }, thickness: 0.36, bodyOffset: 0 };
+  const b = { id: "b", start: { x: 3, y: 0 }, end: { x: 3, y: 3 }, thickness: 0.24, bodyOffset: 0 };
+  const corner = (wb: number, wh: number, bb: number, bh: number) =>
+    deriveWallCorner(
+      { wall: { ...w, baseOffset: wb, height: wh }, endpoint: 0 },
+      { wall: { ...b, baseOffset: bb, height: bh }, endpoint: 0 },
+    );
+  // b on a 0,5 m plinth inside w's height: the same butt joint as a lower b on the same foot.
+  const raised = corner(0, 2.8, 0.5, 2),
+    lower = corner(0, 2.8, 0, 2);
+  assert.deepEqual(raised, lower);
+  // w runs through to the far face of b (x = 3,12), b ends at the inner face of w (y = 0,18).
+  const ring = (id: string) => raised.walls.find((c) => c.wallId === id)!.points;
+  assert.ok(ring("w").some((p) => Math.abs(p.x - 3.12) < 1e-9));
+  assert.ok(ring("b").every((p) => p.y >= 0.18 - 1e-9));
+  // Swapped: b covers w, so b runs through.
+  const swapped = corner(0.5, 2, 0, 2.8);
+  assert.ok(
+    swapped.walls.find((c) => c.wallId === "b")!.points.some((p) => Math.abs(p.y + 0.18) < 1e-9),
+  );
+  assert.throws(() => corner(0, 2.8, 0.5, 2.8), /ganz überdecken/);
+  // In the project the pair joins automatically and the 3D body keeps both feet.
+  let p = addWall(createProject("p", "eg"), { ...w, height: 2.8 });
+  p = addWall(p, { ...b, height: 2, baseOffset: 0.5 });
+  assert.equal(storeyOf(p).wallJoins.length, 1);
+  assert.equal(buildSolid(p).min[2], 0);
+  assert.equal(buildSolid(p).max[2], 2.8);
+  // Lifting w by 0,6 m leaves a partial overlap: rejected with the rule, not the old foot rule.
+  assert.throws(() => updateWall(p, "w", { baseOffset: 0.6 }), /ganz überdecken/);
 });

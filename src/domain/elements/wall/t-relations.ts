@@ -1,5 +1,5 @@
 import { storeyOpenings } from "./openings.ts";
-import { assertSameWallBase } from "./heights.ts";
+import { assertWallsOverlapVertically } from "./heights.ts";
 import { storeyOf, replaceStorey } from "../../storeys/access.ts";
 import type { WallGeometry } from "../../project/geometry-scope.ts";
 import { validateCornerTContact } from "./corner-t-contact.ts";
@@ -39,7 +39,7 @@ export function tConnectionContours(
       throw new Error("Ein Wandende darf nur einen Anschluss haben (Ecke oder T-Anschluss).");
     if (pairs.has(`${incoming.id}>${host.id}`))
       throw new Error("Zwei Wände dürfen nicht gegenseitig T-angeschlossen sein.");
-    assertSameWallBase(host, incoming);
+    assertWallsOverlapVertically(host, incoming);
     occupied.add(incomingEnd);
     pairs.add(`${host.id}>${incoming.id}`);
     const result = inspectTPair(
