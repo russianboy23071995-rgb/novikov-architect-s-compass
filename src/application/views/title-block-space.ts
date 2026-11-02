@@ -224,7 +224,14 @@ function buildBackdrop(real: Project, id: string): Project | null {
     : undefined;
   // A layout sees its master's drawing; the master itself draws that sheet on top.
   const base = layout ? spaceSheet(real, { kind: "layout", id: master.id }) : null;
-  if (!block && !base?.lines?.length && !base?.texts?.length && !base?.hatches.length) return null;
+  if (
+    !block &&
+    !base?.lines?.length &&
+    !base?.texts?.length &&
+    !base?.hatches.length &&
+    !base?.drawings?.length
+  )
+    return null;
   const { width, height: _h } = sheetSize(master.sheet);
   const shift = {
     x: (width - master.sheet.margins.right) / 1000,
@@ -259,12 +266,15 @@ function buildBackdrop(real: Project, id: string): Project | null {
     })),
   });
   const own = copy(base, none, "m:");
+  // The master's placed drawings show on every layout that follows it (ZW2).
+  const drawings = (base?.drawings ?? []).map((d) => ({ ...d, id: `${BACKDROP_PREFIX}m:${d.id}` }));
   const head = copy(block?.storey, shift, "t:");
   const storey: Sheet = {
     ...emptyTitleBlockStorey(`${BACKDROP_PREFIX}${id}`, master.name),
     lines: [...own.lines, ...head.lines],
     texts: [...own.texts, ...head.texts],
     hatches: [...own.hatches, ...head.hatches],
+    ...(drawings.length ? { drawings } : {}),
   };
   // Drawing only: the shared settings (layers, pens, patterns) of the real project.
   return { ...real, storeys: [storey], groundStoreyId: storey.id };

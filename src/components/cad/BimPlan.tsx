@@ -36,6 +36,7 @@ import {
   MIN_CLOSING_POINTS,
 } from "@/application/drawing/path-closure";
 import type { ElementKind } from "../../application/selection/target.ts";
+import { allStoreyElements } from "@/domain/elements/registry";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { columnOutline } from "../../domain/elements/column/model.ts";
 import type { WorkingViewContext } from "@/application/views/working-context";
@@ -112,6 +113,47 @@ import type { Selection } from "./bim-view";
 import { linePath } from "@/lib/bim/lines";
 
 type PlanRect = { x0: number; y0: number; x1: number; y1: number };
+/**
+ * A placed drawing as the plan draws it: the document's plan (`source`, its storey as the
+ * working storey) scaled by 1/denominator, its frame centre on `position`, cropped to the
+ * mask `corners` on the paper. Only the layout's own drawings are `selectable`.
+ */
+export type PlacedDrawingView = {
+  id: string;
+  documentId: string;
+  selectable: boolean;
+  corners: readonly Point[];
+  position: Point;
+  center: Point;
+  denominator: number;
+  source: Project;
+  hiddenLayerIds: readonly string[];
+};
+const placedScenes = new WeakMap<Project, Map<string, ReturnType<typeof derivePlanScene>>>();
+/** The plan scene of a drawing document, kept per source project and hidden layers. */
+function placedScene(view: PlacedDrawingView) {
+  let byKey = placedScenes.get(view.source);
+  if (!byKey) placedScenes.set(view.source, (byKey = new Map()));
+  const key = [...view.hiddenLayerIds].sort().join("|");
+  let scene = byKey.get(key);
+  if (!scene) {
+    const hidden = new Set(view.hiddenLayerIds);
+    const layerOf = new Map(
+      allStoreyElements(storeyOf(view.source)).map((e) => [
+        e.id,
+        (e as { layerId?: string }).layerId,
+      ]),
+    );
+    scene = derivePlanScene(
+      view.source,
+      (id) => !hidden.has(layerOf.get(id) ?? ""),
+      view.source.hatchPatterns,
+      assemblyLibraryOf(view.source),
+    );
+    byKey.set(key, scene);
+  }
+  return scene;
+}
 const NOTHING_SELECTED: ReadonlySet<string> = new Set();
 const ALLOW_ALL = () => true;
 const PICK_NOTHING = () => false;
@@ -120,6 +162,8 @@ export type BimPlanProps = {
   underlay?: { paper: PlanRect; frame: PlanRect; surface?: boolean } | undefined;
   /** Drawn under the plan, never pickable: a master layout's drawing in a layout (LZ2). */
   backdrop?: Project | undefined;
+  /** Drawing documents placed on a layout, each cropped by its mask (docs/ZEICHNUNG.md). */
+  placedDrawings?: readonly PlacedDrawingView[] | undefined;
   pickupScope?: object;
   /** Right-click menu (docs/KONTEXTMENUE.md): on an element or on empty canvas (null). When
    * set it replaces the former double right-click pickup, which moves into the menu. */
@@ -267,6 +311,7 @@ export type BimPlanProps = {
 export function BimPlan({
   underlay,
   backdrop,
+  placedDrawings,
   pickupScope,
   onPickup,
   onContextMenu,
@@ -1377,6 +1422,63 @@ export function BimPlan({
             ))}
           </g>
         )}
+        {placedDrawings?.map((view) => {
+          const scene = placedScene(view);
+          const clipId = `${gridId}-zw-${view.id.replace(/[^a-zA-Z0-9-]/g, "")}`;
+          const points = view.corners.map((p) => `${p.x},${-p.y}`).join(" ");
+          return (
+            <g key={view.id} aria-label={`Zeichnung ${view.id}`}>
+              <defs>
+                <clipPath id={clipId}>
+                  <polygon points={points} />
+                </clipPath>
+              </defs>
+              <g clipPath={`url(#${clipId})`} pointerEvents="none">
+                <g
+                  transform={`translate(${view.position.x} ${-view.position.y}) scale(${1 / view.denominator}) translate(${-view.center.x} ${view.center.y})`}
+                >
+                  {planSceneRuns(scene, []).map((run) => (
+                    <PlanSceneRun
+                      scaleContext={{
+                        view: {
+                          kind: "drawing-document",
+                          projectId: view.source.id,
+                          documentId: view.documentId,
+                        },
+                        denominator: view.denominator,
+                      }}
+                      key={`zw:${run.kind}:${run.ids[0]}`}
+                      {...run}
+                      scene={scene}
+                      selectedIds={NOTHING_SELECTED}
+                      drawing={false}
+                      placement={false}
+                      pixelsPerMetre={camera.pixelsPerMetre / view.denominator}
+                      wallOutlineWidth={wallOutlineWidth}
+                      cutFill={cutFill}
+                      showRenovation={showRenovation}
+                      cornerGeometry={undefined}
+                      allowsShown={ALLOW_ALL}
+                      canPick={PICK_NOTHING}
+                      handlers={sceneHandlers}
+                    />
+                  ))}
+                </g>
+              </g>
+              {/* The mask: a light frame on screen; only the layout's own drawings pick. */}
+              <polygon
+                {...(view.selectable ? selectProps("drawing", view.id) : { pointerEvents: "none" })}
+                className="outline-none"
+                points={points}
+                fill="transparent"
+                stroke={selectedIds.has(view.id) ? "#0284c7" : "#94a3b8"}
+                strokeWidth={selectedIds.has(view.id) ? 2 : 1}
+                strokeDasharray="4 3"
+                vectorEffect="non-scaling-stroke"
+              />
+            </g>
+          );
+        })}
         {tracing && (
           <g aria-label="Transparenzpause" pointerEvents="none" opacity={tracing.opacity}>
             {[...tracing.walls, ...tracing.columns].map((outline, i) => (

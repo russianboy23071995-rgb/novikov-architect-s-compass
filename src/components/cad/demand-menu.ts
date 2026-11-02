@@ -190,6 +190,16 @@ export function selectionSummary(project: Project, selection: Selection) {
       ? { title: "Schraffur", details: `${hatch.points.length} Eckpunkte · 2D-Füllung` }
       : null;
   }
+  if (selection.kind === "drawing") {
+    const drawing = storeyOf(project).drawings?.find((d) => d.id === selection.id);
+    if (!drawing) return null;
+    const mm = (value: number) => Math.round(value * 1000).toLocaleString("de-DE");
+    const { mask } = drawing;
+    return {
+      title: "Zeichnung",
+      details: `Ausschnitt ${mm(mask.x1 - mask.x0)} × ${mm(mask.y1 - mask.y0)} mm Papier`,
+    };
+  }
   const line = storeyOf(project).lines?.find((item) => item.id === selection.id);
   return line
     ? {

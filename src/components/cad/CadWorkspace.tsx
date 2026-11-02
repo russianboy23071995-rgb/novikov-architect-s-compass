@@ -218,6 +218,10 @@ import {
 import { changeLayouts, layoutUnderlay } from "@/application/views/layouts";
 import { spaceBackdrop, spaceLens } from "@/application/views/title-block-space";
 import { LayoutBar } from "./LayoutBar";
+import type { PlacedDrawingView } from "./BimPlan";
+import { placeDrawing } from "@/application/drawings/actions";
+import { documentSource } from "@/application/drawings/sources";
+import { frameMask, maskOnPaper, type PlacedDrawing } from "@/domain/elements/drawing/model";
 import { changeTitleBlocks, titleBlockUnderlay } from "@/application/views/title-blocks";
 import { TitleBlockBar } from "./TitleBlockBar";
 import { SectionDocumentWindow } from "./SectionDocumentWindow";
@@ -228,7 +232,13 @@ import { changeDrawingDocument } from "@/application/views/documents";
 
 const PAPER_GRID_SETTINGS: GridSettings = Object.freeze({ enabled: false, spacing: 0.001 });
 /** Tools of a layout: the last fixes by hand, no dimensions (docs/LAYOUTS.md, LZ1). */
-const LAYOUT_TOOLS: ReadonlySet<ToolId> = new Set<ToolId>(["select", "line", "text", "hatch"]);
+const LAYOUT_TOOLS: ReadonlySet<ToolId> = new Set<ToolId>([
+  "select",
+  "line",
+  "text",
+  "hatch",
+  "drawing",
+]);
 /** Tools of the Plankopfplaner: drawing only, nothing of the building (PK2). */
 const TITLE_BLOCK_TOOLS: ReadonlySet<ToolId> = new Set<ToolId>([
   "select",
@@ -293,6 +303,8 @@ export function CadWorkspace({
   const [activeLayoutId, setActiveLayoutId] = useState<string | null>(null);
   const [layoutWindow, setLayoutWindow] = useState<LayoutDraftTarget | null>(null);
   const [projectInfoOpen, setProjectInfoOpen] = useState(false);
+  // Drawing document the tool „Zeichnung“ places (docs/ZEICHNUNG.md, ZW2).
+  const [drawingDocumentId, setDrawingDocumentId] = useState<string | null>(null);
   const [lastTitleBlockId, setLastTitleBlockId] = useState<string | null>(null);
   // A section or elevation document open in its section tab (docs/ABBILDER.md, AB2).
   const [sectionDocumentId, setSectionDocumentId] = useState<string | null>(null);
@@ -360,6 +372,37 @@ export function CadWorkspace({
     };
   })();
   const spaceTools = space ? (space.kind === "layout" ? LAYOUT_TOOLS : TITLE_BLOCK_TOOLS) : null;
+  /** A plan document with a frame, ready to place (sections and elevations follow, ZW4). */
+  const drawingSource = (documentId: string | null | undefined) => {
+    const document = realProject.drawingDocuments?.find((d) => d.id === documentId);
+    const view = realProject.modelViews?.find((v) => v.id === document?.modelViewId);
+    if (!document?.framing || view?.kind !== "floor-plan") return null;
+    return { document, framing: document.framing, storeyId: view.storeyId };
+  };
+  // Drawings on the open layout: the master's under it, then the layout's own (selectable).
+  const placedDrawingViews = (() => {
+    if (space?.kind !== "layout") return undefined;
+    const backdrop = spaceBackdrop(realProject, space);
+    const view = (d: PlacedDrawing, selectable: boolean): PlacedDrawingView | null => {
+      const source = drawingSource(d.documentId);
+      if (!source) return null;
+      return {
+        id: d.id,
+        documentId: d.documentId,
+        selectable,
+        corners: maskOnPaper(d),
+        position: d.position,
+        center: source.framing.center,
+        denominator: source.document.denominator,
+        source: documentSource(realProject, source.storeyId),
+        hiddenLayerIds: source.document.hiddenLayerIds,
+      };
+    };
+    return [
+      ...(backdrop ? (storeyOf(backdrop).drawings ?? []).map((d) => view(d, false)) : []),
+      ...(storeyOf(project).drawings ?? []).map((d) => view(d, true)),
+    ].filter((v): v is PlacedDrawingView => v !== null);
+  })();
   const autosave = useLocalAutosave(realProject, editing.projectLoad ?? realProject.id);
   const activeDocument = project.drawingDocuments?.find((d) => d.id === activeDocumentId);
   const viewContext = useMemo(
@@ -664,6 +707,10 @@ export function CadWorkspace({
 
   const selectTool = (next: ToolId) => {
     // The Plankopfplaner draws only: building tools stay off there (PK2).
+    if (next === "drawing" && space?.kind !== "layout") {
+      showNotice("Das Werkzeug Zeichnung setzt Abbilder auf ein Layout. Zuerst ein Layout öffnen.");
+      return;
+    }
     if (spaceTools && !spaceTools.has(next)) {
       showNotice(
         space?.kind === "layout"
@@ -1770,6 +1817,41 @@ export function CadWorkspace({
     // Text tool (docs/TEXT.md): the click sets the insertion point; the editor opens there.
     if (tool === "text") {
       setTextDraft({ position: { ...point }, screen: { ...lastPointer.current }, content: "" });
+      return;
+    }
+    // Tool „Zeichnung“ (docs/ZEICHNUNG.md, ZW2): the click sets the drawing's centre.
+    if (tool === "drawing") {
+      const source = drawingSource(drawingDocumentId);
+      if (!source) return showNotice("Zuerst im Werkzeug ein Abbild wählen.");
+      try {
+        // The first drawing gives the title block its drawing name and scale (decision 3).
+        const layout = layoutSpace?.layout;
+        if (layout && !layout.documentId) {
+          const action = {
+            kind: "layout-settings" as const,
+            id: layout.id,
+            name: layout.name,
+            folderId: layout.folderId,
+            masterId: layout.masterId ?? null,
+            ...(layout.sheet ? { sheet: layout.sheet } : {}),
+            documentId: source.document.id,
+          };
+          dispatchEditing({ type: "layout", base: realProject, action });
+        }
+        dispatchEditing({
+          type: "project",
+          project: placeDrawing(project, {
+            id: crypto.randomUUID(),
+            documentId: source.document.id,
+            position: { ...point },
+            frame: source.framing,
+            denominator: source.document.denominator,
+          }),
+        });
+        showNotice(`Zeichnung „${source.document.name}“ platziert`);
+      } catch (error) {
+        setModelError(error instanceof Error ? error.message : "Zeichnung nicht möglich.");
+      }
       return;
     }
     if (tool === "dimension" && dimensionDraft?.edit && dimensionDraft.edit.mode !== "add") {
@@ -3355,6 +3437,7 @@ export function CadWorkspace({
                           tool === "elevation" ||
                           tool === "dimension" ||
                           tool === "text" ||
+                          tool === "drawing" ||
                           pathDrawing ||
                           tool === "roof" ||
                           tool === "room") &&
@@ -3372,6 +3455,7 @@ export function CadWorkspace({
                         tool === "elevation" ||
                         tool === "dimension" ||
                         tool === "text" ||
+                        tool === "drawing" ||
                         tool === "window" ||
                         tool === "door"
                       }
@@ -3400,19 +3484,34 @@ export function CadWorkspace({
                       }
                       closeAtStart={pathClosure !== "none"}
                       roofGuide={roofLine ? { ...roofLine, rise: roofRise } : null}
-                      draftFill={tool === "hatch" ? hatchFill : undefined}
+                      draftFill={
+                        tool === "hatch"
+                          ? hatchFill
+                          : tool === "drawing"
+                            ? { color: "#0284c7", opacity: 0.08 }
+                            : undefined
+                      }
+                      placedDrawings={placedDrawingViews}
                       draftPattern={
                         tool === "hatch" ? toolDefaults.hatch.patternDefinition : undefined
                       }
                       draftPatternRotation={toolDefaults.hatch.patternRotation}
                       draftPatternSize={toolDefaults.hatch.patternSize}
                       draftContour={
-                        areaTool && construction !== "polygon"
-                          ? (point) =>
-                              construction === "boundary"
-                                ? (findHatchBoundary?.(point) ?? [])
-                                : rectangleContour(construction, [...pathPoints, point])
-                          : undefined
+                        tool === "drawing" && drawingSource(drawingDocumentId)
+                          ? (point) => {
+                              const source = drawingSource(drawingDocumentId)!;
+                              return maskOnPaper({
+                                position: point,
+                                mask: frameMask(source.framing, source.document.denominator),
+                              });
+                            }
+                          : areaTool && construction !== "polygon"
+                            ? (point) =>
+                                construction === "boundary"
+                                  ? (findHatchBoundary?.(point) ?? [])
+                                  : rectangleContour(construction, [...pathPoints, point])
+                            : undefined
                       }
                       wallOutlineWidth={wallWidth}
                       cutFill={cutFill}
@@ -3808,6 +3907,31 @@ export function CadWorkspace({
                   </Button>
                   {measurement.error && <span role="alert">{measurement.error}</span>}
                 </div>
+              ) : tool === "drawing" ? (
+                <label className="flex items-center gap-2 text-xs">
+                  Abbild
+                  <select
+                    aria-label="Abbild für die Zeichnung"
+                    className="h-8 rounded border bg-background px-2"
+                    value={drawingDocumentId ?? ""}
+                    onChange={(e) => setDrawingDocumentId(e.target.value || null)}
+                  >
+                    <option value="">Abbild wählen …</option>
+                    {(realProject.drawingDocuments ?? []).map((d) => {
+                      const placeable = !!drawingSource(d.id);
+                      return (
+                        <option key={d.id} value={d.id} disabled={!placeable}>
+                          {d.name} · 1:{d.denominator}
+                          {placeable ? "" : " (folgt)"}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <span className="text-muted-foreground">
+                    Klick setzt die Mitte des Ausschnitts aufs Papier; die Größe folgt aus dem
+                    Maßstab.
+                  </span>
+                </label>
               ) : tool === "wall" ||
                 tool === "column" ||
                 tool === "stair" ||

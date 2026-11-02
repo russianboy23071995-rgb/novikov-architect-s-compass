@@ -87,3 +87,39 @@ test("a placed drawing: size from frame and scale, on the layout's sheet, undoab
     loadProjectData({ ...JSON.parse(serializeProject(real)), schemaVersion: 49 }),
   );
 });
+
+// docs/ZEICHNUNG.md, ZW2: a drawing on the master layout lies under every following layout.
+test("drawings of the master layout show and snap under its layouts; own mask corners snap", async () => {
+  const { spaceBackdrop } = await import("../views/title-block-space.ts");
+  const { projectSnapReferences } = await import("../snapping/project-references.ts");
+  const { storeyOf } = await import("../../domain/storeys/access.ts");
+  let state = spaceEditingReducer(createEditingState(project()), {
+    type: "space",
+    space: { kind: "layout", id: DEFAULT_MASTER_ID },
+  });
+  const lens = spaceLens(state.history.present, { kind: "layout", id: DEFAULT_MASTER_ID });
+  state = spaceEditingReducer(state, {
+    type: "project",
+    project: placeDrawing(lens, {
+      id: "zm",
+      documentId: "d1",
+      position: { x: 0.2, y: 0.15 },
+      frame: framing,
+      denominator: 100,
+    }),
+  });
+  assert.equal(state.error, "");
+  const real = state.history.present;
+  const under = spaceBackdrop(real, { kind: "layout", id: "l1" })!;
+  assert.deepEqual(
+    storeyOf(under).drawings!.map((d) => d.id),
+    ["@bg:m:zm"],
+  );
+  const layoutRefs = projectSnapReferences(spaceLens(real, { kind: "layout", id: "l1" }));
+  assert.ok(layoutRefs.some((r) => r.entityId === "@bg:m:zm"));
+  // On the master itself the drawing is its own and its mask corners snap.
+  const masterRefs = projectSnapReferences(
+    spaceLens(real, { kind: "layout", id: DEFAULT_MASTER_ID }),
+  );
+  assert.ok(masterRefs.some((r) => r.entityId === "zm"));
+});
