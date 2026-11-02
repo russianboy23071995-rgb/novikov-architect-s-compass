@@ -47,8 +47,13 @@ export function StatusBar({
       <Button variant="ghost" className={toggleClass(grid)} onClick={onGrid}>
         <Grid3X3 /> Grid
       </Button>
-      <Button variant="ghost" className={toggleClass(snap)} onClick={onSnap}>
-        <Magnet /> SNAP
+      <Button
+        variant="ghost"
+        className={toggleClass(snap)}
+        onClick={onSnap}
+        title="Rasterengine: an Ecken, Linien, Mitten, Schnittpunkten und Kanten einrasten. Rasterfang zusätzlich über den Schalter daneben."
+      >
+        <Magnet /> Rasterengine
       </Button>
       <GridControls value={gridSettings} onChange={onGridSettings} />
       <Button variant="ghost" className={toggleClass(ortho)} onClick={onOrtho}>

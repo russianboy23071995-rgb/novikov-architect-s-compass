@@ -68,8 +68,8 @@ export function GridControls({
               />
             </label>
             <p className="mb-2 text-xs text-muted-foreground">
-              Für Zeichnen und Bewegen. SNAP bleibt der Hauptschalter. Das sichtbare Raster passt
-              sich weiterhin dem Zoom an.
+              Für Zeichnen und Bewegen. Die Rasterengine bleibt der Hauptschalter. Das sichtbare
+              Raster passt sich weiterhin dem Zoom an.
             </p>
             {error && (
               <p role="alert" className="text-xs text-destructive">
