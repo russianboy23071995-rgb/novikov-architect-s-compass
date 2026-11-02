@@ -132,6 +132,7 @@ export function LayoutNavigator({
     if (!blockAction({ kind: "create", id, name })) return;
     setSelected(id);
     pendingRename.current = { id, kind: "block", name };
+    onOpenTitleBlock?.(id);
   };
   const rename = (target: Renaming) => {
     if (target.kind === "block") {
@@ -521,6 +522,9 @@ export function LayoutNavigator({
             setSelected(action.id);
             if (action.kind === "create-layout" || action.kind === "layout-settings")
               setClosed((ids) => ids.filter((v) => v !== action.folderId));
+            // Something new opens right away as its tab.
+            if (action.kind === "create-layout" || action.kind === "create-master")
+              onOpenLayout?.(action.id);
           }}
           onClose={() => setWindowTarget(null)}
         />
