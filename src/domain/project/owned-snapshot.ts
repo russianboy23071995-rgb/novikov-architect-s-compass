@@ -6,6 +6,7 @@ import {
 } from "./schema.ts";
 import { resolveStoreyLevels } from "../storeys/heights.ts";
 import type { WallSolidReuse } from "../elements/wall/connections.ts";
+import { rememberRoofTrims } from "../elements/wall/roof-trim.ts";
 
 export type ProjectResultMode = "mutable" | "owned";
 
@@ -98,6 +99,8 @@ export function createProjectSnapshot(
     base && owned.has(base) ? (share(validated, base) as Project) : validated,
   );
   owned.add(snapshot);
+  // Its storeys come back in the next validation; their roof trims are resolved already.
+  rememberRoofTrims(snapshot);
   const keys = storeyValidationKeys(snapshot);
   snapshot.storeys.forEach((storey, i) => {
     const registered = validStoreys.has(storey);

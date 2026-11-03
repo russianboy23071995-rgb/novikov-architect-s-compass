@@ -327,6 +327,7 @@
     "benchmarks/storey-keys.test.ts",
     "benchmarks/edit-memory.test.ts",
     "benchmarks/section-zoom.test.ts",
-    "benchmarks/section-canvas.test.ts"
+    "benchmarks/section-canvas.test.ts",
+    "benchmarks/roof-trim.test.ts"
   ]
 }
