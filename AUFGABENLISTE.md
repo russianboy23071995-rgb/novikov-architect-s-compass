@@ -11,7 +11,7 @@ So benutzt du sie:
 
 Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus dieser Liste wird beim Auftrag dort eingetragen.
 
-**Stand:** 03.11.2026 · main nach PR604
+**Stand:** 03.11.2026 · main nach PR605
 
 ## Deine Wünsche
 
@@ -37,7 +37,7 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 | L08 | Räume (Raumflächen, Raumstempel)                                                                                 |      | erledigt: R1–R4 (PR507–512) inkl. Tab-Auswahl; Archicad bestätigt; offen: WoFlV (N35)                                                                                                | §6 Abschnitt 2/4   |
 | L09 | Ungleiche Wandquerschnitte an Anschlüssen                                                                        |      | erledigt: U1 Fußhöhen an Ecke/T (PR574), U2 T-Stoß nach Vorrang im Grundriss (PR575); ungleiche Stärke/Höhe schon PR465/468; Vorrang in 3D/IFC und an Ecken später                                                                                                                                                                                | §6, §8             |
 | L10 | Geschoss ohne oberes Geschoss bzw. Einfügen zwischen gebundenen Geschossen (zurzeit gesperrt, Fachentscheidung)  |      | erledigt durch PR490 (Bindung ans eigene Geschoss)                                                                                                                                   | §9                 |
-| L40 | Werkzeug Deckendurchbruch (Öffnung in Decken, z. B. für Treppen und Schächte) |      | offen (Nutzerwunsch 02.11.2026) | |
+| L40 | Werkzeug Deckendurchbruch (Öffnung in Decken, z. B. für Treppen und Schächte) |      | erledigt (PR605), docs/DECKENDURCHBRUCH.md; Luftraum im Geschoss darüber offen | N48 |
 | L41 | Werkzeug Dachflächenfenster (Fenster in Dachflächen) |      | offen (Nutzerwunsch 02.11.2026) | |
 | L42 | Werkzeug Geländer |      | offen (Nutzerwunsch 02.11.2026) | |
 | L43 | Werkzeug Gelände (Geländemodell) |      | offen (Nutzerwunsch 02.11.2026) | |
