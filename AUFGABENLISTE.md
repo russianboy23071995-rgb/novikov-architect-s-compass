@@ -11,7 +11,7 @@ So benutzt du sie:
 
 Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus dieser Liste wird beim Auftrag dort eingetragen.
 
-**Stand:** 02.11.2026 · main nach PR603
+**Stand:** 03.11.2026 · main nach PR604
 
 ## Deine Wünsche
 
@@ -86,7 +86,7 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 | L27 | Kontextaktionen und Tastenkürzel (u. a. D vs. Strg+D, Kopieren/Spiegeln) |      | teilweise: K1, K2 (PR513–514) | §8, Register |
 | L28 | Einstellungsübersicht (was gilt für Benutzer/Projekt/Ansicht)            |      | offen                         | §8           |
 | L29 | Wandbewegung x/y/Achse abgleichen                                        |      | zurückgestellt seit 24.10.    | §9           |
-| L45 | Funktion „Filter“ (kein Werkzeug): alles auswählen nach Eigenschaft, z. B. Farbe blau, Ebene Innenwand oder Linienart |      | offen (Nutzerwunsch 02.11.2026) | |
+| L45 | Funktion „Filter“ (kein Werkzeug): alles auswählen nach Eigenschaft, z. B. Farbe blau, Ebene Innenwand oder Linienart |      | Stufe 1 erledigt (PR604), docs/FILTER.md; Farbe für Wände/Bauteile über Material offen | |
 
 ## Leistung
 
