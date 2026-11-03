@@ -48,7 +48,11 @@ export function useOverlapCycle(
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
       if (target?.closest("input, textarea, select, [contenteditable='true']")) return;
-      if (event.key === "Escape") return setState(null);
+      if (event.key === "Escape") {
+        // Closing the overlap list uses the press; the selection stays (docs/AUSWAHL_ESCAPE.md).
+        event.preventDefault();
+        return setState(null);
+      }
       if (event.key !== "Tab" || event.ctrlKey || event.metaKey || event.altKey) return;
       event.preventDefault();
       event.stopPropagation();
