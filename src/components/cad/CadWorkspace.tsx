@@ -123,6 +123,7 @@ import { selectionIndex, selectTargets, type SelectionSet } from "@/application/
 import type { SnapCandidate } from "@/constraints/snapping/engine";
 import { CanvasDisplaySettings } from "./CanvasDisplaySettings";
 import { useCanvasDisplaySettings } from "./useCanvasDisplaySettings";
+import { usePictogramSettings } from "./usePictogramSettings";
 import { beginWallChain, appendWallChain, finishWallChain } from "@/application/drawing/wall-chain";
 import type { WallChain } from "@/application/drawing/wall-chain";
 import { defaultGridSettings, type GridSettings } from "@/application/snapping/grid-settings";
@@ -354,6 +355,7 @@ export function CadWorkspace({
   const [displaySettingsOpen, setDisplaySettingsOpen] = useState(false);
   const { wallWidth, setWallWidth, cutFill, setCutFill, showRenovation, setShowRenovation } =
     useCanvasDisplaySettings();
+  const { pictograms, setPictograms, resetPictograms } = usePictogramSettings();
   // Rasterfang starts off: the Rasterengine snaps to points and lines, the grid only on demand.
   const [planGridSettings, setPlanGridSettings] = useState<GridSettings>({
     ...defaultGridSettings,
@@ -2828,6 +2830,9 @@ export function CadWorkspace({
         onCutFill={setCutFill}
         showRenovation={showRenovation}
         onShowRenovation={setShowRenovation}
+        pictograms={pictograms}
+        onPictograms={setPictograms}
+        onResetPictograms={resetPictograms}
       />
       <AlertDialog open={!!trimConfirm} onOpenChange={(open) => !open && setTrimConfirm(null)}>
         <AlertDialogContent>

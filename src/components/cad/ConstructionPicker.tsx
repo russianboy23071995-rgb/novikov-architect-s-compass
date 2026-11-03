@@ -161,7 +161,7 @@ export function ConstructionPicker<T extends ConstructionId>({
                 name={PACKAGE_PICTOGRAMS[id]!}
                 active={value === id}
                 tinted={false}
-                className="size-5"
+                size={22}
               />
             ) : (
               CONSTRUCTIONS[id].icon

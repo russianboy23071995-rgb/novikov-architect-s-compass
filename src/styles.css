@@ -44,7 +44,7 @@
   --radius: 0.5rem;
   /* Active pictograms (docs/WERKZEUGLEISTE.md, WL3): #42D9DF has 1.7:1 on white, so the light
      surface takes the darker turquoise the package recommends. */
-  --pikto-aktiv: #0e9aa0;
+  --pikto-aktiv: var(--pikto-aktiv-hell, #0e9aa0);
   --background: oklch(0.93 0.006 250);
   --foreground: oklch(0.19 0.006 255);
   --card: oklch(0.99 0.003 250 / 58%);
@@ -82,7 +82,13 @@
 }
 
 .dark {
-  --pikto-aktiv: #42d9df;
+  --pikto-aktiv: var(--pikto-aktiv-dunkel, #42d9df);
+}
+
+/* Duotone face of inactive pictograms (docs/WERKZEUGLEISTE.md, WL4); CSS wins over the file's
+   fill-opacity attribute. */
+.pikto .accent {
+  fill-opacity: var(--pikto-duoton, 0.2);
 }
 
 * {

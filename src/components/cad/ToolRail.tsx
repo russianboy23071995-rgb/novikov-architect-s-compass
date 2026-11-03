@@ -58,12 +58,7 @@ export const ToolRail = withStableHandlers(function ToolRail({
           >
             {active && <span className="absolute -left-1 h-5 w-0.5 rounded-r bg-primary" />}
             {tool.pictogram ? (
-              <Pictogram
-                group="werkzeuge"
-                name={tool.pictogram}
-                active={active}
-                className="size-5"
-              />
+              <Pictogram group="werkzeuge" name={tool.pictogram} active={active} size={24} />
             ) : (
               <tool.icon className="size-[18px]" strokeWidth={1.65} />
             )}

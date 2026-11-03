@@ -89,3 +89,36 @@ Nutzervorlage: das Paket „Piktogramme – Navigator und Werkzeuge“ mit 28 Pi
   - Keine Konsolenfehler.
 
 **Grenze:** Die Darstellung im dunklen Design habe ich nur über die berechnete Farbe geprüft, nicht im Bildschirmfoto.
+
+## WL4 – Größe, Zentrierung und Einstellungen der Piktogramme (03.11.2026)
+
+Nutzerhinweis: Die Piktogramme waren zu klein und saßen in den Knöpfen nicht mittig. Außerdem fehlte, wo man ihre Farbe einstellt.
+
+**Befund:** Die Knopf-Komponente setzt jedes SVG darin fest auf 16 px (`[&_svg]:size-4` in `button-variants.ts`). Das Piktogramm-SVG wurde dadurch in seinem 20-px-Rahmen auf 16 px gezwungen und saß oben links. Die Zeichnungen selbst sind in ihrem Raster mittig, nachgerechnet für alle 28. Die Farben standen bisher nur im Code (`styles.css`).
+
+**Umsetzung:**
+
+- **Zentrierung:** `Pictogram.tsx` lässt das SVG seinen Rahmen immer ganz füllen, mit eigener Größe im `style`, die die Knopfregel schlägt. Der Rahmen zentriert es.
+- **Grundgrößen:** Werkzeugleiste 24 px (1:1 im Raster), Zeichenarten 22 px, Navigator und Anpassen-Fenster 18 px. Der Knopf der Leiste bleibt 36 px groß.
+- **Einstellungen im Fenster „Darstellung“**, neuer Abschnitt „Piktogramme“ mit Vorschau:
+  - **Größe:** 75–125 % der Grundgröße, gemeinsam für alle Piktogramme.
+  - **Farbe aktiv:** je für die helle und die dunkle Oberfläche, voreingestellt `#0E9AA0` und `#42D9DF`.
+  - **Linienfarbe:** wie Text oder eine eigene Farbe.
+  - **Deckkraft der Duoton-Fläche:** 0–50 %, voreingestellt 20 %.
+  - **Zurücksetzen** auf die Werte des Pakets.
+- **Speicherung und Wirkung:**
+  - Gespeichert wird je Browser (`novikov.pictograms`), nicht im Projekt und ohne Undo.
+  - Wirksam wird alles sofort über CSS-Variablen: `--pikto-scale`, `--pikto-aktiv-hell`/`-dunkel`, `--pikto-linie` und `--pikto-duoton` (`pictogram-settings.ts`, `usePictogramSettings.ts`, `styles.css`).
+
+**Nachweis:**
+
+- `benchmarks/pictogram-settings.test.ts`: Grenzen, ungültige gespeicherte Werte und die Voreinstellungen.
+- 1556 Tests grün, Typprüfung, Lint, Architekturprüfung ohne Befund, 14-Modell-Hash unverändert.
+- **Browser:**
+  - Alle 20 Knöpfe der Leiste: Das Piktogramm ist 24 px groß und sitzt mit 0 px Abweichung in der Mitte.
+  - Größe 125 % ergibt 30 px, weiter mittig; der Navigator wird 22,5 px.
+  - Die Aktivfarbe ändert sich sofort (getestet mit Rot) und bleibt nach dem Neuladen erhalten.
+  - „Zurücksetzen“ stellt 24 px und `#0E9AA0` wieder her; dunkel ist sie `#42D9DF`.
+  - Keine Konsolenfehler.
+
+**Grenze:** Die Zentrierung ist für die Werkzeugleiste nachgemessen; Zeichenarten und Navigator nutzen denselben Rahmen, sind aber nicht einzeln vermessen.
