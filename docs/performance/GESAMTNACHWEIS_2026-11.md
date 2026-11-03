@@ -102,6 +102,7 @@ Undo, Redo und Geschosswechsel kosten im Reducer nichts. Ihre Zeit im Browser en
 3. **Speicherzuwachs je Bearbeitung** (etwa 60 MB) mit dem Verlaufsbefund aus `docs/performance/HISTORY_MEMORY.md` abgleichen.
    Erledigt am 03.11.2026 (`docs/performance/EDIT_MEMORY.md`): Schnittzeichnungen gehaltener Verlaufsstände werden freigegeben, 20 000: 50 → 8,5 MB je Bearbeitung.
 4. **Dachtrimmung:** Öffnungen je Wand vorab zuordnen, statt sie für jede getrimmte Wand neu zu suchen. Das erst angehen, wenn 1–3 erledigt sind.
+   Erledigt am 03.11.2026 (`docs/performance/ROOF_TRIM.md`): 20 000: 27 → 1,9 ms je Prüfung, 0,5 ms bei unverändertem Dachgeschoss.
 
 ## Grenzen
 

@@ -1,0 +1,28 @@
+{
+  "runtime": "node v24.22.1 win32 x64",
+  "date": "2026-11-03T18:33:19.627Z",
+  "notes": "median of 15; resolveFresh: every storey a new object, resolveSame: the same validated project again; edit*: wall thickness through editingReducer (whole validation).",
+  "results": {
+    "3000": {
+      "trimmedWalls": 120,
+      "resolveFreshMs": 0.69,
+      "resolveSameMs": 0.12,
+      "editRoofStoreyMs": 15.41,
+      "editOtherStoreyMs": 10.97
+    },
+    "10000": {
+      "trimmedWalls": 400,
+      "resolveFreshMs": 1.17,
+      "resolveSameMs": 0.26,
+      "editRoofStoreyMs": 42.1,
+      "editOtherStoreyMs": 36.11
+    },
+    "20000": {
+      "trimmedWalls": 800,
+      "resolveFreshMs": 1.94,
+      "resolveSameMs": 0.52,
+      "editRoofStoreyMs": 75.13,
+      "editOtherStoreyMs": 62.68
+    }
+  }
+}

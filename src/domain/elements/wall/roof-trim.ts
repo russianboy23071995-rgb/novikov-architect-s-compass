@@ -71,8 +71,63 @@ export function roofTrimPlane(
   return { a, b, c, top: Math.max(...heights), bottom: Math.min(...heights) };
 }
 
+type TrimStorey = TrimProject["storeys"][number];
+type RoofSource = { roof: RoofGeometryInput; floor: number | null };
+/**
+ * Resolved storeys with what they were resolved from (docs/performance/ROOF_TRIM.md): the
+ * storey object (walls, windows and doors), its floor and every roof its walls are trimmed at
+ * with that roof's floor. Kept for the input and the result, so the next validation, which gets
+ * the earlier result back, reuses it. Only successful resolutions are kept.
+ */
+const resolved = new WeakMap<
+  object,
+  {
+    floor: number | null;
+    roofs: readonly (readonly [string, RoofSource["roof"], number | null])[];
+    result: object;
+  }
+>();
+let reused = 0;
+/** Diagnostic count of storeys whose trims were reused unchanged, for tests and measurements. */
+export const roofTrimReuseCount = () => reused;
+
 const same = (p: WallTrimPlane | undefined, q: WallTrimPlane) =>
   !!p && p.a === q.a && p.b === q.b && p.c === q.c && p.top === q.top && p.bottom === q.bottom;
+
+/** The roofs of a project with their storey floors. */
+function roofSources(project: TrimProject, levels: ReturnType<typeof resolveStoreyLevels>) {
+  const roofs = new Map<string, RoofSource>();
+  project.storeys.forEach((storey, i) => {
+    for (const roof of storey.roofs ?? [])
+      roofs.set(roof.id, { roof, floor: levels[i]!.elevation });
+  });
+  return roofs;
+}
+const trimInputs = (storey: TrimStorey, floor: number | null, roofs: Map<string, RoofSource>) => ({
+  floor,
+  roofs: [...new Set(storey.walls.flatMap((w) => (w.roofTrim ? [w.roofTrim.roofId] : [])))].map(
+    (id) => [id, roofs.get(id)!.roof, roofs.get(id)!.floor] as const,
+  ),
+});
+
+/**
+ * Marks the storeys of a validated, frozen project as resolved: the next validation gets these
+ * objects back and reuses their trims while their floor and roofs stay (owned snapshots call
+ * this; their storeys are copies of what `resolveRoofTrims` returned).
+ */
+export function rememberRoofTrims(project: TrimProject): void {
+  if (!project.storeys.some((s) => s.walls.some((w) => w.roofTrim))) return;
+  const levels = resolveStoreyLevels(
+    project.storeys,
+    project.groundStoreyId,
+    project.groundDatum ?? 0,
+  );
+  const roofs = roofSources(project, levels);
+  project.storeys.forEach((storey, i) => {
+    if (!storey.walls.some((w) => w.roofTrim || w.trimPlane) || resolved.has(storey)) return;
+    resolved.set(storey, { ...trimInputs(storey, levels[i]!.elevation, roofs), result: storey });
+  });
+}
 
 /**
  * Resolves every roof trim of the project into `trimPlane` (also across storeys) and checks
@@ -89,20 +144,40 @@ export function resolveRoofTrims<T extends TrimProject>(project: T): T {
     project.groundStoreyId,
     project.groundDatum ?? 0,
   );
-  const roofs = new Map<string, { roof: RoofGeometryInput; floor: number | null }>();
-  project.storeys.forEach((storey, i) => {
-    for (const roof of storey.roofs ?? [])
-      roofs.set(roof.id, { roof, floor: levels[i]!.elevation });
-  });
+  const roofs = roofSources(project, levels);
   return {
     ...project,
     storeys: project.storeys.map((storey, i) => {
       if (!storey.walls.some((w) => w.roofTrim || w.trimPlane)) return storey;
       const floor = levels[i]!.elevation;
+      const known = resolved.get(storey);
+      if (
+        known &&
+        known.floor === floor &&
+        known.roofs.every(([id, roof, roofFloor]) => {
+          const source = roofs.get(id);
+          return source?.roof === roof && source.floor === roofFloor;
+        })
+      ) {
+        reused++;
+        return known.result as typeof storey;
+      }
+      // Windows and doors per wall, once per storey (in their order: windows, then doors).
+      const openings = new Map<string, Opening[]>();
+      const host = (wallId: string, opening: Opening) => {
+        const list = openings.get(wallId);
+        if (list) list.push(opening);
+        else openings.set(wallId, [opening]);
+      };
+      for (const w of storey.windows)
+        host(w.wallId, { o: w, kind: "Fenster", top: w.sillHeight + w.height });
+      for (const d of storey.doors ?? []) host(d.wallId, { o: d, kind: "Tür", top: d.height });
+      let changed = false;
       const walls = storey.walls.map((wall) => {
         if (!wall.roofTrim) {
           if (!wall.trimPlane) return wall;
           const { trimPlane: _stale, ...rest } = wall;
+          changed = true;
           return rest as typeof wall;
         }
         const source = roofs.get(wall.roofTrim.roofId);
@@ -122,10 +197,17 @@ export function resolveRoofTrims<T extends TrimProject>(project: T): T {
           throw new Error(
             `Die Dachfläche liegt (teilweise) unter dem Fuß der Wand ${wall.id}; so kann sie nicht getrimmt werden.`,
           );
-        checkOpenings(storey, wall, plane);
-        return same(wall.trimPlane, plane) ? wall : { ...wall, trimPlane: plane };
+        checkOpenings(openings.get(wall.id) ?? [], wall, plane);
+        if (same(wall.trimPlane, plane)) return wall;
+        changed = true;
+        return { ...wall, trimPlane: plane };
       });
-      return { ...storey, walls };
+      // Unchanged storeys keep their identity.
+      const result = changed ? { ...storey, walls } : storey;
+      const entry = { ...trimInputs(storey, floor, roofs), result };
+      resolved.set(storey, entry);
+      resolved.set(result, entry);
+      return result;
     }),
   };
 }
@@ -148,20 +230,10 @@ function lowestOver(wall: TrimWall, plane: WallTrimPlane, left: number, right: n
   return lowest;
 }
 
-function checkOpenings(
-  storey: TrimProject["storeys"][number],
-  wall: TrimWall,
-  plane: WallTrimPlane,
-) {
+type Opening = { o: Hosted; kind: string; top: number };
+/** Refuses an opening of the wall that reaches above the trim plane (decision S). */
+function checkOpenings(openings: readonly Opening[], wall: TrimWall, plane: WallTrimPlane) {
   const length = Math.hypot(wall.end.x - wall.start.x, wall.end.y - wall.start.y);
-  const openings = [
-    ...storey.windows
-      .filter((w) => w.wallId === wall.id)
-      .map((w) => ({ o: w, kind: "Fenster", top: w.sillHeight + w.height })),
-    ...(storey.doors ?? [])
-      .filter((d) => d.wallId === wall.id)
-      .map((d) => ({ o: d, kind: "Tür", top: d.height })),
-  ];
   for (const { o, kind, top } of openings) {
     const centre = o.position * length;
     if (top > lowestOver(wall, plane, centre - o.width / 2, centre + o.width / 2) + 1e-9)

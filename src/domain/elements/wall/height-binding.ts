@@ -77,19 +77,22 @@ export function resolveBoundWallHeights<
   const levels = resolveStoreyLevels(project.storeys, project.groundStoreyId);
   return {
     ...project,
-    storeys: project.storeys.map((storey, index) => ({
-      ...storey,
-      walls: storey.walls.map((wall) => {
+    // Storeys and walls whose height stays keep their identity, so later steps can reuse them
+    // (docs/performance/ROOF_TRIM.md).
+    storeys: project.storeys.map((storey, index) => {
+      let changed = false;
+      const walls = storey.walls.map((wall) => {
         const binding = wall.topBinding;
         if (!binding) return wall;
         const { elevation, upperElevation } = levels[index]!;
         if (elevation == null || upperElevation == null)
           throw new Error("Für die Geschossbindung zuerst die Geschosshöhe festlegen.");
-        return {
-          ...wall,
-          height: resolveWallHeightRule(wall, elevation, binding, upperElevation).height,
-        };
-      }),
-    })),
+        const height = resolveWallHeightRule(wall, elevation, binding, upperElevation).height;
+        if (height === wall.height) return wall;
+        changed = true;
+        return { ...wall, height };
+      });
+      return changed ? { ...storey, walls } : storey;
+    }),
   };
 }
