@@ -13,6 +13,7 @@ import type { CutFill } from "./cut-fill";
 import { HeightMark } from "./HeightMark";
 import { SectionLevelMarks } from "./SectionGraphic";
 import { SectionCanvas } from "./SectionCanvas";
+import { recallSectionBox, rememberSectionBox } from "./view-cameras";
 import {
   cachedSectionDrawing,
   HATCH_PAPER,
@@ -78,7 +79,9 @@ export function SectionDrawingView({
     }),
     [extent],
   );
-  const [box, setBox] = useState<Box | null>(null);
+  // Zoom per section: a section shown again in the shared tab keeps it (docs/TABS.md).
+  const [box, setBox] = useState<Box | null>(() => recallSectionBox(section.id));
+  useEffect(() => rememberSectionBox(section.id, box), [section.id, box]);
   const view = box ?? fit;
   const svg = useRef<SVGSVGElement>(null);
   // Wheel steps between two frames zoom once (docs/performance/SECTION_ZOOM.md).
