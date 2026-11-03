@@ -325,6 +325,7 @@
     "benchmarks/placed-freshness.test.ts",
     "src/application/snapping/placed-sources.test.ts",
     "benchmarks/storey-keys.test.ts",
-    "benchmarks/edit-memory.test.ts"
+    "benchmarks/edit-memory.test.ts",
+    "benchmarks/section-zoom.test.ts"
   ]
 }

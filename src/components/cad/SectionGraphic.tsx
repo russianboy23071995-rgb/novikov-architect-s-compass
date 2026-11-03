@@ -1,8 +1,10 @@
+import { memo } from "react";
 import type { SectionHeightMarks } from "@/domain/views/sections";
 import type { SectionDrawing, SectionPoint } from "@/rendering/viewport/section-drawing";
 import { cutPaint, type CutFill } from "./cut-fill";
 import { MARK_PAPER, sectionGraphicExtent } from "./section-graphic";
 import { HeightMark } from "./HeightMark";
+import { segmentPath } from "./section-paths";
 import { SectionLayerGraphic } from "./SectionLayerGraphic";
 import { CAD_TURQUOISE } from "@/rendering/viewport/highlight";
 
@@ -22,8 +24,11 @@ const HATCH_PAPER = 0.0015;
  * (docs/ZEICHNUNG.md, ZW4); there the height marks are drawn here too (`marks`), in the tab
  * they stay editable and are drawn by the tab. Selected elements (`selectedIds`, e.g. found by the
  * filter, docs/FILTER.md) are drawn in the selection colour.
+ *
+ * Memoised: zooming and panning change only the view box of the surrounding SVG, never this
+ * content (docs/performance/SECTION_ZOOM.md).
  */
-export function SectionGraphic({
+export const SectionGraphic = memo(function SectionGraphic({
   drawing,
   cutFill,
   denominator,
@@ -51,31 +56,26 @@ export function SectionGraphic({
             {picked(v.id) && (
               <polygon points={svgPoints(v.points)} fill={CAD_TURQUOISE} fillOpacity={0.25} />
             )}
-            {v.edges.map(([a, b], j) => (
-              <line
-                key={j}
-                x1={a.x}
-                y1={-a.y}
-                x2={b.x}
-                y2={-b.y}
+            {v.edges.length > 0 && (
+              <path
+                d={segmentPath(v.edges)}
+                fill="none"
                 stroke={ink(v.id)}
                 strokeWidth={picked(v.id) ? 1.25 : 0.75}
                 vectorEffect="non-scaling-stroke"
               />
-            ))}
-            {v.marks?.segments.map(([a, b], j) => (
-              <line
-                key={`m${j}`}
-                x1={a.x}
-                y1={-a.y}
-                x2={b.x}
-                y2={-b.y}
+            )}
+            {v.marks && v.marks.segments.length > 0 && (
+              <path
+                d={segmentPath(v.marks.segments)}
+                fill="none"
                 stroke="var(--foreground)"
                 strokeWidth={0.6}
-                strokeDasharray={v.marks!.dashed ? "6 4" : undefined}
+                // A dash pattern starts anew with every segment, as with separate lines.
+                strokeDasharray={v.marks.dashed ? "6 4" : undefined}
                 vectorEffect="non-scaling-stroke"
               />
-            ))}
+            )}
           </g>
         ))}
       </g>
@@ -195,4 +195,4 @@ export function SectionGraphic({
       )}
     </>
   );
-}
+});

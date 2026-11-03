@@ -69,6 +69,11 @@ export function SectionDrawingView({
   const [box, setBox] = useState<Box | null>(null);
   const view = box ?? fit;
   const svg = useRef<SVGSVGElement>(null);
+  // Wheel steps between two frames zoom once (docs/performance/SECTION_ZOOM.md).
+  const wheel = useRef<{ at: { x: number; y: number }; f: number; frame: number } | null>(null);
+  const viewRef = useRef(view);
+  viewRef.current = view;
+  useEffect(() => () => cancelAnimationFrame(wheel.current?.frame ?? 0), []);
   const drag = useRef<{ x: number; y: number; box: Box } | null>(null);
   const toModel = (clientX: number, clientY: number) => {
     const m = svg.current?.getScreenCTM();
@@ -212,12 +217,26 @@ export function SectionDrawingView({
             const at = toModel(event.clientX, event.clientY);
             if (!at) return;
             const f = event.deltaY > 0 ? 1.15 : 1 / 1.15;
-            setBox({
-              x: at.x - (at.x - view.x) * f,
-              y: at.y - (at.y - view.y) * f,
-              w: view.w * f,
-              h: view.h * f,
-            });
+            if (wheel.current) {
+              wheel.current.f *= f;
+              wheel.current.at = at;
+              return;
+            }
+            wheel.current = {
+              at,
+              f,
+              frame: requestAnimationFrame(() => {
+                const step = wheel.current!;
+                wheel.current = null;
+                const v = viewRef.current;
+                setBox({
+                  x: step.at.x - (step.at.x - v.x) * step.f,
+                  y: step.at.y - (step.at.y - v.y) * step.f,
+                  w: v.w * step.f,
+                  h: v.h * step.f,
+                });
+              }),
+            };
           }}
           onClick={(event) => {
             if (!drawingMarks) return;
