@@ -1095,9 +1095,12 @@ export function BimPlan({
     },
   });
   const listPosition = referenceSelection?.hits.length ? referenceSelection.position : null;
+  // The same set while the same elements are selected (also none): a new but equal selection,
+  // e.g. after the layout book's tab, re-renders no run of the plan (docs/TABS.md).
+  const selectionKey = (selections ?? (selection ? [selection] : [])).map((t) => t.id).join("\n");
   const selectedIds = useMemo(
-    () => new Set((selections ?? (selection ? [selection] : [])).map((t) => t.id)),
-    [selections, selection],
+    () => (selectionKey ? new Set(selectionKey.split("\n")) : NOTHING_SELECTED),
+    [selectionKey],
   );
   const latestSelect = useRef(selectProps);
   latestSelect.current = selectProps;
