@@ -112,6 +112,7 @@ import { useWindowPlacement } from "./useWindowPlacement";
 import { useDoorPlacement } from "./useDoorPlacement";
 import { SlabToolFields } from "./SlabToolFields";
 import { SlabOpeningToolFields } from "./SlabOpeningToolFields";
+import { ConstructionPicker } from "./ConstructionPicker";
 import { slabOpeningOutline } from "@/domain/elements/slab/opening";
 import { DoorPlacementFields } from "./DoorPlacementFields";
 import { useSelectionMove } from "./useSelectionMove";
@@ -1414,23 +1415,15 @@ export function CadWorkspace({
       />
     ) : owner === "hatch" ? (
       <section aria-label="Schraffurwerkzeug" className="flex flex-wrap items-end gap-3">
-        <label className="text-xs">
-          Erstellung
-          <select
-            aria-label="Schraffur-Erstellung"
-            value={hatchConstruction}
-            onChange={(e) => {
-              cancelInteraction();
-              setHatchConstruction(e.target.value as HatchConstruction);
-            }}
-            className="block rounded border bg-background p-1"
-          >
-            <option value="polygon">Polygon per Klick</option>
-            <option value="diagonal">Rechteck: Diagonale</option>
-            <option value="side-height">Rechteck: Seite und Höhe</option>
-            <option value="boundary">Geschlossene Kontur übernehmen</option>
-          </select>
-        </label>
+        <ConstructionPicker
+          label="Schraffur-Erstellung"
+          options={["polygon", "diagonal", "side-height", "boundary"] as const}
+          value={hatchConstruction}
+          onValue={(construction) => {
+            cancelInteraction();
+            setHatchConstruction(construction);
+          }}
+        />
         <HatchRotationField
           enabled={!!toolDefaults.hatch.patternDefinition}
           value={toolDefaults.hatch.patternRotation ?? 0}
@@ -3773,6 +3766,33 @@ export function CadWorkspace({
                       }}
                       draftPattern={
                         tool === "hatch" ? toolDefaults.hatch.patternDefinition : undefined
+                      }
+                      draftShape={
+                        tool === "slab"
+                          ? "slab"
+                          : tool === "slabOpening"
+                            ? "slabOpening"
+                            : tool === "room" && !roomByWalls
+                              ? "room"
+                              : roofPhase === "outline"
+                                ? "roof"
+                                : undefined
+                      }
+                      draftCircle={
+                        circleTool
+                          ? (point) =>
+                              pathPoints[0]
+                                ? {
+                                    center: pathPoints[0],
+                                    diameter:
+                                      2 *
+                                      Math.hypot(
+                                        point.x - pathPoints[0].x,
+                                        point.y - pathPoints[0].y,
+                                      ),
+                                  }
+                                : null
+                          : undefined
                       }
                       draftPatternRotation={toolDefaults.hatch.patternRotation}
                       draftPatternSize={toolDefaults.hatch.patternSize}

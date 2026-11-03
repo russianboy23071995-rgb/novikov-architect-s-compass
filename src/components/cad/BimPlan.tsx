@@ -1,4 +1,5 @@
 import type { DimensionStyle } from "./DimensionStyleFields";
+import { slabOpeningOutline, slabOpeningSymbol } from "@/domain/elements/slab/opening";
 import { TextGraphic } from "./TextGraphic";
 import { SectionGraphic } from "./SectionGraphic";
 import type { SectionDrawing } from "@/rendering/viewport/section-drawing";
@@ -295,6 +296,13 @@ export type BimPlanProps = {
   /** Roof tool guide: reference line and rise side; null rise follows the cursor (ROOF D3). */
   roofGuide?: { start: Point; end: Point; rise: "left" | "right" | null } | null;
   draftFill?: Hatch["fill"] | undefined;
+  /**
+   * Preview of the finished element of an area tool other than the hatch (user wish
+   * 03.11.2026): the outline the click would create, drawn like that element.
+   */
+  draftShape?: "slab" | "slabOpening" | "room" | "roof" | undefined;
+  /** Round slab opening under construction: centre and diameter at the pointer, or null. */
+  draftCircle?: ((point: Point) => { center: Point; diameter: number } | null) | undefined;
   draftPattern?: HatchPatternDefinition | null | undefined;
   draftPatternRotation?: number | undefined;
   draftPatternSize?: HatchPatternSize | undefined;
@@ -373,6 +381,8 @@ export function BimPlan({
   closeAtStart = false,
   roofGuide = null,
   draftFill,
+  draftShape,
+  draftCircle,
   draftPattern,
   draftPatternRotation,
   draftPatternSize,
@@ -1931,6 +1941,65 @@ export function BimPlan({
                     definition={draftPattern}
                     pixelsPerMetre={camera.pixelsPerMetre}
                   />
+                )}
+              </g>
+            );
+          })()}
+        {drawing &&
+          !draftFill &&
+          draftShape &&
+          (() => {
+            const circle =
+              draftShape === "slabOpening" && draftCircle && resolvedHover
+                ? draftCircle(resolvedHover.point)
+                : null;
+            const points = circle
+              ? slabOpeningOutline({ circle })
+              : draftContour
+                ? constructedContour
+                : [...draftPoints, ...(resolvedHover ? [resolvedHover.point] : [])];
+            if (points.length < 3 || (circle && !(circle.diameter > 0))) return null;
+            const ring = (ps: readonly Point[]) => ps.map((p) => `${p.x},${-p.y}`).join(" ");
+            const width = wallOutlineWidth / camera.pixelsPerMetre;
+            const symbol =
+              draftShape === "slabOpening"
+                ? slabOpeningSymbol(circle ? { circle } : { points })
+                : null;
+            return (
+              <g pointerEvents="none" data-draft-preview={draftShape} opacity={0.75}>
+                {symbol?.kind === "circle" ? (
+                  <>
+                    <path
+                      d={`M ${symbol.half[0].x} ${-symbol.half[0].y} A ${symbol.radius} ${symbol.radius} 0 0 0 ${symbol.half[1].x} ${-symbol.half[1].y} Z`}
+                      fill="var(--primary)"
+                    />
+                    <circle
+                      cx={symbol.center.x}
+                      cy={-symbol.center.y}
+                      r={symbol.radius}
+                      fill="none"
+                      stroke="var(--primary)"
+                      strokeWidth={width}
+                    />
+                  </>
+                ) : (
+                  <>
+                    {symbol?.kind === "outline" && symbol.wedge && (
+                      <polygon points={ring(symbol.wedge)} fill="var(--primary)" />
+                    )}
+                    <polygon
+                      points={ring(points)}
+                      fill={draftShape === "room" ? "var(--primary)" : "none"}
+                      fillOpacity={draftShape === "room" ? 0.08 : undefined}
+                      stroke="var(--primary)"
+                      strokeWidth={width}
+                      strokeDasharray={
+                        draftShape === "roof"
+                          ? `${6 / camera.pixelsPerMetre} ${4 / camera.pixelsPerMetre}`
+                          : undefined
+                      }
+                    />
+                  </>
                 )}
               </g>
             );
