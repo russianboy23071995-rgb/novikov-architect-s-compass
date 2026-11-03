@@ -329,6 +329,7 @@
     "benchmarks/section-zoom.test.ts",
     "benchmarks/section-canvas.test.ts",
     "benchmarks/roof-trim.test.ts",
-    "benchmarks/escape-step.test.ts"
+    "benchmarks/escape-step.test.ts",
+    "benchmarks/run-selection.test.ts"
   ]
 }
