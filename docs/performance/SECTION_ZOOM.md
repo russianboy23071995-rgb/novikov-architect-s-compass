@@ -46,3 +46,5 @@ Gemessen mit `section-zoom/zoom-measure.js`, vorher und nachher mit derselben Me
 - **Schnitt A-A bei 3 000 Elementen:** Das Öffnen lag nachher bei 183–202 ms statt 112 ms. Bei so kurzen Zeiten ist das im Rahmen der Schwankung, aber nicht weiter geprüft.
 - **Abnahme „höchstens 16 ms bei 3 000 Elementen“:** Für Schnitt A-A erfüllt, für die Südansicht mit 20–22 ms knapp verfehlt. Gemessen ist hier aber bis zur übernächsten Bildgrenze.
 - **Südansicht bei 20 000 Elementen:** Mit etwa 4 Bildern pro Sekunde bleibt das Zoomen spürbar ruckelig.
+
+**Nachtrag 03.11.2026:** Der Schnitt-Tab zeichnet jetzt auf Canvas (docs/performance/SECTION_CANVAS.md); beim durchgehenden Zoomen bleibt bei 20 000 Elementen jedes Bild unter 16 ms.

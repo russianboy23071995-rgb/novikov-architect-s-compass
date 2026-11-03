@@ -11,8 +11,14 @@ import type { SectionPoint } from "@/rendering/viewport/section-drawing";
 import { Button } from "@/components/ui/button";
 import type { CutFill } from "./cut-fill";
 import { HeightMark } from "./HeightMark";
-import { SectionGraphic } from "./SectionGraphic";
-import { cachedSectionDrawing, MARK_PAPER, sectionGraphicExtent } from "./section-graphic";
+import { SectionLevelMarks } from "./SectionGraphic";
+import { SectionCanvas } from "./SectionCanvas";
+import {
+  cachedSectionDrawing,
+  HATCH_PAPER,
+  MARK_PAPER,
+  sectionGraphicExtent,
+} from "./section-graphic";
 
 type Box = { x: number; y: number; w: number; h: number };
 
@@ -62,10 +68,16 @@ export function SectionDrawingView({
   selectedIds?: ReadonlySet<string> | undefined;
 }) {
   const drawing = useMemo(() => cachedSectionDrawing(project, section), [project, section]);
-  const fit = useMemo((): Box => {
-    const e = sectionGraphicExtent(drawing, denominator);
-    return { x: e.minX, y: -e.maxY, w: e.maxX - e.minX, h: e.maxY - e.minY };
-  }, [drawing, denominator]);
+  const extent = useMemo(() => sectionGraphicExtent(drawing, denominator), [drawing, denominator]);
+  const fit = useMemo(
+    (): Box => ({
+      x: extent.minX,
+      y: -extent.maxY,
+      w: extent.maxX - extent.minX,
+      h: extent.maxY - extent.minY,
+    }),
+    [extent],
+  );
   const [box, setBox] = useState<Box | null>(null);
   const view = box ?? fit;
   const svg = useRef<SVGSVGElement>(null);
@@ -206,183 +218,190 @@ export function SectionDrawingView({
             : "Die Schnittlinie trifft keine Bauteile. Linie im Grundriss über das Gebäude legen."}
         </p>
       ) : (
-        <svg
-          ref={svg}
-          role="img"
-          aria-label={`Schnittzeichnung ${section.name}`}
-          className={`min-h-0 flex-1 touch-none select-none ${drawingMarks ? "cursor-crosshair" : ""}`}
-          viewBox={`${view.x} ${view.y} ${view.w} ${view.h}`}
-          preserveAspectRatio="xMidYMid meet"
-          onWheel={(event) => {
-            const at = toModel(event.clientX, event.clientY);
-            if (!at) return;
-            const f = event.deltaY > 0 ? 1.15 : 1 / 1.15;
-            if (wheel.current) {
-              wheel.current.f *= f;
-              wheel.current.at = at;
-              return;
-            }
-            wheel.current = {
-              at,
-              f,
-              frame: requestAnimationFrame(() => {
-                const step = wheel.current!;
-                wheel.current = null;
-                const v = viewRef.current;
-                setBox({
-                  x: step.at.x - (step.at.x - v.x) * step.f,
-                  y: step.at.y - (step.at.y - v.y) * step.f,
-                  w: v.w * step.f,
-                  h: v.h * step.f,
-                });
-              }),
-            };
-          }}
-          onClick={(event) => {
-            if (!drawingMarks) return;
-            // The second click of a double click adds nothing; the double click finishes.
-            if (event.detail > 1) return;
-            const at = snapAt(event.clientX, event.clientY);
-            if (!at) return;
-            setDraft((now) =>
-              !now || now.x === null
-                ? { x: at.point.x, points: [], lastAt: Date.now() }
-                : { ...now, points: [...now.points, at.point], lastAt: Date.now() },
-            );
-          }}
-          onPointerDown={(event) => {
-            // With the height mark tool the left button sets points (click), it never pans.
-            if (drawingMarks && event.button === 0) return;
-            if (event.button === 0) setSelected(null);
-            event.currentTarget.setPointerCapture(event.pointerId);
-            drag.current = { x: event.clientX, y: event.clientY, box: view };
-          }}
-          onDoubleClick={() => finish(true)}
-          onPointerMove={(event) => {
-            const move = moving.current;
-            if (move) {
-              const p = toModel(event.clientX, event.clientY);
-              if (p) setMoveX({ id: move.id, x: move.startX + p.x - move.from });
-              return;
-            }
-            const start = drag.current;
-            const m = svg.current?.getScreenCTM();
-            if (!start || !m) {
-              if (drawingMarks) setHover(snapAt(event.clientX, event.clientY));
-              return;
-            }
-            setBox({
-              ...start.box,
-              x: start.box.x - (event.clientX - start.x) / m.a,
-              y: start.box.y - (event.clientY - start.y) / m.d,
-            });
-          }}
-          onPointerUp={() => {
-            const move = moving.current;
-            moving.current = null;
-            if (move && moveX && Math.abs(moveX.x - move.startX) > 1e-6)
-              onUpdateHeightMarks?.(move.id, { x: moveX.x });
-            setMoveX(null);
-            drag.current = null;
-          }}
-          onPointerLeave={() => setHover(null)}
-        >
-          <SectionGraphic
+        // The drawing is a canvas (docs/performance/SECTION_CANVAS.md); the SVG above it with
+        // the same view box holds what is edited and the storey marks with their text.
+        <div className="relative min-h-0 flex-1">
+          <SectionCanvas
             drawing={drawing}
+            view={view}
             cutFill={cutFill}
-            denominator={denominator}
+            hatch={HATCH_PAPER * denominator}
+            extent={extent}
             selectedIds={selectedIds}
           />
-          <g aria-label="Höhenkoten">
-            {marks.map((set) => {
-              const x = moveX?.id === set.id ? moveX.x : set.x;
-              const zs = set.points.map((p) => p.z);
-              return (
-                <g
-                  key={set.id}
-                  role="button"
-                  aria-label={`Höhenkoten ${set.points.length}`}
-                  aria-pressed={selected === set.id}
-                  className={drawingMarks ? "" : "cursor-move"}
-                  onPointerDown={(event) => {
-                    if (drawingMarks || event.button !== 0) return;
-                    event.stopPropagation();
-                    const p = toModel(event.clientX, event.clientY);
-                    if (!p) return;
-                    setSelected(set.id);
-                    svg.current?.setPointerCapture(event.pointerId);
-                    moving.current = { id: set.id, from: p.x, startX: set.x };
-                  }}
-                >
-                  {selected === set.id && (
-                    <rect
-                      x={x - mark * 2}
-                      y={-Math.max(...zs) - mark * 1.5}
-                      width={mark * 4}
-                      height={Math.max(...zs) - Math.min(...zs) + mark * 3}
-                      fill="var(--primary)"
-                      fillOpacity={0.12}
-                      stroke="var(--primary)"
-                      strokeWidth={1}
-                      vectorEffect="non-scaling-stroke"
-                    />
-                  )}
-                  {set.points.map((p, i) => (
+          <svg
+            ref={svg}
+            role="img"
+            aria-label={`Schnittzeichnung ${section.name}`}
+            className={`absolute inset-0 h-full w-full touch-none select-none ${drawingMarks ? "cursor-crosshair" : ""}`}
+            viewBox={`${view.x} ${view.y} ${view.w} ${view.h}`}
+            preserveAspectRatio="xMidYMid meet"
+            onWheel={(event) => {
+              const at = toModel(event.clientX, event.clientY);
+              if (!at) return;
+              const f = event.deltaY > 0 ? 1.15 : 1 / 1.15;
+              if (wheel.current) {
+                wheel.current.f *= f;
+                wheel.current.at = at;
+                return;
+              }
+              wheel.current = {
+                at,
+                f,
+                frame: requestAnimationFrame(() => {
+                  const step = wheel.current!;
+                  wheel.current = null;
+                  const v = viewRef.current;
+                  setBox({
+                    x: step.at.x - (step.at.x - v.x) * step.f,
+                    y: step.at.y - (step.at.y - v.y) * step.f,
+                    w: v.w * step.f,
+                    h: v.h * step.f,
+                  });
+                }),
+              };
+            }}
+            onClick={(event) => {
+              if (!drawingMarks) return;
+              // The second click of a double click adds nothing; the double click finishes.
+              if (event.detail > 1) return;
+              const at = snapAt(event.clientX, event.clientY);
+              if (!at) return;
+              setDraft((now) =>
+                !now || now.x === null
+                  ? { x: at.point.x, points: [], lastAt: Date.now() }
+                  : { ...now, points: [...now.points, at.point], lastAt: Date.now() },
+              );
+            }}
+            onPointerDown={(event) => {
+              // With the height mark tool the left button sets points (click), it never pans.
+              if (drawingMarks && event.button === 0) return;
+              if (event.button === 0) setSelected(null);
+              event.currentTarget.setPointerCapture(event.pointerId);
+              drag.current = { x: event.clientX, y: event.clientY, box: view };
+            }}
+            onDoubleClick={() => finish(true)}
+            onPointerMove={(event) => {
+              const move = moving.current;
+              if (move) {
+                const p = toModel(event.clientX, event.clientY);
+                if (p) setMoveX({ id: move.id, x: move.startX + p.x - move.from });
+                return;
+              }
+              const start = drag.current;
+              const m = svg.current?.getScreenCTM();
+              if (!start || !m) {
+                if (drawingMarks) setHover(snapAt(event.clientX, event.clientY));
+                return;
+              }
+              setBox({
+                ...start.box,
+                x: start.box.x - (event.clientX - start.x) / m.a,
+                y: start.box.y - (event.clientY - start.y) / m.d,
+              });
+            }}
+            onPointerUp={() => {
+              const move = moving.current;
+              moving.current = null;
+              if (move && moveX && Math.abs(moveX.x - move.startX) > 1e-6)
+                onUpdateHeightMarks?.(move.id, { x: moveX.x });
+              setMoveX(null);
+              drag.current = null;
+            }}
+            onPointerLeave={() => setHover(null)}
+          >
+            <SectionLevelMarks drawing={drawing} denominator={denominator} />
+            <g aria-label="Höhenkoten">
+              {marks.map((set) => {
+                const x = moveX?.id === set.id ? moveX.x : set.x;
+                const zs = set.points.map((p) => p.z);
+                return (
+                  <g
+                    key={set.id}
+                    role="button"
+                    aria-label={`Höhenkoten ${set.points.length}`}
+                    aria-pressed={selected === set.id}
+                    className={drawingMarks ? "" : "cursor-move"}
+                    onPointerDown={(event) => {
+                      if (drawingMarks || event.button !== 0) return;
+                      event.stopPropagation();
+                      const p = toModel(event.clientX, event.clientY);
+                      if (!p) return;
+                      setSelected(set.id);
+                      svg.current?.setPointerCapture(event.pointerId);
+                      moving.current = { id: set.id, from: p.x, startX: set.x };
+                    }}
+                  >
+                    {selected === set.id && (
+                      <rect
+                        x={x - mark * 2}
+                        y={-Math.max(...zs) - mark * 1.5}
+                        width={mark * 4}
+                        height={Math.max(...zs) - Math.min(...zs) + mark * 3}
+                        fill="var(--primary)"
+                        fillOpacity={0.12}
+                        stroke="var(--primary)"
+                        strokeWidth={1}
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    )}
+                    {set.points.map((p, i) => (
+                      <HeightMark
+                        key={i}
+                        x={x}
+                        z={p.z}
+                        side={p.x <= x ? "right" : "left"}
+                        kind={set.kind}
+                        size={mark}
+                        reach={p.x}
+                      />
+                    ))}
+                  </g>
+                );
+              })}
+            </g>
+            {drawingMarks && (
+              <g aria-label="Höhenkoten-Vorschau" pointerEvents="none" opacity={0.8}>
+                {(draft?.x ?? hover?.point.x) !== undefined && (
+                  <line
+                    x1={draft?.x ?? hover!.point.x}
+                    y1={view.y}
+                    x2={draft?.x ?? hover!.point.x}
+                    y2={view.y + view.h}
+                    stroke="var(--primary)"
+                    strokeWidth={0.75}
+                    strokeDasharray="6 4"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                )}
+                {draft?.x !== null &&
+                  draft !== null &&
+                  [...draft.points, ...(hover ? [hover.point] : [])].map((p, i) => (
                     <HeightMark
                       key={i}
-                      x={x}
-                      z={p.z}
-                      side={p.x <= x ? "right" : "left"}
-                      kind={set.kind}
+                      x={draft.x!}
+                      z={p.y}
+                      side={p.x <= draft.x! ? "right" : "left"}
+                      kind={heightTool.kind}
                       size={mark}
                       reach={p.x}
                     />
                   ))}
-                </g>
-              );
-            })}
-          </g>
-          {drawingMarks && (
-            <g aria-label="Höhenkoten-Vorschau" pointerEvents="none" opacity={0.8}>
-              {(draft?.x ?? hover?.point.x) !== undefined && (
-                <line
-                  x1={draft?.x ?? hover!.point.x}
-                  y1={view.y}
-                  x2={draft?.x ?? hover!.point.x}
-                  y2={view.y + view.h}
-                  stroke="var(--primary)"
-                  strokeWidth={0.75}
-                  strokeDasharray="6 4"
-                  vectorEffect="non-scaling-stroke"
-                />
-              )}
-              {draft?.x !== null &&
-                draft !== null &&
-                [...draft.points, ...(hover ? [hover.point] : [])].map((p, i) => (
-                  <HeightMark
-                    key={i}
-                    x={draft.x!}
-                    z={p.y}
-                    side={p.x <= draft.x! ? "right" : "left"}
-                    kind={heightTool.kind}
-                    size={mark}
-                    reach={p.x}
+                {hover && hover.kind !== "free" && (
+                  <circle
+                    cx={hover.point.x}
+                    cy={-hover.point.y}
+                    r={mark * 0.35}
+                    fill="none"
+                    stroke="var(--primary)"
+                    strokeWidth={1.5}
+                    vectorEffect="non-scaling-stroke"
                   />
-                ))}
-              {hover && hover.kind !== "free" && (
-                <circle
-                  cx={hover.point.x}
-                  cy={-hover.point.y}
-                  r={mark * 0.35}
-                  fill="none"
-                  stroke="var(--primary)"
-                  strokeWidth={1.5}
-                  vectorEffect="non-scaling-stroke"
-                />
-              )}
-            </g>
-          )}
-        </svg>
+                )}
+              </g>
+            )}
+          </svg>
+        </div>
       )}
     </div>
   );

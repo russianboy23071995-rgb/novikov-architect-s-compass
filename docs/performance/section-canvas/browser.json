@@ -1,0 +1,57 @@
+{
+  "runtime": "Chromium (Claude Browser-Pane), Vite-Entwicklungsserver, Bildschirm mit 144 Hz (7 ms je Bild), Gesamtmodell (benchmarks/gesamt-fixture.ts)",
+  "date": "2026-11-03",
+  "stepMethod": "docs/performance/section-zoom/zoom-measure.js: Mausrad-Schritt, 150 ms Pause, Zeit bis der neue Bildausschnitt gezeichnet ist",
+  "gestureMethod": "24 Mausrad-Schritte im Abstand von 16, 40 und 80 ms, Abstände zwischen den Bildern (requestAnimationFrame)",
+  "steps": {
+    "3000": {
+      "Südansicht": { "svgElements": 52, "openMs": 423, "zoomMedianMs": 13, "zoomMaxMs": 21 },
+      "Schnitt A-A": { "svgElements": 52, "openMs": 132, "zoomMedianMs": 10, "zoomMaxMs": 14 }
+    },
+    "20000": {
+      "Südansicht": {
+        "svgElements": 52,
+        "openMs": 1404,
+        "zoomMedianMs": 114,
+        "zoomMaxMs": 178,
+        "note": "Pause 150 ms länger als die 120 ms bis zum scharfen Nachzeichnen: der Schritt wartet auf das Nachzeichnen"
+      },
+      "Schnitt A-A": { "svgElements": 52, "openMs": 243, "zoomMedianMs": 20, "zoomMaxMs": 30 }
+    }
+  },
+  "gesture20000": {
+    "Südansicht": [
+      { "spacingMs": 16, "frames": 59, "medianFrameMs": 7, "p95FrameMs": 7, "maxFrameMs": 7 },
+      { "spacingMs": 40, "frames": 144, "medianFrameMs": 7, "p95FrameMs": 7, "maxFrameMs": 14 },
+      { "spacingMs": 80, "frames": 289, "medianFrameMs": 7, "p95FrameMs": 7, "maxFrameMs": 7 }
+    ],
+    "Schnitt A-A": [
+      { "spacingMs": 16, "frames": 59, "medianFrameMs": 7, "p95FrameMs": 7, "maxFrameMs": 7 },
+      { "spacingMs": 40, "frames": 146, "medianFrameMs": 7, "p95FrameMs": 7, "maxFrameMs": 7 },
+      { "spacingMs": 80, "frames": 288, "medianFrameMs": 7, "p95FrameMs": 7, "maxFrameMs": 7 }
+    ]
+  },
+  "sharp20000": {
+    "Südansicht": { "untilSharpAfterStepMs": [174, 176, 179, 183, 246], "themeRedrawMs": 142 },
+    "Schnitt A-A": { "untilSharpAfterStepMs": [133, 134, 136, 138, 141], "themeRedrawMs": 138 }
+  },
+  "imageComparison3000": {
+    "method": "SVG des alten Stands mit aufgelösten Farben als Bild gerastert gegen Canvas plus SVG-Ebene des neuen Stands, gleicher Ausschnitt; Pixel mit mehr als 32 bzw. 128 Abweichung in einem Kanal",
+    "light": [
+      { "view": "Südansicht", "zoomSteps": 0, "inked": 105239, "differ32": 0, "differ128": 0 },
+      { "view": "Südansicht", "zoomSteps": 8, "inked": 291886, "differ32": 0, "differ128": 0 },
+      { "view": "Schnitt A-A", "zoomSteps": 0, "inked": 377185, "differ32": 0, "differ128": 0 },
+      { "view": "Schnitt A-A", "zoomSteps": 10, "inked": 675714, "differ32": 0, "differ128": 0 },
+      { "view": "Schnitt D-D", "zoomSteps": 0, "inked": 101866, "differ32": 0, "differ128": 0 },
+      {
+        "view": "Schnitt D-D (geschichtete Wand)",
+        "zoomSteps": 14,
+        "inked": 507944,
+        "differ32": 70,
+        "differ128": 0
+      }
+    ],
+    "dark": "gleiche Werte wie hell",
+    "sensitivity": "Canvas allein ohne SVG-Ebene gegen das alte SVG (Südansicht, eingepasst): 336 Pixel abweichend (die Geschosskoten fehlen)"
+  }
+}

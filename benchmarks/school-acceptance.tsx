@@ -420,7 +420,9 @@ async function viewSteps() {
   await step(
     "Schnitt-Tab öffnen",
     () => click(sectionButton()!),
-    () => !!tab("Schnitt") && !!document.querySelector("g[data-element-id]"),
+    // The drawing is a canvas (docs/performance/SECTION_CANVAS.md); sharp once it is drawn.
+    () =>
+      !!tab("Schnitt") && !!document.querySelector(`canvas[data-section-canvas][data-sharp="1"]`),
     120000,
   );
   await step(
