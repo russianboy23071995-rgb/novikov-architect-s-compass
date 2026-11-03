@@ -101,6 +101,8 @@ export function sectionDrawing(project: Project, section: Section): SectionDrawi
 
   // Edges shared by faces of different planes (or by one face only) are visible edges.
   const edgeNormals = new Map<string, Vec3[]>();
+  // Edges where only facets of one curved surface meet (a round opening) stay undrawn.
+  const roughEdges = new Set<string>();
   const edgeKey = (a: Vec3, b: Vec3) => {
     const ka = key(a),
       kb = key(b);
@@ -112,10 +114,12 @@ export function sectionDrawing(project: Project, section: Section): SectionDrawi
       const list = edgeNormals.get(k);
       if (list) list.push(face.normal);
       else edgeNormals.set(k, [face.normal]);
+      if (!(face as Face).smooth) roughEdges.add(k);
     });
   const visibleEdge = (k: string) => {
     const normals = edgeNormals.get(k)!;
     if (normals.length < 2) return true;
+    if (!roughEdges.has(k)) return false;
     const [n] = normals;
     return normals.some((m) => n![0] * m[0] + n![1] * m[1] + n![2] * m[2] < 1 - 1e-6);
   };

@@ -873,7 +873,7 @@ export function BimPlan({
   } else if (selection?.kind === "slabOpening") {
     storeyOf(project)
       .slabOpenings?.find((o) => o.id === selection.id)
-      ?.points.forEach((point, index) =>
+      ?.points?.forEach((point, index) =>
         handles.push({ point, index, label: `Durchbruchecke ${index + 1}` }),
       );
   } else if (selection?.kind === "line") {

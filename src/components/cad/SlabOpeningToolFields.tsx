@@ -7,8 +7,8 @@ export function SlabOpeningToolFields({
   construction,
   onConstruction,
 }: {
-  construction: HatchConstruction;
-  onConstruction: (construction: HatchConstruction) => void;
+  construction: HatchConstruction | "circle";
+  onConstruction: (construction: HatchConstruction | "circle") => void;
 }) {
   return (
     <section aria-label="Werkzeug Deckendurchbruch" className="flex flex-wrap items-end gap-3">
@@ -17,18 +17,19 @@ export function SlabOpeningToolFields({
         <select
           aria-label="Deckendurchbruch-Erstellung"
           value={construction}
-          onChange={(e) => onConstruction(e.target.value as HatchConstruction)}
+          onChange={(e) => onConstruction(e.target.value as HatchConstruction | "circle")}
           className="block rounded border bg-background p-1"
         >
           <option value="diagonal">Rechteck: Diagonale</option>
           <option value="side-height">Rechteck: Seite und Höhe</option>
+          <option value="circle">Kreis: Mittelpunkt und Rand</option>
           <option value="polygon">Polygon per Klick</option>
           <option value="boundary">Geschlossene Kontur übernehmen</option>
         </select>
       </label>
       <p className="text-xs text-muted-foreground">
         Ganz innerhalb einer Decke zeichnen; der Durchbruch geht durch die ganze Deckenstärke.
-        Darstellung nach DIN 1356-1: Umriss mit Diagonalkreuz.
+        Darstellung: Umriss mit schwarzem Eckkeil, rund mit schwarzer Sichel.
       </p>
     </section>
   );

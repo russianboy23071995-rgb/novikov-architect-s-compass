@@ -112,6 +112,7 @@ import { useWindowPlacement } from "./useWindowPlacement";
 import { useDoorPlacement } from "./useDoorPlacement";
 import { SlabToolFields } from "./SlabToolFields";
 import { SlabOpeningToolFields } from "./SlabOpeningToolFields";
+import { slabOpeningOutline } from "@/domain/elements/slab/opening";
 import { DoorPlacementFields } from "./DoorPlacementFields";
 import { useSelectionMove } from "./useSelectionMove";
 import { useElementSelection } from "./useElementSelection";
@@ -590,8 +591,15 @@ export function CadWorkspace({
     (tool === "room" && !roomByWalls);
   const pathDrawing = tool === "line" || areaTool || roofPhase === "line";
   const [hatchConstruction, setHatchConstruction] = useState<HatchConstruction>("polygon");
+  // Round Deckendurchbruch (docs/DECKENDURCHBRUCH.md): centre, then a point on the rim.
+  const [openingCircle, setOpeningCircle] = useState(false);
+  const circleTool = tool === "slabOpening" && openingCircle;
   const construction: HatchConstruction =
-    tool === "room" && roomConstruction !== "walls" ? roomConstruction : hatchConstruction;
+    tool === "room" && roomConstruction !== "walls"
+      ? roomConstruction
+      : circleTool
+        ? "diagonal"
+        : hatchConstruction;
   const findHatchBoundary = useMemo(
     () =>
       areaTool && construction === "boundary" ? prepareHatchBoundaries(project, visibility) : null,
@@ -601,7 +609,7 @@ export function CadWorkspace({
   const hatchFill = toolDefaults.hatch.fill;
   // Regel 3 (docs/POLYGON_REGELN.md): each click-by-click tool declares how it closes.
   const pathClosure: PathClosure = areaTool
-    ? construction === "polygon"
+    ? construction === "polygon" && !circleTool
       ? "polygon"
       : "none"
     : tool === "line" && lineKind === "polyline"
@@ -1036,7 +1044,9 @@ export function CadWorkspace({
         (selection.kind === "slab"
           ? storeyOf(project).slabs!.find((slab) => slab.id === selection.id)!.points[0]!
           : selection.kind === "slabOpening"
-            ? storeyOf(project).slabOpenings!.find((o) => o.id === selection.id)!.points[0]!
+            ? ((o) => o.circle?.center ?? o.points![0]!)(
+                storeyOf(project).slabOpenings!.find((o) => o.id === selection.id)!,
+              )
             : selection.kind === "roof"
               ? storeyOf(project).roofs!.find((roof) => roof.id === selection.id)!.points[0]!
               : selection.kind === "room"
@@ -1385,10 +1395,11 @@ export function CadWorkspace({
       />
     ) : owner === "slabOpening" ? (
       <SlabOpeningToolFields
-        construction={hatchConstruction}
+        construction={openingCircle ? "circle" : hatchConstruction}
         onConstruction={(construction) => {
           cancelInteraction();
-          setHatchConstruction(construction);
+          setOpeningCircle(construction === "circle");
+          if (construction !== "circle") setHatchConstruction(construction);
         }}
       />
     ) : owner === "slab" ? (
@@ -1835,7 +1846,16 @@ export function CadWorkspace({
             : tool === "slab"
               ? { kind: "slab", points, ...toolDefaults.slab }
               : tool === "slabOpening"
-                ? { kind: "slabOpening", points }
+                ? circleTool
+                  ? {
+                      kind: "slabOpening",
+                      circle: {
+                        center: points[0]!,
+                        diameter:
+                          2 * Math.hypot(points[1]!.x - points[0]!.x, points[1]!.y - points[0]!.y),
+                      },
+                    }
+                  : { kind: "slabOpening", points }
                 : tool === "room"
                   ? {
                       kind: "room",
@@ -2263,7 +2283,8 @@ export function CadWorkspace({
         return;
       }
       const next = click.points;
-      if (
+      if (circleTool && next.length === 2) finishPath(next);
+      else if (
         areaTool &&
         construction !== "polygon" &&
         next.length === (construction === "diagonal" ? 2 : 3)
@@ -3766,9 +3787,21 @@ export function CadWorkspace({
                             }
                           : areaTool && construction !== "polygon"
                             ? (point) =>
-                                construction === "boundary"
-                                  ? (findHatchBoundary?.(point) ?? [])
-                                  : rectangleContour(construction, [...pathPoints, point])
+                                circleTool
+                                  ? slabOpeningOutline({
+                                      circle: {
+                                        center: pathPoints[0] ?? point,
+                                        diameter:
+                                          2 *
+                                          Math.hypot(
+                                            point.x - (pathPoints[0] ?? point).x,
+                                            point.y - (pathPoints[0] ?? point).y,
+                                          ),
+                                      },
+                                    })
+                                  : construction === "boundary"
+                                    ? (findHatchBoundary?.(point) ?? [])
+                                    : rectangleContour(construction, [...pathPoints, point])
                             : undefined
                       }
                       wallOutlineWidth={wallWidth}

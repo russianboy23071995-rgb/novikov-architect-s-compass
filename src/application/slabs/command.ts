@@ -28,6 +28,11 @@ export function previewSlabCommand(
       text.trim(),
     );
   if (opening) return previewOpeningCommand(project, target, opening);
+  const round =
+    /^(?:deckendurchbruch|durchbruch)\s+(?:ø|d)\s*=?\s*(\d+(?:[.,]\d+)?)\s*(mm|cm|m)?$/iu.exec(
+      text.trim(),
+    );
+  if (round) return previewRoundOpeningCommand(project, target, round);
   if (!measure) return null;
   if (target?.kind !== "slab") throw new Error("Bitte zuerst eine Decke auswählen.");
   const slab = storeyOf(project).slabs?.find((s) => s.id === target.id);
@@ -80,5 +85,36 @@ function previewOpeningCommand(
       ],
     }),
     summary: `Deckendurchbruch ${format(width)} × ${format(depth)} m in der Mitte der Decke`,
+  };
+}
+
+/** „Deckendurchbruch ø 20 cm“: a round opening of that diameter in the middle of the outline box
+ * of the selected slab (schema 52); refused outside the slab like every opening. */
+function previewRoundOpeningCommand(
+  project: Project,
+  target: ElementTarget | null,
+  match: RegExpExecArray,
+): { result: Project; summary: string } {
+  if (target?.kind !== "slab") throw new Error("Bitte zuerst eine Decke auswählen.");
+  const slab = storeyOf(project).slabs?.find((s) => s.id === target.id);
+  if (!slab) throw new Error("Die ausgewählte Decke existiert nicht mehr.");
+  const diameter =
+    Number(match[1]!.replace(",", ".")) /
+    units[(match[2] ?? "m").toLowerCase() as keyof typeof units];
+  if (!(diameter > 0))
+    throw new Error("Der Durchmesser des Durchbruchs muss größer als null sein.");
+  const xs = slab.points.map((p) => p.x),
+    ys = slab.points.map((p) => p.y);
+  const center = {
+    x: (Math.min(...xs) + Math.max(...xs)) / 2,
+    y: (Math.min(...ys) + Math.max(...ys)) / 2,
+  };
+  return {
+    result: addSlabOpening(project, {
+      id: `slab-opening-${crypto.randomUUID()}`,
+      slabId: slab.id,
+      circle: { center, diameter },
+    }),
+    summary: `Runder Deckendurchbruch ø ${diameter.toLocaleString("de-DE", { maximumFractionDigits: 6 })} m in der Mitte der Decke`,
   };
 }

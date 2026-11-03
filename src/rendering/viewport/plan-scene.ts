@@ -1,7 +1,7 @@
 import { PLAN_CUT_HEIGHT, roofPlanView } from "./roof-plan.ts";
 import { columnLevels, columnOutline } from "../../domain/elements/column/model.ts";
 import { stairGeometry, stairPlan } from "../../domain/elements/stair/model.ts";
-import { slabOpeningCross } from "../../domain/elements/slab/opening.ts";
+import { slabOpeningSymbol } from "../../domain/elements/slab/opening.ts";
 import type { HatchPatternDefinition } from "../../domain/elements/hatch/pattern.ts";
 import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
 import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
@@ -64,9 +64,10 @@ export function derivePlanScene(
     // Incoming cores carried through the host's cover layers at T joints (L09 U2).
     layerJoints: tJunctionLayerJoints(plan.walls, storey.wallTJunctions, wallLayers),
     slabs: new Map(plan.slabs.map((s) => [s.id, s])),
-    // Deckendurchbruch after DIN 1356-1: outline and both diagonals (docs/DECKENDURCHBRUCH.md).
+    // Deckendurchbruch: outline with a symmetric black corner wedge, a circle half black
+    // (template of the user, docs/DECKENDURCHBRUCH.md).
     slabOpenings: new Map(
-      plan.slabOpenings.map((o) => [o.id, { opening: o, cross: slabOpeningCross(o.points) }]),
+      plan.slabOpenings.map((o) => [o.id, { opening: o, symbol: slabOpeningSymbol(o) }]),
     ),
     roofs: new Map(plan.roofs.map((r) => [r.id, r])),
     rooms: new Map(plan.rooms.map((r) => [r.id, r])),

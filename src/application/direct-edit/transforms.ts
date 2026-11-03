@@ -35,7 +35,11 @@ export function editablePoints(project: Project, target: TransformTarget): Point
     if (slab) return slab.points.map((point) => ({ ...point }));
   } else if (target.kind === "slabOpening") {
     const opening = storeyOf(project).slabOpenings?.find((item) => item.id === target.id);
-    if (opening) return opening.points.map((point) => ({ ...point }));
+    if (opening?.circle)
+      throw new Error(
+        "Ein runder Durchbruch hat keine Ecken; den Durchmesser in den Eigenschaften ändern.",
+      );
+    if (opening) return opening.points!.map((point) => ({ ...point }));
   } else if (target.kind === "roof") {
     const roof = storeyOf(project).roofs?.find((item) => item.id === target.id);
     if (roof) return roof.points.map((point) => ({ ...point }));

@@ -405,34 +405,47 @@ export function PlanSceneContent({
           </g>
         );
       })}
-      {plan.slabOpenings.map(({ opening, cross }) => {
-        // DIN 1356-1: outline with both diagonals, in the slab contour colour and width.
-        const stroke = selectedIds.has(opening.id) ? "#94a3b8" : "var(--primary)";
+      {plan.slabOpenings.map(({ opening, symbol }) => {
+        // Template of the user (docs/DECKENDURCHBRUCH.md): outline with a symmetric black corner
+        // wedge, a circle with its upper left half black; slab contour colour and width.
+        const ink = selectedIds.has(opening.id) ? "#94a3b8" : "var(--primary)";
         const width = wallOutlineWidth / pixelsPerMetre;
+        const pick = {
+          ...selectProps("slabOpening", opening.id),
+          "aria-label": `Deckendurchbruch ${opening.id}`,
+          fill: "transparent",
+          stroke: ink,
+          strokeWidth: width,
+          pointerEvents: placement ? ("none" as const) : ("all" as const),
+          className: "cursor-pointer outline-none focus-visible:stroke-sky-300",
+        };
+        const ring = (points: readonly { x: number; y: number }[]) =>
+          points.map((p) => `${p.x},${-p.y}`).join(" ");
         return (
           <g key={opening.id} data-slab-opening={opening.id}>
-            <polygon
-              {...selectProps("slabOpening", opening.id)}
-              aria-label={`Deckendurchbruch ${opening.id}`}
-              points={opening.points.map((p) => `${p.x},${-p.y}`).join(" ")}
-              fill="transparent"
-              stroke={stroke}
-              strokeWidth={width}
-              pointerEvents={placement ? "none" : "all"}
-              className="cursor-pointer outline-none focus-visible:stroke-sky-300"
-            />
-            {cross.map(([a, b], i) => (
-              <line
-                key={i}
-                x1={a.x}
-                y1={-a.y}
-                x2={b.x}
-                y2={-b.y}
-                stroke={stroke}
-                strokeWidth={width / 2}
-                pointerEvents="none"
-              />
-            ))}
+            {symbol.kind === "circle" ? (
+              <>
+                <path
+                  data-symbol="half"
+                  d={`M ${symbol.half[0].x} ${-symbol.half[0].y} A ${symbol.radius} ${symbol.radius} 0 0 0 ${symbol.half[1].x} ${-symbol.half[1].y} Z`}
+                  fill={ink}
+                  pointerEvents="none"
+                />
+                <circle {...pick} cx={symbol.center.x} cy={-symbol.center.y} r={symbol.radius} />
+              </>
+            ) : (
+              <>
+                {symbol.wedge && (
+                  <polygon
+                    data-symbol="wedge"
+                    points={ring(symbol.wedge)}
+                    fill={ink}
+                    pointerEvents="none"
+                  />
+                )}
+                <polygon {...pick} points={ring(symbol.outline)} />
+              </>
+            )}
           </g>
         );
       })}
