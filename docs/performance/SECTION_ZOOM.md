@@ -37,7 +37,7 @@ Gemessen mit `section-zoom/zoom-measure.js`, vorher und nachher mit derselben Me
   - 14-Modell-Hash `e42aa36e…` unverändert.
 - **Browser:**
   - Südansicht eingezoomt, Kanten, Fenster und gestrichelte Geschosslinien richtig gezeichnet.
-  - Keine Konsolenfehler.
+  - Nach frischem Laden keine Konsolenfehler beim Öffnen und Zoomen. Die Meldung „Hydration failed“ beim Laden der Seite gab es schon vorher. „Component is not a function“ trat nur nach dem Hot-Reload für die Vorher-Messung auf.
 
 ## Grenzen
 
