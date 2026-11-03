@@ -60,3 +60,57 @@ Grundriss, Layouts, Plankopf und Abbilder merken sich ihren Ausschnitt schon je 
 
 - Ein Abbild öffnet sich wie bisher über den Navigator.
 - Den Wechsel zwischen Layout und Plankopfplaner habe ich nur im Test geprüft, nicht im Browser.
+
+## Tabwechsel flüssig (03.11.2026)
+
+Nutzerhinweis: Das Wechseln der Tabs war nicht ganz flüssig. Gemessen wurde vom Klick auf den Tab bis zum zweiten gezeichneten Bild, im Entwicklungsserver, Chromium, Fenster etwa 1 600 × 1 200, mit dem Gesamtmodell.
+
+**Ursache:** Grundriss, Layoutbuch und 3D teilten sich eine Zeichenfläche, die bei jedem Wechsel neu aufgebaut wurde. Hinter dem Schnitt wurde der Grundriss unnötig mitgerendert. Beim Wechsel fielen außerdem drei weitere Kosten an:
+
+- Die eingefügten Grundrisse im Layout wurden bei jedem Rendern komplett durchlaufen, weil ihre Läufe und ihre Maßstabsangabe jedes Mal neu entstanden.
+- Die Werkzeugleisten renderten bei jedem Rendern des Arbeitsbereichs neu.
+- Der Ansichtsbezug des Grundrisses war nach dem Layoutbuch ein neues Objekt mit gleichem Inhalt.
+
+**Umsetzung:**
+
+- **Eine Zeichenfläche je Art** (\`CadWorkspace.tsx\`, \`keepViewport\`): Grundriss, 3D und Layoutbuch haben je eine Fläche. Die gerade nicht gezeigten bleiben bestehen, ausgeblendet mit \`content-visibility: hidden\` und \`inert\`. Der Browser überspringt ihre Darstellungsarbeit, behält aber ihren Zustand. Hinter dem Schnitt bleibt die Fläche eingefroren. Ein neues Projekt verwirft die gehaltenen Flächen.
+  - Mit \`display: none\` musste der Browser beim Einblenden das Layout aller SVG-Elemente neu rechnen.
+  - Mit \`visibility: hidden\` rechnete er die verborgene Fläche bei jeder Änderung am Grundriss mit.
+  - Beides wurde gemessen und verworfen.
+- **Eingefügte Grundrisse** (\`BimPlan.tsx\`, \`PlacedPlanRuns\`): memoisiert mit stabilen Läufen und stabiler Maßstabsangabe. Die Layout-Fläche rendert beim Wechsel in 7 statt 166 ms (3 000 Elemente).
+- **Werkzeugleisten** (\`stable-handlers.tsx\`): \`TopToolbar\` und \`ToolRail\` sind memoisiert. Ihre Rückrufe gehen über stabile Hüllen, die immer die aktuelle Funktion aufrufen. Sie rendern nur noch, wenn sich ein angezeigter Wert ändert, zum Beispiel Geschossname oder erlaubte Werkzeuge. Das gilt auch außerhalb des Tabwechsels, etwa bei Auswahl oder Hover.
+- **Ansichtsbezug:** wird nach Projekt, Ebenensicht und Abbild gemerkt. Der Grundriss bekommt nach dem Layoutbuch dasselbe Objekt zurück.
+- **Suche nach der sichtbaren Fläche:** Das Vorschaubild der Sicherung und der Abnahmelauf suchen nur in der gezeigten Fläche (\`data-hidden-tab\`).
+
+**Ergebnis (Median je Wechsel):**
+
+| Wechsel                | 3 000 vorher | 3 000 nachher | 20 000 vorher | 20 000 nachher |
+| ---------------------- | -----------: | ------------: | ------------: | -------------: |
+| ins Layoutbuch         |   350–380 ms |    200–220 ms |     1,6–1,7 s |    0,25–0,27 s |
+| Layoutbuch → Schnitt   |       246 ms |        191 ms |        0,65 s |         0,23 s |
+| 3D → Grundriss         |       190 ms |        123 ms |        0,53 s |         0,17 s |
+| Grundriss → 3D         |       128 ms |        124 ms |        0,31 s |         0,13 s |
+| Schnitt → 3D           |       130 ms |        122 ms |        0,30 s |         0,11 s |
+| Layoutbuch → Grundriss |       125 ms |    ca. 230 ms |        0,61 s |         0,45 s |
+
+- **3 000 nachher:** gemessen mit \`content-visibility\`, aber vor dem Merken des Ansichtsbezugs.
+- **20 000 nachher:** gemessen mit allen Änderungen. Der Wechsel Layoutbuch → Grundriss bei 3 000 Elementen ist mit dem Merken des Ansichtsbezugs nicht neu gemessen.
+
+**Nachweis:**
+
+- **Browser:**
+  - Ein Klick trifft in jedem Tab nur die gezeigte Fläche, die verborgenen sind \`inert\`.
+  - Wand im Grundriss gewählt, ins Layoutbuch gewechselt, Entf gedrückt: Die Wand ist noch da, die Elementzahl bleibt bei 4 411. Zurück im Grundriss lässt sie sich wieder auswählen.
+  - Keine Konsolenfehler.
+- **Prüfungen:**
+  - 1553 Tests grün,
+  - Typprüfung, Lint (eine Warnung, die es vorher schon gab), Architekturprüfung ohne Befund,
+  - 14-Modell-Hash \`e42aa36e…\` unverändert.
+
+**Grenzen:**
+
+- **Messbedingungen:** Gemessen wurde im Entwicklungsserver; ein Produktionsbuild ist schneller. Die Vorher-Werte wurden in einem Fenster ähnlicher, aber nicht gleicher Größe gemessen. Die Wiederholung im selben Fenster brach ab: ein Klick des Nutzers kam dazwischen, und die alten Wechsel dauerten länger als das Zeitlimit.
+- **Erstes Öffnen:** Das erste Öffnen eines Tabs und ein neuer Inhalt im Tab (anderes Geschoss, anderer Schnitt, anderes Layout) bauen weiter neu auf.
+- **Speicher:** Bis zu drei Zeichenflächen bestehen gleichzeitig.
+- **Ungeklärter Rest:** Layoutbuch → Grundriss braucht bei 20 000 Elementen noch etwa 0,45 s; nicht weiter zerlegt.
+- **Tests:** Für die stabilen Hüllen und das Halten der Flächen gibt es keinen eigenen Test, weil die Testläufe keine React-Komponenten rendern. Belegt sind sie durch die Browserprobe.

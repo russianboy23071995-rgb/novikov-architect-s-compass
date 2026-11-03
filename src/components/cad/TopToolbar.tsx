@@ -1,4 +1,5 @@
 import type { VisibilityAction } from "@/application/layers/visibility-actions";
+import { withStableHandlers } from "./stable-handlers";
 import {
   Ruler,
   Filter,
@@ -138,7 +139,8 @@ function IconControl({
   );
 }
 
-export function TopToolbar(props: TopToolbarProps) {
+/** Memoised with stable callbacks: workspace renders (tab switches, hover) skip it (docs/TABS.md). */
+export const TopToolbar = withStableHandlers(function TopToolbar(props: TopToolbarProps) {
   return (
     <header className="glass-panel-strong z-40 shrink-0 overflow-hidden rounded-lg">
       <div className="flex h-11 min-w-0 items-center gap-2 overflow-x-auto px-2.5">
@@ -471,4 +473,4 @@ export function TopToolbar(props: TopToolbarProps) {
       </div>
     </header>
   );
-}
+});

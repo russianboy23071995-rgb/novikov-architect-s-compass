@@ -97,7 +97,11 @@ async function until(check: () => boolean, timeout = 60000) {
     await frame();
   }
 }
-const label = (text: string) => document.querySelector<HTMLElement>(`[aria-label="${text}"]`);
+// Hidden tabs keep their drawing area (docs/TABS.md); only shown elements count.
+const label = (text: string) =>
+  [...document.querySelectorAll<HTMLElement>(`[aria-label="${text}"]`)].find(
+    (e) => !e.closest("[data-hidden-tab]"),
+  ) ?? null;
 const button = (text: string) =>
   [...document.querySelectorAll<HTMLButtonElement>("button")].find(
     (b) => b.textContent?.trim() === text && !b.disabled,
