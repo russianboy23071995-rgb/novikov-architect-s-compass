@@ -115,6 +115,7 @@ import {
 import type { ToolSnapPolicy } from "@/application/tools/snapping";
 import { useHoverReference } from "./useHoverReference";
 import { getLocalSnapSources } from "@/application/snapping/local-sources";
+import { combineSourceIndexes } from "@/constraints/snapping/local-source-index";
 import { panPlan, planScaleBar, planViewBox, zoomPlan } from "@/rendering/viewport/plan-camera";
 import type { PlanCamera, ViewSize } from "@/rendering/viewport/plan-camera";
 import { previewEdit } from "@/application/direct-edit/controller";
@@ -254,6 +255,8 @@ export type BimPlanProps = {
       }
     | null
     | undefined;
+  /** Snapping to what the drawings placed on a layout show (docs/LAYOUTBUCH.md), read only. */
+  placedSnap?: { sources: LocalSnapSources; ids: ReadonlySet<string> } | null | undefined;
   /** Model point of the click that selected the element; picks the segment of a line (S3). */
   selectionAnchor?: Point | null | undefined;
   /** Length helper of a selected line: new length of a segment (docs/LINIEN.md, S3). */
@@ -376,6 +379,7 @@ export function BimPlan({
   selectionAnchor,
   onLineLength,
   tracing,
+  placedSnap,
   sectionDraft,
   textPreview,
   closeAtStart = false,
@@ -548,14 +552,19 @@ export function BimPlan({
   useEffect(() => setHover(null), [endpointSnap, camera, editSession]);
   const pinnedReferences = useMemo(() => toolPinnedReferences(snapping), [snapping]);
   const modelSources = useMemo(() => getLocalSnapSources(project), [project]);
-  const traceSnap = tracing?.snap ?? null;
+  const traceSnap = tracing?.snap ?? placedSnap ?? null;
   const sourceQuery = useMemo(
     () =>
       visibility && traceSnap
         ? createTracedToolSourceQuery(project, visibility, visibility.context, snapping, traceSnap)
         : visibility
           ? createVisibleToolSourceQuery(project, visibility, visibility.context, snapping)
-          : createToolSourceQuery(modelSources, snapping),
+          : traceSnap
+            ? createToolSourceQuery(
+                combineSourceIndexes([modelSources, traceSnap.sources]),
+                snapping,
+              )
+            : createToolSourceQuery(modelSources, snapping),
     [modelSources, snapping, project, visibility, traceSnap],
   );
   const density = useSnapDensity(

@@ -6,6 +6,7 @@ import { RoomListPanel } from "./RoomListPanel";
 import { ElementListPanel } from "./ElementListPanel";
 import { FilterWindow, type FilterPlace } from "./FilterWindow";
 import { placedDrawingKey, sameDrawingKey } from "@/rendering/viewport/placed-freshness";
+import { placedDrawingSnap } from "@/application/snapping/placed-sources";
 import { filterElements, NO_CRITERIA, similarCriteria } from "@/application/selection/filter";
 import { sectionShownIds } from "@/rendering/viewport/section-drawing";
 import { ToolSettingsWindow } from "./ToolSettingsWindow";
@@ -566,6 +567,61 @@ export function CadWorkspace({
       ...(backdrop ? (storeyOf(backdrop).drawings ?? []).map((d) => view(d, false)) : []),
       ...(storeyOf(project).drawings ?? []).map((d) => view(d, true)),
     ].filter((v): v is PlacedDrawingView => v !== null);
+  })();
+  // Snapping to what the placed drawings show (docs/LAYOUTBUCH.md): rebuilt only when a drawing
+  // moves, is cropped or shows another state.
+  const placedSnapMemo = useRef<{
+    key: string;
+    contents: object[];
+    value: ReturnType<typeof placedDrawingSnap>;
+  } | null>(null);
+  const placedSnap = (() => {
+    if (!placedDrawingViews?.length) return null;
+    const key = placedDrawingViews
+      .map((v) =>
+        [
+          v.id,
+          v.position.x,
+          v.position.y,
+          v.mask.x0,
+          v.mask.x1,
+          v.mask.y0,
+          v.mask.y1,
+          v.center.x,
+          v.center.y,
+          v.denominator,
+        ].join(","),
+      )
+      .join("|");
+    const contents = placedDrawingViews.map((v) =>
+      v.content.kind === "plan" ? v.content.source : v.content.drawing,
+    );
+    const last = placedSnapMemo.current;
+    if (last && last.key === key && last.contents.every((c, i) => c === contents[i]))
+      return last.value;
+    const value = placedDrawingSnap(
+      placedDrawingViews.map((v) => ({
+        id: v.id,
+        position: v.position,
+        mask: v.mask,
+        center: v.center,
+        denominator: v.denominator,
+        content:
+          v.content.kind === "plan"
+            ? v.content
+            : {
+                kind: "section" as const,
+                drawing: v.content.drawing,
+                rings: v.content.drawing.cuts.flatMap((c) => c.loops),
+                paths: [
+                  ...v.content.drawing.cuts.flatMap((c) => c.open),
+                  ...v.content.drawing.views.flatMap((view) => view.edges),
+                ],
+              },
+      })),
+    );
+    placedSnapMemo.current = { key, contents, value };
+    return value;
   })();
   const autosave = useLocalAutosave(realProject, editing.projectLoad ?? realProject.id);
   const activeDocument = project.drawingDocuments?.find((d) => d.id === activeDocumentId);
@@ -3987,6 +4043,7 @@ export function CadWorkspace({
                       onSectionLine={moveSectionLine}
                       selectionAnchor={pickedPoint.anchor}
                       tracing={tracingView}
+                      placedSnap={placedSnap}
                       onLineLength={(lineId, segment, length, direction) => {
                         try {
                           dispatchEditing({

@@ -324,3 +324,23 @@ function sheetParts(project: Project): Part[] {
   }
   return parts;
 }
+
+/** Snap part of a closed outline: corners with both edge directions, edge midpoints. */
+export const ringSnapPart = (id: string, points: readonly Point2[]): SnapPart =>
+  hatchPart({ id, points });
+/** Snap part of an open polyline: its points and the midpoints of its pieces. */
+export function pathSnapPart(id: string, points: readonly Point2[]): SnapPart {
+  return part((midpoint) => [
+    ...points.map((point, index) => ({
+      point: { ...point },
+      entityId: id,
+      feature: `vertex-${index}`,
+      directions: [points[index - 1], points[index + 1]]
+        .filter((p) => p !== undefined)
+        .map((p) => ({ x: p.x - point.x, y: p.y - point.y })),
+    })),
+    ...points
+      .slice(1)
+      .flatMap((point, index) => midpoint(id, `segment-${index}-midpoint`, points[index]!, point)),
+  ]);
+}
