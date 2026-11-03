@@ -163,7 +163,8 @@ export function DemandMenu({
             {selectionCount === 1 ? "Element frei bewegen" : "Auswahl frei bewegen"}
           </button>
         )}
-        {onReferences && selection?.kind !== "dimension" && (
+        {/* A drawing placed on a layout is read only: no reference points in it (LAYOUTBUCH.md). */}
+        {onReferences && selection?.kind !== "dimension" && selection?.kind !== "drawing" && (
           <button
             type="button"
             className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
@@ -287,6 +288,7 @@ export function DemandMenu({
               {edgeIndex == null &&
                 selection.kind !== "slab" &&
                 selection.kind !== "slabOpening" &&
+                selection.kind !== "drawing" &&
                 selection.kind !== "roof" &&
                 selection.kind !== "column" &&
                 selection.kind !== "stair" &&

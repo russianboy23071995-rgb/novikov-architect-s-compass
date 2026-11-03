@@ -310,7 +310,7 @@ const lastDrawing = new WeakMap<Section, { inputs: readonly unknown[]; drawing: 
 /** Everything a section drawing reads: the storey parts of the building, the storeys (walls of
  * the build-up, names and levels), the build-up library and the ground storey. Layouts, texts,
  * project information or view settings are not part of it. */
-const drawingInputs = (project: Project): unknown[] => [
+export const sectionDrawingInputs = (project: Project): unknown[] => [
   ...buildingParts(project),
   "|",
   ...project.storeys,
@@ -332,7 +332,7 @@ export function rememberedSectionDrawing(project: Project, section: Section): Se
   let drawing = bySection.get(section);
   if (drawing) return drawing;
   const owned = isOwnedProjectSnapshot(project);
-  const inputs = owned ? drawingInputs(project) : [];
+  const inputs = owned ? sectionDrawingInputs(project) : [];
   const last = owned ? lastDrawing.get(section) : undefined;
   drawing = last && same(last.inputs, inputs) ? last.drawing : sectionDrawing(project, section);
   bySection.set(section, drawing);

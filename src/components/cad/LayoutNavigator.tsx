@@ -1,5 +1,13 @@
 import { useRef, useState, type ReactNode } from "react";
-import { ChevronDown, ChevronRight, File, FileStack, Folder, PanelBottom } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  File,
+  FileStack,
+  Folder,
+  PanelBottom,
+  RefreshCw,
+} from "lucide-react";
 import type { Project } from "@/domain/project/schema";
 import {
   LAYOUT_COLLECTION_ID,
@@ -34,6 +42,13 @@ export type LayoutNavigation = {
   activeTitleBlockId?: string | null;
   /** Opens the sheet and exports it as PDF (docs/PDF_EXPORT.md). */
   onExportPdf?: (kind: "layout" | "block", id: string) => void;
+  /**
+   * Layouts whose placed drawings no longer show the current model or document, one id per line
+   * (a string keeps the memoised navigator stable; docs/LAYOUTBUCH.md).
+   */
+  staleLayouts?: string;
+  /** Click on the yellow update symbol: draws that layout's placed drawings anew. */
+  onRefreshLayout?: (id: string) => void;
 };
 
 type Kind = "folder" | "layout" | "master" | "block";
@@ -62,7 +77,10 @@ export function LayoutNavigator({
   onOpenTitleBlock,
   activeTitleBlockId = null,
   onExportPdf,
+  staleLayouts = "",
+  onRefreshLayout,
 }: LayoutNavigation & { project: Project }) {
+  const stale = new Set(staleLayouts ? staleLayouts.split("\n") : []);
   const folders = projectLayoutFolders(project),
     layouts = projectLayouts(project),
     masters = projectMasterLayouts(project);
@@ -310,6 +328,21 @@ export function LayoutNavigator({
               />
             ) : (
               <span className="truncate">{name}</span>
+            )}
+            {stale.has(id) && onRefreshLayout && (
+              <button
+                type="button"
+                aria-label={`${name} aktualisieren`}
+                title="Modell oder Abbild geändert – Klick aktualisiert die Zeichnungen dieses Plans"
+                className="ml-auto shrink-0 rounded p-0.5 text-amber-500 hover:bg-amber-500/15"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRefreshLayout(id);
+                }}
+                onDoubleClick={(e) => e.stopPropagation()}
+              >
+                <RefreshCw className="size-3.5" />
+              </button>
             )}
           </div>
         </ContextMenuTrigger>

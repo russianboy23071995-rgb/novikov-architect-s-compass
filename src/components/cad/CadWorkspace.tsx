@@ -5,6 +5,7 @@ import { isDefaultHeightLineList } from "@/domain/elements/room/height-line";
 import { RoomListPanel } from "./RoomListPanel";
 import { ElementListPanel } from "./ElementListPanel";
 import { FilterWindow, type FilterPlace } from "./FilterWindow";
+import { placedDrawingKey, sameDrawingKey } from "@/rendering/viewport/placed-freshness";
 import { filterElements, NO_CRITERIA, similarCriteria } from "@/application/selection/filter";
 import { sectionShownIds } from "@/rendering/viewport/section-drawing";
 import { ToolSettingsWindow } from "./ToolSettingsWindow";
@@ -263,6 +264,12 @@ import {
   updateHeightMarks,
 } from "@/application/sections/height-marks";
 
+/** What a placed drawing shows, kept at its last update (docs/LAYOUTBUCH.md). */
+type FrozenDrawing = Pick<
+  PlacedDrawingView,
+  "documentId" | "limit" | "center" | "denominator" | "content"
+>;
+
 export function CadWorkspace({
   layerVisibility,
   initialProject,
@@ -436,6 +443,9 @@ export function CadWorkspace({
     const target = `${kind === "block" ? "title-block" : "layout"}:${id}`;
     if (!space || `${space.kind}:${space.id}` !== target)
       selectCanvasTab(kind === "block" ? titleBlockTab(id) : layoutTab(id));
+    // Paper always shows the current state: an out-of-date layout is drawn anew first.
+    const refreshed = kind === "layout" && staleLayouts.split("\n").includes(id);
+    if (kind === "layout") refreshLayout(id);
     setPdfRequest({
       id: Date.now(),
       target,
@@ -444,7 +454,7 @@ export function CadWorkspace({
         setPdfRequest(null);
         if (result.ok) {
           setModelError("");
-          showNotice(result.message);
+          showNotice(refreshed ? `Plan aktualisiert · ${result.message}` : result.message);
         } else setModelError(result.message);
       },
     });
@@ -492,23 +502,64 @@ export function CadWorkspace({
     });
     if (notice) showNotice(notice);
   };
+  // Layout book (docs/LAYOUTBUCH.md, user wish 03.11.2026): a layout keeps its placed drawings at
+  // the state of its last update. What they show is kept here per layout and drawing (memory
+  // only, a new project starts current); a changed model or document marks the layout in the
+  // navigator, a click there (or a PDF export) draws it anew.
+  const frozenDrawings = useRef(
+    new Map<string, Map<string, { key: readonly unknown[] | null; shown: FrozenDrawing }>>(),
+  );
+  const [frozenVersion, setFrozenVersion] = useState(0);
+  const frozenProjectId = useRef(realProject.id);
+  if (frozenProjectId.current !== realProject.id) {
+    frozenProjectId.current = realProject.id;
+    frozenDrawings.current.clear();
+  }
+  const refreshLayout = (layoutId: string) => {
+    frozenDrawings.current.delete(layoutId);
+    setFrozenVersion((v) => v + 1);
+  };
+  const staleLayouts = useMemo(() => {
+    const stale: string[] = [];
+    for (const [layoutId, drawings] of frozenDrawings.current)
+      for (const { key, shown } of drawings.values())
+        if (!sameDrawingKey(key, placedDrawingKey(realProject, shown.documentId))) {
+          stale.push(layoutId);
+          break;
+        }
+    return stale.sort().join("\n");
+  }, [realProject, frozenVersion]);
   // Drawings on the open layout: the master's under it, then the layout's own (selectable).
   const placedDrawingViews = (() => {
     if (space?.kind !== "layout") return undefined;
     const backdrop = spaceBackdrop(realProject, space);
+    let frozen = frozenDrawings.current.get(space.id);
+    if (!frozen) frozenDrawings.current.set(space.id, (frozen = new Map()));
+    const kept = frozen;
     const view = (d: PlacedDrawing, selectable: boolean): PlacedDrawingView | null => {
-      const source = drawingSource(d.documentId);
-      if (!source) return null;
+      // Position and mask belong to the layout and follow at once; the content waits.
+      let entry = kept.get(d.id);
+      if (!entry || entry.shown.documentId !== d.documentId) {
+        const source = drawingSource(d.documentId);
+        if (!source) return null;
+        entry = {
+          key: placedDrawingKey(realProject, d.documentId),
+          shown: {
+            documentId: d.documentId,
+            limit: frameMask(source.framing, source.document.denominator),
+            center: source.framing.center,
+            denominator: source.document.denominator,
+            content: source.content,
+          },
+        };
+        kept.set(d.id, entry);
+      }
       return {
         id: d.id,
-        documentId: d.documentId,
         selectable,
         mask: d.mask,
-        limit: frameMask(source.framing, source.document.denominator),
         position: d.position,
-        center: source.framing.center,
-        denominator: source.document.denominator,
-        content: source.content,
+        ...entry.shown,
       };
     };
     return [
@@ -4433,6 +4484,11 @@ export function CadWorkspace({
                   }
                   onOpenTitleBlock={(id) => selectCanvasTab(titleBlockTab(id))}
                   onExportPdf={exportPdf}
+                  staleLayouts={staleLayouts}
+                  onRefreshLayout={(id) => {
+                    refreshLayout(id);
+                    showNotice("Plan aktualisiert.");
+                  }}
                   activeTitleBlockId={space?.id ?? null}
                   activeLayoutId={activeLayout}
                   project={realProject}
