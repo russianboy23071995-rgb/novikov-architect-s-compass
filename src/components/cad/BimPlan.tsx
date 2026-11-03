@@ -1434,6 +1434,9 @@ export function BimPlan({
       onKeyDown={(event) => {
         if (selecting) return;
         if (event.key === "Escape") {
+          // A running marquee, mask drag or pan uses the press: the workspace keeps the
+          // selection then (docs/AUSWAHL_ESCAPE.md).
+          if (marquee.box || maskDrag.current || navigation.current) event.preventDefault();
           marquee.cancel();
           // Escape drops a mask drag; the stored mask stays (ZW3).
           if (maskDrag.current) endMaskDrag();

@@ -214,6 +214,7 @@ import {
 import { sectionLookTo } from "@/domain/views/sections";
 import { SectionFields } from "./SectionFields";
 import { SectionProperties } from "./SectionProperties";
+import { escapeStep } from "./escape-step";
 import { SectionDrawingView } from "./SectionDrawingView";
 import { cachedSectionDrawing, sectionFraming } from "./section-graphic";
 import { LayoutSettingsWindow, type LayoutDraftTarget } from "./LayoutSettingsWindow";
@@ -656,6 +657,9 @@ export function CadWorkspace({
   const cancelMeasurement = useRef<() => void>(() => {});
   const cancelCalibration = useRef<() => void>(() => {});
   const cancelImage = useRef<() => void>(() => {});
+  // Escape in two steps (docs/AUSWAHL_ESCAPE.md): whether something runs that it ends first,
+  // and whether a selection waits for the second press. Set every render.
+  const escapeState = useRef({ running: false, selected: false });
   const fileInput = useRef<HTMLInputElement>(null);
   const [pendingFile, setPendingFile] = useState<{ project: Project; name: string } | null>(null);
   const [readingFile, setReadingFile] = useState(false);
@@ -927,10 +931,16 @@ export function CadWorkspace({
         return;
       }
       if (event.key === "Escape") {
+        const step = escapeStep({ consumed: event.defaultPrevented, ...escapeState.current });
         cancelInteraction();
         setDemandOpen(false);
         setTool("select");
         setModelError("");
+        if (step === "deselect") {
+          setSelection(null);
+          // The picked element keeps no keyboard focus once it is no longer selected.
+          if (document.activeElement instanceof SVGElement) document.activeElement.blur();
+        }
       }
     };
     window.addEventListener("keydown", handler);
@@ -2484,6 +2494,27 @@ export function CadWorkspace({
     () => selectTool("select"),
   );
   cancelMeasurement.current = measurement.reset;
+  escapeState.current = {
+    running:
+      tool !== "select" ||
+      !!pendingSession ||
+      groupMove.active ||
+      imageTool.active ||
+      calibration.active ||
+      // The on-demand menu opens with every selection; it closes with the selection.
+      !!wallChain ||
+      pathPoints.length > 0 ||
+      !!roofLine ||
+      !!roofRise ||
+      !!dimensionDraft ||
+      !!textDraft ||
+      !!stairStart ||
+      stairDirection !== null ||
+      stairTread !== null ||
+      !!sectionStart ||
+      !!sectionEnd,
+    selected: selections.length > 0,
+  };
   const windowPlacement =
     measurement.adapter ??
     calibration.adapter ??
