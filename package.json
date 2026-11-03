@@ -331,6 +331,7 @@
     "benchmarks/roof-trim.test.ts",
     "benchmarks/escape-step.test.ts",
     "benchmarks/run-selection.test.ts",
-    "benchmarks/pictograms.test.ts"
+    "benchmarks/pictograms.test.ts",
+    "benchmarks/pictogram-settings.test.ts"
   ]
 }

@@ -1,5 +1,7 @@
 import { FloatingPanel } from "./FloatingPanel";
 import { CUT_FILL_MODES, cutPaint, type CutFill } from "./cut-fill";
+import { Pictogram } from "./Pictogram";
+import { PICTOGRAM_DUOTONE, PICTOGRAM_SCALE, type PictogramSettings } from "./pictogram-settings";
 
 export function CanvasDisplaySettings({
   open,
@@ -10,7 +12,14 @@ export function CanvasDisplaySettings({
   onCutFill,
   showRenovation,
   onShowRenovation,
+  pictograms,
+  onPictograms,
+  onResetPictograms,
 }: {
+  /** Size and colours of the pictograms (docs/WERKZEUGLEISTE.md, WL4). */
+  pictograms: PictogramSettings;
+  onPictograms: (settings: PictogramSettings) => void;
+  onResetPictograms: () => void;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   wallWidth: number;
@@ -111,6 +120,101 @@ export function CanvasDisplaySettings({
             Neubau rot, Abbruch gelb, Bestand in der Schnittfarbe. Den Bauzustand einer Wand legst
             du im Wandfenster unter „Bauzustand“ fest.
           </p>
+        </fieldset>
+        <fieldset className="space-y-3">
+          <legend className="font-medium">Piktogramme</legend>
+          <div className="flex items-center gap-3" aria-label="Vorschau Piktogramme">
+            <Pictogram group="werkzeuge" name="wand" />
+            <Pictogram group="werkzeuge" name="wand" active />
+            <Pictogram group="werkzeuge" name="fenster" />
+            <Pictogram group="werkzeuge" name="fenster" active />
+            <Pictogram group="navigator" name="grundriss" size={18} />
+          </div>
+          <label className="flex items-center justify-between gap-4 text-sm">
+            Größe
+            <span className="flex items-center gap-2">
+              <input
+                type="range"
+                aria-label="Größe der Piktogramme"
+                min={PICTOGRAM_SCALE.min}
+                max={PICTOGRAM_SCALE.max}
+                step={PICTOGRAM_SCALE.step}
+                value={pictograms.scale}
+                onChange={(e) => onPictograms({ ...pictograms, scale: Number(e.target.value) })}
+              />
+              <span className="w-10 text-right tabular-nums">
+                {Math.round(pictograms.scale * 100)} %
+              </span>
+            </span>
+          </label>
+          <label className="flex items-center justify-between gap-4 text-sm">
+            Farbe aktiv, helle Oberfläche
+            <input
+              type="color"
+              aria-label="Aktivfarbe hell"
+              value={pictograms.activeLight}
+              onChange={(e) => onPictograms({ ...pictograms, activeLight: e.target.value })}
+            />
+          </label>
+          <label className="flex items-center justify-between gap-4 text-sm">
+            Farbe aktiv, dunkle Oberfläche
+            <input
+              type="color"
+              aria-label="Aktivfarbe dunkel"
+              value={pictograms.activeDark}
+              onChange={(e) => onPictograms({ ...pictograms, activeDark: e.target.value })}
+            />
+          </label>
+          <div className="flex items-center justify-between gap-4 text-sm">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                aria-label="Eigene Linienfarbe"
+                checked={pictograms.line !== null}
+                onChange={(e) =>
+                  onPictograms({ ...pictograms, line: e.target.checked ? "#1d2125" : null })
+                }
+              />
+              Eigene Linienfarbe (sonst wie Text)
+            </label>
+            {pictograms.line !== null && (
+              <input
+                type="color"
+                aria-label="Linienfarbe"
+                value={pictograms.line}
+                onChange={(e) => onPictograms({ ...pictograms, line: e.target.value })}
+              />
+            )}
+          </div>
+          <label className="flex items-center justify-between gap-4 text-sm">
+            Deckkraft der Fläche (inaktiv)
+            <span className="flex items-center gap-2">
+              <input
+                type="range"
+                aria-label="Deckkraft der Duoton-Fläche"
+                min={PICTOGRAM_DUOTONE.min}
+                max={PICTOGRAM_DUOTONE.max}
+                step={PICTOGRAM_DUOTONE.step}
+                value={pictograms.duotone}
+                onChange={(e) => onPictograms({ ...pictograms, duotone: Number(e.target.value) })}
+              />
+              <span className="w-10 text-right tabular-nums">
+                {Math.round(pictograms.duotone * 100)} %
+              </span>
+            </span>
+          </label>
+          <div className="flex items-center justify-between gap-4">
+            <p className="text-xs text-muted-foreground">
+              Werkzeugleiste, Zeichenarten und Navigator. Wird in diesem Browser gespeichert.
+            </p>
+            <button
+              type="button"
+              className="shrink-0 rounded border px-2 py-1 text-xs hover:bg-muted"
+              onClick={onResetPictograms}
+            >
+              Zurücksetzen
+            </button>
+          </div>
         </fieldset>
       </div>
     </FloatingPanel>

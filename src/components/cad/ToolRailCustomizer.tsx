@@ -136,7 +136,7 @@ export function ToolRailCustomizer({
                   }}
                 >
                   {tool.pictogram ? (
-                    <Pictogram group="werkzeuge" name={tool.pictogram} className="size-4" />
+                    <Pictogram group="werkzeuge" name={tool.pictogram} size={18} />
                   ) : (
                     <Icon className="size-4 shrink-0" strokeWidth={1.65} />
                   )}

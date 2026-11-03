@@ -93,7 +93,7 @@ function TreeItem({
               group="navigator"
               name={node.pictogram}
               active={active.includes(node.id)}
-              className="size-4"
+              size={18}
             />
           ) : (
             <Icon className="size-3.5 shrink-0 opacity-70" />
