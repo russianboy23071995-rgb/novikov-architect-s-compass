@@ -56,7 +56,8 @@ export function SlabToolFields({
         />
       </label>
       <p className="text-xs text-muted-foreground">
-        Oberkante = Rohfußboden des Geschosses darüber; die Stärke wächst nach unten.
+        Bodenplatte dieses Geschosses: Oberkante = sein Rohfußboden, die Stärke wächst nach unten
+        ins Geschoss darunter.
       </p>
     </section>
   );

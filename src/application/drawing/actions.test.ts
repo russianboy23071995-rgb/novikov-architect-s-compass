@@ -408,7 +408,8 @@ import { addSlab, updateSlab } from "../slabs/actions.ts";
 import { SLAB_DEFAULTS, storeySlabLevels, slabArea } from "../../domain/elements/slab/model.ts";
 import { ELEMENT_KINDS as SLAB_KINDS, storeyElements } from "../../domain/elements/registry.ts";
 import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
-import { setStoreyHeight } from "../storeys/actions.ts";
+import { addStorey, setStoreyHeight } from "../storeys/actions.ts";
+import { selectWorkingStorey } from "../storeys/working-storey.ts";
 import { createHistory, commitProject, undoProject } from "../history/project-history.ts";
 import { derivePlanScene, planSceneRuns } from "../../rendering/viewport/plan-scene.ts";
 import { previewDeleteSelection } from "../elements/delete.ts";
@@ -433,7 +434,7 @@ const lShape = [
   { x: 0, y: 5 },
 ];
 
-test("a slab drawn in a storey is its ceiling on the Decke layer and round-trips", () => {
+test("a slab drawn in a storey is its floor on the Decke layer and round-trips", () => {
   const base = slabBase();
   const p = createDrawing(base, base, "slab-1", {
     kind: "slab",
@@ -448,32 +449,49 @@ test("a slab drawn in a storey is its ceiling on the Decke layer and round-trips
   assert.equal(SLAB_KINDS.slab.label, "Decke");
   assert.deepEqual(storeyElements(storeyOf(p), "slab"), [slab]);
   assert.equal(slabArea(slab), 24);
-  // Top on the raw floor of the storey above (EG 3,00 m), thickness downward.
-  assert.deepEqual(storeySlabLevels(p, "eg", slab), { top: 3, bottom: 2.8 });
+  // Schema 53: top on the storey's own raw floor (EG ±0,00), thickness downward into the
+  // storey below (docs/SLAB_ELEMENT.md).
+  assert.deepEqual(storeySlabLevels(p, "eg", slab), { top: 0, bottom: -0.2 });
   const reopened = readProjectFile(serializeProject(p));
   assert.equal(reopened.schemaVersion, PROJECT_SCHEMA_VERSION);
-  assert.equal(PROJECT_SCHEMA_VERSION, 52);
+  assert.equal(PROJECT_SCHEMA_VERSION, 53);
   assert.deepEqual(reopened, p);
 });
 
-test("thickness keeps the slab top and moves the underside; the top follows the storey height", () => {
+test("schema 52 files load as 53 unchanged; their slabs now are the floor of their storey", () => {
+  const p = addSlab(slabBase(), { id: "s", points: lShape, ...SLAB_DEFAULTS });
+  const raw = JSON.parse(serializeProject(p));
+  raw.schemaVersion = 52;
+  const loaded = readProjectFile(JSON.stringify(raw));
+  assert.equal(loaded.schemaVersion, 53);
+  assert.deepEqual(storeyOf(loaded).slabs, storeyOf(p).slabs);
+  assert.deepEqual(storeySlabLevels(loaded, "eg", storeyOf(loaded).slabs![0]!), {
+    top: 0,
+    bottom: -0.2,
+  });
+});
+
+test("thickness keeps the slab top and moves the underside; the top follows the storey's floor", () => {
   const p = addSlab(slabBase(), { id: "s", points: lShape, ...SLAB_DEFAULTS });
   const thicker = updateSlab(p, "s", { thickness: 0.3 });
   assert.deepEqual(storeySlabLevels(thicker, "eg", storeyOf(thicker).slabs![0]!), {
-    top: 3,
-    bottom: 2.7,
+    top: 0,
+    bottom: -0.3,
   });
   const offset = updateSlab(p, "s", { topOffset: -0.05 });
   assert.deepEqual(storeySlabLevels(offset, "eg", storeyOf(offset).slabs![0]!), {
-    top: 2.95,
-    bottom: 2.75,
+    top: -0.05,
+    bottom: -0.25,
   });
-  // Nothing is stored: a new storey height moves the slab with it.
+  // Nothing is stored: the storey's own height does not move its floor slab.
   const higher = setStoreyHeight(p, p, { projectId: "p", storeyId: "eg", height: 3.2 });
-  assert.equal(storeySlabLevels(higher, "eg", storeyOf(higher).slabs![0]!)!.top, 3.2);
-  // Unknown storey height: no invented level.
+  assert.equal(storeySlabLevels(higher, "eg", storeyOf(higher).slabs![0]!)!.top, 0);
+  // Its own height unknown: the floor is still known (EG on the project datum).
   const unknown = addSlab(createProject("q", "eg"), { id: "s", points: lShape, ...SLAB_DEFAULTS });
-  assert.equal(storeySlabLevels(unknown, "eg", storeyOf(unknown).slabs![0]!), null);
+  assert.deepEqual(storeySlabLevels(unknown, "eg", storeyOf(unknown).slabs![0]!), {
+    top: 0,
+    bottom: -0.2,
+  });
 });
 
 test("invalid slabs are rejected without changing the model; one undo per change", () => {
@@ -1153,6 +1171,9 @@ function roofRoom(heightLines?: HeightLine[]) {
     eaveCut: "vertical",
     topCut: "vertical",
   });
+  // The ceiling above the room is the floor slab of the storey above (schema 53).
+  p = addStorey(p, p, { projectId: "p", storeyId: "eg", side: "above", id: "og", height: 3 });
+  p = selectWorkingStorey(p, p, "og");
   p = addSlab(p, {
     id: "s",
     points: [
@@ -1163,6 +1184,7 @@ function roofRoom(heightLines?: HeightLine[]) {
     ],
     ...SLAB_DEFAULTS,
   });
+  p = selectWorkingStorey(p, p, "eg");
   return createDrawing(p, p, "r", {
     kind: "room",
     points: ring8x6,

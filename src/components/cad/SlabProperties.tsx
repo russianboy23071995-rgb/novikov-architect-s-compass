@@ -71,7 +71,7 @@ export function SlabProperties({
           />
         </label>
         <label className="block text-xs">
-          Versatz OK zum Geschoss darüber (m)
+          Versatz OK zum Rohfußboden (m)
           <Input
             name="topOffset"
             type="number"

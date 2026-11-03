@@ -1,4 +1,4 @@
-import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
+import { storeyAbove, storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { standardLayerId } from "../../domain/layers/model.ts";
 import { validateLike } from "../../domain/project/owned-snapshot.ts";
 import type { Project } from "../../domain/project/schema.ts";
@@ -10,6 +10,12 @@ import {
   type RoomHeightField,
   type RoomHeightLineResult,
 } from "../../domain/elements/room/heights.ts";
+
+/** Ceilings of the working storey: its roofs and the floor slabs of the storey above. */
+function ceilingSourcesOf(project: Project) {
+  const storey = storeyOf(project);
+  return storeyCeilingSources(storey, storeyAbove(project, storey.id));
+}
 
 type RoomCreation = Omit<Room, "layerId" | "number" | "name"> & {
   layerId?: string;
@@ -75,10 +81,10 @@ export function updateRoom(
 
 /** Clear heights of a room in the working storey: its slabs and roofs only (R3, A08). */
 export function workingRoomClearHeights(project: Project, room: Room): RoomHeightField {
-  return roomClearHeights(room, storeyCeilingSources(storeyOf(project)));
+  return roomClearHeights(room, ceilingSourcesOf(project));
 }
 
 /** Every height line of a room in the working storey with its area above (R3b). */
 export function workingRoomHeightLines(project: Project, room: Room): RoomHeightLineResult[] {
-  return roomHeightLineResults(room, storeyCeilingSources(storeyOf(project)));
+  return roomHeightLineResults(room, ceilingSourcesOf(project));
 }

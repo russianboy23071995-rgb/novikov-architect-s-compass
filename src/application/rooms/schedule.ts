@@ -1,4 +1,5 @@
 import type { Project } from "../../domain/project/schema.ts";
+import { storeyAbove } from "../../domain/storeys/access.ts";
 import { roomArea } from "../../domain/elements/room/model.ts";
 import {
   roomClearHeights,
@@ -54,7 +55,7 @@ export function roomSchedule(project: Project): RoomSchedule {
   const storeys = project.storeys
     .filter((storey) => storey.rooms?.length)
     .map((storey): ScheduleStorey => {
-      const sources = storeyCeilingSources(storey);
+      const sources = storeyCeilingSources(storey, storeyAbove(project, storey.id));
       const rooms = [...(storey.rooms ?? [])]
         .sort((a, b) => a.number.localeCompare(b.number, "de", { numeric: true }))
         .map((room): ScheduleRoom => {

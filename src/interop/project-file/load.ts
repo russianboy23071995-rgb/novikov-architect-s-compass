@@ -274,6 +274,15 @@ export function migrateProjectData(value: unknown): Project {
     return migrateProjectData(
       withColumnLayer(withoutBoundHeights({ ...projectV36Schema.parse(value), schemaVersion: 37 })),
     );
+  // Schema 52 files have the same structure; their slabs now are the floor of their storey
+  // (docs/SLAB_ELEMENT.md, user decision 03.11.2026: no data moved, test projects only).
+  if (value.schemaVersion === 52)
+    return validateProject(
+      withoutBoundHeights({
+        ...(value as unknown as Parameters<typeof withoutBoundHeights>[0]),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
+    );
   // Schema 51 files carry outlined slab openings only; the strict v51 schema rejects circles.
   if (value.schemaVersion === 51)
     return validateProject(

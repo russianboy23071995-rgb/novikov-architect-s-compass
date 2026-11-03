@@ -27,11 +27,11 @@ export type SlabFace = {
  */
 export function slabBody(
   slab: Pick<Slab, "id" | "points" | "thickness" | "topOffset">,
-  upperElevation: number | null,
+  floorElevation: number | null,
   holes: readonly (readonly Point2[])[] = [],
   smooth: readonly boolean[] = [],
 ): { faces: SlabFace[]; volume: number } | null {
-  const levels = slabLevels(slab, upperElevation);
+  const levels = slabLevels(slab, floorElevation);
   if (!levels) return null;
   const { top, bottom } = levels;
   const points = slab.points;
