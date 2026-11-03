@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { HatchConstruction } from "@/application/hatches/construction";
 import type { Layer } from "@/domain/layers/model";
 import { FloatingPanel } from "./FloatingPanel";
+import { ConstructionPicker } from "./ConstructionPicker";
 import { SETTINGS_WINDOW } from "./settings-window-size";
 import { SettingsSections } from "./SettingsSections";
 import type { RoomDefaults } from "./useToolDefaults";
@@ -18,21 +19,12 @@ function ConstructionSelect({
   onValue: (c: RoomConstruction) => void;
 }) {
   return (
-    <label className="text-xs">
-      Erstellung
-      <select
-        aria-label="Raum-Erstellung"
-        value={value}
-        onChange={(e) => onValue(e.target.value as RoomConstruction)}
-        className="block rounded border bg-background p-1"
-      >
-        <option value="walls">Klick in Raum zwischen Wänden</option>
-        <option value="polygon">Polygon per Klick</option>
-        <option value="diagonal">Rechteck: Diagonale</option>
-        <option value="side-height">Gedrehtes Rechteck: Seite + dritter Punkt</option>
-        <option value="boundary">Geschlossene Kontur übernehmen</option>
-      </select>
-    </label>
+    <ConstructionPicker
+      label="Raum-Erstellung"
+      options={["walls", "polygon", "diagonal", "side-height", "boundary"] as const}
+      value={value}
+      onValue={onValue}
+    />
   );
 }
 

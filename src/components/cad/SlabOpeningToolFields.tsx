@@ -1,4 +1,5 @@
 import type { HatchConstruction } from "@/application/hatches/construction";
+import { ConstructionPicker } from "./ConstructionPicker";
 
 /** Deckendurchbruch tool (docs/DECKENDURCHBRUCH.md): outline construction shared with slabs and
  * hatches. The slab that holds the outline is found by the action; the opening takes its layer.
@@ -12,21 +13,12 @@ export function SlabOpeningToolFields({
 }) {
   return (
     <section aria-label="Werkzeug Deckendurchbruch" className="flex flex-wrap items-end gap-3">
-      <label className="text-xs">
-        Erstellung
-        <select
-          aria-label="Deckendurchbruch-Erstellung"
-          value={construction}
-          onChange={(e) => onConstruction(e.target.value as HatchConstruction | "circle")}
-          className="block rounded border bg-background p-1"
-        >
-          <option value="diagonal">Rechteck: Diagonale</option>
-          <option value="side-height">Rechteck: Seite und Höhe</option>
-          <option value="circle">Kreis: Mittelpunkt und Rand</option>
-          <option value="polygon">Polygon per Klick</option>
-          <option value="boundary">Geschlossene Kontur übernehmen</option>
-        </select>
-      </label>
+      <ConstructionPicker
+        label="Deckendurchbruch-Erstellung"
+        options={["diagonal", "side-height", "circle", "polygon", "boundary"] as const}
+        value={construction}
+        onValue={onConstruction}
+      />
       <p className="text-xs text-muted-foreground">
         Ganz innerhalb einer Decke zeichnen; der Durchbruch geht durch die ganze Deckenstärke.
         Darstellung: Umriss mit schwarzem Eckkeil, rund mit schwarzer Sichel.

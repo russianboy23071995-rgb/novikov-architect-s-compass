@@ -248,6 +248,8 @@ export function CadViewport({
             referenceScope: _scope,
             draftContour: _contour,
             draftFill: _fill,
+            draftShape: _shape,
+            draftCircle: _circle,
             ...sheet
           } = model;
           const width = (p.x1 - p.x0) * PAPER_PIXELS_PER_METRE,

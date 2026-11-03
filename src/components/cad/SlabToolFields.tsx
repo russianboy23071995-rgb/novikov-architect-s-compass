@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { HatchConstruction } from "@/application/hatches/construction";
 import type { SlabDefaults } from "./useToolDefaults";
+import { ConstructionPicker } from "./ConstructionPicker";
 
 /** Slab tool: outline construction shared with hatches, thickness and top offset in metres.
  * Values are taken over only when they are valid numbers; the action validates again.
@@ -28,20 +29,12 @@ export function SlabToolFields({
   };
   return (
     <section aria-label="Deckenwerkzeug" className="flex flex-wrap items-end gap-3">
-      <label className="text-xs">
-        Erstellung
-        <select
-          aria-label="Decken-Erstellung"
-          value={construction}
-          onChange={(e) => onConstruction(e.target.value as HatchConstruction)}
-          className="block rounded border bg-background p-1"
-        >
-          <option value="polygon">Polygon per Klick</option>
-          <option value="diagonal">Rechteck: Diagonale</option>
-          <option value="side-height">Rechteck: Seite und Höhe</option>
-          <option value="boundary">Geschlossene Kontur übernehmen</option>
-        </select>
-      </label>
+      <ConstructionPicker
+        label="Decken-Erstellung"
+        options={["polygon", "diagonal", "side-height", "boundary"] as const}
+        value={construction}
+        onValue={onConstruction}
+      />
       <label className="text-xs">
         Stärke (m)
         <input

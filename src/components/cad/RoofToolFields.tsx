@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ConstructionPicker } from "./ConstructionPicker";
 import type { HatchConstruction } from "@/application/hatches/construction";
 import { MAX_ROOF_PITCH, MIN_ROOF_PITCH } from "@/domain/elements/roof/model";
 import type { RoofCut } from "@/domain/elements/roof/geometry";
@@ -91,20 +92,12 @@ function ConstructionSelect({
   onValue: (c: HatchConstruction) => void;
 }) {
   return (
-    <label className="text-xs">
-      Umriss
-      <select
-        aria-label="Dach-Umriss"
-        value={value}
-        onChange={(e) => onValue(e.target.value as HatchConstruction)}
-        className="block rounded border bg-background p-1"
-      >
-        <option value="polygon">Polygon per Klick</option>
-        <option value="diagonal">Rechteck: Diagonale</option>
-        <option value="side-height">Gedrehtes Rechteck: Seite + dritter Punkt</option>
-        <option value="boundary">Geschlossene Kontur übernehmen</option>
-      </select>
-    </label>
+    <ConstructionPicker
+      label="Dach-Umriss"
+      options={["polygon", "diagonal", "side-height", "boundary"] as const}
+      value={value}
+      onValue={onValue}
+    />
   );
 }
 
