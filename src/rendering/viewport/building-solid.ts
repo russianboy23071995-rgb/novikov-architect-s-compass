@@ -7,7 +7,7 @@ import { createDerivedCache } from "../../domain/project/derived-cache.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 
 // Moved from lib/bim/geometry.ts (25.10.2026); the per-storey extrusion followed to storey-solid.ts (27.10.2026).
-type BuildingEntry = { project: Project; result: Solid };
+type BuildingEntry = { project: Project; result: Solid; parts: readonly Solid[] };
 const buildings = createDerivedCache<Project, BuildingEntry>();
 // Only one weak recent candidate: no project-ID registry or retained scene history.
 let recentBuilding: WeakRef<BuildingEntry> | null = null;
@@ -81,18 +81,31 @@ export function workingStoreySolid(input: Project): Solid {
 
 /** One derived building scene. Storeys remain authoritative; working selection is not a filter. */
 export function buildBuildingSolid(input: Project): Solid {
+  return buildingEntry(input).result;
+}
+
+/**
+ * The storey parts of the building, in the order of its faces. Parts of an owned snapshot keep
+ * their identity while their storey is unchanged, so derived views can remember work per part
+ * (section drawings, docs/performance/SECTION_PARTS.md).
+ */
+export function buildingParts(input: Project): readonly Solid[] {
+  return buildingEntry(input).parts;
+}
+
+function buildingEntry(input: Project): BuildingEntry {
   const cached = buildings.get(input);
   const immutable = isOwnedProjectSnapshot(input);
-  if (cached && immutable) return cached.result;
+  if (cached && immutable) return cached;
   // Mutable public inputs always pass full validation, including same-identity calls.
   const project = immutable ? input : validateProject(input);
-  if (cached && sameProjectModel(project, cached.project)) return cached.result;
+  if (cached && sameProjectModel(project, cached.project)) return cached;
   const recent = recentBuilding?.deref();
   // Only factory-owned snapshots may reuse their prior validation.
   // Conservative model equality includes geometry, storey heights, datum and joins.
   if (recent && sameProjectModel(project, recent.project)) {
     buildings.set(input, recent);
-    return recent.result;
+    return recent;
   }
   const parts = project.storeys
     // Storeys with solid elements: walls, slabs, roofs or columns (SLAB_/ROOF_ELEMENT, STUETZEN).
@@ -115,8 +128,8 @@ export function buildBuildingSolid(input: Project): Solid {
       ? ([0, 1, 2].map((i) => Math.max(...parts.map((p) => p.max[i]!))) as Vec3)
       : [1, 1, 1],
   };
-  const entry = { project, result: freezeBuilding(result) };
+  const entry = { project, result: freezeBuilding(result), parts: Object.freeze(parts) };
   buildings.set(input, entry);
   recentBuilding = new WeakRef(entry);
-  return entry.result;
+  return entry;
 }

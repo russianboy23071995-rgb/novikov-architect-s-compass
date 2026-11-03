@@ -1,8 +1,9 @@
 import type { Project } from "../../domain/project/schema.ts";
 import { resolveStoreyLevels } from "../../domain/storeys/heights.ts";
 import { isElevation, sectionFrame, type Section } from "../../domain/views/sections.ts";
-import { buildBuildingSolid } from "./building-solid.ts";
-import type { Face, Vec3 } from "./storey-solid.ts";
+import { buildingParts } from "./building-solid.ts";
+import { isOwnedProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
+import type { Face, Solid, Vec3 } from "./storey-solid.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import type { Material } from "../../domain/elements/wall/assembly.ts";
 import { assemblyLibraryOf, wallLayerBands } from "./wall-layers.ts";
@@ -81,15 +82,58 @@ function clip(polygon: Tagged[], side: (p: Local) => number): Tagged[] {
   return out;
 }
 
+/** A view face before its edges are known: candidate edges carry their key. */
+type PartView = {
+  depth: number;
+  id: string;
+  points: SectionPoint[];
+  candidates: { key: string; from: SectionPoint; to: SectionPoint }[];
+  marks?: { segments: [SectionPoint, SectionPoint][]; dashed: boolean };
+};
 /**
- * Section drawing from the building solid (docs/SCHNITT.md, SC3). The plane stands on the
- * section line; parts it meets are cut (outlines per element), parts behind it in the viewing
- * direction are drawn as a view: faces turned to the viewer, farthest first (painter's order),
- * with their visible edges only (edges between faces of one plane are left out). Faces in front
- * of the plane are not drawn. The drawing is limited to the length of the line.
+ * The work of one storey part of the building for one section line: edge normals, cut segments
+ * chained per element, view faces with their candidate edges. Edges are decided across all
+ * parts afterwards, so a part never decides alone what a neighbouring storey hides.
  */
-export function sectionDrawing(project: Project, section: Section): SectionDrawing {
-  const solid = buildBuildingSolid(project);
+type PartSection = { edges: PartEdges; cuts: SectionCut[]; views: PartView[] };
+/** Edges of one storey part, the same for every section: the key of each face edge, the
+ * normals of the faces meeting there, and the edges not only between smooth facets. */
+type PartEdges = { keys: string[][]; normals: Map<string, Vec3[]>; rough: Set<string> };
+// Per storey part (identity kept while its storey is unchanged), and per section line.
+const partEdgeTables = new WeakMap<Solid, PartEdges>();
+const partSections = new WeakMap<Solid, Map<string, PartSection>>();
+const edgeKey = (a: Vec3, b: Vec3) => {
+  const ka = key(a),
+    kb = key(b);
+  return ka < kb ? `${ka}|${kb}` : `${kb}|${ka}`;
+};
+function partEdges(part: Solid, frozen: boolean): PartEdges {
+  const known = frozen ? partEdgeTables.get(part) : undefined;
+  if (known) return known;
+  const normals = new Map<string, Vec3[]>();
+  // Edges where only facets of one curved surface meet (a round opening) stay undrawn.
+  const rough = new Set<string>();
+  const keys = (part.faces as readonly Face[]).map((face) =>
+    face.vertices.map((a, i) => {
+      const k = edgeKey(a, face.vertices[(i + 1) % face.vertices.length]!);
+      const list = normals.get(k);
+      if (list) list.push(face.normal);
+      else normals.set(k, [face.normal]);
+      if (!face.smooth) rough.add(k);
+      return k;
+    }),
+  );
+  const result = { keys, normals, rough };
+  if (frozen) partEdgeTables.set(part, result);
+  return result;
+}
+const lineKey = (section: Section) =>
+  JSON.stringify([section.start, section.end, section.look, isElevation(section)]);
+
+function partSection(part: Solid, section: Section, frozen: boolean): PartSection {
+  const line = lineKey(section);
+  const known = frozen ? partSections.get(part)?.get(line) : undefined;
+  if (known) return known;
   const { d, view, length } = sectionFrame(section);
   const mirror = section.look === "right";
   const local = (v: Vec3): Local => {
@@ -98,48 +142,21 @@ export function sectionDrawing(project: Project, section: Section): SectionDrawi
     return { u: x * d.x + y * d.y, z: v[2], w: x * view.x + y * view.y };
   };
   const out = (p: Local): SectionPoint => ({ x: mirror ? length - p.u : p.u, y: p.z });
-
-  // Edges shared by faces of different planes (or by one face only) are visible edges.
-  const edgeNormals = new Map<string, Vec3[]>();
-  // Edges where only facets of one curved surface meet (a round opening) stay undrawn.
-  const roughEdges = new Set<string>();
-  const edgeKey = (a: Vec3, b: Vec3) => {
-    const ka = key(a),
-      kb = key(b);
-    return ka < kb ? `${ka}|${kb}` : `${kb}|${ka}`;
-  };
-  for (const face of solid.faces)
-    face.vertices.forEach((a, i) => {
-      const k = edgeKey(a, face.vertices[(i + 1) % face.vertices.length]!);
-      const list = edgeNormals.get(k);
-      if (list) list.push(face.normal);
-      else edgeNormals.set(k, [face.normal]);
-      if (!(face as Face).smooth) roughEdges.add(k);
-    });
-  const visibleEdge = (k: string) => {
-    const normals = edgeNormals.get(k)!;
-    if (normals.length < 2) return true;
-    if (!roughEdges.has(k)) return false;
-    const [n] = normals;
-    return normals.some((m) => n![0] * m[0] + n![1] * m[1] + n![2] * m[2] < 1 - 1e-6);
-  };
-
+  const edges = partEdges(part, frozen);
   // Per element and kind: frame and glass of one window are chained apart.
   const segments = new Map<
     string,
     { id: string; kind: SectionCut["kind"]; list: [Local, Local][] }
   >();
-  const views: { depth: number; view: SectionView }[] = [];
+  const views: PartView[] = [];
   const within = (p: Tagged[]) =>
     clip(
       clip(p, (q) => q.u),
       (q) => length - q.u,
     );
-  for (const face of solid.faces as readonly Face[]) {
-    const tagged: Tagged[] = face.vertices.map((v, i) => ({
-      p: local(v),
-      edge: edgeKey(v, face.vertices[(i + 1) % face.vertices.length]!),
-    }));
+  for (const [index, face] of (part.faces as readonly Face[]).entries()) {
+    const faceKeys = edges.keys[index]!;
+    const tagged: Tagged[] = face.vertices.map((v, i) => ({ p: local(v), edge: faceKeys[i]! }));
     // Cut: where the face crosses the plane w = 0, within the line.
     const crossings: Local[] = [];
     tagged.forEach((a, i) => {
@@ -167,13 +184,13 @@ export function sectionDrawing(project: Project, section: Section): SectionDrawi
     // View: faces turned to the viewer, behind the plane.
     const facing = face.normal[0] * view.x + face.normal[1] * view.y;
     if (facing > -1e-6) continue;
-    const part = within(clip(tagged, (q) => q.w));
-    if (part.length < 3) continue;
-    const depth = part.reduce((sum, q) => sum + q.p.w, 0) / part.length;
-    const edges: [SectionPoint, SectionPoint][] = [];
-    part.forEach((a, i) => {
-      if (a.edge && visibleEdge(a.edge))
-        edges.push([out(a.p), out(part[(i + 1) % part.length]!.p)]);
+    const seen = within(clip(tagged, (q) => q.w));
+    if (seen.length < 3) continue;
+    const depth = seen.reduce((sum, q) => sum + q.p.w, 0) / seen.length;
+    const candidates: PartView["candidates"] = [];
+    seen.forEach((a, i) => {
+      if (a.edge)
+        candidates.push({ key: a.edge, from: out(a.p), to: out(seen[(i + 1) % seen.length]!.p) });
     });
     // Opening symbol lines lie in the pane; kept behind the plane and limited to the line.
     const symbol = (face.marks?.segments ?? []).flatMap(
@@ -191,22 +208,77 @@ export function sectionDrawing(project: Project, section: Section): SectionDrawi
     );
     views.push({
       depth,
-      view: {
-        id: face.wallId,
-        points: part.map((q) => out(q.p)),
-        edges,
-        ...(symbol.length ? { marks: { segments: symbol, dashed: face.marks!.dashed } } : {}),
-      },
+      id: face.wallId,
+      points: seen.map((q) => out(q.p)),
+      candidates,
+      ...(symbol.length ? { marks: { segments: symbol, dashed: face.marks!.dashed } } : {}),
     });
   }
-  views.sort((a, b) => b.depth - a.depth);
-
   // An elevation (A1) cuts nothing: only what lies beyond the line in the viewing direction.
   const cuts: SectionCut[] = isElevation(section)
     ? []
     : [...segments.values()]
         .map(({ id, kind, list }) => ({ ...chain(id, list, length, out), kind }))
         .filter((c) => c.loops.length > 0 || c.open.length > 0);
+  const result = { edges, cuts, views };
+  if (frozen) {
+    let bySection = partSections.get(part);
+    if (!bySection) partSections.set(part, (bySection = new Map()));
+    bySection.set(line, result);
+  }
+  return result;
+}
+
+/**
+ * Section or elevation drawing of the whole building (docs/SCHNITTE.md). The work is done per
+ * storey part and remembered while the part stays the same (docs/performance/SECTION_PARTS.md):
+ * an edit recomputes only its storey. Edges between faces of different parts, the depth order
+ * and the wall layers are decided over the whole building, so the drawing equals the one of a
+ * single pass over all faces.
+ */
+export function sectionDrawing(project: Project, section: Section): SectionDrawing {
+  const parts = buildingParts(project);
+  // Parts of an owned snapshot keep their identity while their storey stays; only those are remembered.
+  const frozen = isOwnedProjectSnapshot(project);
+  const pieces = parts.map((part) => partSection(part, section, frozen));
+  const { d, length } = sectionFrame(section);
+  const mirror = section.look === "right";
+
+  // Edges shared by faces of different planes (or by one face only) are visible edges; the
+  // faces meeting at an edge may belong to different storey parts.
+  const decided = new Map<string, boolean>();
+  const visibleEdge = (k: string) => {
+    let known = decided.get(k);
+    if (known !== undefined) return known;
+    let first: Vec3 | undefined,
+      count = 0,
+      rough = false,
+      bent = false;
+    for (const piece of pieces) {
+      if (piece.edges.rough.has(k)) rough = true;
+      for (const m of piece.edges.normals.get(k) ?? []) {
+        if (!first) first = m;
+        else if (first[0] * m[0] + first[1] * m[1] + first[2] * m[2] < 1 - 1e-6) bent = true;
+        count++;
+      }
+    }
+    known = count < 2 || (rough && bent);
+    decided.set(k, known);
+    return known;
+  };
+  const views = pieces
+    .flatMap((piece) => piece.views)
+    .map((v, order) => ({ v, order }))
+    .sort((a, b) => b.v.depth - a.v.depth || a.order - b.order)
+    .map(({ v }): SectionView => ({
+      id: v.id,
+      points: v.points,
+      edges: v.candidates
+        .filter((c) => visibleEdge(c.key))
+        .map((c): [SectionPoint, SectionPoint] => [c.from, c.to]),
+      ...(v.marks ? { marks: v.marks } : {}),
+    }));
+  const cuts = pieces.flatMap((piece) => piece.cuts);
   const layered = withWallLayers(project, section, cuts, { d, length, mirror });
   const names = new Map(project.storeys.map((s) => [s.id, s.name]));
   const levels = resolveStoreyLevels(project.storeys, project.groundStoreyId)
@@ -214,11 +286,11 @@ export function sectionDrawing(project: Project, section: Section): SectionDrawi
     .map((l) => ({ storeyId: l.storeyId, name: names.get(l.storeyId)!, elevation: l.elevation! }));
   const all = [
     ...cuts.flatMap((c) => [...c.loops.flat(), ...c.open.flat()]),
-    ...views.flatMap((v) => v.view.points),
+    ...views.flatMap((v) => v.points),
   ];
   return {
     cuts: layered,
-    views: views.map((v) => v.view),
+    views,
     levels,
     width: length,
     bounds: all.length
@@ -230,6 +302,42 @@ export function sectionDrawing(project: Project, section: Section): SectionDrawi
         }
       : null,
   };
+}
+
+const drawings = new WeakMap<Project, WeakMap<Section, SectionDrawing>>();
+// The last drawing per section with what it was derived from (docs/performance/SECTION_PARTS.md).
+const lastDrawing = new WeakMap<Section, { inputs: readonly unknown[]; drawing: SectionDrawing }>();
+/** Everything a section drawing reads: the storey parts of the building, the storeys (walls of
+ * the build-up, names and levels), the build-up library and the ground storey. Layouts, texts,
+ * project information or view settings are not part of it. */
+const drawingInputs = (project: Project): unknown[] => [
+  ...buildingParts(project),
+  "|",
+  ...project.storeys,
+  project.materials,
+  project.wallAssemblies,
+  project.groundStoreyId,
+  project.groundDatum,
+];
+const same = (a: readonly unknown[], b: readonly unknown[]) =>
+  a.length === b.length && a.every((v, i) => Object.is(v, b[i]));
+/**
+ * The section drawing, derived once per project and section (a layout draws it every frame),
+ * and reused for a newer project when nothing it reads has changed. Only owned snapshots reuse:
+ * their storeys and parts keep their identity while unchanged.
+ */
+export function rememberedSectionDrawing(project: Project, section: Section): SectionDrawing {
+  let bySection = drawings.get(project);
+  if (!bySection) drawings.set(project, (bySection = new WeakMap()));
+  let drawing = bySection.get(section);
+  if (drawing) return drawing;
+  const owned = isOwnedProjectSnapshot(project);
+  const inputs = owned ? drawingInputs(project) : [];
+  const last = owned ? lastDrawing.get(section) : undefined;
+  drawing = last && same(last.inputs, inputs) ? last.drawing : sectionDrawing(project, section);
+  bySection.set(section, drawing);
+  if (owned) lastDrawing.set(section, { inputs, drawing });
+  return drawing;
 }
 
 /**

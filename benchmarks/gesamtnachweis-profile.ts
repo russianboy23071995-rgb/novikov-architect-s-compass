@@ -17,6 +17,7 @@ import { defaultLineAppearance } from "../src/lib/bim/lines.ts";
 import { buildBuildingSolid, buildingFacePart } from "../src/rendering/viewport/building-solid.ts";
 import { sectionDrawing } from "../src/rendering/viewport/section-drawing.ts";
 import { exportIfc } from "../src/lib/bim/ifc.ts";
+import { rememberedSectionDrawing as cachedSectionDrawing } from "../src/rendering/viewport/section-drawing.ts";
 import type { Project } from "../src/domain/project/schema.ts";
 import { resolveRoofTrims } from "../src/domain/elements/wall/roof-trim.ts";
 import { resolveBoundWallHeights } from "../src/domain/elements/wall/height-binding.ts";
@@ -135,10 +136,19 @@ for (const elements of sizes) {
   // All section and elevation drawings after one model change (each drawn layout needs them;
   // the drawing cache is per project object).
   const sections = state.history.present.sections ?? [];
-  const sectionAll = measure(() => {
+  // Each sample first changes one wall of storey 2, then draws every section of the new state.
+  const sectionTimes: number[] = [];
+  for (let i = -1; i < 3; i++) {
+    state = editingReducer(state, {
+      type: "project",
+      project: updateWall(state.history.present, wall, { height: i % 2 ? 2.7 : 2.75 }),
+    });
     const p = state.history.present;
-    return sections.map((s) => sectionDrawing(p, s));
-  }, 3);
+    const t = performance.now();
+    for (const s of sections) sectionDrawing(p, s);
+    if (i >= 0) sectionTimes.push(performance.now() - t);
+  }
+  const sectionAll = { ms: stats(sectionTimes) };
 
   // A line drawn on a layout: no building element changes.
   const layoutId = state.history.present.layouts![0]!.id;
@@ -164,6 +174,30 @@ for (const elements of sizes) {
     return s.history.present;
   });
   const layoutBuilding = rebuiltParts(beforeLayout, layoutLine.last);
+  // The drawings a layout shows, after a change on the layout (nothing they show changed).
+  const sectionsAfterLayout = measure((i) => {
+    const before = state.history.present;
+    for (const s of sections) cachedSectionDrawing(before, s);
+    const space = { kind: "layout" as const, id: layoutId };
+    let next = spaceEditingReducer(state, { type: "space", space });
+    const lens = spaceLens(next.history.present, space);
+    next = spaceEditingReducer(next, {
+      type: "project",
+      project: createDrawing(lens, lens, `messlinie-b-${elements}-${i}`, {
+        kind: "line",
+        points: [
+          { x: 0.02, y: 0.05 + i * 0.001 },
+          { x: 0.1, y: 0.05 + i * 0.001 },
+        ],
+        lineKind: "line",
+        appearance: defaultLineAppearance,
+      }),
+    });
+    state = next;
+    const t = performance.now();
+    for (const s of sections) cachedSectionDrawing(state.history.present, s);
+    return performance.now() - t;
+  }, 3);
 
   // Project information (title block data): no building element changes.
   const info = measure((i) => {
@@ -211,6 +245,8 @@ for (const elements of sizes) {
     resolveRoofTrimsMs: roofTrims.ms,
     resolveBoundWallHeightsMs: boundHeights.ms,
     sectionsAfterChange: { count: sections.length, ms: sectionAll.ms },
+    // Only the drawing part of each sample (the layout edit itself is timed in layoutLine).
+    sectionsAfterLayoutChangeMs: Math.round(sectionsAfterLayout.last * 10) / 10,
     layoutLine: { ms: layoutLine.ms, ...reused(layoutLine.counters), building: layoutBuilding },
     projectInfo: { ms: info.ms, ...reused(info.counters) },
     undoMs: undo.ms,
