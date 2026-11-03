@@ -216,10 +216,9 @@ export function buildPreviewSolid(project: ModelGeometry, elevation: number): So
         solid.max[2] = Math.max(solid.max[2], p[2]);
       }
   }
-  // Ceiling slabs of this storey: top on the next raw floor (elevation + storey height).
-  // Both come from this storey and its elevation, which every storey cache already keys on.
+  // Floor slabs of this storey: top on its own raw floor, the underside reaches into the
+  // storey below (docs/SLAB_ELEMENT.md, schema 53). Only the elevation every storey cache keys on.
   const storey = storeyOf(project);
-  // Disposable scopes may omit the height; their slabs then stay out, like an unknown height.
   const height = "height" in storey && typeof storey.height === "number" ? storey.height : null;
   const bodies: { faces: Face[]; volume: number }[] = (storey.slabs ?? []).flatMap((slab) => {
     const openings = ("slabOpenings" in storey ? (storey.slabOpenings ?? []) : []).filter(
@@ -227,7 +226,7 @@ export function buildPreviewSolid(project: ModelGeometry, elevation: number): So
     );
     const body = slabBody(
       slab,
-      height === null ? null : elevation + height,
+      elevation,
       openings.map(slabOpeningOutline),
       openings.map((o) => !!o.circle),
     );

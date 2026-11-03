@@ -32,3 +32,12 @@ export function replaceStorey<P extends StoreySource, T>(source: P, storey: T): 
     storeys: source.storeys.map((s) => ((s as { id: string }).id === id ? storey : s)),
   } as unknown as Replaced<P, T>;
 }
+/** The storey directly above in the sequence (lowest to highest), or undefined for the top one.
+ * Read where a storey needs the floor above it, e.g. room ceilings (docs/SLAB_ELEMENT.md). */
+export function storeyAbove<S extends { id: string }>(
+  source: { storeys: readonly S[] },
+  storeyId: string,
+): S | undefined {
+  const index = source.storeys.findIndex((s) => s.id === storeyId);
+  return index < 0 ? undefined : source.storeys[index + 1];
+}

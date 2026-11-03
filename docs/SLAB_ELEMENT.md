@@ -4,7 +4,7 @@ Basis: main `58b9dae`, Branch `feat/slab-element`. Bezug: N47 (Decken mit Stärk
 
 ## Nutzerentscheidungen (28.10.2026)
 
-- **Lage:** Eine Decke, die in einem Geschoss platziert wird, ist die Decke dieses Geschosses. Ihre Oberkante liegt auf dem Rohfußboden des Geschosses darüber (OK Rohfußboden = Kote des oberen Geschosses, im Modell `upperElevation`) plus einem Versatz (Standard 0).
+- **Lage (bis Schema 52, abgelöst am 03.11.2026, siehe unten):** Eine Decke, die in einem Geschoss platziert wird, ist die Decke dieses Geschosses. Ihre Oberkante liegt auf dem Rohfußboden des Geschosses darüber (OK Rohfußboden = Kote des oberen Geschosses, im Modell `upperElevation`) plus einem Versatz (Standard 0).
 - **Bezugskante oben:** Wie die Wand eine Hauptachse hat, hat die Decke ihre Oberkante als Bezug. Eine Änderung der Stärke (z. B. 0,20 → 0,30 m) behält die Oberkante und verschiebt die Unterkante.
 - **Höhenbezüge der Wände:** Wandbezüge sollen sich grundsätzlich auf die Geschosshöhen beziehen, nicht auf Decken. Die bisherige Bindung „bis UK Rohdecke“ mit angenommenen 0,20 m (N22, Schema 26) war ein Zwischenschritt, um eine dazwischenliegende Decke sichtbar anzudeuten. Decken einzubeziehen bleibt erlaubt, ist aber nicht die Zielrichtung. Die Umstellung der Wandbindung ist ein eigener späterer Schritt (Teil C, neu gefasst) und in Teil A nicht enthalten.
 - Empfehlungen der Änderungskarte übernommen: Standardstärke 0,20 m, frei änderbar; Polygon, Rechteck und geschlossene Kontur als Erstellung; im Grundriss dünner gestrichelter Umriss mit leichter Füllung, über die Ebene „Decke“ ausblendbar; L- und andere nicht-konvexe Formen erlaubt, keine Löcher.
@@ -97,3 +97,27 @@ Nutzerentscheidung 29.10.2026 (Zielbild): Jede Wand und jede Decke erhält spät
 - Grenzen wie bei Schraffuren: Kontur versetzen nur für konvexe Umrisse; ein sich selbst schneidender Umriss wird nicht übernommen; Punkte löschen gibt es noch nicht.
 - Nachweis: drei Tests in `drawing/actions.test.ts` (Punkt, Strecken, Seite, Knicken an einer L-Decke: Vorschau = Übernahme in 2D und 3D-Gebäudekörper, Stärke/Versatz bleiben; Offset am Rechteck, Ablehnung am L; Kreuzung abgelehnt, Modell unverändert, ein Undo-Schritt über den Controller). Hatch-Gleichheitstests unverändert grün. 14-Modell-Hash `09528ac4…7823253` unverändert. 1347 Tests grün.
 - Browser: Decke aus der Wiederherstellung geladen (Ladedialog zeigt „0 Türen · 1 Decken“), Ecke verschoben (6,00 → 4,655 m²), Knick eingefügt (→ 4,055 m²), weitere Ecke verschoben; kreuzende Position nicht übernommen; drei Undo-Schritte zurück zum Rechteck; keine Konsolenfehler.
+
+## Decke als Bodenplatte (Schema 53, 03.11.2026)
+
+Nutzerentscheidung vom 03.11.2026: Eine Decke, die in einem Geschoss gezeichnet wird, ist dessen Bodenplatte, also die Decke des Geschosses darunter. Gezeichnet und gezeigt wird sie im eigenen Geschoss; so liegt auch ein Deckendurchbruch dort, wo man ihn zeichnet. Im Geschoss darunter wird er nicht dargestellt.
+
+- **Lage:** Oberkante = Rohfußboden des eigenen Geschosses (`elevation`) + Versatz (Standard 0), die Stärke wächst nach unten. `slabLevels` und `slabBody` rechnen ab der Kote des Geschosses. Die eigene Geschosshöhe wird dafür nicht gebraucht; eine Decke erscheint auch, wenn sie unbekannt ist.
+- **3D, Schnitte, Ansichten:** Der Geschosskörper enthält die Bodenplatte unter seinem Fußboden.
+- **IFC:** `IfcSlab` FLOOR im eigenen Geschoss, Platzierung an der Unterkante, also unter der Geschossplatzierung.
+- **Raumhöhen (Entscheidung E2):** Die lichte Höhe eines Raums misst bis zur Bodenplatte des Geschosses darüber (`storeyCeilingSources(storey, storeyAbove(...))`). Das ist eine ausdrückliche Ausnahme von A08. Dächer bleiben im eigenen Geschoss. Das gilt für Grundriss, Raumliste und IFC-Raumwerte.
+- **Oberfläche:** Eigenschaftsfeld „Versatz OK zum Rohfußboden“; der Hinweis im Deckenwerkzeug nennt die Bodenplatte.
+- **Alte Dateien (Entscheidung E1):** Schema 52 wird ohne Datenänderung als 53 gelesen. Bestehende Decken liegen dadurch eine Geschosshöhe tiefer als vorher; bisher gab es nur Testprojekte.
+- **Unverändert:** Gebundene Wände reichen bis zum Rohfußboden darüber und überschneiden damit die Bodenplatte darüber, wie vorher die Decke (Teil C3).
+- **Abnahmehaus** (`benchmarks/slab-ifc-acceptance.ts`): gleiche Geometrie wie vorher. Die EG-Decke ist die Bodenplatte des OG. Die OG-Decke hat kein Geschoss darüber und bleibt mit der OG-Höhe als Versatz im OG.
+
+**Nachweis:**
+
+- Tests für die Höhenlage (Oberkante, Stärke, Versatz, eigene Höhe unbekannt), den 3D-Körper, den IFC-Export, die Raumhöhen unter der Bodenplatte darüber und das Laden von Schema 52.
+- 1552 Tests grün, Typprüfung, Lint, Architekturprüfung ohne Befund, 14-Modell-Hash `e42aa36e…` unverändert.
+- Browser (Gesamtmodell 3 000, Schnitt A-A): Die Decken liegen unter ±0,00, +3,20, +6,40 und +9,60, also unter den Geschossen 0 bis 3, die sie tragen. Keine Konsolenfehler.
+
+**Grenzen:**
+
+- Im Browser ist keine Decke neu gezeichnet worden; geprüft ist die Darstellung geladener Decken.
+- Das Gesamtmodell (`benchmarks/gesamt-fixture.ts`) behält seine Decken in den Geschossen 0 bis 3. Sie liegen jetzt eine Geschosshöhe tiefer; seine Zeitmessungen wurden nicht wiederholt.

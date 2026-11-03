@@ -31,6 +31,10 @@ export function roofAcceptanceRoof(): Omit<Roof, "layerId"> {
 /** EG with its ceiling slab, OG walls and the roof; the OG ceiling slab is left out. */
 export function roofAcceptanceProject(): Project {
   let p = slabAcceptanceProject();
-  p = validateProject(replaceStorey(p, { ...storeyOf(p), slabs: [] }));
+  // The OG holds the EG ceiling as its floor slab (schema 53); only the OG ceiling goes.
+  const og = storeyOf(p);
+  p = validateProject(
+    replaceStorey(p, { ...og, slabs: (og.slabs ?? []).filter((s) => s.id !== "og-decke") }),
+  );
   return addRoof(p, roofAcceptanceRoof());
 }

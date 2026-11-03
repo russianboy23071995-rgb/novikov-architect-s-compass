@@ -16,18 +16,24 @@ export type CeilingSource = {
   levelLine?: (z: number, upper: HeightLineUpper) => { point: Point2; direction: Point2 };
 };
 
-/** Ceiling sources of one storey (docs/ROOM_ELEMENT.md, R3/R3b): its slabs (underside or top,
- * needs the storey height) and its roofs (underside or outer skin plane). Only the own storey
- * is read (A08). */
-export function storeyCeilingSources(storey: {
-  height?: number | null | undefined;
+type CeilingSlabs = {
   slabs?: readonly Pick<Slab, "id" | "points" | "thickness" | "topOffset">[] | undefined;
-  roofs?: readonly (RoofGeometryInput & { id: string })[] | undefined;
-}): CeilingSource[] {
+};
+/** Ceiling sources of one storey (docs/ROOM_ELEMENT.md, R3/R3b): the slabs of the storey
+ * `above` – since schema 53 a slab is the floor of its storey, so the ceiling of a room is the
+ * floor slab above it (underside or top, needs the storey height; user decision 03.11.2026, an
+ * explicit exception to A08) – and the storey's own roofs (underside or outer skin plane). */
+export function storeyCeilingSources(
+  storey: {
+    height?: number | null | undefined;
+    roofs?: readonly (RoofGeometryInput & { id: string })[] | undefined;
+  },
+  above?: CeilingSlabs | undefined,
+): CeilingSource[] {
   const sources: CeilingSource[] = [];
   const height = storey.height;
   if (typeof height === "number")
-    for (const slab of storey.slabs ?? []) {
+    for (const slab of above?.slabs ?? []) {
       const top = height + slab.topOffset;
       sources.push({
         id: slab.id,

@@ -44,7 +44,7 @@ Nutzerwunsch (02.11.2026): Werkzeug Deckendurchbruch, Öffnung in Decken, z. B. 
 
 ## Grenzen
 
-- **Grundriss des Geschosses darüber:** Der Durchbruch wird dort noch nicht als Luftraum gezeigt. Das wäre eine geschossübergreifende Darstellung nach A08 und braucht eine eigene Entscheidung.
+- **Geschoss darunter:** Seit Schema 53 ist eine Decke die Bodenplatte ihres Geschosses (docs/SLAB_ELEMENT.md). Der Durchbruch liegt damit im Geschoss, in dem er gezeichnet und gezeigt wird. Im Geschoss darunter wird er nicht dargestellt (Nutzerentscheidung 03.11.2026); ein eigener Luftraum entfällt.
 - **Raumhöhen** über einem Durchbruch bleiben unverändert: Die Decke gilt dort weiter als oberer Abschluss.
 - **Nicht durchgehende Aussparungen** (nach DIN mit einer Diagonale) gibt es nicht.
 - **Keine Verknüpfung mit Treppen:** Ein Treppenloch wird von Hand gezeichnet.

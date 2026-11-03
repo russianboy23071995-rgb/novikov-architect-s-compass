@@ -4,10 +4,11 @@ import { resolveStoreyLevels, type StoreyHeight } from "../../storeys/heights.ts
 
 export const MAX_SLAB_POINTS = 10000;
 
-/** Floor slab of a storey (schema 29, user decisions 28.10.2026).
- * A slab placed in a storey is that storey's ceiling: its top lies on the raw floor level of the
- * storey above (OK Rohfußboden, the storey's upperElevation) plus topOffset. The top is the
- * slab's reference; changing the thickness keeps the top and moves the underside.
+/** Floor slab of a storey (schema 29, user decisions 28.10.2026; schema 53, user decision
+ * 03.11.2026, docs/SLAB_ELEMENT.md): a slab placed in a storey is that storey's floor – the
+ * ceiling of the storey below. Its top lies on the storey's own raw floor level (OK
+ * Rohfußboden, the storey's elevation) plus topOffset; it is drawn and shown in this storey.
+ * The top is the slab's reference; changing the thickness keeps the top and moves the underside.
  * points: simple outline in model metres, any winding, no holes yet.
  * Heights are derived from the storey levels only; no elevation is stored.
  */
@@ -40,10 +41,10 @@ export const SLAB_DEFAULTS = { thickness: 0.2, topOffset: 0 } as const satisfies
 /** Top and underside above the project datum, or null while the storey height is unknown. */
 export function slabLevels(
   slab: Pick<Slab, "thickness" | "topOffset">,
-  upperElevation: number | null,
+  floorElevation: number | null,
 ): { top: number; bottom: number } | null {
-  if (upperElevation === null) return null;
-  const top = upperElevation + slab.topOffset;
+  if (floorElevation === null) return null;
+  const top = floorElevation + slab.topOffset;
   return { top, bottom: top - slab.thickness };
 }
 
@@ -58,7 +59,7 @@ export function storeySlabLevels(
     project.groundStoreyId,
     project.groundDatum ?? 0,
   ).find((l) => l.storeyId === storeyId);
-  return slabLevels(slab, level?.upperElevation ?? null);
+  return slabLevels(slab, level?.elevation ?? null);
 }
 
 /** Plan area in square metres. */

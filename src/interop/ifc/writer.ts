@@ -9,6 +9,7 @@ import { columnLevels } from "../../domain/elements/column/model.ts";
 import { IFC_RENOVATION_STATUS, wallRenovation } from "../../domain/elements/wall/renovation.ts";
 import { wallBase } from "../../domain/elements/wall/heights.ts";
 import { resolveStoreyLevels } from "../../domain/storeys/heights.ts";
+import { storeyAbove } from "../../domain/storeys/access.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import { validateSimplePolygon } from "../../geometry/polygons/simple-polygon.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
@@ -763,11 +764,11 @@ export async function writeIfc(
         );
       }
     }
-    // Ceiling slabs (docs/SLAB_ELEMENT.md, Teil B2): IfcSlab FLOOR in the storey that owns
-    // them, outline extruded upward from the underside. Without a known storey height there is
-    // no level and no slab, as in 3D.
+    // Floor slabs (docs/SLAB_ELEMENT.md, Teil B2, schema 53): IfcSlab FLOOR in the storey whose
+    // floor they are, outline extruded upward from the underside below the storey's raw floor.
+    // Without a known storey elevation there is no level and no slab, as in 3D.
     for (const slab of floor.slabs ?? []) {
-      const slabLevel = slabLevels(slab, level.upperElevation);
+      const slabLevel = slabLevels(slab, level.elevation);
       if (!slabLevel) continue;
       const ring = validateSimplePolygon(slab.points);
       const points = ring.valid && ring.signedArea < 0 ? [...slab.points].reverse() : slab.points;
@@ -1009,7 +1010,9 @@ export async function writeIfc(
     // (spaces are decomposition, not containment). Clear heights and height line areas from the
     // storey's own slabs and roofs go along as quantities and NOVIKOV properties.
     const spaces: string[] = [];
-    const ceilings = floor.rooms?.length ? storeyCeilingSources(floor) : [];
+    const ceilings = floor.rooms?.length
+      ? storeyCeilingSources(floor, storeyAbove(project, floor.id))
+      : [];
     for (const room of floor.rooms ?? []) {
       const ring = validateSimplePolygon(room.points);
       const points = ring.valid && ring.signedArea < 0 ? [...room.points].reverse() : room.points;

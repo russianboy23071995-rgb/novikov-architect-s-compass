@@ -14,7 +14,7 @@ import {
   type AssemblyLibrary,
 } from "./wall-layers.ts";
 import { openingOverlaps } from "../../domain/elements/wall/opening-overlaps.ts";
-import { storeyOf } from "../../domain/storeys/access.ts";
+import { storeyAbove, storeyOf } from "../../domain/storeys/access.ts";
 import {
   roomClearHeights,
   roomHeightLineResults,
@@ -41,7 +41,9 @@ export function derivePlanScene(
   }
   // Overlaps stay allowed; the plan marks every involved window or door as a hint.
   const storey = "storeys" in geometry ? storeyOf(geometry) : geometry.storey;
-  const ceilings = plan.rooms.length ? storeyCeilingSources(storey) : [];
+  // Room ceilings: own roofs and the floor slabs of the storey above (docs/SLAB_ELEMENT.md).
+  const above = "storeys" in geometry ? storeyAbove(geometry, storeyOf(geometry).id) : undefined;
+  const ceilings = plan.rooms.length ? storeyCeilingSources(storey, above) : [];
   const overlapping = new Set(openingOverlaps(storey).flatMap((o) => [o.first, o.second]));
   // Layers of walls with a build-up, across the thickness (docs/WANDAUFBAU.md, SA2).
   const wallLayers = new Map(

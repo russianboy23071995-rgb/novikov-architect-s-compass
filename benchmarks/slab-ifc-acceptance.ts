@@ -1,6 +1,8 @@
 // Small two-storey house for the Archicad acceptance of ceiling slabs (docs/SLAB_ELEMENT.md,
 // Teil B2), built through the normal application actions: EG 3,00 m with a rectangular ceiling
 // slab 0,20 m, OG 2,80 m with an L-shaped ceiling slab 0,25 m. Walls end at the slab underside.
+// Schema 53: a slab is the floor of its storey, so the EG ceiling is drawn in the OG; the OG
+// ceiling has no storey above and stays in the OG, raised by the OG height. Same geometry.
 import { createProject } from "../src/application/projects/create.ts";
 import { addWall } from "../src/application/walls/actions.ts";
 import { addWindow } from "../src/application/windows/actions.ts";
@@ -48,7 +50,15 @@ export function slabAcceptanceProject(): Project {
   p = setStoreyHeight(p, p, { projectId: p.id, storeyId: "eg", height: eg.height });
   p = renameStorey(p, p, { projectId: p.id, storeyId: "eg", name: "Erdgeschoss" });
   p = ring(p, "eg", eg.height - eg.slab);
-  // EG ceiling over the outer wall faces.
+  p = addStorey(p, p, {
+    projectId: p.id,
+    storeyId: "eg",
+    side: "above",
+    id: "og",
+    height: og.height,
+  });
+  p = selectWorkingStorey(p, p, "og");
+  // EG ceiling over the outer wall faces: the floor slab of the OG.
   p = addSlab(p, {
     id: "eg-decke",
     points: [
@@ -60,14 +70,6 @@ export function slabAcceptanceProject(): Project {
     thickness: eg.slab,
     topOffset: 0,
   });
-  p = addStorey(p, p, {
-    projectId: p.id,
-    storeyId: "eg",
-    side: "above",
-    id: "og",
-    height: og.height,
-  });
-  p = selectWorkingStorey(p, p, "og");
   p = ring(p, "og", og.height - og.slab);
   // OG ceiling: L shape, one corner of the plan left open.
   p = addSlab(p, {
@@ -81,7 +83,7 @@ export function slabAcceptanceProject(): Project {
       { x: -0.15, y: 6.15 },
     ],
     thickness: og.slab,
-    topOffset: 0,
+    topOffset: og.height,
   });
   return p;
 }

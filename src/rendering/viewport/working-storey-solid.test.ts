@@ -145,7 +145,7 @@ const slabOutline = [
   { x: 0, y: 5 },
 ];
 
-test("a ceiling slab is a closed body under the next raw floor, marked as slab", () => {
+test("a floor slab is a closed body under the storey's raw floor, marked as slab", () => {
   const base = slabProject();
   const p = addSlab(base, { id: "s", points: slabOutline, ...SLAB_DEFAULTS });
   const before = buildBuildingSolid(base);
@@ -159,26 +159,27 @@ test("a ceiling slab is a closed body under the next raw floor, marked as slab",
   assert.equal(slabFaces.length, 14);
   assert.ok(slabFaces.every((f) => f.wallId === "s"));
   const zs = slabFaces.flatMap((f) => f.vertices.map((v) => v[2]));
-  assert.equal(Math.max(...zs), 3);
-  assert.ok(Math.abs(Math.min(...zs) - 2.8) < 1e-12);
+  // Schema 53: top on the storey's own raw floor, underside into the storey below.
+  assert.equal(Math.max(...zs), 0);
+  assert.ok(Math.abs(Math.min(...zs) + 0.2) < 1e-12);
   assert.ok(Math.abs(buildSolid(p).volume - buildSolid(base).volume - 24 * 0.2) < 1e-9);
-  // Thickness keeps the top; the storey height moves the slab.
-  const thicker = buildBuildingSolid(updateSlab(p, "s", { thickness: 0.3 }));
-  const tz = thicker.faces.filter((f) => f.slab).flatMap((f) => f.vertices.map((v) => v[2]));
-  assert.equal(Math.max(...tz), 3);
-  assert.ok(Math.abs(Math.min(...tz) - 2.7) < 1e-12);
+  // Thickness keeps the top; the storey's own height does not move its floor slab.
+  const slabZ = (project: typeof p) =>
+    buildBuildingSolid(project)
+      .faces.filter((f) => f.slab)
+      .flatMap((f) => f.vertices.map((v) => v[2]));
+  const tz = slabZ(updateSlab(p, "s", { thickness: 0.3 }));
+  assert.equal(Math.max(...tz), 0);
+  assert.ok(Math.abs(Math.min(...tz) + 0.3) < 1e-12);
   const higher = setStoreyHeight(p, p, { projectId: "p", storeyId: "eg", height: 3.2 });
-  assert.equal(
-    Math.max(...buildBuildingSolid(higher).faces.flatMap((f) => f.vertices.map((v) => v[2]))),
-    3.2,
-  );
-  // Unknown storey height: no body.
+  assert.equal(Math.max(...slabZ(higher)), 0);
+  // Its own height unknown: the floor is known, so is the body.
   const unknown = addSlab(createProject("q", "eg"), {
     id: "s",
     points: slabOutline,
     ...SLAB_DEFAULTS,
   });
-  assert.equal(buildBuildingSolid(unknown).faces.length, 0);
+  assert.equal(buildBuildingSolid(unknown).faces.filter((f) => f.slab).length, 14);
 });
 
 test("slab faces stay out of wall feet; slab corners are movement origins; picking names the slab", () => {

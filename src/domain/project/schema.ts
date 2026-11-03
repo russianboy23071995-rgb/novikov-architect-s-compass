@@ -716,7 +716,8 @@ export const projectV51Schema = projectV45Schema.extend({
   layouts: z.array(layoutV49Schema).max(5000).optional(),
   projectInfo: projectInfoSchema.optional(),
 });
-/** Schema 52: round slab openings (circle with centre and diameter). */
+/** Schema 52: round slab openings (circle with centre and diameter). Schema 53: same structure,
+ * a slab is the floor of its storey (docs/SLAB_ELEMENT.md). */
 const storeySchema = drawingStoreySchema.extend({
   slabOpenings: z.array(slabOpeningSchema).max(5000).optional(),
 });

@@ -91,7 +91,7 @@ import { slabAcceptanceProject } from "../../../benchmarks/slab-ifc-acceptance.t
 import { addSlab } from "../../application/slabs/actions.ts";
 import { createProject as emptyProject } from "../../application/projects/create.ts";
 
-test("each ceiling slab exports as IfcSlab FLOOR from its underside, contained in its storey", async () => {
+test("each slab exports as IfcSlab FLOOR from its underside, contained in its storey", async () => {
   const project = slabAcceptanceProject();
   const ifc = await exportIfc(project, date);
   const line = (ref: string) => ifc.split("\n").find((r) => r.startsWith(`${ref}=`))!;
@@ -99,7 +99,8 @@ test("each ceiling slab exports as IfcSlab FLOOR from its underside, contained i
   const slabs = rows(ifc, "IFCSLAB");
   assert.equal(slabs.length, 2);
   const expected = {
-    "eg-decke": { storey: "Erdgeschoss", bottom: 2.8, depth: 0.2, points: 4 },
+    // The EG ceiling is the floor slab of the OG (schema 53): underside 0,20 m below its floor.
+    "eg-decke": { storey: "1. Obergeschoss", bottom: -0.2, depth: 0.2, points: 4 },
     "og-decke": { storey: "1. Obergeschoss", bottom: 2.55, depth: 0.25, points: 6 },
   } as const;
   for (const [id, want] of Object.entries(expected)) {
@@ -131,7 +132,8 @@ test("each ceiling slab exports as IfcSlab FLOOR from its underside, contained i
     );
   }
   assert.ok(ifc.includes("'Thickness',$,IFCLENGTHMEASURE(0.25)"));
-  // Without a known storey height there is no level and no IfcSlab, as in 3D.
+  // The storey's own height unknown: its floor is known (EG on the datum), so is the IfcSlab,
+  // as in 3D.
   const unknown = addSlab(emptyProject("q", "eg"), {
     id: "s",
     points: [
@@ -142,7 +144,7 @@ test("each ceiling slab exports as IfcSlab FLOOR from its underside, contained i
     thickness: 0.2,
     topOffset: 0,
   });
-  assert.equal(rows(await exportIfc(unknown, date), "IFCSLAB").length, 0);
+  assert.equal(rows(await exportIfc(unknown, date), "IFCSLAB").length, 1);
 });
 
 test("filling variants for Archicad: placeholder body or type and quantities; default unchanged", async () => {

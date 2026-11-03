@@ -198,6 +198,7 @@ test("start project always has Erdgeschoss and 1. Obergeschoss at 3,00 m; slabs 
   const slabFaces = solid.faces.filter((f) => "slab" in f && f.slab);
   assert.ok(slabFaces.length > 0, "slab is part of the 3D building solid");
   const z = slabFaces.flatMap((f) => f.vertices.map((v) => v[2]));
-  assert.equal(Math.max(...z), 3);
-  assert.ok(Math.abs(Math.min(...z) - 2.8) < 1e-9);
+  // A slab drawn in the EG is its floor (schema 53): top on ±0,00, underside 0,20 m below.
+  assert.equal(Math.max(...z), 0);
+  assert.ok(Math.abs(Math.min(...z) + 0.2) < 1e-9);
 });
