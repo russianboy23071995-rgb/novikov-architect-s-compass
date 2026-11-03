@@ -1,0 +1,41 @@
+{
+  "runtime": "Chromium (Claude Browser-Pane), Vite-Entwicklungsserver, Gesamtmodell (benchmarks/gesamt-fixture.ts)",
+  "date": "2026-11-03",
+  "method": "zoom-measure.js: Mausrad-Ereignis am SVG, Zeit bis der neue Bildausschnitt gezeichnet ist; 20 Schritte (3 000) bzw. 10 Schritte (20 000)",
+  "before": {
+    "3000": {
+      "Südansicht": { "elements": 14865, "openMs": 745, "zoomMedianMs": 197, "zoomMaxMs": 387 },
+      "Schnitt A-A": { "elements": 2447, "openMs": 112, "zoomMedianMs": 36, "zoomMaxMs": 88 }
+    },
+    "20000": {
+      "Südansicht": { "elements": 97145, "openMs": 4452, "zoomMedianMs": 1362, "zoomMaxMs": 1612 },
+      "Schnitt A-A": { "elements": 15197, "openMs": 621, "zoomMedianMs": 209, "zoomMaxMs": 317 }
+    }
+  },
+  "after": {
+    "3000": {
+      "Südansicht": {
+        "elements": 11368,
+        "openMs": [1236, 603],
+        "zoomMedianMs": [20, 22],
+        "zoomMaxMs": [26, 702]
+      },
+      "Schnitt A-A": {
+        "elements": 1487,
+        "openMs": [183, 202],
+        "zoomMedianMs": [10, 12],
+        "zoomMaxMs": [16, 16]
+      }
+    },
+    "20000": {
+      "Südansicht": {
+        "elements": 74608,
+        "openMs": 2540,
+        "zoomMedianMs": 272,
+        "zoomMaxMs": 2734,
+        "paintOnlyMedianMs": 127
+      },
+      "Schnitt A-A": { "elements": 9137, "openMs": 513, "zoomMedianMs": 20, "zoomMaxMs": 24 }
+    }
+  }
+}
