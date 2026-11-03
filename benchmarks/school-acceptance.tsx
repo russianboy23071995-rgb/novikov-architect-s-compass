@@ -7,6 +7,7 @@ import { selectWorkingStorey } from "../src/application/storeys/working-storey";
 import type { Project } from "../src/domain/project/schema";
 import { schoolPlanCounts, schoolPlanFixture } from "./school-plan-fixture";
 import { schoolFixture } from "./school-fixture";
+import { GESAMT_IMAGES, gesamtCounts, gesamtFixture } from "./gesamt-fixture";
 import "../src/styles.css";
 
 /** Acceptance run on the five-storey school (user decision 25.10.2026). The real production
@@ -19,10 +20,12 @@ if (!import.meta.env.PROD || location.port !== "8085")
   throw new Error("Use the isolated production workspace on port 8085");
 
 const params = new URLSearchParams(location.search);
-const size = (params.get("size") ?? "s") as "s" | "l" | "x";
+const size = (params.get("size") ?? "s") as "s" | "l" | "x" | "g";
+// g: the school model of x with every newer feature (benchmarks/gesamt-fixture.ts, GESAMTNACHWEIS).
+const synthetic = size === "x" || size === "g";
 const withImages = params.get("images") !== "0";
 const RESULT_KEY = `school-run-${size}`;
-const PROJECT_ID = size === "x" ? "school" : "school-plan";
+const PROJECT_ID = synthetic ? "school" : "school-plan";
 const idle = async (ms: number) => {
   await new Promise((r) => setTimeout(r, ms));
   return heapMB();
@@ -204,13 +207,37 @@ async function noiseImage(seed: number) {
     binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
   return { data: btoa(binary), bytes: bytes.length, width: canvas.width, height: canvas.height };
 }
+/** The 7 images of the g model, 4000 × 4000 px, striped like the Node version (gesamt-images.ts). */
+async function gesamtCanvasImages() {
+  const images: { data: string }[] = [];
+  for (let i = 0; i < GESAMT_IMAGES.count; i++) {
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = GESAMT_IMAGES.pixels;
+    const context = canvas.getContext("2d")!;
+    const shade = 230 - i * 9;
+    context.fillStyle = `rgb(${shade},${shade},${shade})`;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "rgb(40,40,40)";
+    for (let x = 0; x < canvas.width; x += 33) context.fillRect(x, 0, 1, canvas.height);
+    const blob = await new Promise<Blob>((r) => canvas.toBlob((b) => r(b!), "image/png"));
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    let binary = "";
+    for (let k = 0; k < bytes.length; k += 0x8000)
+      binary += String.fromCharCode(...bytes.subarray(k, k + 0x8000));
+    images.push({ data: btoa(binary) });
+  }
+  return images;
+}
 async function buildModel(): Promise<{ project: Project; imageBytes: number }> {
   let p =
-    size === "x"
-      ? schoolFixture(20000)
-      : schoolPlanFixture(size === "l" ? { wings: 3, desksPerRoom: 50 } : {});
+    size === "g"
+      ? gesamtFixture(20000, withImages ? await gesamtCanvasImages() : [])
+      : size === "x"
+        ? schoolFixture(20000)
+        : schoolPlanFixture(size === "l" ? { wings: 3, desksPerRoom: 50 } : {});
   let imageBytes = 0;
-  if (withImages)
+  // The g model brings its own images (7 × 4000 × 4000 px).
+  if (withImages && size !== "g")
     for (const [i, s] of p.storeys.entries()) {
       const image = await noiseImage(i + 1);
       imageBytes += image.bytes;
@@ -236,38 +263,37 @@ async function buildModel(): Promise<{ project: Project; imageBytes: number }> {
       });
     }
   return {
-    project: selectWorkingStorey(p, p, size === "x" ? "s2" : "s0"),
+    project: selectWorkingStorey(p, p, synthetic ? "s2" : "s0"),
     imageBytes,
   };
 }
-const targets =
-  size === "x"
-    ? {
-        wall: "s2-b0",
-        lengths: ["3 m", "3,5 m"],
-        window: "s2-win0",
-        door: null as string | null,
-        line: "s2-line0",
-        partition: null as { x: number; y: number } | null,
-        storeys: ["Geschoss 0", "Geschoss 1", "Geschoss 3", "Geschoss 4", "Geschoss 2"],
-        home: "Geschoss 2",
-      }
-    : {
-        wall: "s0-w0-par-n3",
-        lengths: ["8 m", "8,2 m"],
-        window: "s0-w0-win-s0a",
-        door: "s0-w0-door-n2" as string | null,
-        line: "s0-w0-desk-s0-0",
-        partition: { x: 25, y: 4.45 } as { x: number; y: number } | null,
-        storeys: [
-          "1. Obergeschoss",
-          "2. Obergeschoss",
-          "3. Obergeschoss",
-          "4. Obergeschoss",
-          "Erdgeschoss",
-        ],
-        home: "Erdgeschoss",
-      };
+const targets = synthetic
+  ? {
+      wall: "s2-b0",
+      lengths: ["3 m", "3,5 m"],
+      window: "s2-win0",
+      door: null as string | null,
+      line: "s2-line0",
+      partition: null as { x: number; y: number } | null,
+      storeys: ["Geschoss 0", "Geschoss 1", "Geschoss 3", "Geschoss 4", "Geschoss 2"],
+      home: "Geschoss 2",
+    }
+  : {
+      wall: "s0-w0-par-n3",
+      lengths: ["8 m", "8,2 m"],
+      window: "s0-w0-win-s0a",
+      door: "s0-w0-door-n2" as string | null,
+      line: "s0-w0-desk-s0-0",
+      partition: { x: 25, y: 4.45 } as { x: number; y: number } | null,
+      storeys: [
+        "1. Obergeschoss",
+        "2. Obergeschoss",
+        "3. Obergeschoss",
+        "4. Obergeschoss",
+        "Erdgeschoss",
+      ],
+      home: "Erdgeschoss",
+    };
 
 // --- steps ---------------------------------------------------------------------------------
 type StepResult = {
@@ -358,7 +384,7 @@ function summary(project: Project, imageBytes: number, fileBytes: number) {
   return {
     size,
     withImages,
-    counts: size === "x" ? null : schoolPlanCounts(project),
+    counts: size === "g" ? gesamtCounts(project) : size === "x" ? null : schoolPlanCounts(project),
     imageBytes,
     fileMB: Math.round((fileBytes / 1048576) * 100) / 100,
     userAgent: navigator.userAgent,
@@ -368,6 +394,78 @@ function stats(values: number[]) {
   const s = [...values].sort((a, b) => a - b);
   const at = (q: number) => s[Math.min(s.length - 1, Math.floor(q * s.length))]!;
   return { n: s.length, median: at(0.5), p95: at(0.95), max: s[s.length - 1]! };
+}
+
+const tab = (start: string) =>
+  [...document.querySelectorAll<HTMLElement>('[role="tab"]')].find((t) =>
+    t.textContent?.trim().startsWith(start),
+  );
+/** 3D as a tab (the 2D/3D switch became „Ansicht als Tab öffnen“, docs/LAYOUTS.md KA1). */
+async function open3D() {
+  if (tab("3D")) return click(tab("3D")!);
+  click(label("Ansicht als Tab öffnen")!);
+  const item = () =>
+    [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find(
+      (m) => m.textContent?.trim() === "3D-Ansicht",
+    );
+  await until(() => !!item(), 10000);
+  click(item()!);
+}
+/** Section, layout and PDF of the g model (GESAMTNACHWEIS): open, switch back, export. */
+async function viewSteps() {
+  const sectionButton = () =>
+    [...document.querySelectorAll<HTMLButtonElement>("button")].find((b) =>
+      b.title.startsWith("Klick öffnet den Schnitt als Tab"),
+    );
+  await step(
+    "Schnitt-Tab öffnen",
+    () => click(sectionButton()!),
+    () => !!tab("Schnitt") && !!document.querySelector("g[data-element-id]"),
+    120000,
+  );
+  await step(
+    "Grundriss-Tab",
+    () => click(tab("Grundriss")!),
+    () => !!element("wall", targets.wall),
+    60000,
+  );
+  await step(
+    "Schnitt-Tab erneut",
+    () => click(tab("Schnitt")!),
+    // The plan stays mounted behind the tab; the section tab itself is the target state.
+    () => tab("Schnitt")?.getAttribute("aria-selected") === "true",
+    60000,
+  );
+  await step(
+    "Layouts-Navigator",
+    () => click(tab("Layouts")!),
+    () => !!label("Plan 1"),
+  );
+  await step(
+    "Layout öffnen",
+    () => label("Plan 1")!.dispatchEvent(new MouseEvent("dblclick", { bubbles: true })),
+    () => !!button("PDF exportieren"),
+    120000,
+  );
+  captured = null;
+  await step(
+    "Layout – PDF",
+    () => click(button("PDF exportieren")!),
+    () => !!captured,
+    300000,
+  );
+  await step(
+    "Grundriss-Tab zurück",
+    () => click(tab("Grundriss")!),
+    () => !!element("wall", targets.wall),
+    60000,
+  );
+  await step(
+    "Gebäudestruktur-Navigator",
+    () => click(tab("Gebäudestruktur")!),
+    () =>
+      [...document.querySelectorAll("button")].some((b) => b.textContent?.trim() === targets.home),
+  );
 }
 
 async function phaseOne() {
@@ -400,6 +498,8 @@ async function phaseOne() {
         ),
       () => bodyText().includes(`BIM Project · ${name}`),
     );
+
+  if (size === "g") await viewSteps();
 
   await select("wall", targets.wall);
   await command("Wandlänge", `Wandlänge auf ${targets.lengths[0]}`);
@@ -478,7 +578,7 @@ async function phaseOne() {
   key("l");
   await paint();
   const svg = planSvg()!;
-  const origin = screen(size === "x" ? { x: 5, y: -2 } : { x: 3, y: 2 });
+  const origin = screen(synthetic ? { x: 5, y: -2 } : { x: 3, y: 2 });
   const snap: number[] = [];
   currentStep = "Fang";
   for (let i = 0; i < 100; i++) {
@@ -494,7 +594,7 @@ async function phaseOne() {
   if (targets.door) await select("door", targets.door);
   await step(
     "2D → 3D",
-    () => click(button("3D")!),
+    () => open3D(),
     () => !!document.querySelector("canvas"),
   );
   // The 3D view keeps deriving after its canvas appears; count that apart from the drag.
@@ -526,7 +626,7 @@ async function phaseOne() {
   );
   await step(
     "3D → 2D",
-    () => click(button("2D")!),
+    () => click(tab("Grundriss")!),
     () => !!element("wall", targets.wall),
   );
 
@@ -537,7 +637,7 @@ async function phaseOne() {
   await select("wall", targets.wall);
   await step(
     "Z: 2D → 3D",
-    () => click(button("3D")!),
+    () => open3D(),
     () => !!document.querySelector("canvas"),
   );
   await step(
@@ -585,7 +685,7 @@ async function phaseOne() {
   );
   await step(
     "Z: 3D → 2D",
-    () => click(button("2D")!),
+    () => click(tab("Grundriss")!),
     () => !!element("wall", targets.wall),
   );
 
@@ -770,7 +870,7 @@ async function dragRun(model: ReturnType<typeof summary>) {
   await select("door", targets.door!);
   await step(
     "2D → 3D",
-    () => click(button("3D")!),
+    () => open3D(),
     () => !!document.querySelector("canvas"),
   );
   await step("3D – Szene fertig", quiet, () => true);
