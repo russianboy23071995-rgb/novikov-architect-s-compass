@@ -14,6 +14,7 @@ import { wallBody } from "../../domain/elements/wall/body.ts";
 import { validateProject, wallLength } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { slabBody } from "./slab-solid.ts";
+import { slabOpeningOutline } from "../../domain/elements/slab/opening.ts";
 import { roofBody } from "./roof-solid.ts";
 import { columnBody } from "./column-solid.ts";
 import { openingInsertBodies } from "./opening-insert-solid.ts";
@@ -31,6 +32,8 @@ export type Face = {
   column?: true;
   /** Stair face (docs/TREPPE.md). */
   stair?: true;
+  /** Facet of a curved surface (round slab opening): no drawn edge to a smooth neighbour. */
+  smooth?: true;
   /** Face of a window or door element in an opening (docs/FENSTER_TUEREN.md, FT2). */
   opening?: "window" | "door";
   /** Glass pane of a window element. */
@@ -219,10 +222,15 @@ export function buildPreviewSolid(project: ModelGeometry, elevation: number): So
   // Disposable scopes may omit the height; their slabs then stay out, like an unknown height.
   const height = "height" in storey && typeof storey.height === "number" ? storey.height : null;
   const bodies: { faces: Face[]; volume: number }[] = (storey.slabs ?? []).flatMap((slab) => {
-    const holes = ("slabOpenings" in storey ? (storey.slabOpenings ?? []) : [])
-      .filter((o) => o.slabId === slab.id)
-      .map((o) => o.points);
-    const body = slabBody(slab, height === null ? null : elevation + height, holes);
+    const openings = ("slabOpenings" in storey ? (storey.slabOpenings ?? []) : []).filter(
+      (o) => o.slabId === slab.id,
+    );
+    const body = slabBody(
+      slab,
+      height === null ? null : elevation + height,
+      openings.map(slabOpeningOutline),
+      openings.map((o) => !!o.circle),
+    );
     return body ? [body] : [];
   });
   // Roofs of this storey: relative to the storey floor only (docs/ROOF_ELEMENT.md, D2).

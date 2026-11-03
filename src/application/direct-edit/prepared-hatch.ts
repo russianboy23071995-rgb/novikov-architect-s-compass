@@ -46,7 +46,8 @@ export function prepareHatchContourPreview(session: EditSession): PreparedDirect
     kind === "slab"
       ? (level.slabs ?? [])
       : kind === "slabOpening"
-        ? (level.slabOpenings ?? [])
+        ? // A round opening has no corners to edit; only outlines take this path.
+          (level.slabOpenings ?? []).flatMap((o) => (o.points ? [{ ...o, points: o.points }] : []))
         : level.hatches;
   const hatch = items.find((h) => h.id === session.target.id);
   const index = session.index ?? (session.action === "offset" ? 0 : null);

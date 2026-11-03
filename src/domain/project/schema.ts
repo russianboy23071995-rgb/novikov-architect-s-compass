@@ -12,7 +12,11 @@ import {
   windowInsertSchema,
 } from "../elements/window/insert.ts";
 import { slabSchema } from "../elements/slab/model.ts";
-import { slabOpeningProblem, slabOpeningSchema } from "../elements/slab/opening.ts";
+import {
+  slabOpeningProblem,
+  slabOpeningSchema,
+  slabOpeningV51Schema,
+} from "../elements/slab/opening.ts";
 import { roofSchema } from "../elements/roof/model.ts";
 import { columnLevels, columnSchema } from "../elements/column/model.ts";
 import { dimensionSchema } from "../elements/dimension/model.ts";
@@ -699,15 +703,29 @@ export const projectV50Schema = projectV45Schema.extend({
   projectInfo: projectInfoSchema.optional(),
 });
 /** Schema 51: openings in slabs (Deckendurchbrüche, docs/DECKENDURCHBRUCH.md, L40). */
+const storeyV51Schema = drawingStoreySchema.extend({
+  slabOpenings: z.array(slabOpeningV51Schema).max(5000).optional(),
+});
+const layoutDrawingV51Schema = z.object({ layoutId: id, storey: storeyV51Schema }).strict();
+export const projectV51Schema = projectV45Schema.extend({
+  schemaVersion: z.literal(51),
+  storeys: z.array(storeyV51Schema).min(1),
+  modelViews: z.array(anyModelViewSchema).optional(),
+  layoutDrawings: z.array(layoutDrawingV51Schema).max(5000).optional(),
+  masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
+  layouts: z.array(layoutV49Schema).max(5000).optional(),
+  projectInfo: projectInfoSchema.optional(),
+});
+/** Schema 52: round slab openings (circle with centre and diameter). */
 const storeySchema = drawingStoreySchema.extend({
   slabOpenings: z.array(slabOpeningSchema).max(5000).optional(),
 });
-const layoutDrawingV51Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
+const layoutDrawingV52Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
 const projectSchema = projectV45Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z.array(storeySchema).min(1),
   modelViews: z.array(anyModelViewSchema).optional(),
-  layoutDrawings: z.array(layoutDrawingV51Schema).max(5000).optional(),
+  layoutDrawings: z.array(layoutDrawingV52Schema).max(5000).optional(),
   masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
   layouts: z.array(layoutV49Schema).max(5000).optional(),
   projectInfo: projectInfoSchema.optional(),

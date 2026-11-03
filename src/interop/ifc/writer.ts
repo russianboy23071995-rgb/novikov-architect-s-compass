@@ -783,12 +783,40 @@ export async function writeIfc(
       // Deckendurchbrüche (docs/DECKENDURCHBRUCH.md): voids through the whole slab thickness,
       // placed with the slab, like the openings of walls.
       for (const opening of (floor.slabOpenings ?? []).filter((o) => o.slabId === slab.id)) {
-        const hole = validateSimplePolygon(opening.points);
-        const outline =
-          hole.valid && hole.signedArea < 0 ? [...opening.points].reverse() : opening.points;
+        // A round opening keeps its true circle as IfcCircleProfileDef (schema 52).
+        const shape = opening.circle
+          ? (() => {
+              const centre = add(
+                "IFCAXIS2PLACEMENT2D",
+                `${point([opening.circle.center.x, opening.circle.center.y])},$`,
+              );
+              const profile = add(
+                "IFCCIRCLEPROFILEDEF",
+                `.AREA.,$,${centre},${real(opening.circle.diameter / 2)}`,
+              );
+              const solid = add(
+                "IFCEXTRUDEDAREASOLID",
+                `${profile},${origin},${up},${real(slab.thickness)}`,
+              );
+              const representation = add(
+                "IFCSHAPEREPRESENTATION",
+                `${context},'Body','SweptSolid',(${solid})`,
+              );
+              return add("IFCPRODUCTDEFINITIONSHAPE", `$,$,(${representation})`);
+            })()
+          : (() => {
+              const points = opening.points!;
+              const hole = validateSimplePolygon(points);
+              return body(
+                0,
+                0,
+                slab.thickness,
+                hole.valid && hole.signedArea < 0 ? [...points].reverse() : points,
+              );
+            })();
         const openingRef = add(
           "IFCOPENINGELEMENT",
-          `${await guid("opening", opening.id)},$,${label("Deckendurchbruch " + opening.id)},$,$,${placement(storeyPlacement, 0, 0, slabLevel.bottom - elevation)},${body(0, 0, slab.thickness, outline)},$,.OPENING.`,
+          `${await guid("opening", opening.id)},$,${label("Deckendurchbruch " + opening.id)},$,$,${placement(storeyPlacement, 0, 0, slabLevel.bottom - elevation)},${shape},$,.OPENING.`,
         );
         add(
           "IFCRELVOIDSELEMENT",

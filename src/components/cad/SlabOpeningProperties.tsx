@@ -12,7 +12,7 @@ const metres = (value: number) =>
 
 /** Axis-parallel rectangle as its lower left corner and size, else null. */
 function rectangleOf(points: SlabOpening["points"]) {
-  if (points.length !== 4) return null;
+  if (points?.length !== 4) return null;
   const xs = [...new Set(points.map((p) => p.x))],
     ys = [...new Set(points.map((p) => p.y))];
   if (xs.length !== 2 || ys.length !== 2) return null;
@@ -24,7 +24,8 @@ function rectangleOf(points: SlabOpening["points"]) {
 /**
  * Deckendurchbruch in the shared properties bar (docs/DECKENDURCHBRUCH.md). A rectangle along
  * the axes takes a new width and depth from its lower left corner; other outlines are edited at
- * their corners in the plan. Every change runs the shared action, which keeps it in its slab.
+ * their corners in the plan; a round opening takes a new diameter. Every change runs the shared
+ * action, which keeps it in its slab.
  */
 export function SlabOpeningProperties({
   project,
@@ -46,10 +47,50 @@ export function SlabOpeningProperties({
       <p className="text-xs text-muted-foreground" aria-label="Durchbruchwerte">
         {`In Decke ${opening.slabId} · Fläche ${metres(slabOpeningArea(opening))} m²`}
         {rectangle ? ` · ${metres(rectangle.width)} × ${metres(rectangle.depth)} m` : ""}
+        {opening.circle ? ` · ø ${metres(opening.circle.diameter)} m` : ""}
       </p>
+      {opening.circle && (
+        <PropertyForm
+          key={`${opening.circle.center.x},${opening.circle.center.y},${opening.circle.diameter}`}
+          onSubmit={(event) => {
+            event.preventDefault();
+            const raw = new FormData(event.currentTarget).get("diameter");
+            const diameter = typeof raw === "string" && raw.trim() !== "" ? Number(raw) : NaN;
+            try {
+              if (!(diameter > 0)) throw new Error("size");
+              onChange(
+                updateSlabOpening(project, opening.id, {
+                  circle: { ...opening.circle!, diameter },
+                }),
+                selection,
+              );
+              setError("");
+            } catch (e) {
+              setError(
+                e instanceof Error && e.message !== "size" && !e.message.startsWith("[")
+                  ? `Nicht übernommen: ${e.message}`
+                  : "Nicht übernommen: Durchmesser größer als null, ganz in der Decke.",
+              );
+            }
+          }}
+          className="flex flex-wrap items-end gap-2"
+        >
+          <label className="block text-xs">
+            Durchmesser (m)
+            <Input
+              name="diameter"
+              type="number"
+              step="any"
+              required
+              defaultValue={opening.circle.diameter}
+              className="mt-1 h-8 w-28"
+            />
+          </label>
+        </PropertyForm>
+      )}
       {rectangle && (
         <PropertyForm
-          key={opening.points.map((p) => `${p.x},${p.y}`).join(";")}
+          key={opening.points!.map((p) => `${p.x},${p.y}`).join(";")}
           onSubmit={(event) => {
             event.preventDefault();
             const data = new FormData(event.currentTarget);

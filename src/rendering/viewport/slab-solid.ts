@@ -7,7 +7,14 @@ import { slabLevels, type Slab } from "../../domain/elements/slab/model.ts";
 
 type Vec3 = [number, number, number];
 /** A slab face in the storey solid; `slab` keeps it out of every wall-only path. */
-export type SlabFace = { wallId: string; vertices: Vec3[]; normal: Vec3; slab: true };
+export type SlabFace = {
+  wallId: string;
+  vertices: Vec3[];
+  normal: Vec3;
+  slab: true;
+  /** Facet of a round opening's side: drawn as one smooth surface, without edges between. */
+  smooth?: true;
+};
 
 /**
  * Closed body of one ceiling slab (docs/SLAB_ELEMENT.md, Teil B): top on the raw floor of the
@@ -15,12 +22,14 @@ export type SlabFace = { wallId: string; vertices: Vec3[]; normal: Vec3; slab: t
  * triangles (non-convex outlines), one quad per outline edge. Null while the storey height
  * is unknown: no invented level. Openings (Deckendurchbrüche, docs/DECKENDURCHBRUCH.md) are
  * holes through the whole thickness with their own inner side faces; without openings the body
- * is exactly the former one.
+ * is exactly the former one. `smooth` marks holes that stand for a circle: their side faces
+ * are facets of one round surface.
  */
 export function slabBody(
   slab: Pick<Slab, "id" | "points" | "thickness" | "topOffset">,
   upperElevation: number | null,
   holes: readonly (readonly Point2[])[] = [],
+  smooth: readonly boolean[] = [],
 ): { faces: SlabFace[]; volume: number } | null {
   const levels = slabLevels(slab, upperElevation);
   if (!levels) return null;
@@ -63,7 +72,7 @@ export function slabBody(
   };
   const rings = [ring, ...holes.map((hole) => (holeArea(hole) > 0 ? [...hole].reverse() : hole))];
   const cutAway = holes.reduce((sum, hole) => sum + Math.abs(holeArea(hole)), 0);
-  for (const edgeRing of rings)
+  for (const [k, edgeRing] of rings.entries())
     for (let i = 0; i < edgeRing.length; i++) {
       const a = edgeRing[i]!,
         b = edgeRing[(i + 1) % edgeRing.length]!;
@@ -78,6 +87,7 @@ export function slabBody(
         ],
         normal: [(b.y - a.y) / length, -(b.x - a.x) / length, 0],
         slab: true,
+        ...(k > 0 && smooth[k - 1] ? { smooth: true as const } : {}),
       });
     }
   return { faces, volume: ((Math.abs(area) - cutAway) / 2) * (top - bottom) };

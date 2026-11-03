@@ -110,7 +110,13 @@ export function projectSnapParts(project: Project): readonly (readonly SnapPart[
     (storey.drawings ?? []).map((d) => remembered(owned, d, drawingPart)),
     // Deckendurchbruch corners and edge midpoints (docs/DECKENDURCHBRUCH.md), after all
     // earlier kinds so their order stays.
-    (storey.slabOpenings ?? []).map((o) => remembered(owned, o, hatchPart)),
+    (storey.slabOpenings ?? []).map((o) =>
+      remembered(owned, o, (opening) =>
+        opening.points
+          ? hatchPart({ id: opening.id, points: opening.points })
+          : circlePart(opening),
+      ),
+    ),
     // Paper and margin frame of a Plankopf or layout: corners, edge midpoints and, through
     // the corner directions, the edges themselves (docs/LAYOUTS.md).
     sheetParts(project),
@@ -136,6 +142,29 @@ function columnPart(column: NonNullable<Project["storeys"][number]["columns"]>[n
       ...[0, 1, 2, 3].map((k) => ({
         point: { ...outline[k * step]! },
         entityId: column.id,
+        feature: `quadrant-${k}`,
+        directions: [],
+      })),
+    ],
+    segments: [],
+  };
+}
+
+/** A round slab opening: centre and the four quadrant points of its rim. */
+function circlePart(
+  opening: NonNullable<Project["storeys"][number]["slabOpenings"]>[number],
+): Part {
+  const { center, diameter } = opening.circle!;
+  const r = diameter / 2;
+  return {
+    references: [
+      { point: { ...center }, entityId: opening.id, feature: "centre", directions: [] },
+      ...[0, 1, 2, 3].map((k) => ({
+        point: {
+          x: center.x + r * Math.cos((k * Math.PI) / 2),
+          y: center.y + r * Math.sin((k * Math.PI) / 2),
+        },
+        entityId: opening.id,
         feature: `quadrant-${k}`,
         directions: [],
       })),

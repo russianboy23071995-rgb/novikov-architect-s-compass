@@ -60,7 +60,13 @@ export type DrawingRequest =
     }
   | { kind: "slab"; points: Point[]; thickness: number; topOffset: number; layerId?: string }
   // Deckendurchbruch (docs/DECKENDURCHBRUCH.md): the slab that holds the outline is found.
-  | { kind: "slabOpening"; points: Point[]; layerId?: string }
+  | {
+      kind: "slabOpening";
+      points?: Point[];
+      /** Round opening (schema 52) instead of an outline. */
+      circle?: { center: Point; diameter: number };
+      layerId?: string;
+    }
   | ({ kind: "roof"; points: Point[]; layerId?: string } & Omit<Roof, "id" | "points" | "layerId">)
   | {
       kind: "room";
@@ -132,7 +138,9 @@ export function createDrawing(
   if (request.kind === "slabOpening")
     return addSlabOpening(current, {
       id,
-      points: closedDrawingContour(request.points),
+      ...(request.circle
+        ? { circle: request.circle }
+        : { points: closedDrawingContour(request.points ?? []) }),
       ...(request.layerId ? { layerId: request.layerId } : {}),
     });
   if (request.kind === "room")

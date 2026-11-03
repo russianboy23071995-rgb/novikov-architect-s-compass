@@ -19,7 +19,7 @@ Nutzerwunsch (02.11.2026): Werkzeug Deckendurchbruch, Öffnung in Decken, z. B. 
 
 ## Darstellung
 
-- **Grundriss nach DIN 1356-1:** der Umriss des Durchbruchs mit beiden Diagonalen. Bei einem Viereck verbinden sie die gegenüberliegenden Ecken. Bei anderen Umrissen werden die Diagonalen des umschließenden Rechtecks gezeichnet, begrenzt auf das Innere des Umrisses. Farbe und Linienbreite folgen der Deckenkontur, die Diagonalen sind halb so breit.
+- **Grundriss (Symbol ab 03.11.2026, siehe unten):** Umriss mit schwarzem Eckkeil; runder Durchbruch als Kreis, oben links zur Hälfte schwarz. Bis dahin (PR605) zeigte der Grundriss das Diagonalkreuz nach DIN 1356-1, das laut Nutzer eine Kernbohrung bezeichnet.
 - In der Änderungskarte stand „gestrichelt wie die Decke“. Die Decke wird aber seit der Nutzerentscheidung vom 29.10.2026 als durchgezogene Kontur ohne Füllung gezeichnet, deshalb ist der Durchbruch ebenfalls durchgezogen.
 - **3D:** Die Decke hat ein Loch durch die ganze Stärke, mit eigenen Laibungsflächen. Eine Decke ohne Durchbruch ist Fläche für Fläche unverändert (14-Modell-Hash `e42aa36e…` gleich).
 - **Schnitt und Ansicht:** Die geschnittene Decke ist am Durchbruch unterbrochen, die Laibung dahinter ist sichtbar.
@@ -76,3 +76,57 @@ Nutzerwunsch (02.11.2026): Werkzeug Deckendurchbruch, Öffnung in Decken, z. B. 
   - Decke löschen entfernt den Durchbruch mit, Strg+Z stellt beide her.
   - Datei mit zwei Durchbrüchen (Rechteck und Fünfeck) geladen, beide mit Kreuz.
   - Nach frischem Laden keine Konsolenfehler. Die Fehler davor kamen aus dem Modulwechsel des laufenden Servers, als noch ein Projekt mit Schema 50 im Speicher lag.
+
+## Symbol nach Vorlage und runder Durchbruch (03.11.2026)
+
+Nutzervorlage (Bild vom 03.11.2026): Rechteck mit schwarzer Ecke, Kreis mit schwarzem Anteil. Übernommen wird nur die Symbolik: keine Beschriftung, keine Kennung, kein Luftraum. Nach der ersten Fassung hat der Nutzer nachgeschärft: Der Keil soll symmetrisch sein, mit einem Knick als sauberem Versatz der Ecke; der Kreis soll zur Hälfte schwarz sein statt einer dünnen Sichel; im Schnitt soll die Rundung glatt sein.
+
+### Verhalten
+
+- **Eckiges Symbol:**
+  - Ein dünner Umriss mit einem schwarzen Keil an der Ecke ganz links, bei zwei gleich weit linken Ecken an der oberen. Beim Rechteck ist das die Ecke oben links, bei einem spitzen Umriss nie die Spitze.
+  - Beide Schenkel des Keils laufen gleich weit an den Seiten entlang, so weit wie die kürzere der beiden Seiten.
+  - Der Knick ist die Ecke, nach innen versetzt auf der Winkelhalbierenden, mit 12 % der Schenkellänge Abstand zu beiden Seiten. Damit ist der Keil an der Winkelhalbierenden gespiegelt.
+  - Fiele der Knick bei einem sehr schmalen Umriss heraus, gibt es keinen Keil.
+- **Rundes Symbol:** ein Kreis, dessen obere linke Hälfte schwarz ist, begrenzt durch den Durchmesser von links unten nach rechts oben.
+- **Runder Durchbruch (Schema 52):**
+  - Erstellung „Kreis: Mittelpunkt und Rand“: erst den Mittelpunkt klicken, dann einen Punkt auf dem Rand.
+  - Gespeichert werden Mittelpunkt und Durchmesser.
+  - Bearbeiten: Der Durchmesser ist im Eigenschaftsfenster änderbar, bewegt wird der Kreis als Ganzes. Ecken gibt es nicht; Eckaktionen lehnen mit Hinweis ab.
+  - Fang: Mittelpunkt und vier Quadrantenpunkte.
+  - Textbefehl „Deckendurchbruch ø 20 cm“: legt den Kreis in die Mitte der Decke.
+  - IFC als echtes Kreisprofil (`IfcCircleProfileDef`), Mengen mit π r².
+- **Geometrie des Kreises:**
+  - 3D, Schnitt und die Prüfung „liegt in der Decke“ rechnen mit einem 96-Eck, das den Kreis umschließt. Seine Kanten berühren den Kreis, sodass die Prüfung nie einen Kreis durchlässt, der den Deckenrand oder einen anderen Durchbruch berührt.
+  - Die Ecken des 96-Ecks liegen einen halben Schritt neben den Achsen. Ein Schnitt durch die Mitte in x- oder y-Richtung trifft deshalb nie genau eine Ecke.
+- **Glatte Rundung:** Die Laibungsflächen eines runden Durchbruchs sind als glatt markiert. Zwischen zwei glatten Flächen zeichnen Schnitt und Ansicht keine Kante; zu sehen sind nur Ober- und Unterkante der Laibung.
+- Bestehende Dateien mit Schema 51 laden unverändert. Das strenge v51-Schema lehnt eingeschmuggelte Kreise ab.
+
+### Befunde und Korrekturen
+
+- **Naht in 3D:**
+  - Liegt die Brücke von einem Loch zur Deckenecke genau auf der Verlängerung einer Lochkante, entfernte die Dreieckszerlegung einen Punkt als „gerade“, den ein anderes Dreieck noch benutzte. Das ergab eine T-Kreuzung (ein Punkt mitten auf einer Dreieckskante), die als Linie über die Decke sichtbar war.
+  - Jetzt nimmt ein strenger Durchgang keine neue Kante durch einen anderen Punkt an und entfernt keinen geraden Punkt, den ein Dreieck schon nutzt oder der als Brückenende noch zweimal im Ring steht.
+  - Nur wenn sonst kein Schritt möglich ist, gelten die alten Regeln.
+- **Schnitt durch die Kreismitte:** Eine Ecke des Kreisvielecks lag genau auf der Schnittebene. Eine Kante in der Schnittebene liefert der Schnitt aber nicht als Schnittlinie, deshalb schloss sich die geschnittene Decke nicht und blieb ungefüllt. Behoben durch die Lage der Ecken neben den Achsen.
+
+### Grenzen
+
+- Ein Schnitt, der genau durch eine Ecke eines Umrisses läuft, kann die Schnittfläche weiterhin offen lassen. Das ist eine Schwäche der Schnittberechnung bei Kanten in der Schnittebene, sie betrifft alle Bauteile. Beim Kreis tritt sie für Schnitte durch die Mitte nicht mehr auf.
+- Das Symbol hat feste Verhältnisse (12 %, Hälfte) und keine Einstellungen.
+
+### Nachweis
+
+- **Tests** in `openings.test.ts`, jetzt 8:
+  - Symmetrie des Keils (Quadrat, langes Rechteck, Polygon: gleiche Schenkel, gleicher Abstand des Knicks zu beiden Seiten).
+  - Halbkreis.
+  - Runder Durchbruch: Laden, Schema 51/52, 96 glatte Laibungsflächen, keine Fugenkanten in der Ansicht, Mengen, IFC-Kreisprofil, Ablehnungen, Bewegen, Durchmesser, Textbefehl, Fang.
+  - T-Kreuzung: Jede Innenkante wird von genau zwei Dreiecken geteilt.
+  - Schnitt durch die Kreismitte in beiden Achsen: zwei geschlossene Teile. Dieser Test schlägt ohne die Korrektur fehl.
+- **Prüfungen:** 1536 Tests grün, Typprüfung, Lint und Architekturprüfung sauber, 14-Modell-Hash `e42aa36e…` unverändert.
+- **Browser** (Decke 6 × 4 m mit Rechteck 1,5 × 1 m, Fünfeck und Kreis ø 0,80 m, Schnitt K-K durch die Kreismitte):
+  - Grundriss: symmetrische Keile und Halbkreis.
+  - Ein Kreis lässt sich mit dem Werkzeug zeichnen, der Durchmesser ist im Eigenschaftsfenster änderbar.
+  - Schnitt K-K: Die Decke ist schwarz gefüllt und am Kreis unterbrochen, die Laibung erscheint ohne Fugenlinien.
+  - 3D: alle drei Löcher, keine Linie mehr neben dem Fünfeck.
+  - Nach frischem Laden keine Konsolenfehler.

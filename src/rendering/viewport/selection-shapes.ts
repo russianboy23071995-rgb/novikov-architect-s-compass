@@ -4,6 +4,7 @@ import { textBox } from "../../domain/elements/text/model.ts";
 import { planDenominator } from "../../domain/views/scale.ts";
 import { dimensionLayout } from "../../domain/elements/dimension/model.ts";
 import { columnOutline } from "../../domain/elements/column/model.ts";
+import { slabOpeningOutline } from "../../domain/elements/slab/opening.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { imageReferenceCorners } from "./image-reference.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
@@ -74,7 +75,7 @@ const PLAN_SHAPES: {
   line: (l) => ({ points: l.points, closed: false }),
   hatch: (h) => ({ points: h.points, closed: true }),
   slab: (s) => ({ points: s.points, closed: true }),
-  slabOpening: (o) => ({ points: o.points, closed: true }),
+  slabOpening: (o) => ({ points: slabOpeningOutline(o), closed: true }),
   roof: (r) => ({ points: r.points, closed: true }),
   room: (r) => ({ points: r.points, closed: true }),
   column: (c) => ({ points: columnOutline(c), closed: true }),

@@ -228,7 +228,10 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
           ? {
               slabOpenings: storeyOf(affected).slabOpenings!.map((o) => ({
                 ...o,
-                points: o.points.map(translate),
+                ...(o.points ? { points: o.points.map(translate) } : {}),
+                ...(o.circle
+                  ? { circle: { ...o.circle, center: translate(o.circle.center) } }
+                  : {}),
               })),
             }
           : {}),

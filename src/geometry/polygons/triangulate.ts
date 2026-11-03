@@ -128,34 +128,57 @@ export function triangulatePolygonWithHoles(
     ring = [...ring.slice(0, at + 1), ...loop, ...ring.slice(at)];
   }
   // Clip the bridged ring; duplicated bridge vertices share positions with triangle corners.
+  // A strict pass keeps the mesh free of T-junctions (a vertex in the middle of a triangle
+  // edge, drawn as a seam): no new edge through any vertex, no bridge end dropped as straight.
+  // Only when no ear passes does a relaxed pass take the plain rules.
   const same = (a: Point2, b: Point2) => a.x === b.x && a.y === b.y;
+  const through = (a: Point2, c: Point2) =>
+    vertices.some(
+      (q) =>
+        !same(q, a) &&
+        !same(q, c) &&
+        cross(a, c, q) === 0 &&
+        (q.x - a.x) * (c.x - q.x) + (q.y - a.y) * (c.y - q.y) > 0,
+    );
   const triangles: [number, number, number][] = [];
+  const used = new Set<number>();
   let guard = ring.length * ring.length + 8;
   while (ring.length > 3 && guard-- > 0) {
     let clipped = false;
-    for (let i = 0; i < ring.length; i++) {
-      const ia = ring[(i + ring.length - 1) % ring.length]!,
-        ib = ring[i]!,
-        ic = ring[(i + 1) % ring.length]!;
-      const a = vertices[ia]!,
-        b = vertices[ib]!,
-        c = vertices[ic]!;
-      const turn = cross(a, b, c);
-      if (turn === 0) {
+    for (const strict of [true, false]) {
+      for (let i = 0; i < ring.length; i++) {
+        const ia = ring[(i + ring.length - 1) % ring.length]!,
+          ib = ring[i]!,
+          ic = ring[(i + 1) % ring.length]!;
+        const a = vertices[ia]!,
+          b = vertices[ib]!,
+          c = vertices[ic]!;
+        const turn = cross(a, b, c);
+        if (turn === 0) {
+          // A spike back along a bridge (a = c) always goes.
+          const between = (b.x - a.x) * (c.x - b.x) + (b.y - a.y) * (c.y - b.y) > 0;
+          // A straight vertex another triangle already uses, or a bridge end still in the
+          // ring twice, would be left in the middle of a triangle edge.
+          if (strict && between && (used.has(ib) || ring.indexOf(ib) !== ring.lastIndexOf(ib)))
+            continue;
+          ring.splice(i, 1);
+          clipped = true;
+          break;
+        }
+        if (turn < 0) continue;
+        if (strict && through(a, c)) continue;
+        const blocked = ring.some((j) => {
+          const q = vertices[j]!;
+          return !same(q, a) && !same(q, b) && !same(q, c) && inTriangle(q, a, b, c);
+        });
+        if (blocked) continue;
+        triangles.push([ia, ib, ic]);
+        used.add(ia).add(ib).add(ic);
         ring.splice(i, 1);
         clipped = true;
         break;
       }
-      if (turn < 0) continue;
-      const blocked = ring.some((j) => {
-        const q = vertices[j]!;
-        return !same(q, a) && !same(q, b) && !same(q, c) && inTriangle(q, a, b, c);
-      });
-      if (blocked) continue;
-      triangles.push([ia, ib, ic]);
-      ring.splice(i, 1);
-      clipped = true;
-      break;
+      if (clipped) break;
     }
     if (!clipped) throw new Error("Umriss lässt sich nicht in Dreiecke zerlegen.");
   }
