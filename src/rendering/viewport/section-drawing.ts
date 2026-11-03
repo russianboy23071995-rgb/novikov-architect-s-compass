@@ -3,6 +3,7 @@ import { resolveStoreyLevels } from "../../domain/storeys/heights.ts";
 import { isElevation, sectionFrame, type Section } from "../../domain/views/sections.ts";
 import { buildingParts } from "./building-solid.ts";
 import { isOwnedProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
+import { createDerivedCache } from "../../domain/project/derived-cache.ts";
 import type { Face, Solid, Vec3 } from "./storey-solid.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import type { Material } from "../../domain/elements/wall/assembly.ts";
@@ -304,7 +305,9 @@ export function sectionDrawing(project: Project, section: Section): SectionDrawi
   };
 }
 
-const drawings = new WeakMap<Project, WeakMap<Section, SectionDrawing>>();
+// Per snapshot; the undo history releases the drawings of the steps it keeps
+// (docs/performance/EDIT_MEMORY.md).
+const drawings = createDerivedCache<Project, WeakMap<Section, SectionDrawing>>();
 // The last drawing per section with what it was derived from (docs/performance/SECTION_PARTS.md).
 const lastDrawing = new WeakMap<Section, { inputs: readonly unknown[]; drawing: SectionDrawing }>();
 /** Everything a section drawing reads: the storey parts of the building, the storeys (walls of

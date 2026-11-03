@@ -1,0 +1,101 @@
+{
+  "runtime": "node v24.22.1 win32 x64",
+  "date": "2026-11-03T17:19:12.077Z",
+  "edits": 30,
+  "notes": "heapUsed after gc, difference over 30 wall height edits on storey 2 (editingReducer).",
+  "results": {
+    "3000": {
+      "modelOnly": {
+        "retainedMiB": 0.37,
+        "perEditMiB": 0.01,
+        "undoMedianMs": 0
+      },
+      "plan": {
+        "retainedMiB": 22.52,
+        "perEditMiB": 0.75,
+        "undoMedianMs": 118
+      },
+      "building": {
+        "retainedMiB": 7.48,
+        "perEditMiB": 0.25,
+        "undoMedianMs": 11
+      },
+      "sections": {
+        "retainedMiB": 26.88,
+        "perEditMiB": 0.9,
+        "undoMedianMs": 134
+      },
+      "all": {
+        "retainedMiB": 41.26,
+        "perEditMiB": 1.38,
+        "undoMedianMs": 227
+      },
+      "allNoHistory": {
+        "retainedMiB": 33.43,
+        "perEditMiB": 1.11
+      }
+    },
+    "10000": {
+      "modelOnly": {
+        "retainedMiB": 0.45,
+        "perEditMiB": 0.01,
+        "undoMedianMs": 0
+      },
+      "plan": {
+        "retainedMiB": 75.95,
+        "perEditMiB": 2.53,
+        "undoMedianMs": 929
+      },
+      "building": {
+        "retainedMiB": 24.55,
+        "perEditMiB": 0.82,
+        "undoMedianMs": 52
+      },
+      "sections": {
+        "retainedMiB": 90.04,
+        "perEditMiB": 3,
+        "undoMedianMs": 429
+      },
+      "all": {
+        "retainedMiB": 138.87,
+        "perEditMiB": 4.63,
+        "undoMedianMs": 1362
+      },
+      "allNoHistory": {
+        "retainedMiB": 115.74,
+        "perEditMiB": 3.86
+      }
+    },
+    "20000": {
+      "modelOnly": {
+        "retainedMiB": 0.37,
+        "perEditMiB": 0.01,
+        "undoMedianMs": 0
+      },
+      "plan": {
+        "retainedMiB": 126.46,
+        "perEditMiB": 4.22,
+        "undoMedianMs": 3632
+      },
+      "building": {
+        "retainedMiB": 48.23,
+        "perEditMiB": 1.61,
+        "undoMedianMs": 117
+      },
+      "sections": {
+        "retainedMiB": 173.52,
+        "perEditMiB": 5.78,
+        "undoMedianMs": 1241
+      },
+      "all": {
+        "retainedMiB": 256.06,
+        "perEditMiB": 8.54,
+        "undoMedianMs": 4223
+      },
+      "allNoHistory": {
+        "retainedMiB": 223.12,
+        "perEditMiB": 7.44
+      }
+    }
+  }
+}

@@ -1,6 +1,9 @@
-import type { Project } from "@/domain/project/schema";
+import type { Project } from "../../domain/project/schema.ts";
+import { createDerivedCache } from "../../domain/project/derived-cache.ts";
 
-const sources = new WeakMap<Project, Map<string, Project>>();
+// Released with the snapshot by the undo history (docs/performance/EDIT_MEMORY.md); the plan
+// scene of a source lives as long as the source.
+const sources = createDerivedCache<Project, Map<string, Project>>();
 
 /**
  * The project as a placed drawing sees it (docs/ZEICHNUNG.md, ZW2): the document's storey as

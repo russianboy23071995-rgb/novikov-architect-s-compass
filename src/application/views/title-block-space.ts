@@ -1,3 +1,4 @@
+import { createDerivedCache } from "../../domain/project/derived-cache.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { createProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
@@ -22,7 +23,9 @@ import {
  */
 export type DrawingSpace = { kind: "title-block" | "layout"; id: string };
 
-const lenses = new WeakMap<Project, Map<string, Project>>();
+// Per real snapshot; the undo history releases the lenses (and what is derived from them) of
+// the steps it keeps (docs/performance/EDIT_MEMORY.md).
+const lenses = createDerivedCache<Project, Map<string, Project>>();
 const key = (space: DrawingSpace) => `${space.kind}:${space.id}`;
 /** Storey id of a layout's sheet; distinct from the layout's own id. */
 export const layoutSheetId = (layoutId: string) => `sheet-${layoutId}`;
@@ -209,7 +212,7 @@ function spaceFrames(real: Project, space: DrawingSpace): SheetFrames {
 
 /** Ids of drawn-under elements: never model elements, never pickable (docs/PLANKOPF.md). */
 const BACKDROP_PREFIX = "@bg:";
-const backdrops = new WeakMap<Project, Map<string, Project | null>>();
+const backdrops = createDerivedCache<Project, Map<string, Project | null>>();
 
 /**
  * What lies under a layout's own drawing (docs/LAYOUTS.md, LZ2; docs/PLANKOPF.md, PK4): the
