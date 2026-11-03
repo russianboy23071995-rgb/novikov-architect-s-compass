@@ -305,7 +305,7 @@ function drawingPart(drawing: Parameters<typeof maskOnPaper>[0] & { id: string }
   return hatchPart({ id: drawing.id, points: maskOnPaper(drawing) });
 }
 
-const sheetPartCache = new WeakMap<Project, Part[]>();
+const sheetPartCache = createDerivedCache<Project, Part[]>();
 function sheetParts(project: Project): Part[] {
   const sheet = sheetFrames(project);
   if (!sheet) return [];

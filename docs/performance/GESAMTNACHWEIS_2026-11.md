@@ -100,6 +100,7 @@ Undo, Redo und Geschosswechsel kosten im Reducer nichts. Ihre Zeit im Browser en
 1. **Schnitt- und Ansichtszeichnungen nur neu rechnen, wenn sich etwas ändert, das die Zeichnung zeigt.** Möglich ist das über einen Schlüssel aus den Geschossteilen des Gebäudes statt dem Projektobjekt, oder über die schon vorhandene Wiederverwendung der Geschossteile.
 2. **`storeyKeys` auf die Werte eingrenzen, die die Geschossprüfung wirklich liest.** Das sind Ebenen, Muster, Bilder, Materialien und Aufbauten; Layouts, Planköpfe, Abbilder und Projektinformation gehören nicht dazu.
 3. **Speicherzuwachs je Bearbeitung** (etwa 60 MB) mit dem Verlaufsbefund aus `docs/performance/HISTORY_MEMORY.md` abgleichen.
+   Erledigt am 03.11.2026 (`docs/performance/EDIT_MEMORY.md`): Schnittzeichnungen gehaltener Verlaufsstände werden freigegeben, 20 000: 50 → 8,5 MB je Bearbeitung.
 4. **Dachtrimmung:** Öffnungen je Wand vorab zuordnen, statt sie für jede getrimmte Wand neu zu suchen. Das erst angehen, wenn 1–3 erledigt sind.
 
 ## Grenzen
