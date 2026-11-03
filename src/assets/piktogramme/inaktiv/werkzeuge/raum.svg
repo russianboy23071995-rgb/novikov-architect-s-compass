@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+<title>Raumwerkzeug</title>
+<rect class="accent" x="4" y="4" width="16" height="16" rx="1" fill="currentColor" stroke="none" fill-opacity="0.2"/>
+<rect x="4" y="4" width="16" height="16" rx="1"/>
+<path d="M6.667 16.444L6.667 10.222M6.667 12A1.778 1.778 0 0 1 10.222 12L10.222 16.444M10.222 12A1.778 1.778 0 0 1 13.778 12L13.778 16.444"/>
+<path d="M15.111 8.889A1.333 1.333 0 0 1 17.778 8.889C17.778 9.778 16.978 10.311 16.356 10.844L15.671 11.48Q15.111 12 15.875 12L17.778 12"/>
+</svg>

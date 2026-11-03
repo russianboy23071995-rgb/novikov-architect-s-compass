@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import type { TreeNode } from "./cad-types";
+import { Pictogram } from "./Pictogram";
 import type { Project } from "@/domain/project/schema";
 
 /** Navigator folder for the sections (docs/SCHNITT.md, SC1); its entries follow in SC2. */
@@ -87,7 +88,16 @@ function TreeItem({
           }
           onClick={(event) => onSelect(node.id, node.label, event.ctrlKey || event.metaKey)}
         >
-          <Icon className="size-3.5 shrink-0 opacity-70" />
+          {node.pictogram ? (
+            <Pictogram
+              group="navigator"
+              name={node.pictogram}
+              active={active.includes(node.id)}
+              className="size-4"
+            />
+          ) : (
+            <Icon className="size-3.5 shrink-0 opacity-70" />
+          )}
           <span className="truncate">{node.label}</span>
         </Button>
       </div>
@@ -150,25 +160,38 @@ function NavigatorContent({
           id: project.id,
           label: "Gebäudestruktur",
           kind: "group",
+          pictogram: "gesamtuebersicht",
           children: [...project.storeys]
             .reverse()
-            .map((s) => ({ id: s.id, label: s.name, kind: "group" })),
+            .map((s) => ({ id: s.id, label: s.name, kind: "group", pictogram: "grundriss" })),
         },
         {
           id: SECTIONS_FOLDER_ID,
           label: "Schnitte",
           kind: "group",
+          pictogram: "schnitt",
           children: (project.sections ?? [])
             .filter((s) => s.kind !== "elevation")
-            .map((s) => ({ id: s.id, label: `${s.mark} · ${s.name}`, kind: "item" })),
+            .map((s) => ({
+              id: s.id,
+              label: `${s.mark} · ${s.name}`,
+              kind: "item",
+              pictogram: "schnitt",
+            })),
         },
         {
           id: ELEVATIONS_FOLDER_ID,
           label: "Ansichten",
           kind: "group",
+          pictogram: "ansicht",
           children: (project.sections ?? [])
             .filter((s) => s.kind === "elevation")
-            .map((s) => ({ id: s.id, label: `${s.mark} · ${s.name}`, kind: "item" })),
+            .map((s) => ({
+              id: s.id,
+              label: `${s.mark} · ${s.name}`,
+              kind: "item",
+              pictogram: "ansicht",
+            })),
         },
       ] satisfies TreeNode[],
     [project.id, project.storeys, project.sections],

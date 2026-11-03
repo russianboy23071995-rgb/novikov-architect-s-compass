@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+<title>Grundriss (aktiv)</title>
+<path class="accent-voll" d="M13 4L19 4Q20 4 20 5L20 11.889Q20 12.889 19 12.889L13 12.889Q12 12.889 12 11.889L12 5Q12 4 13 4Z" fill="currentColor" stroke="none"/>
+<path d="M9.333 20L5 20Q4 20 4 19L4 5Q4 4 5 4L19 4Q20 4 20 5L20 19Q20 20 19 20L14.667 20"/>
+<path d="M12 4L12 9.333"/>
+<path d="M12 12.889L20 12.889"/>
+<path d="M4 12.889L7.556 12.889"/>
+</svg>

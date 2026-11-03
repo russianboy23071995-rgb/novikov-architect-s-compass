@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { cn } from "@/lib/utils";
 import type { CadTool, ToolId } from "./cad-types";
 import { RAIL_TOOLS, SELECT_TOOL } from "./rail-tools";
+import { Pictogram } from "./Pictogram";
 import { TOOL_GROUPS, type ToolLayout } from "./tool-layout";
 
 type ToolRailProps = {
@@ -33,6 +34,8 @@ export const ToolRail = withStableHandlers(function ToolRail({
   const button = (tool: CadTool) => {
     const active = activeTool === tool.id;
     const blocked = !!allowed && !allowed.has(tool.id);
+    // Planned tools stay greyed until they exist (WL3); not disabled, so the tooltip says so.
+    const planned = !!tool.planned;
     return (
       <Tooltip key={tool.id} delayDuration={250}>
         <TooltipTrigger asChild>
@@ -42,16 +45,28 @@ export const ToolRail = withStableHandlers(function ToolRail({
             aria-label={`${tool.label} tool`}
             aria-pressed={active}
             disabled={blocked}
-            onClick={() => onSelect(tool.id)}
-            onDoubleClick={() => onSettings?.(tool.id)}
+            aria-disabled={planned || undefined}
+            onClick={() => !planned && onSelect(tool.id)}
+            onDoubleClick={() => !planned && onSettings?.(tool.id)}
             className={cn(
               "relative h-9 w-9 shrink-0 rounded-md border border-transparent text-muted-foreground transition-all duration-150 hover:border-border hover:bg-accent hover:text-foreground",
+              planned &&
+                "cursor-not-allowed opacity-40 hover:border-transparent hover:bg-transparent",
               active &&
                 "border-primary/30 bg-primary/12 text-primary shadow-[inset_0_1px_0_var(--glass-highlight),0_0_18px_color-mix(in_oklab,var(--primary)_12%,transparent)] hover:bg-primary/18 hover:text-primary",
             )}
           >
             {active && <span className="absolute -left-1 h-5 w-0.5 rounded-r bg-primary" />}
-            <tool.icon className="size-[18px]" strokeWidth={1.65} />
+            {tool.pictogram ? (
+              <Pictogram
+                group="werkzeuge"
+                name={tool.pictogram}
+                active={active}
+                className="size-5"
+              />
+            ) : (
+              <tool.icon className="size-[18px]" strokeWidth={1.65} />
+            )}
           </Button>
         </TooltipTrigger>
         <TooltipContent
@@ -59,7 +74,8 @@ export const ToolRail = withStableHandlers(function ToolRail({
           className="border border-border bg-popover text-popover-foreground"
         >
           {tool.label} <span className="ml-2 text-muted-foreground">{tool.shortcut}</span>
-          {tool.id !== "select" && (
+          {tool.planned && <span className="ml-2 text-muted-foreground">kommt später</span>}
+          {tool.id !== "select" && !tool.planned && (
             <span className="ml-2 text-muted-foreground">Doppelklick: Einstellungen</span>
           )}
         </TooltipContent>

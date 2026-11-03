@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+<title>Stützenwerkzeug (aktiv)</title>
+<path class="accent-voll" d="M9.339 6.225L11.106 7.108Q12 7.556 12 8.556L12 19Q12 20 11.106 19.553L9.339 18.669Q8.444 18.222 8.444 17.222L8.444 6.778Q8.444 5.778 9.339 6.225Z" fill="currentColor" stroke="none"/>
+<path d="M12.894 4.447L14.661 5.331Q15.556 5.778 15.556 6.778L15.556 17.222Q15.556 18.222 14.661 18.669L12.894 19.553Q12 20 11.106 19.553L9.339 18.669Q8.444 18.222 8.444 17.222L8.444 6.778Q8.444 5.778 9.339 5.331L11.106 4.447Q12 4 12.894 4.447Z"/>
+<path d="M8.444 5.778L11.106 7.108Q12 7.556 12.894 7.108L15.556 5.778"/>
+<path d="M12 7.556L12 20"/>
+</svg>

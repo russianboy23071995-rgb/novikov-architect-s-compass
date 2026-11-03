@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+<title>Polygonwerkzeug</title>
+<path class="accent" d="M11.134 4.855L18.199 8.034Q19.111 8.444 19.024 9.441L18.309 17.67Q18.222 18.667 17.225 18.746L8.108 19.476Q7.111 19.556 6.81 18.602L4.746 12.065Q4.444 11.111 5.099 10.355L9.567 5.2Q10.222 4.444 11.134 4.855Z" fill="currentColor" stroke="none" fill-opacity="0.2"/>
+<path d="M11.134 4.855L18.199 8.034Q19.111 8.444 19.024 9.441L18.309 17.67Q18.222 18.667 17.225 18.746L8.108 19.476Q7.111 19.556 6.81 18.602L4.746 12.065Q4.444 11.111 5.099 10.355L9.567 5.2Q10.222 4.444 11.134 4.855Z"/>
+<circle cx="10.222" cy="4.444" r="1.111" fill="currentColor"/>
+<circle cx="19.111" cy="8.444" r="1.111" fill="currentColor"/>
+<circle cx="18.222" cy="18.667" r="1.111" fill="currentColor"/>
+<circle cx="7.111" cy="19.556" r="1.111" fill="currentColor"/>
+<circle cx="4.444" cy="11.111" r="1.111" fill="currentColor"/>
+</svg>

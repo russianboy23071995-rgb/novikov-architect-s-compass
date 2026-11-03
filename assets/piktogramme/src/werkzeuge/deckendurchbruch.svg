@@ -1,0 +1,6 @@
+<svg viewBox="0 0 24 24">
+<title>Deckendurchbruchwerkzeug</title>
+<path class="accent" d="M12 8.5 16 10.5 12 12.5 8 10.5Z"/>
+<path d="M12 17.5 3 13v-2.5L12 6l9 4.5V13z"/><path d="m3 10.5 9 4.5 9-4.5"/><path d="M12 15v2.5"/>
+<path d="m12 8.5 4 2-4 2-4-2z"/><path data-knock="1" d="M10.5 11.75 12 11l1.5.75M12 8.5V11"/>
+</svg>

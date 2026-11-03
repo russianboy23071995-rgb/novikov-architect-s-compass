@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Pictogram as PackagePictogram } from "./Pictogram";
 
 /** Every way an area tool can construct its outline (docs/ERSTELLUNG_PIKTOGRAMME.md). */
 export type ConstructionId =
@@ -94,6 +95,13 @@ export const CONSTRUCTIONS: Record<ConstructionId, { label: string; icon: ReactN
   },
 };
 
+/** Constructions drawn with a pictogram of the package instead of the own line drawing. */
+const PACKAGE_PICTOGRAMS: Partial<Record<ConstructionId, string>> = {
+  polygon: "polygon",
+  diagonal: "rechteck",
+  circle: "kreis",
+};
+
 /**
  * Small pictogram buttons for the construction of an area tool (user wish 03.11.2026), instead
  * of a list: one click picks the way of drawing. Shared by slab, slab opening, hatch, room and
@@ -145,7 +153,19 @@ export function ConstructionPicker<T extends ConstructionId>({
               value === id ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"
             }`}
           >
-            {CONSTRUCTIONS[id].icon}
+            {PACKAGE_PICTOGRAMS[id] ? (
+              // Pictograms of the package (docs/WERKZEUGLEISTE.md, WL3); the pressed button is
+              // already dark, so its active pictogram keeps the button's text colour.
+              <PackagePictogram
+                group="werkzeuge"
+                name={PACKAGE_PICTOGRAMS[id]!}
+                active={value === id}
+                tinted={false}
+                className="size-5"
+              />
+            ) : (
+              CONSTRUCTIONS[id].icon
+            )}
           </button>
         ))}
       </div>

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ToolId } from "./cad-types";
 import { RAIL_TOOLS } from "./rail-tools";
+import { Pictogram } from "./Pictogram";
 import {
   DEFAULT_TOOL_LAYOUT,
   moveTool,
@@ -134,8 +135,13 @@ export function ToolRailCustomizer({
                     focusTool(id);
                   }}
                 >
-                  <Icon className="size-4 shrink-0" strokeWidth={1.65} />
+                  {tool.pictogram ? (
+                    <Pictogram group="werkzeuge" name={tool.pictogram} className="size-4" />
+                  ) : (
+                    <Icon className="size-4 shrink-0" strokeWidth={1.65} />
+                  )}
                   {tool.label}
+                  {tool.planned && <span className="text-muted-foreground">· kommt später</span>}
                 </div>
               );
             })}

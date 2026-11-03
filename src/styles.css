@@ -42,6 +42,9 @@
 
 :root {
   --radius: 0.5rem;
+  /* Active pictograms (docs/WERKZEUGLEISTE.md, WL3): #42D9DF has 1.7:1 on white, so the light
+     surface takes the darker turquoise the package recommends. */
+  --pikto-aktiv: #0e9aa0;
   --background: oklch(0.93 0.006 250);
   --foreground: oklch(0.19 0.006 255);
   --card: oklch(0.99 0.003 250 / 58%);
@@ -76,6 +79,10 @@
   --glass-shadow-soft:
     0 12px 36px oklch(0.32 0.01 250 / 12%), inset 0 1px 0 var(--glass-highlight),
     inset 0 -1px 0 oklch(0.3 0.008 250 / 5%);
+}
+
+.dark {
+  --pikto-aktiv: #42d9df;
 }
 
 * {

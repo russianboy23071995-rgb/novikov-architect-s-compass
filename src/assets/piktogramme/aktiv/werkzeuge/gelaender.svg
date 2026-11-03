@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+<title>Geländerwerkzeug (aktiv)</title>
+<mask id="k-werkzeuge-gelaender" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect width="24" height="24" fill="#fff"/><path d="M8.889 6.444L8.889 14.444M12 8L12 16M15.111 9.556L15.111 17.556" stroke="#000"/></mask>
+<g mask="url(#k-werkzeuge-gelaender)"><path class="accent-voll" d="M6.672 5.336L17.328 10.664Q18.222 11.111 18.222 12.111L18.222 18.111Q18.222 19.111 17.328 18.664L6.672 13.336Q5.778 12.889 5.778 11.889L5.778 5.889Q5.778 4.889 6.672 5.336Z" fill="currentColor" stroke="none"/></g>
+<path d="M5.778 4.889L18.222 11.111"/>
+<path d="M5.778 4.889L5.778 12.889M18.222 11.111L18.222 19.111"/>
+<path d="M5.778 12.889L18.222 19.111"/>
+</svg>

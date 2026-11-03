@@ -1,0 +1,7 @@
+<svg viewBox="0 0 24 24">
+<title>Fensterwerkzeug</title>
+<path class="accent" d="M4.25 13.5 18.25 20.5V10.5L4.25 3.5Z"/>
+<path d="M4.25 13.5 18.25 20.5 19.75 19.75V9.75L5.75 2.75 4.25 3.5Z"/>
+<path d="M4.25 3.5 18.25 10.5 19.75 9.75"/><path d="M18.25 10.5V20.5"/>
+<path data-knock="1" d="M11.25 17V7"/><path data-knock="1" d="M4.25 7.5 18.25 14.5"/>
+</svg>

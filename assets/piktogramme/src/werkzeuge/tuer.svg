@@ -1,0 +1,7 @@
+<svg viewBox="0 0 24 24">
+<title>Türwerkzeug</title>
+<path class="accent" d="M8.75 17.5V5.5L13.75 8V20Z"/>
+<path d="M7.75 17 14.75 20.5 16.25 19.75V6.75L9.25 3.25 7.75 4Z"/>
+<path d="M7.75 4 14.75 7.5 16.25 6.75"/><path d="M14.75 7.5V20.5"/>
+<path d="M8.75 17.5V5.5L13.75 8V20"/><path data-knock="1" d="M11.75 14l1.5.75"/>
+</svg>
