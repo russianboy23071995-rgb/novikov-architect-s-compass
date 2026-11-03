@@ -1065,6 +1065,7 @@ export function BimPlan({
       planSelectionShapes(project).filter((s) => isLayerVisible(project, visibility, s.target.id)),
     [project, visibility],
   );
+  const cycleShapes = useMemo(() => shapes.filter((s) => s.target.kind !== "drawing"), [shapes]);
   // Tab cycling through overlapping elements (docs/TAB_AUSWAHL.md); select tool only.
   const overlap = useOverlapCycle(
     interactive &&
@@ -1074,7 +1075,9 @@ export function BimPlan({
       !selecting &&
       !pan &&
       !referenceSelection?.selecting,
-    shapes,
+    // Placed drawings on a layout take no part: a click picks the topmost one, nothing is
+    // offered from the layers below or inside it (docs/LAYOUTBUCH.md).
+    cycleShapes,
     camera.pixelsPerMetre,
   );
   const marquee = useSelectionMarquee(

@@ -321,6 +321,7 @@
     "src/constraints/inference/hover-reference.test.ts",
     "benchmarks/school-plan-fixture.test.ts",
     "benchmarks/gesamt-fixture.test.ts",
-    "benchmarks/section-parts.test.ts"
+    "benchmarks/section-parts.test.ts",
+    "benchmarks/placed-freshness.test.ts"
   ]
 }

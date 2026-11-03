@@ -134,6 +134,8 @@ function NavigatorContent({
   onOpenTitleBlock,
   activeTitleBlockId,
   onExportPdf,
+  staleLayouts,
+  onRefreshLayout,
   ...documents
 }: ProjectNavigatorProps) {
   const [settings, setSettings] = useState(false);
@@ -238,6 +240,8 @@ function NavigatorContent({
             {...(onOpenTitleBlock ? { onOpenTitleBlock } : {})}
             activeTitleBlockId={activeTitleBlockId ?? null}
             {...(onExportPdf ? { onExportPdf } : {})}
+            {...(staleLayouts ? { staleLayouts } : {})}
+            {...(onRefreshLayout ? { onRefreshLayout } : {})}
           />
         </ScrollArea>
       ) : tab === "documents" ? (
@@ -367,6 +371,7 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
     (kind: "layout" | "block", id: string) => latest.current.onExportPdf?.(kind, id),
     [],
   );
+  const onRefreshLayout = useCallback((id: string) => latest.current.onRefreshLayout?.(id), []);
   const onDocumentAction = useCallback<ProjectNavigatorProps["onDocumentAction"]>(
     (...args) => latest.current.onDocumentAction(...args),
     [],
@@ -386,6 +391,8 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
       onOpenTitleBlock={onOpenTitleBlock}
       activeTitleBlockId={props.activeTitleBlockId ?? null}
       onExportPdf={onExportPdf}
+      staleLayouts={props.staleLayouts ?? ""}
+      onRefreshLayout={onRefreshLayout}
       onDocumentVisibility={props.onDocumentVisibility}
       onRenameStorey={onRenameStorey}
       onBuildingChange={onBuildingChange}
