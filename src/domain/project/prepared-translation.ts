@@ -19,6 +19,7 @@ import {
 import { wallBody } from "../elements/wall/body.ts";
 import { hatchSchema } from "../elements/hatch/model.ts";
 import { slabSchema } from "../elements/slab/model.ts";
+import { slabOpeningProblem, slabOpeningSchema } from "../elements/slab/opening.ts";
 import { roofSchema } from "../elements/roof/model.ts";
 import { roomSchema } from "../elements/room/model.ts";
 import { validateReferenceExtent } from "../elements/reference/model.ts";
@@ -42,6 +43,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...s.walls,
       ...s.windows,
       ...(s.slabs ?? []),
+      ...(s.slabOpenings ?? []),
       ...(s.roofs ?? []),
       ...(s.rooms ?? []),
       ...(s.columns ?? []),
@@ -80,6 +82,10 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       hatches: s.hatches.filter((h) => ids.has(h.id)),
       references: s.references.filter((r) => ids.has(r.id)),
       ...(s.slabs ? { slabs: s.slabs.filter((slab) => ids.has(slab.id)) } : {}),
+      // Slab openings follow their slab (docs/DECKENDURCHBRUCH.md) or move on their own.
+      ...(s.slabOpenings
+        ? { slabOpenings: s.slabOpenings.filter((o) => ids.has(o.id) || ids.has(o.slabId)) }
+        : {}),
       ...(s.roofs ? { roofs: s.roofs.filter((roof) => ids.has(roof.id)) } : {}),
       ...(s.rooms ? { rooms: s.rooms.filter((room) => ids.has(room.id)) } : {}),
       ...(s.columns ? { columns: s.columns.filter((column) => ids.has(column.id)) } : {}),
@@ -121,6 +127,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...storeyOf(affected).windows,
       ...(storeyOf(affected).doors ?? []),
       ...(storeyOf(affected).slabs ?? []),
+      ...(storeyOf(affected).slabOpenings ?? []),
       ...(storeyOf(affected).roofs ?? []),
       ...(storeyOf(affected).rooms ?? []),
       ...(storeyOf(affected).columns ?? []),
@@ -217,6 +224,14 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
               })),
             }
           : {}),
+        ...(storeyOf(affected).slabOpenings
+          ? {
+              slabOpenings: storeyOf(affected).slabOpenings!.map((o) => ({
+                ...o,
+                points: o.points.map(translate),
+              })),
+            }
+          : {}),
         // A roof moves with its reference line (docs/ROOF_ELEMENT.md, D3).
         ...(storeyOf(affected).roofs
           ? {
@@ -300,6 +315,22 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
     for (const line of storeyOf(geometry).lines!) validateLineGeometry(line);
     for (const hatch of storeyOf(geometry).hatches) hatchSchema.parse(hatch);
     for (const slab of storeyOf(geometry).slabs ?? []) slabSchema.parse(slab);
+    for (const opening of storeyOf(geometry).slabOpenings ?? []) slabOpeningSchema.parse(opening);
+    // A moved opening or slab keeps every opening of that slab inside it, already in the preview.
+    const movedOpenings = storeyOf(geometry).slabOpenings ?? [];
+    if (movedOpenings.length) {
+      const now = <T extends { id: string }>(all: readonly T[], moved: readonly T[]) =>
+        all.map((e) => moved.find((m) => m.id === e.id) ?? e);
+      const slabs = now(s.slabs ?? [], storeyOf(geometry).slabs ?? []);
+      const openings = now(s.slabOpenings ?? [], movedOpenings);
+      for (const slabId of new Set(movedOpenings.map((o) => o.slabId))) {
+        const problem = slabOpeningProblem(
+          slabs.find((slab) => slab.id === slabId)!,
+          openings.filter((o) => o.slabId === slabId),
+        );
+        if (problem) throw new Error(problem);
+      }
+    }
     for (const roof of storeyOf(geometry).roofs ?? []) roofSchema.parse(roof);
     for (const room of storeyOf(geometry).rooms ?? []) roomSchema.parse(room);
     for (const column of storeyOf(geometry).columns ?? []) columnSchema.parse(column);
@@ -336,6 +367,9 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       hatches: replace(s.hatches, storeyOf(patch.geometry).hatches),
       references: replace(s.references, storeyOf(patch.geometry).references),
       ...(s.slabs ? { slabs: replace(s.slabs, storeyOf(patch.geometry).slabs ?? []) } : {}),
+      ...(s.slabOpenings
+        ? { slabOpenings: replace(s.slabOpenings, storeyOf(patch.geometry).slabOpenings ?? []) }
+        : {}),
       ...(s.roofs ? { roofs: replace(s.roofs, storeyOf(patch.geometry).roofs ?? []) } : {}),
       ...(s.rooms ? { rooms: replace(s.rooms, storeyOf(patch.geometry).rooms ?? []) } : {}),
       ...(s.columns ? { columns: replace(s.columns, storeyOf(patch.geometry).columns ?? []) } : {}),
@@ -366,6 +400,7 @@ export function prepareStoreysTranslation(source: Project, selectedIds: readonly
       ...s.walls,
       ...s.windows,
       ...(s.slabs ?? []),
+      ...(s.slabOpenings ?? []),
       ...(s.roofs ?? []),
       ...(s.rooms ?? []),
       ...(s.columns ?? []),
@@ -436,6 +471,7 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
       ...s.walls,
       ...s.windows,
       ...(s.slabs ?? []),
+      ...(s.slabOpenings ?? []),
       ...(s.roofs ?? []),
       ...(s.rooms ?? []),
       ...(s.columns ?? []),

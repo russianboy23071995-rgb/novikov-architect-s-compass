@@ -30,6 +30,7 @@ import type { Selection } from "./bim-view";
 import { LineInspector } from "./LineControls";
 import { DoorProperties } from "./DoorProperties";
 import { SlabProperties } from "./SlabProperties";
+import { SlabOpeningProperties } from "./SlabOpeningProperties";
 import { OverlapHint } from "./OverlapHint";
 import { MarkField } from "./MarkField";
 import { newOpeningMark, setOpeningMark } from "@/application/openings/marks";
@@ -77,6 +78,19 @@ export function BimInspector({
   if (slab)
     return (
       <SlabProperties project={project} slab={slab} selection={selection} onChange={onChange} />
+    );
+  const slabOpening =
+    selection?.kind === "slabOpening"
+      ? storeyOf(project).slabOpenings?.find((item) => item.id === selection.id)
+      : undefined;
+  if (slabOpening)
+    return (
+      <SlabOpeningProperties
+        project={project}
+        opening={slabOpening}
+        selection={selection}
+        onChange={onChange}
+      />
     );
   const roof =
     selection?.kind === "roof"

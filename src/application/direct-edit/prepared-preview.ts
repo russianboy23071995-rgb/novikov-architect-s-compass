@@ -35,7 +35,9 @@ function prepareCapability(
   projectView: boolean,
 ): PreparedDirectEditPreview | null {
   if (
-    (session.target.kind === "hatch" || session.target.kind === "slab") &&
+    (session.target.kind === "hatch" ||
+      session.target.kind === "slab" ||
+      session.target.kind === "slabOpening") &&
     ["point", "stretch", "edge", "offset", "insert"].includes(session.action)
   )
     return prepareHatchContourPreview(session);

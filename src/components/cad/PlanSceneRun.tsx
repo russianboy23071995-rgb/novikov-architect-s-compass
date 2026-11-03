@@ -117,6 +117,7 @@ export function PlanSceneContent({
     references: kind === "reference" ? ids.map((id) => scene.references.get(id)!) : [],
     rooms: kind === "room" ? ids.map((id) => scene.rooms.get(id)!) : [],
     slabs: kind === "slab" ? ids.map((id) => scene.slabs.get(id)!) : [],
+    slabOpenings: kind === "slabOpening" ? ids.map((id) => scene.slabOpenings.get(id)!) : [],
     roofs: kind === "roof" ? ids.map((id) => scene.roofs.get(id)!) : [],
     hatches: kind === "hatch" ? ids.map((id) => scene.hatches.get(id)!) : [],
     walls: kind === "wall" ? ids.map((id) => scene.walls.get(id)!) : [],
@@ -401,6 +402,37 @@ export function PlanSceneContent({
               pointerEvents={placement ? "none" : "all"}
               className="cursor-pointer outline-none focus-visible:stroke-sky-300"
             />
+          </g>
+        );
+      })}
+      {plan.slabOpenings.map(({ opening, cross }) => {
+        // DIN 1356-1: outline with both diagonals, in the slab contour colour and width.
+        const stroke = selectedIds.has(opening.id) ? "#94a3b8" : "var(--primary)";
+        const width = wallOutlineWidth / pixelsPerMetre;
+        return (
+          <g key={opening.id} data-slab-opening={opening.id}>
+            <polygon
+              {...selectProps("slabOpening", opening.id)}
+              aria-label={`Deckendurchbruch ${opening.id}`}
+              points={opening.points.map((p) => `${p.x},${-p.y}`).join(" ")}
+              fill="transparent"
+              stroke={stroke}
+              strokeWidth={width}
+              pointerEvents={placement ? "none" : "all"}
+              className="cursor-pointer outline-none focus-visible:stroke-sky-300"
+            />
+            {cross.map(([a, b], i) => (
+              <line
+                key={i}
+                x1={a.x}
+                y1={-a.y}
+                x2={b.x}
+                y2={-b.y}
+                stroke={stroke}
+                strokeWidth={width / 2}
+                pointerEvents="none"
+              />
+            ))}
           </g>
         );
       })}

@@ -108,6 +108,9 @@ export function projectSnapParts(project: Project): readonly (readonly SnapPart[
     (storey.columns ?? []).map((column) => remembered(owned, column, columnPart)),
     // Mask corners and edge midpoints of a drawing on a layout (docs/ZEICHNUNG.md, ZW2).
     (storey.drawings ?? []).map((d) => remembered(owned, d, drawingPart)),
+    // Deckendurchbruch corners and edge midpoints (docs/DECKENDURCHBRUCH.md), after all
+    // earlier kinds so their order stays.
+    (storey.slabOpenings ?? []).map((o) => remembered(owned, o, hatchPart)),
     // Paper and margin frame of a Plankopf or layout: corners, edge midpoints and, through
     // the corner directions, the edges themselves (docs/LAYOUTS.md).
     sheetParts(project),

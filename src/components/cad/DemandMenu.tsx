@@ -217,7 +217,10 @@ export function DemandMenu({
             <>
               {/* Slab outlines are edited in the plan only (docs/SLAB_ELEMENT.md, E1). */}
               {/* Roof outlines likewise (docs/ROOF_ELEMENT.md, D3). */}
-              {((selection.kind !== "slab" && selection.kind !== "roof") || !solid) && (
+              {((selection.kind !== "slab" &&
+                selection.kind !== "slabOpening" &&
+                selection.kind !== "roof") ||
+                !solid) && (
                 <>
                   {closedContour(project, selection) && (
                     <button
@@ -283,6 +286,7 @@ export function DemandMenu({
               )}
               {edgeIndex == null &&
                 selection.kind !== "slab" &&
+                selection.kind !== "slabOpening" &&
                 selection.kind !== "roof" &&
                 selection.kind !== "column" &&
                 selection.kind !== "stair" &&

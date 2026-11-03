@@ -780,6 +780,21 @@ export async function writeIfc(
         ["Thickness", `IFCLENGTHMEASURE(${real(slab.thickness)})`],
         ["TopOffset", `IFCLENGTHMEASURE(${real(slab.topOffset)})`],
       ]);
+      // Deckendurchbrüche (docs/DECKENDURCHBRUCH.md): voids through the whole slab thickness,
+      // placed with the slab, like the openings of walls.
+      for (const opening of (floor.slabOpenings ?? []).filter((o) => o.slabId === slab.id)) {
+        const hole = validateSimplePolygon(opening.points);
+        const outline =
+          hole.valid && hole.signedArea < 0 ? [...opening.points].reverse() : opening.points;
+        const openingRef = add(
+          "IFCOPENINGELEMENT",
+          `${await guid("opening", opening.id)},$,${label("Deckendurchbruch " + opening.id)},$,$,${placement(storeyPlacement, 0, 0, slabLevel.bottom - elevation)},${body(0, 0, slab.thickness, outline)},$,.OPENING.`,
+        );
+        add(
+          "IFCRELVOIDSELEMENT",
+          `${await guid("void", opening.id)},$,$,$,${slabRef},${openingRef}`,
+        );
+      }
     }
     // Columns (docs/STUETZEN.md): IfcColumn with a parametric swept profile (rectangle or
     // circle) from the foot to the top, so receiving tools can treat it as a real column.

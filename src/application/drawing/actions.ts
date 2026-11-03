@@ -7,6 +7,7 @@ import { pointsCompatible } from "../../geometry/tolerances/model.ts";
 import { addLine } from "../lines/actions.ts";
 import { addWall } from "../walls/actions.ts";
 import { addSlab } from "../slabs/actions.ts";
+import { addSlabOpening } from "../slabs/openings.ts";
 import { addRoof } from "../roofs/actions.ts";
 import { addRoom } from "../rooms/actions.ts";
 import type { HeightLine } from "../../domain/elements/room/height-line.ts";
@@ -58,6 +59,8 @@ export type DrawingRequest =
       layerId?: string;
     }
   | { kind: "slab"; points: Point[]; thickness: number; topOffset: number; layerId?: string }
+  // Deckendurchbruch (docs/DECKENDURCHBRUCH.md): the slab that holds the outline is found.
+  | { kind: "slabOpening"; points: Point[]; layerId?: string }
   | ({ kind: "roof"; points: Point[]; layerId?: string } & Omit<Roof, "id" | "points" | "layerId">)
   | {
       kind: "room";
@@ -124,6 +127,12 @@ export function createDrawing(
       points: closedDrawingContour(request.points),
       thickness: request.thickness,
       topOffset: request.topOffset,
+      ...(request.layerId ? { layerId: request.layerId } : {}),
+    });
+  if (request.kind === "slabOpening")
+    return addSlabOpening(current, {
+      id,
+      points: closedDrawingContour(request.points),
       ...(request.layerId ? { layerId: request.layerId } : {}),
     });
   if (request.kind === "room")

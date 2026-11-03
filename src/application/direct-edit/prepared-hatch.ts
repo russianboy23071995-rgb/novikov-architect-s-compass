@@ -3,6 +3,11 @@ import { editDirection } from "./snapping.ts";
 import { prepareContourInsertion } from "../../geometry/polygons/edit-edge.ts";
 import { MAX_HATCH_POINTS } from "../../domain/elements/hatch/model.ts";
 import { MAX_SLAB_POINTS } from "../../domain/elements/slab/model.ts";
+import {
+  MAX_SLAB_OPENING_POINTS,
+  slabOpeningProblem,
+  type SlabOpening,
+} from "../../domain/elements/slab/opening.ts";
 import { offsetContourPoints, offsetDirection } from "./offset.ts";
 import { prepareSessionContourEdge } from "./contour.ts";
 import {
@@ -23,12 +28,14 @@ import type { PreparedDirectEditPreview } from "./prepared-preview.ts";
 /** An owned validated snapshot fixes all non-contour fields. Point/edge previews
  * use changed-edge checks; offset and insertion retain full target contour validation.
  * Shared by hatches and ceiling slab outlines (docs/SLAB_ELEMENT.md, E1); the slab patch
- * carries the storey height so the 3D preview places the slab at its level.
+ * carries the storey height so the 3D preview places the slab at its level. Slab openings
+ * (docs/DECKENDURCHBRUCH.md) use the same path; their preview carries their slab and stays
+ * inside it.
  */
 export function prepareHatchContourPreview(session: EditSession): PreparedDirectEditPreview {
   const kind = session.target.kind;
   if (
-    (kind !== "hatch" && kind !== "slab") ||
+    (kind !== "hatch" && kind !== "slab" && kind !== "slabOpening") ||
     !["point", "stretch", "edge", "offset", "insert"].includes(session.action)
   )
     throw Error("Unsupported contour preview");
@@ -36,19 +43,28 @@ export function prepareHatchContourPreview(session: EditSession): PreparedDirect
     base = createProjectSnapshot(source),
     level = storeyOf(base);
   const items: readonly { id: string; points: readonly Point[] }[] =
-    kind === "slab" ? (level.slabs ?? []) : level.hatches;
+    kind === "slab"
+      ? (level.slabs ?? [])
+      : kind === "slabOpening"
+        ? (level.slabOpenings ?? [])
+        : level.hatches;
   const hatch = items.find((h) => h.id === session.target.id);
   const index = session.index ?? (session.action === "offset" ? 0 : null);
   if (!hatch || index === null || !Number.isInteger(index) || !hatch.points[index])
     throw Error("Invalid contour grip");
   if (
     session.action === "insert" &&
-    hatch.points.length >= (kind === "slab" ? MAX_SLAB_POINTS : MAX_HATCH_POINTS)
+    hatch.points.length >=
+      (kind === "slab"
+        ? MAX_SLAB_POINTS
+        : kind === "slabOpening"
+          ? MAX_SLAB_OPENING_POINTS
+          : MAX_HATCH_POINTS)
   )
     throw Error(
-      kind === "slab"
-        ? "Maximale Anzahl der Deckenpunkte erreicht."
-        : "Maximale Anzahl der Schraffurpunkte erreicht.",
+      kind === "hatch"
+        ? "Maximale Anzahl der Schraffurpunkte erreicht."
+        : "Maximale Anzahl der Deckenpunkte erreicht.",
     );
   const ring = hatch.points as Point[];
   const insert = session.action === "insert" ? prepareContourInsertion(ring, index) : null;
@@ -93,14 +109,25 @@ export function prepareHatchContourPreview(session: EditSession): PreparedDirect
         throw Error(`Invalid contour: ${result.reason} (${result.indices.join(", ")})`);
     }
     Object.freeze(points);
-    return Object.freeze({ ...hatch!, points }) as typeof hatch & { id: string };
+    const changed = Object.freeze({ ...hatch!, points }) as typeof hatch & { id: string };
+    if (kind === "slabOpening") {
+      const opening = changed as SlabOpening;
+      const problem = slabOpeningProblem(
+        (level.slabs ?? []).find((s) => s.id === opening.slabId)!,
+        (level.slabOpenings ?? [])
+          .map((o) => (o.id === opening.id ? opening : o))
+          .filter((o) => o.slabId === opening.slabId),
+      );
+      if (problem) throw Error(problem);
+    }
+    return changed;
   }
   return Object.freeze({
     evaluate(current, selection, point) {
       const changed = resolve(current, selection, point);
       const geometry = {
         storey:
-          kind === "slab"
+          kind === "slabOpening"
             ? {
                 ...level,
                 walls: [],
@@ -111,24 +138,45 @@ export function prepareHatchContourPreview(session: EditSession): PreparedDirect
                 wallTJunctions: [],
                 references: [],
                 hatches: [],
-                slabs: [changed as Slab],
+                slabs: (level.slabs ?? []).filter((s) => s.id === (changed as SlabOpening).slabId),
+                slabOpenings: (level.slabOpenings ?? []).map((o) =>
+                  o.id === changed.id ? (changed as SlabOpening) : o,
+                ),
               }
-            : {
-                ...level,
-                walls: [],
-                windows: [],
-                lines: [],
-                wallJoins: [],
-                wallTJunctions: [],
-                references: [],
-                hatches: [changed as Hatch],
-              },
+            : kind === "slab"
+              ? {
+                  ...level,
+                  walls: [],
+                  windows: [],
+                  doors: [],
+                  lines: [],
+                  wallJoins: [],
+                  wallTJunctions: [],
+                  references: [],
+                  hatches: [],
+                  slabs: [changed as Slab],
+                }
+              : {
+                  ...level,
+                  walls: [],
+                  windows: [],
+                  lines: [],
+                  wallJoins: [],
+                  wallTJunctions: [],
+                  references: [],
+                  hatches: [changed as Hatch],
+                },
         assets: [],
       };
+      // An opening's preview redraws its slab with the moved hole.
+      const replaced =
+        kind === "slabOpening"
+          ? Object.freeze([...replacedIds, (changed as SlabOpening).slabId])
+          : replacedIds;
       return {
         geometry,
-        replacedIds,
-        storeyPatches: [{ storeyId: level.id, geometry, replacedIds }],
+        replacedIds: replaced,
+        storeyPatches: [{ storeyId: level.id, geometry, replacedIds: replaced }],
       };
     },
     materialize(current, selection, point) {
@@ -137,15 +185,24 @@ export function prepareHatchContourPreview(session: EditSession): PreparedDirect
       // unaffected entity; validation/publication remains exclusively at fullEdit.
       return replaceStorey(
         base,
-        kind === "slab"
+        kind === "slabOpening"
           ? {
               ...level,
-              slabs: (level.slabs ?? []).map((s) => (s.id === changed.id ? (changed as Slab) : s)),
+              slabOpenings: (level.slabOpenings ?? []).map((o) =>
+                o.id === changed.id ? (changed as SlabOpening) : o,
+              ),
             }
-          : {
-              ...level,
-              hatches: level.hatches.map((h) => (h.id === changed.id ? (changed as Hatch) : h)),
-            },
+          : kind === "slab"
+            ? {
+                ...level,
+                slabs: (level.slabs ?? []).map((s) =>
+                  s.id === changed.id ? (changed as Slab) : s,
+                ),
+              }
+            : {
+                ...level,
+                hatches: level.hatches.map((h) => (h.id === changed.id ? (changed as Hatch) : h)),
+              },
       );
     },
   } satisfies PreparedDirectEditPreview);

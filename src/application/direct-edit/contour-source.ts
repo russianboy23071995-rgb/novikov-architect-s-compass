@@ -8,6 +8,8 @@ export function closedContour(project: Project, target: ElementTarget) {
     return storeyOf(project).hatches.find((h) => h.id === target.id)?.points ?? null;
   if (target.kind === "slab")
     return storeyOf(project).slabs?.find((s) => s.id === target.id)?.points ?? null;
+  if (target.kind === "slabOpening")
+    return storeyOf(project).slabOpenings?.find((o) => o.id === target.id)?.points ?? null;
   if (target.kind === "roof")
     return storeyOf(project).roofs?.find((r) => r.id === target.id)?.points ?? null;
   if (target.kind === "room")

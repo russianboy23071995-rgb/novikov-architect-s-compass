@@ -74,6 +74,7 @@ const PLAN_SHAPES: {
   line: (l) => ({ points: l.points, closed: false }),
   hatch: (h) => ({ points: h.points, closed: true }),
   slab: (s) => ({ points: s.points, closed: true }),
+  slabOpening: (o) => ({ points: o.points, closed: true }),
   roof: (r) => ({ points: r.points, closed: true }),
   room: (r) => ({ points: r.points, closed: true }),
   column: (c) => ({ points: columnOutline(c), closed: true }),
@@ -103,6 +104,7 @@ const PLAN_CAPTIONS: { [K in ElementKind]: (element: ElementOf<K>) => string | u
   line: () => undefined,
   hatch: () => undefined,
   slab: () => undefined,
+  slabOpening: () => undefined,
   roof: () => undefined,
   room: (r) => (r.name ? `${r.number} ${r.name}` : r.number),
   column: () => undefined,
@@ -120,6 +122,7 @@ const SHAPE_ORDER: readonly ElementKind[] = [
   "line",
   "hatch",
   "slab",
+  "slabOpening",
   "roof",
   "room",
   "column",
@@ -142,6 +145,8 @@ const PICK_RANK: Record<ElementKind, number> = {
   hatch: 3,
   roof: 4,
   slab: 5,
+  // Drawn over its slab, so a click inside the opening picks the opening.
+  slabOpening: 4.5,
   room: 6,
   // Under the layout's own lines and texts, which stay pickable on top of it.
   drawing: 6,

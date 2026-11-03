@@ -12,6 +12,7 @@ import {
   windowInsertSchema,
 } from "../elements/window/insert.ts";
 import { slabSchema } from "../elements/slab/model.ts";
+import { slabOpeningProblem, slabOpeningSchema } from "../elements/slab/opening.ts";
 import { roofSchema } from "../elements/roof/model.ts";
 import { columnLevels, columnSchema } from "../elements/column/model.ts";
 import { dimensionSchema } from "../elements/dimension/model.ts";
@@ -688,11 +689,25 @@ const drawingStoreySchema = projectV43Schema.shape.storeys.element.extend({
 });
 const layoutDrawingV50Schema = z.object({ layoutId: id, storey: drawingStoreySchema }).strict();
 // Built from v45 directly: one more extend level is too deep for the type checker.
-const projectSchema = projectV45Schema.extend({
-  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+export const projectV50Schema = projectV45Schema.extend({
+  schemaVersion: z.literal(50),
   storeys: z.array(drawingStoreySchema).min(1),
   modelViews: z.array(anyModelViewSchema).optional(),
   layoutDrawings: z.array(layoutDrawingV50Schema).max(5000).optional(),
+  masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
+  layouts: z.array(layoutV49Schema).max(5000).optional(),
+  projectInfo: projectInfoSchema.optional(),
+});
+/** Schema 51: openings in slabs (Deckendurchbrüche, docs/DECKENDURCHBRUCH.md, L40). */
+const storeySchema = drawingStoreySchema.extend({
+  slabOpenings: z.array(slabOpeningSchema).max(5000).optional(),
+});
+const layoutDrawingV51Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
+const projectSchema = projectV45Schema.extend({
+  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+  storeys: z.array(storeySchema).min(1),
+  modelViews: z.array(anyModelViewSchema).optional(),
+  layoutDrawings: z.array(layoutDrawingV51Schema).max(5000).optional(),
   masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
   layouts: z.array(layoutV49Schema).max(5000).optional(),
   projectInfo: projectInfoSchema.optional(),
@@ -1098,6 +1113,7 @@ export function validateProject(
       ...s.windows,
       ...(s.doors ?? []),
       ...(s.slabs ?? []),
+      ...((s as { slabOpenings?: readonly { id: string }[] }).slabOpenings ?? []),
       ...(s.roofs ?? []),
       ...(s.rooms ?? []),
       ...(s.columns ?? []),
@@ -1271,12 +1287,26 @@ function validateStoreyInserts(storey: Project["storeys"][number]): void {
   }
 }
 
-/** Slabs reference an existing layer; their outline and values are checked by the schema. */
+/** Slabs reference an existing layer; their outline and values are checked by the schema.
+ * Slab openings (L40) belong to a slab of the same storey and lie strictly inside it. */
 function validateStoreySlabs(storey: Project["storeys"][number], layers: { id: string }[]): void {
-  if (!storey.slabs?.length) return;
+  if (!storey.slabs?.length && !storey.slabOpenings?.length) return;
   const layerIds = new Set(layers.map((l) => l.id));
-  for (const slab of storey.slabs)
+  for (const slab of storey.slabs ?? [])
     if (!layerIds.has(slab.layerId)) throw new Error("Unknown layer: " + slab.layerId);
+  const openings = storey.slabOpenings ?? [];
+  for (const opening of openings) {
+    if (!layerIds.has(opening.layerId)) throw new Error("Unknown layer: " + opening.layerId);
+    if (!storey.slabs?.some((slab) => slab.id === opening.slabId))
+      throw new Error(`Deckendurchbruch ${opening.id}: Decke fehlt.`);
+  }
+  for (const slab of openings.length ? (storey.slabs ?? []) : []) {
+    const problem = slabOpeningProblem(
+      slab,
+      openings.filter((o) => o.slabId === slab.id),
+    );
+    if (problem) throw new Error(problem);
+  }
 }
 
 /** Rooms reference an existing layer; their numbers are unique in the whole project (N32). */
@@ -1501,6 +1531,7 @@ function drawingSheetPatterns(
     storey.windows,
     storey.doors,
     storey.slabs,
+    storey.slabOpenings,
     storey.roofs,
     storey.rooms,
     storey.columns,

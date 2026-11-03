@@ -77,6 +77,16 @@ export const SlabIcon = icon(
   </>,
 );
 
+/** Deckendurchbruch after DIN 1356-1: the opening outline with both diagonals in a slab. */
+export const SlabOpeningIcon = icon(
+  "SlabOpeningIcon",
+  <>
+    <path d="M2 11l8-5 12 3-8 5z" />
+    <path d="M8 9.2l3.5-2.1 4.5 1.1-3.5 2.1zM8 9.2l8-1M11.5 7.1l1 3.2" strokeWidth={1} />
+    <path d="M2 11v3l12 3 8-5V9M14 14v3" />
+  </>,
+);
+
 /** A gable roof in perspective over the outline of the walls. */
 export const RoofIcon = icon(
   "RoofIcon",
