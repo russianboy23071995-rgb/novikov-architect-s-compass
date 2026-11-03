@@ -95,6 +95,263 @@ type Props = PlanRun & {
     key: (kind: ElementTarget["kind"], id: string, event: React.KeyboardEvent) => void;
   };
 };
+
+/** Props that make a drawn element selectable (click, context menu, keys, aria-pressed). */
+const selectPropsFor =
+  (selectedIds: ReadonlySet<string>, drawing: boolean, handlers: Props["handlers"]) =>
+  (kind: ElementTarget["kind"], id: string) => ({
+    role: "button",
+    "data-plan-pick": "",
+    "data-kind": kind,
+    "data-id": id,
+    tabIndex: drawing ? -1 : 0,
+    "aria-label": `Select ${kind} ${id}`,
+    "aria-pressed": selectedIds.has(id),
+    onContextMenu: (event: React.MouseEvent) => handlers.secondary(kind, id, event),
+    onClick: (event: React.MouseEvent) => handlers.click(kind, id, event),
+    onKeyDown: (event: React.KeyboardEvent) => handlers.key(kind, id, event),
+  });
+
+type PlanWallScene = PlanScene["walls"] extends ReadonlyMap<string, infer W> ? W : never;
+type WallProps = Pick<
+  Props,
+  | "scene"
+  | "selectedIds"
+  | "drawing"
+  | "pixelsPerMetre"
+  | "wallOutlineWidth"
+  | "cutFill"
+  | "showRenovation"
+  | "cornerGeometry"
+  | "allowsShown"
+  | "canPick"
+  | "handlers"
+> & { wall: PlanWallScene };
+/** Ids whose selection a wall shows: the wall, its windows and its doors. */
+const wallSelectionIds = (props: WallProps) => [
+  props.wall.id,
+  ...(props.scene.openings.get(props.wall.id) ?? []).map((o) => o.id),
+  ...(props.scene.doors.get(props.wall.id) ?? []).map((d) => d.id),
+];
+/** Same wall drawing: every prop unchanged, the selection only as far as this wall shows it
+ * (docs/TABS.md, Auswahlklick Schritt 2). A click then re-renders only the walls whose
+ * highlight changes. */
+function sameWall(prev: WallProps, next: WallProps) {
+  for (const key of Object.keys(next) as (keyof WallProps)[])
+    if (key !== "selectedIds" && !Object.is(prev[key], next[key])) return false;
+  if (prev.selectedIds === next.selectedIds) return true;
+  return wallSelectionIds(next).every(
+    (id) => prev.selectedIds.has(id) === next.selectedIds.has(id),
+  );
+}
+/** One wall of the plan with its windows and doors, memoised (see sameWall). */
+const PlanWall = memo(function PlanWall({
+  wall,
+  scene,
+  selectedIds,
+  drawing,
+  pixelsPerMetre,
+  wallOutlineWidth,
+  cutFill,
+  showRenovation,
+  cornerGeometry,
+  allowsShown,
+  canPick,
+  handlers,
+}: WallProps) {
+  const outlines = scene.outlines;
+  const bands =
+    showRenovation && wall.renovation && wall.renovation !== "existing"
+      ? undefined
+      : scene.wallLayers.get(wall.id);
+  const selectProps = selectPropsFor(selectedIds, drawing, handlers);
+  const length = wallLength(wall);
+  const body = wallBody(wall);
+  const angle = (-Math.atan2(wall.end.y - wall.start.y, wall.end.x - wall.start.x) * 180) / Math.PI;
+  const profile = (!!cornerGeometry &&
+    cornerGeometry.walls.find((w) => w.wallId === wall.id)?.localProfile) ||
+    scene.solids.get(wall.id)?.localProfile || [
+      { x: 0, y: -wall.thickness / 2 },
+      { x: length, y: -wall.thickness / 2 },
+      { x: length, y: wall.thickness / 2 },
+      { x: 0, y: wall.thickness / 2 },
+    ];
+  return (
+    <g key={wall.id} transform={`translate(${body.start.x} ${-body.start.y}) rotate(${angle})`}>
+      {bands && (
+        <WallLayerGraphic
+          profile={profile}
+          bands={bands}
+          pixelsPerMetre={pixelsPerMetre}
+          lineWidth={wallOutlineWidth}
+        />
+      )}
+      <polygon
+        {...selectProps("wall", wall.id)}
+        points={profile.map((p) => `${p.x},${-p.y}`).join(" ")}
+        {...(bands
+          ? { fill: "var(--background)", fillOpacity: 0 }
+          : wallCutPaint(cutFill, showRenovation, wall.renovation))}
+        stroke={cornerGeometry ? "var(--primary)" : "none"}
+        strokeWidth={wallOutlineWidth / pixelsPerMetre}
+        className="outline-none focus-visible:stroke-sky-300"
+      />
+      {!cornerGeometry && (
+        <path
+          aria-label={`Wandkontur ${wall.id}`}
+          d={(outlines.get(wall.id) ?? [])
+            .map((edge) => {
+              const local = (p: Point) => {
+                const dx = p.x - body.start.x,
+                  dy = p.y - body.start.y;
+                return `${dx * body.normal.y - dy * body.normal.x},${-(dx * body.normal.x + dy * body.normal.y)}`;
+              };
+              return `M${local(edge.start)} L${local(edge.end)}`;
+            })
+            .join(" ")}
+          fill="none"
+          stroke={selectedIds.has(wall.id) ? "#94a3b8" : "var(--primary)"}
+          strokeWidth={wallOutlineWidth / pixelsPerMetre}
+          pointerEvents="none"
+        />
+      )}
+      {(scene.openings.get(wall.id) ?? []).map((opening) => {
+        // Window element (FT3): jambs cut, glass pane, boards seen below the cut.
+        const symbol = windowPlanSymbol(opening, wall);
+        const line = selectedIds.has(opening.id) ? WALL_AXIS_COLOR : "var(--primary)";
+        return (
+          <g key={opening.id}>
+            <rect
+              {...(canPick(opening.id) ? selectProps("window", opening.id) : {})}
+              x={opening.position * length - opening.width / 2}
+              y={-wall.thickness / 2}
+              width={opening.width}
+              height={wall.thickness}
+              fill="var(--background)"
+              stroke={
+                !allowsShown(opening.id)
+                  ? "none"
+                  : selectedIds.has(opening.id)
+                    ? WALL_AXIS_COLOR
+                    : scene.overlapping.has(opening.id)
+                      ? OVERLAP_COLOR
+                      : "var(--primary)"
+              }
+              strokeWidth={wallOutlineWidth / pixelsPerMetre}
+              className="outline-none"
+              style={selectedIds.has(opening.id) ? CAD_SHIMMER : undefined}
+            />
+            {symbol ? (
+              <g
+                aria-label={`Fensterelement ${opening.mark ?? opening.id}`}
+                visibility={allowsShown(opening.id) ? "visible" : "hidden"}
+                fill="none"
+                stroke={line}
+                style={selectedIds.has(opening.id) ? CAD_SHIMMER : undefined}
+                pointerEvents="none"
+              >
+                <path
+                  d={planRectPath(symbol.sills)}
+                  strokeWidth={(0.5 * wallOutlineWidth) / pixelsPerMetre}
+                />
+                <path
+                  d={planRectPath(symbol.jambs)}
+                  fill="var(--background)"
+                  strokeWidth={wallOutlineWidth / pixelsPerMetre}
+                />
+                <path
+                  d={planRectPath(symbol.glasses)}
+                  strokeWidth={(0.5 * wallOutlineWidth) / pixelsPerMetre}
+                />
+              </g>
+            ) : (
+              <line
+                visibility={allowsShown(opening.id) ? "visible" : "hidden"}
+                x1={opening.position * length - opening.width / 2}
+                x2={opening.position * length + opening.width / 2}
+                y1={0}
+                y2={0}
+                stroke={line}
+                style={selectedIds.has(opening.id) ? CAD_SHIMMER : undefined}
+                strokeWidth={wallOutlineWidth / pixelsPerMetre}
+                pointerEvents="none"
+              />
+            )}
+            <MarkLabel
+              text={opening.mark}
+              x={opening.position * length}
+              side={1}
+              thickness={wall.thickness}
+              angle={angle}
+              pixelsPerMetre={pixelsPerMetre}
+              visible={allowsShown(opening.id)}
+            />
+          </g>
+        );
+      })}
+      {(scene.doors.get(wall.id) ?? []).map((door) => {
+        const shown = allowsShown(door.id),
+          selected = selectedIds.has(door.id);
+        const stroke = selected ? WALL_AXIS_COLOR : "var(--primary)";
+        const outline = !selected && scene.overlapping.has(door.id) ? OVERLAP_COLOR : stroke;
+        // Door element (FT3): frame jambs cut; the leaf swings in the clear width.
+        const frame = doorPlanFrame(door, wall);
+        return (
+          <g key={door.id} aria-label={`Tür ${door.id}`}>
+            <rect
+              {...(canPick(door.id) ? selectProps("door", door.id) : {})}
+              x={door.position * length - door.width / 2}
+              y={-wall.thickness / 2}
+              width={door.width}
+              height={wall.thickness}
+              fill="var(--background)"
+              stroke={shown ? outline : "none"}
+              strokeWidth={wallOutlineWidth / pixelsPerMetre}
+              className="outline-none"
+              style={selected ? CAD_SHIMMER : undefined}
+            />
+            <path
+              visibility={shown ? "visible" : "hidden"}
+              d={doorPlanPath(
+                doorPlanSymbol(frame ? { ...door, width: frame.leafWidth } : door, {
+                  length,
+                  thickness: wall.thickness,
+                }),
+              )}
+              fill="none"
+              stroke={stroke}
+              style={selected ? CAD_SHIMMER : undefined}
+              strokeWidth={wallOutlineWidth / pixelsPerMetre}
+              pointerEvents="none"
+            />
+            {frame && (
+              <path
+                aria-label={`Türzarge ${door.mark ?? door.id}`}
+                visibility={shown ? "visible" : "hidden"}
+                d={planRectPath(frame.jambs)}
+                fill="var(--background)"
+                stroke={stroke}
+                style={selected ? CAD_SHIMMER : undefined}
+                strokeWidth={wallOutlineWidth / pixelsPerMetre}
+                pointerEvents="none"
+              />
+            )}
+            <MarkLabel
+              text={door.mark}
+              x={door.position * length}
+              side={door.opensTo === "left" ? 1 : -1}
+              thickness={wall.thickness}
+              angle={angle}
+              pixelsPerMetre={pixelsPerMetre}
+              visible={shown}
+            />
+          </g>
+        );
+      })}
+    </g>
+  );
+}, sameWall);
+
 /** A contiguous paint-order run. Unaffected runs retain every prop across pointer updates. */
 export function PlanSceneContent({
   kind,
@@ -133,18 +390,7 @@ export function PlanSceneContent({
     showRenovation && wall.renovation && wall.renovation !== "existing"
       ? undefined
       : scene.wallLayers.get(wall.id);
-  const selectProps = (kind: ElementTarget["kind"], id: string) => ({
-    role: "button",
-    "data-plan-pick": "",
-    "data-kind": kind,
-    "data-id": id,
-    tabIndex: drawing ? -1 : 0,
-    "aria-label": `Select ${kind} ${id}`,
-    "aria-pressed": selectedIds.has(id),
-    onContextMenu: (event: React.MouseEvent) => handlers.secondary(kind, id, event),
-    onClick: (event: React.MouseEvent) => handlers.click(kind, id, event),
-    onKeyDown: (event: React.KeyboardEvent) => handlers.key(kind, id, event),
-  });
+  const selectProps = selectPropsFor(selectedIds, drawing, handlers);
   return (
     <>
       {plan.references.map((r) => {
@@ -501,198 +747,23 @@ export function PlanSceneContent({
           )}
         </g>
       ))}
-      {plan.walls.map((wall) => {
-        const length = wallLength(wall);
-        const body = wallBody(wall);
-        const angle =
-          (-Math.atan2(wall.end.y - wall.start.y, wall.end.x - wall.start.x) * 180) / Math.PI;
-        const profile = (!!cornerGeometry &&
-          cornerGeometry.walls.find((w) => w.wallId === wall.id)?.localProfile) ||
-          scene.solids.get(wall.id)?.localProfile || [
-            { x: 0, y: -wall.thickness / 2 },
-            { x: length, y: -wall.thickness / 2 },
-            { x: length, y: wall.thickness / 2 },
-            { x: 0, y: wall.thickness / 2 },
-          ];
-        const bands = shownLayers(wall);
-        return (
-          <g
-            key={wall.id}
-            transform={`translate(${body.start.x} ${-body.start.y}) rotate(${angle})`}
-          >
-            {bands && (
-              <WallLayerGraphic
-                profile={profile}
-                bands={bands}
-                pixelsPerMetre={pixelsPerMetre}
-                lineWidth={wallOutlineWidth}
-              />
-            )}
-            <polygon
-              {...selectProps("wall", wall.id)}
-              points={profile.map((p) => `${p.x},${-p.y}`).join(" ")}
-              {...(bands
-                ? { fill: "var(--background)", fillOpacity: 0 }
-                : wallCutPaint(cutFill, showRenovation, wall.renovation))}
-              stroke={cornerGeometry ? "var(--primary)" : "none"}
-              strokeWidth={wallOutlineWidth / pixelsPerMetre}
-              className="outline-none focus-visible:stroke-sky-300"
-            />
-            {!cornerGeometry && (
-              <path
-                aria-label={`Wandkontur ${wall.id}`}
-                d={(outlines.get(wall.id) ?? [])
-                  .map((edge) => {
-                    const local = (p: Point) => {
-                      const dx = p.x - body.start.x,
-                        dy = p.y - body.start.y;
-                      return `${dx * body.normal.y - dy * body.normal.x},${-(dx * body.normal.x + dy * body.normal.y)}`;
-                    };
-                    return `M${local(edge.start)} L${local(edge.end)}`;
-                  })
-                  .join(" ")}
-                fill="none"
-                stroke={selectedIds.has(wall.id) ? "#94a3b8" : "var(--primary)"}
-                strokeWidth={wallOutlineWidth / pixelsPerMetre}
-                pointerEvents="none"
-              />
-            )}
-            {(scene.openings.get(wall.id) ?? []).map((opening) => {
-              // Window element (FT3): jambs cut, glass pane, boards seen below the cut.
-              const symbol = windowPlanSymbol(opening, wall);
-              const line = selectedIds.has(opening.id) ? WALL_AXIS_COLOR : "var(--primary)";
-              return (
-                <g key={opening.id}>
-                  <rect
-                    {...(canPick(opening.id) ? selectProps("window", opening.id) : {})}
-                    x={opening.position * length - opening.width / 2}
-                    y={-wall.thickness / 2}
-                    width={opening.width}
-                    height={wall.thickness}
-                    fill="var(--background)"
-                    stroke={
-                      !allowsShown(opening.id)
-                        ? "none"
-                        : selectedIds.has(opening.id)
-                          ? WALL_AXIS_COLOR
-                          : scene.overlapping.has(opening.id)
-                            ? OVERLAP_COLOR
-                            : "var(--primary)"
-                    }
-                    strokeWidth={wallOutlineWidth / pixelsPerMetre}
-                    className="outline-none"
-                    style={selectedIds.has(opening.id) ? CAD_SHIMMER : undefined}
-                  />
-                  {symbol ? (
-                    <g
-                      aria-label={`Fensterelement ${opening.mark ?? opening.id}`}
-                      visibility={allowsShown(opening.id) ? "visible" : "hidden"}
-                      fill="none"
-                      stroke={line}
-                      style={selectedIds.has(opening.id) ? CAD_SHIMMER : undefined}
-                      pointerEvents="none"
-                    >
-                      <path
-                        d={planRectPath(symbol.sills)}
-                        strokeWidth={(0.5 * wallOutlineWidth) / pixelsPerMetre}
-                      />
-                      <path
-                        d={planRectPath(symbol.jambs)}
-                        fill="var(--background)"
-                        strokeWidth={wallOutlineWidth / pixelsPerMetre}
-                      />
-                      <path
-                        d={planRectPath(symbol.glasses)}
-                        strokeWidth={(0.5 * wallOutlineWidth) / pixelsPerMetre}
-                      />
-                    </g>
-                  ) : (
-                    <line
-                      visibility={allowsShown(opening.id) ? "visible" : "hidden"}
-                      x1={opening.position * length - opening.width / 2}
-                      x2={opening.position * length + opening.width / 2}
-                      y1={0}
-                      y2={0}
-                      stroke={line}
-                      style={selectedIds.has(opening.id) ? CAD_SHIMMER : undefined}
-                      strokeWidth={wallOutlineWidth / pixelsPerMetre}
-                      pointerEvents="none"
-                    />
-                  )}
-                  <MarkLabel
-                    text={opening.mark}
-                    x={opening.position * length}
-                    side={1}
-                    thickness={wall.thickness}
-                    angle={angle}
-                    pixelsPerMetre={pixelsPerMetre}
-                    visible={allowsShown(opening.id)}
-                  />
-                </g>
-              );
-            })}
-            {(scene.doors.get(wall.id) ?? []).map((door) => {
-              const shown = allowsShown(door.id),
-                selected = selectedIds.has(door.id);
-              const stroke = selected ? WALL_AXIS_COLOR : "var(--primary)";
-              const outline = !selected && scene.overlapping.has(door.id) ? OVERLAP_COLOR : stroke;
-              // Door element (FT3): frame jambs cut; the leaf swings in the clear width.
-              const frame = doorPlanFrame(door, wall);
-              return (
-                <g key={door.id} aria-label={`Tür ${door.id}`}>
-                  <rect
-                    {...(canPick(door.id) ? selectProps("door", door.id) : {})}
-                    x={door.position * length - door.width / 2}
-                    y={-wall.thickness / 2}
-                    width={door.width}
-                    height={wall.thickness}
-                    fill="var(--background)"
-                    stroke={shown ? outline : "none"}
-                    strokeWidth={wallOutlineWidth / pixelsPerMetre}
-                    className="outline-none"
-                    style={selected ? CAD_SHIMMER : undefined}
-                  />
-                  <path
-                    visibility={shown ? "visible" : "hidden"}
-                    d={doorPlanPath(
-                      doorPlanSymbol(frame ? { ...door, width: frame.leafWidth } : door, {
-                        length,
-                        thickness: wall.thickness,
-                      }),
-                    )}
-                    fill="none"
-                    stroke={stroke}
-                    style={selected ? CAD_SHIMMER : undefined}
-                    strokeWidth={wallOutlineWidth / pixelsPerMetre}
-                    pointerEvents="none"
-                  />
-                  {frame && (
-                    <path
-                      aria-label={`Türzarge ${door.mark ?? door.id}`}
-                      visibility={shown ? "visible" : "hidden"}
-                      d={planRectPath(frame.jambs)}
-                      fill="var(--background)"
-                      stroke={stroke}
-                      style={selected ? CAD_SHIMMER : undefined}
-                      strokeWidth={wallOutlineWidth / pixelsPerMetre}
-                      pointerEvents="none"
-                    />
-                  )}
-                  <MarkLabel
-                    text={door.mark}
-                    x={door.position * length}
-                    side={door.opensTo === "left" ? 1 : -1}
-                    thickness={wall.thickness}
-                    angle={angle}
-                    pixelsPerMetre={pixelsPerMetre}
-                    visible={shown}
-                  />
-                </g>
-              );
-            })}
-          </g>
-        );
-      })}
+      {plan.walls.map((wall) => (
+        <PlanWall
+          key={wall.id}
+          wall={wall}
+          scene={scene}
+          selectedIds={selectedIds}
+          drawing={drawing}
+          pixelsPerMetre={pixelsPerMetre}
+          wallOutlineWidth={wallOutlineWidth}
+          cutFill={cutFill}
+          showRenovation={showRenovation}
+          cornerGeometry={cornerGeometry}
+          allowsShown={allowsShown}
+          canPick={canPick}
+          handlers={handlers}
+        />
+      ))}
       {scene.layerJoints.map((joint) => {
         // Incoming core through the host's cover layers at a T joint (L09 U2), drawn above both
         // walls; only where both walls show their layers.
