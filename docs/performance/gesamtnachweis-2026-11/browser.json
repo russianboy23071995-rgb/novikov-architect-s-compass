@@ -1,0 +1,246 @@
+{
+  "content": {
+    "projectHash": "8c79d04644d3acb6389fccef0e7024ed40f3d6bc6fe792ce901a3fc470141a5d",
+    "ifcHash": "8cf4ea5b80beeb00cd8f70200d7e03bf32a7902437b6a6a932b8d68d03f565b8",
+    "projectEqual": true,
+    "ifcEqual": true
+  },
+  "model": {
+    "size": "g",
+    "withImages": true,
+    "counts": {
+      "walls": 4000,
+      "trimmedWalls": 800,
+      "windows": 2000,
+      "lines": 14000,
+      "slabs": 4,
+      "slabOpenings": 40,
+      "rooms": 2000,
+      "roofs": 1,
+      "references": 7,
+      "sections": 8,
+      "documents": 13,
+      "layouts": 6,
+      "placedDrawings": 12
+    },
+    "imageBytes": 0,
+    "fileMB": 6.29,
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Claude/4.4212.0 Chrome/152.0.7977.167 Safari/537.36 MSIX"
+  },
+  "steps": [
+    {
+      "step": "Modell erzeugen (nicht App)",
+      "ms": 11303,
+      "longTaskMs": 0,
+      "heapMB": 109.4,
+      "ok": true
+    },
+    {
+      "step": "Öffnen – Datei prüfen",
+      "ms": 815,
+      "longTaskMs": 11168,
+      "heapMB": 262.8,
+      "ok": true
+    },
+    {
+      "step": "Öffnen – Projekt laden",
+      "ms": 1172.5,
+      "longTaskMs": 1169,
+      "heapMB": 133.4,
+      "ok": true
+    },
+    { "step": "Geschoss Geschoss 0", "ms": 531.7, "longTaskMs": 496, "heapMB": 179.9, "ok": true },
+    { "step": "Geschoss Geschoss 1", "ms": 707.3, "longTaskMs": 692, "heapMB": 199.9, "ok": true },
+    { "step": "Geschoss Geschoss 3", "ms": 672.1, "longTaskMs": 637, "heapMB": 194.4, "ok": true },
+    { "step": "Geschoss Geschoss 4", "ms": 502.3, "longTaskMs": 479, "heapMB": 218.6, "ok": true },
+    { "step": "Geschoss Geschoss 2", "ms": 366.8, "longTaskMs": 353, "heapMB": 235.6, "ok": true },
+    { "step": "Schnitt-Tab öffnen", "ms": 1356, "longTaskMs": 1346, "heapMB": 341.4, "ok": true },
+    { "step": "Grundriss-Tab", "ms": 67.3, "longTaskMs": 0, "heapMB": 346, "ok": true },
+    {
+      "step": "Schnitt-Tab erneut",
+      "ms": 60154,
+      "longTaskMs": 1039,
+      "heapMB": 204.8,
+      "ok": false,
+      "note": "Zeitüberschreitung"
+    },
+    { "step": "Layouts-Navigator", "ms": 24.8, "longTaskMs": 0, "heapMB": 204.8, "ok": true },
+    { "step": "Layout öffnen", "ms": 1461.8, "longTaskMs": 1227, "heapMB": 223.9, "ok": true },
+    { "step": "Layout – PDF", "ms": 1652.2, "longTaskMs": 1590, "heapMB": 300, "ok": true },
+    { "step": "Grundriss-Tab zurück", "ms": 440.5, "longTaskMs": 430, "heapMB": 313.1, "ok": true },
+    {
+      "step": "Gebäudestruktur-Navigator",
+      "ms": 76.8,
+      "longTaskMs": 69,
+      "heapMB": 314,
+      "ok": true
+    },
+    { "step": "Auswahl wall", "ms": 103.6, "longTaskMs": 75, "heapMB": 328, "ok": true },
+    { "step": "Wandlänge – Vorschau", "ms": 111.1, "longTaskMs": 103, "heapMB": 323.9, "ok": true },
+    { "step": "Wandlänge – Übernehmen", "ms": 588.6, "longTaskMs": 568, "heapMB": 379, "ok": true },
+    { "step": "Auswahl window", "ms": 85.7, "longTaskMs": 77, "heapMB": 390.6, "ok": true },
+    {
+      "step": "Fensterbreite – Vorschau",
+      "ms": 103.3,
+      "longTaskMs": 97,
+      "heapMB": 389.1,
+      "ok": true
+    },
+    {
+      "step": "Fensterbreite – Übernehmen",
+      "ms": 365.2,
+      "longTaskMs": 349,
+      "heapMB": 446.1,
+      "ok": true
+    },
+    { "step": "Auswahl line", "ms": 107.3, "longTaskMs": 87, "heapMB": 433.1, "ok": true },
+    { "step": "Löschen (Entf)", "ms": 874.4, "longTaskMs": 849, "heapMB": 534.3, "ok": true },
+    { "step": "2D → 3D", "ms": 832.4, "longTaskMs": 787, "heapMB": 629.8, "ok": true },
+    { "step": "3D – Szene fertig", "ms": 473.9, "longTaskMs": 0, "heapMB": 646.6, "ok": true },
+    {
+      "step": "3D: Tür entlang Wand ziehen",
+      "ms": 16.5,
+      "longTaskMs": 0,
+      "heapMB": 646.6,
+      "ok": true
+    },
+    { "step": "3D → 2D", "ms": 291.1, "longTaskMs": 284, "heapMB": 637.7, "ok": true },
+    { "step": "Auswahl wall", "ms": 87.9, "longTaskMs": 70, "heapMB": 653.4, "ok": true },
+    { "step": "Z: 2D → 3D", "ms": 203.5, "longTaskMs": 178, "heapMB": 680.8, "ok": true },
+    {
+      "step": "Z: Bewegung starten, Ursprung wählen",
+      "ms": 1615.3,
+      "longTaskMs": 1573,
+      "heapMB": 398.5,
+      "ok": true
+    },
+    {
+      "step": "Z: Achse und Vorschau +0,5 m",
+      "ms": 60067.3,
+      "longTaskMs": 66,
+      "heapMB": 285.6,
+      "ok": false,
+      "note": "Zeitüberschreitung"
+    },
+    { "step": "Z: Übernehmen", "ms": 1026.6, "longTaskMs": 1005, "heapMB": 372.2, "ok": true },
+    { "step": "Z: Undo", "ms": 506.7, "longTaskMs": 481, "heapMB": 422.1, "ok": true },
+    { "step": "Z: Redo", "ms": 651, "longTaskMs": 620, "heapMB": 389.5, "ok": true },
+    { "step": "Z: 3D → 2D", "ms": 367.3, "longTaskMs": 363, "heapMB": 409.6, "ok": true },
+    {
+      "step": "Speichern (Datei erzeugen)",
+      "ms": 380.4,
+      "longTaskMs": 344,
+      "heapMB": 694.7,
+      "ok": true
+    },
+    {
+      "step": "Z: im gespeicherten Stand",
+      "ms": 2.8,
+      "longTaskMs": 0,
+      "heapMB": 694.7,
+      "ok": true
+    },
+    { "step": "IFC exportieren", "ms": 2215.5, "longTaskMs": 2124, "heapMB": 921.4, "ok": true },
+    {
+      "step": "IFC: Bauteile vollständig",
+      "ms": 27.7,
+      "longTaskMs": 0,
+      "heapMB": 921.4,
+      "ok": true
+    },
+    {
+      "step": "Neu öffnen – Datei prüfen",
+      "ms": 643.5,
+      "longTaskMs": 602,
+      "heapMB": 1018.3,
+      "ok": true
+    },
+    {
+      "step": "Neu öffnen – Projekt laden",
+      "ms": 736.9,
+      "longTaskMs": 726,
+      "heapMB": 1093.9,
+      "ok": true
+    },
+    { "step": "Autosicherung aktuell", "ms": 7.8, "longTaskMs": 0, "heapMB": 824.9, "ok": true },
+    {
+      "step": "Inhalt vor Neuladen – Datei",
+      "ms": 374.9,
+      "longTaskMs": 337,
+      "heapMB": 879.8,
+      "ok": true
+    },
+    {
+      "step": "Inhalt vor Neuladen – IFC",
+      "ms": 2187.8,
+      "longTaskMs": 2112,
+      "heapMB": 1069.3,
+      "ok": true
+    },
+    {
+      "step": "Neuladen bis Wiederherstellungsangebot",
+      "ms": 176.6,
+      "longTaskMs": 63,
+      "heapMB": 1123,
+      "ok": true
+    },
+    {
+      "step": "Wiederherstellung – Stand prüfen",
+      "ms": 1334.9,
+      "longTaskMs": 1179,
+      "heapMB": 128.4,
+      "ok": true
+    },
+    {
+      "step": "Wiederherstellung – Projekt laden",
+      "ms": 1112.4,
+      "longTaskMs": 1105,
+      "heapMB": 221.4,
+      "ok": true
+    },
+    {
+      "step": "Inhalt nach Wiederherstellung – Datei",
+      "ms": 1065.8,
+      "longTaskMs": 962,
+      "heapMB": 220.9,
+      "ok": true
+    },
+    {
+      "step": "Inhalt nach Wiederherstellung – IFC",
+      "ms": 2419.7,
+      "longTaskMs": 2312,
+      "heapMB": 431.6,
+      "ok": true
+    },
+    {
+      "step": "Inhalt gleich (Datei und IFC)",
+      "ms": 2.9,
+      "longTaskMs": 89,
+      "heapMB": 481.4,
+      "ok": true
+    }
+  ],
+  "snap": { "n": 100, "median": 13.899999976158142, "p95": 18, "max": 27.900000035762787 },
+  "undo": {
+    "n": 20,
+    "median": 13.900000035762787,
+    "p95": 612.6000000238419,
+    "max": 612.6000000238419
+  },
+  "redo": { "n": 20, "median": 409, "p95": 669.3000000119209, "max": 669.3000000119209 },
+  "session": { "n": 50, "median": 579.1, "p95": 745.1, "max": 956.5 },
+  "sessionHeap": [
+    361.7, 430.2, 497, 562.4, 625.6, 666.2, 756.3, 794.2, 883.5, 945.4, 1006.8, 1067.8, 1129.3,
+    341.3, 385, 449.8, 513.9, 575.9, 637.2, 725.6, 786.1, 846.1, 905.8, 968.1, 1032, 1096, 1159.8,
+    376.1, 442.8, 508.2, 572.4, 634, 694.7, 760.8, 821.1, 885.2, 948.9, 1013.2, 1077.2, 1141.1,
+    1204.9, 390.3, 371.6, 439.6, 503.5, 567.8, 631.6, 694.8, 758.6, 822.4
+  ],
+  "sessionReleased": [
+    5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+    4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+  ],
+  "heapAfterIdle": 824.9,
+  "errors": [],
+  "loadToRestoredMs": 3034,
+  "heapAfterRestoreIdle": 172.6
+}

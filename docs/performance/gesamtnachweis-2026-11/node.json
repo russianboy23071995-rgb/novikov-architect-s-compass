@@ -1,0 +1,377 @@
+{
+  "date": "2026-11-03T12:59:30.928Z",
+  "node": "v24.22.1",
+  "cpu": "AMD Ryzen 5 3600 6-Core Processor              ",
+  "samples": 9,
+  "results": [
+    {
+      "elements": 3000,
+      "counts": {
+        "walls": 600,
+        "trimmedWalls": 120,
+        "windows": 300,
+        "lines": 2100,
+        "slabs": 4,
+        "slabOpenings": 40,
+        "rooms": 300,
+        "roofs": 1,
+        "references": 7,
+        "sections": 8,
+        "documents": 13,
+        "layouts": 6,
+        "placedDrawings": 12
+      },
+      "fileMB": 4,
+      "buildMs": 4384,
+      "openMs": {
+        "median": 118.6,
+        "p95": 122.7,
+        "max": 122.7
+      },
+      "wallEdit": {
+        "ms": {
+          "median": 11,
+          "p95": 13.4,
+          "max": 13.4
+        },
+        "storeysReused": 4,
+        "storeysRevalidated": 1,
+        "elementsReused": 541,
+        "building": {
+          "parts": 5,
+          "rebuilt": 1
+        }
+      },
+      "wallEditWithBuildingMs": {
+        "median": 29.3,
+        "p95": 42.4,
+        "max": 42.4
+      },
+      "trimmedStoreyWallEdit": {
+        "ms": {
+          "median": 10.3,
+          "p95": 14.4,
+          "max": 14.4
+        },
+        "storeysReused": 4,
+        "storeysRevalidated": 1,
+        "elementsReused": 541
+      },
+      "resolveRoofTrimsMs": {
+        "median": 0.8,
+        "p95": 1,
+        "max": 1
+      },
+      "resolveBoundWallHeightsMs": {
+        "median": 0,
+        "p95": 0.1,
+        "max": 0.1
+      },
+      "sectionsAfterChange": {
+        "count": 8,
+        "ms": {
+          "median": 924.1,
+          "p95": 975.3,
+          "max": 975.3
+        }
+      },
+      "layoutLine": {
+        "ms": {
+          "median": 42.8,
+          "p95": 73.5,
+          "max": 73.5
+        },
+        "storeysReused": 0,
+        "storeysRevalidated": 5,
+        "elementsReused": 2721,
+        "building": {
+          "parts": 5,
+          "rebuilt": 0
+        }
+      },
+      "projectInfo": {
+        "ms": {
+          "median": 37.6,
+          "p95": 48.8,
+          "max": 48.8
+        },
+        "storeysReused": 0,
+        "storeysRevalidated": 5,
+        "elementsReused": 2712
+      },
+      "undoMs": {
+        "median": 0,
+        "p95": 0.1,
+        "max": 0.1
+      },
+      "redoMs": {
+        "median": 0,
+        "p95": 0.1,
+        "max": 0.1
+      },
+      "storeySwitchMs": {
+        "median": 0,
+        "p95": 0,
+        "max": 0
+      },
+      "serializeMs": {
+        "median": 58.8,
+        "p95": 59.1,
+        "max": 59.1
+      },
+      "ifcMs": {
+        "median": 553.8,
+        "p95": 589,
+        "max": 589
+      },
+      "heapUsedMB": 352,
+      "rssMB": 580
+    },
+    {
+      "elements": 10000,
+      "counts": {
+        "walls": 2000,
+        "trimmedWalls": 400,
+        "windows": 1000,
+        "lines": 7000,
+        "slabs": 4,
+        "slabOpenings": 40,
+        "rooms": 1000,
+        "roofs": 1,
+        "references": 7,
+        "sections": 8,
+        "documents": 13,
+        "layouts": 6,
+        "placedDrawings": 12
+      },
+      "fileMB": 5.2,
+      "buildMs": 8348,
+      "openMs": {
+        "median": 342.1,
+        "p95": 344.6,
+        "max": 344.6
+      },
+      "wallEdit": {
+        "ms": {
+          "median": 34,
+          "p95": 39.7,
+          "max": 39.7
+        },
+        "storeysReused": 4,
+        "storeysRevalidated": 1,
+        "elementsReused": 1801,
+        "building": {
+          "parts": 5,
+          "rebuilt": 1
+        }
+      },
+      "wallEditWithBuildingMs": {
+        "median": 88.9,
+        "p95": 97.1,
+        "max": 97.1
+      },
+      "trimmedStoreyWallEdit": {
+        "ms": {
+          "median": 33.9,
+          "p95": 38.8,
+          "max": 38.8
+        },
+        "storeysReused": 4,
+        "storeysRevalidated": 1,
+        "elementsReused": 1801
+      },
+      "resolveRoofTrimsMs": {
+        "median": 7.3,
+        "p95": 9,
+        "max": 9
+      },
+      "resolveBoundWallHeightsMs": {
+        "median": 0.1,
+        "p95": 0.1,
+        "max": 0.1
+      },
+      "sectionsAfterChange": {
+        "count": 8,
+        "ms": {
+          "median": 3356,
+          "p95": 4443.3,
+          "max": 4443.3
+        }
+      },
+      "layoutLine": {
+        "ms": {
+          "median": 124.4,
+          "p95": 152.1,
+          "max": 152.1
+        },
+        "storeysReused": 0,
+        "storeysRevalidated": 5,
+        "elementsReused": 9021,
+        "building": {
+          "parts": 5,
+          "rebuilt": 0
+        }
+      },
+      "projectInfo": {
+        "ms": {
+          "median": 134.3,
+          "p95": 146.6,
+          "max": 146.6
+        },
+        "storeysReused": 0,
+        "storeysRevalidated": 5,
+        "elementsReused": 9012
+      },
+      "undoMs": {
+        "median": 0,
+        "p95": 0.1,
+        "max": 0.1
+      },
+      "redoMs": {
+        "median": 0,
+        "p95": 0.1,
+        "max": 0.1
+      },
+      "storeySwitchMs": {
+        "median": 0,
+        "p95": 0,
+        "max": 0
+      },
+      "serializeMs": {
+        "median": 192.8,
+        "p95": 200.9,
+        "max": 200.9
+      },
+      "ifcMs": {
+        "median": 1743.5,
+        "p95": 1813,
+        "max": 1813
+      },
+      "heapUsedMB": 672,
+      "rssMB": 1484
+    },
+    {
+      "elements": 20000,
+      "counts": {
+        "walls": 4000,
+        "trimmedWalls": 800,
+        "windows": 2000,
+        "lines": 14000,
+        "slabs": 4,
+        "slabOpenings": 40,
+        "rooms": 2000,
+        "roofs": 1,
+        "references": 7,
+        "sections": 8,
+        "documents": 13,
+        "layouts": 6,
+        "placedDrawings": 12
+      },
+      "fileMB": 7,
+      "buildMs": 14976,
+      "openMs": {
+        "median": 727.3,
+        "p95": 797.5,
+        "max": 797.5
+      },
+      "wallEdit": {
+        "ms": {
+          "median": 88.2,
+          "p95": 98.8,
+          "max": 98.8
+        },
+        "storeysReused": 4,
+        "storeysRevalidated": 1,
+        "elementsReused": 3601,
+        "building": {
+          "parts": 5,
+          "rebuilt": 1
+        }
+      },
+      "wallEditWithBuildingMs": {
+        "median": 184.8,
+        "p95": 216.5,
+        "max": 216.5
+      },
+      "trimmedStoreyWallEdit": {
+        "ms": {
+          "median": 77.9,
+          "p95": 88.5,
+          "max": 88.5
+        },
+        "storeysReused": 4,
+        "storeysRevalidated": 1,
+        "elementsReused": 3601
+      },
+      "resolveRoofTrimsMs": {
+        "median": 24.6,
+        "p95": 32,
+        "max": 32
+      },
+      "resolveBoundWallHeightsMs": {
+        "median": 0.2,
+        "p95": 0.2,
+        "max": 0.2
+      },
+      "sectionsAfterChange": {
+        "count": 8,
+        "ms": {
+          "median": 7286.4,
+          "p95": 7601.8,
+          "max": 7601.8
+        }
+      },
+      "layoutLine": {
+        "ms": {
+          "median": 328.1,
+          "p95": 505.7,
+          "max": 505.7
+        },
+        "storeysReused": 0,
+        "storeysRevalidated": 5,
+        "elementsReused": 18021,
+        "building": {
+          "parts": 5,
+          "rebuilt": 0
+        }
+      },
+      "projectInfo": {
+        "ms": {
+          "median": 310.5,
+          "p95": 366.4,
+          "max": 366.4
+        },
+        "storeysReused": 0,
+        "storeysRevalidated": 5,
+        "elementsReused": 18012
+      },
+      "undoMs": {
+        "median": 0,
+        "p95": 0.1,
+        "max": 0.1
+      },
+      "redoMs": {
+        "median": 0,
+        "p95": 0.1,
+        "max": 0.1
+      },
+      "storeySwitchMs": {
+        "median": 0,
+        "p95": 0,
+        "max": 0
+      },
+      "serializeMs": {
+        "median": 374.2,
+        "p95": 375.9,
+        "max": 375.9
+      },
+      "ifcMs": {
+        "median": 3687.3,
+        "p95": 3790.7,
+        "max": 3790.7
+      },
+      "heapUsedMB": 569,
+      "rssMB": 2155
+    }
+  ]
+}
