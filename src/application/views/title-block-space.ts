@@ -57,21 +57,29 @@ export function spaceLens(real: Project, space: DrawingSpace): Project {
   } = real;
   // Identity stays stable per real project, so base checks of the tools keep working.
   // The lens has no title blocks, so master layouts point at none there (PK4).
-  const lens = createProjectSnapshot({
-    ...shared,
-    ...(shared.masterLayouts
-      ? {
-          masterLayouts: shared.masterLayouts.map(({ titleBlockId: _block, ...master }) => master),
-        }
-      : {}),
-    // Nor drawing documents: layouts point at none there (AT1).
-    ...(shared.layouts
-      ? { layouts: shared.layouts.map(({ documentId: _document, ...layout }) => layout) }
-      : {}),
-    storeys: [sheet],
-    groundStoreyId: sheet.id,
-    workingViews: [{ kind: "working-plan", storeyId: sheet.id, denominator: 1 }],
-  });
+  const lens = createProjectSnapshot(
+    {
+      ...shared,
+      ...(shared.masterLayouts
+        ? {
+            masterLayouts: shared.masterLayouts.map(
+              ({ titleBlockId: _block, ...master }) => master,
+            ),
+          }
+        : {}),
+      // Nor drawing documents: layouts point at none there (AT1).
+      ...(shared.layouts
+        ? { layouts: shared.layouts.map(({ documentId: _document, ...layout }) => layout) }
+        : {}),
+      storeys: [sheet],
+      groundStoreyId: sheet.id,
+      workingViews: [{ kind: "working-plan", storeyId: sheet.id, denominator: 1 }],
+      // Unchanged shared values (layers, images, patterns …) keep the real project's objects, so a
+      // layout edit written back leaves them as they are (docs/performance/STOREY_KEYS.md).
+    },
+    undefined,
+    real,
+  );
   if (!byKey) lenses.set(real, (byKey = new Map()));
   byKey.set(key(space), lens);
   setSheetFrames(lens, { ...spaceFrames(real, space), backdrop: spaceBackdrop(real, space) });
@@ -99,11 +107,18 @@ export function fromSpaceLens(real: Project, space: DrawingSpace, next: Project)
     hatchPatterns,
     ...shared
   } = next;
-  // The lens only keeps the patterns its sheet uses; the building's stay with the project.
+  // The lens only keeps the patterns its sheet uses; the building's stay with the project. With
+  // no new or changed pattern the project keeps its own list.
+  const known = new Set(real.hatchPatterns);
   const patterns = new Map(real.hatchPatterns.map((p) => [p.id, p]));
   for (const p of hatchPatterns) patterns.set(p.id, p);
+  const samePatterns = hatchPatterns.every((p) => known.has(p));
   const sheet = { ...storeyOf(next), id: before.id, name: before.name };
-  const base = { ...real, ...shared, hatchPatterns: [...patterns.values()] };
+  const base = {
+    ...real,
+    ...shared,
+    hatchPatterns: samePatterns ? real.hatchPatterns : [...patterns.values()],
+  };
   if (space.kind === "title-block")
     return {
       ...base,

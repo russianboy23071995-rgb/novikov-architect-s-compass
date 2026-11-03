@@ -992,6 +992,22 @@ function restoreKnownElements(
  * storey's resolved levels (bound wall heights) and every other project value by identity.
  * Any difference forces full validation of that storey. Extend this when a new rule reads more.
  */
+/**
+ * Project values the scope check of one storey reads besides the storey itself
+ * (validateStoreyScope; docs/performance/STOREY_KEYS.md). A value read there must be listed
+ * here, or a changed value would reuse a stale check. Layouts, title blocks, sections, other
+ * storeys' views and documents, project information and the visibility are not read (the
+ * visibility is checked once for the project).
+ */
+const STOREY_SCOPE_FIELDS = [
+  "id",
+  "layers",
+  "defaultLayerIds",
+  "assets",
+  "hatchPatterns",
+  "documentFolders",
+] as const;
+type ViewLike = { id: string; kind?: string; storeyId?: string };
 function storeyKeys(
   identity: Record<string, unknown>,
   storeys: readonly { id: string; height: number | null }[],
@@ -1000,13 +1016,30 @@ function storeyKeys(
   const levels = new Map(
     resolveStoreyLevels(storeys, groundStoreyId).map((s) => [s.storeyId, s.elevation]),
   );
-  const shared = Object.keys(identity)
-    .filter((name) => name !== "storeys")
-    .sort()
-    .flatMap((name) => [name, identity[name]]);
+  const shared = STOREY_SCOPE_FIELDS.flatMap((name) => [name, identity[name]]);
+  const working = (identity["workingViews"] as readonly ViewLike[] | undefined) ?? [];
+  const plans = ((identity["modelViews"] as readonly ViewLike[] | undefined) ?? []).filter(
+    (v) => v.kind === "floor-plan",
+  );
+  const documents =
+    (identity["drawingDocuments"] as readonly { modelViewId: string }[] | undefined) ?? [];
   return storeys.map((storey, index) => {
     const next = storeys[index + 1];
-    return [levels.get(storey.id), next?.id, next && levels.get(next.id), ...shared];
+    // The storey's own working views, plan views and their documents, as the scope gets them.
+    const views = plans.filter((v) => v.storeyId === storey.id);
+    const ids = new Set(views.map((v) => v.id));
+    return [
+      levels.get(storey.id),
+      next?.id,
+      next && levels.get(next.id),
+      ...shared,
+      "working",
+      ...working.filter((v) => v.storeyId === storey.id),
+      "plans",
+      ...views,
+      "documents",
+      ...documents.filter((d) => ids.has(d.modelViewId)),
+    ];
   });
 }
 
@@ -1151,6 +1184,8 @@ export function validateProject(
   }
   const used = new Set<string>();
   const { storeys, groundStoreyId: _ground, ...shared } = project;
+  // Hidden layers exist: checked here once, not per storey (not part of the storey key).
+  validateVisibility(project as unknown as SingleProject);
   validateRoomNumbers(storeys);
   // Drawings lie on layouts only (ZW1). A layout's sheet seen as a storey (the drawing space
   // of a layout tab) carries the id „sheet-<layout>“; a storey of the building never does.

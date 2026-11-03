@@ -323,6 +323,7 @@
     "benchmarks/gesamt-fixture.test.ts",
     "benchmarks/section-parts.test.ts",
     "benchmarks/placed-freshness.test.ts",
-    "src/application/snapping/placed-sources.test.ts"
+    "src/application/snapping/placed-sources.test.ts",
+    "benchmarks/storey-keys.test.ts"
   ]
 }
