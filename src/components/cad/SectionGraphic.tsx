@@ -2,7 +2,7 @@ import { memo } from "react";
 import type { SectionHeightMarks } from "@/domain/views/sections";
 import type { SectionDrawing, SectionPoint } from "@/rendering/viewport/section-drawing";
 import { cutPaint, type CutFill } from "./cut-fill";
-import { MARK_PAPER, sectionGraphicExtent } from "./section-graphic";
+import { HATCH_PAPER, MARK_PAPER, sectionGraphicExtent } from "./section-graphic";
 import { HeightMark } from "./HeightMark";
 import { segmentPath } from "./section-paths";
 import { SectionLayerGraphic } from "./SectionLayerGraphic";
@@ -14,8 +14,6 @@ const loopPath = (loops: readonly SectionPoint[][]) =>
   loops.map((loop) => `M${svgPoints(loop).replaceAll(" ", " L")} Z`).join(" ");
 /** Line weights of cut outlines: building parts heavy, frames medium, glass thin. */
 const stroke = { part: 1.75, frame: 1.1, glass: 0.6 } as const;
-/** Hatch spacing of cut layers: 1,5 mm on paper. */
-const HATCH_PAPER = 0.0015;
 
 /**
  * The drawn section or elevation (docs/SCHNITT.md, SC3): the view beyond, storey levels with
@@ -28,6 +26,67 @@ const HATCH_PAPER = 0.0015;
  * Memoised: zooming and panning change only the view box of the surrounding SVG, never this
  * content (docs/performance/SECTION_ZOOM.md).
  */
+/** Storey height marks left and right outside the border, with the storey name (BS1). */
+function LevelMarks({
+  drawing,
+  level,
+  denominator,
+}: {
+  drawing: SectionDrawing;
+  level: SectionDrawing["levels"][number];
+  denominator: number;
+}) {
+  const mark = MARK_PAPER * denominator;
+  const markGap = mark * 1.5;
+  return (
+    <>
+      <HeightMark
+        x={-markGap}
+        z={level.elevation}
+        side="left"
+        kind="shell"
+        size={mark}
+        name={level.name}
+        reach={0}
+      />
+      <HeightMark
+        x={drawing.width + markGap}
+        z={level.elevation}
+        side="right"
+        kind="shell"
+        size={mark}
+        name={level.name}
+        reach={drawing.width}
+      />
+    </>
+  );
+}
+
+/**
+ * The storey marks alone, for the section tab: there the drawing is a canvas below
+ * (docs/performance/SECTION_CANVAS.md) and only the marks with their text stay SVG.
+ */
+export const SectionLevelMarks = memo(function SectionLevelMarks({
+  drawing,
+  denominator,
+}: {
+  drawing: SectionDrawing;
+  denominator: number;
+}) {
+  return (
+    <g aria-label="Geschosse">
+      {drawing.levels.map((level) => (
+        <LevelMarks
+          key={level.storeyId}
+          drawing={drawing}
+          level={level}
+          denominator={denominator}
+        />
+      ))}
+    </g>
+  );
+});
+
 export const SectionGraphic = memo(function SectionGraphic({
   drawing,
   cutFill,
@@ -43,7 +102,6 @@ export const SectionGraphic = memo(function SectionGraphic({
 }) {
   const paint = cutPaint(cutFill);
   const mark = MARK_PAPER * denominator;
-  const markGap = mark * 1.5;
   const extent = sectionGraphicExtent(drawing, denominator);
   const picked = (id: string) => selectedIds?.has(id) ?? false;
   const ink = (id: string) => (picked(id) ? CAD_TURQUOISE : "var(--foreground)");
@@ -92,24 +150,7 @@ export const SectionGraphic = memo(function SectionGraphic({
               strokeDasharray="8 4"
               vectorEffect="non-scaling-stroke"
             />
-            <HeightMark
-              x={-markGap}
-              z={level.elevation}
-              side="left"
-              kind="shell"
-              size={mark}
-              name={level.name}
-              reach={0}
-            />
-            <HeightMark
-              x={drawing.width + markGap}
-              z={level.elevation}
-              side="right"
-              kind="shell"
-              size={mark}
-              name={level.name}
-              reach={drawing.width}
-            />
+            <LevelMarks drawing={drawing} level={level} denominator={denominator} />
           </g>
         ))}
       </g>

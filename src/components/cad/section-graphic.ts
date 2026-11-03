@@ -9,6 +9,8 @@ import {
 
 /** Storey marks outside the border (BS1): triangle 2,5 mm on paper like the section symbol. */
 export const MARK_PAPER = 0.0025;
+/** Hatch spacing of cut layers: 1,5 mm on paper. */
+export const HATCH_PAPER = 0.0015;
 
 /** The section drawing, remembered per project and section and reused while nothing it reads
  * changes (docs/performance/SECTION_PARTS.md); a layout draws it every frame. */
