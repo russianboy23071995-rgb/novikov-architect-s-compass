@@ -167,3 +167,33 @@ Bei Wand und Fenster bleibt die Zeit gleich. Laut Profiler rendert der Grundriss
 - 1554 Tests grün, Typprüfung, Lint, Architekturprüfung ohne Befund, Hash unverändert.
 
 **Grenze:** Der Raum-Lauf ist nicht eigens geprüft. Die Messung fand kein auswählbares Raum-Element unter „Select room“.
+
+## Auswahlklick Schritt 2: Wände einzeln memoisiert (03.11.2026)
+
+Freigabe durch den Nutzer am 03.11.2026.
+
+**Umsetzung** (`PlanSceneRun.tsx`): Jede Wand mit ihren Fenstern und Türen ist ein eigener memoisierter Baustein (`PlanWall`). Er rendert nur neu, wenn sich eine seiner Eingaben ändert (etwa Szene, Maßstab, Linienstärke) oder die Auswahl der Wand, eines ihrer Fenster oder einer ihrer Türen. Die Auswahl anderer Elemente lässt ihn unberührt. Die Hilfsfunktion `selectPropsFor` teilen sich Lauf und Wand.
+
+**Ergebnis** (20 000 Elemente, Renderzeit des Grundrisses laut React-Profiler, Median aus 3 Durchgängen, alt und neu im selben Fenster):
+
+| Klick    | Schritt 1 | Schritt 2 |
+| -------- | --------: | --------: |
+| Abwählen |    194 ms |     43 ms |
+| Wand     |     53 ms |     62 ms |
+| Fenster  |     51 ms |     53 ms |
+| Linie    |     71 ms |     69 ms |
+
+Beim Abwählen rendert jetzt nur noch die Wand, die vorher gewählt war. Beim Auswählen bleibt die Renderzeit des Grundrisses bei etwa 50–70 ms. Dieser Rest liegt nicht mehr im Wand-Lauf, sondern in anderen Teilen des Grundrisses, etwa Griffen und Überlagerungen der Auswahl. Er ist nicht weiter zerlegt.
+
+**Messbedingungen:** Die Zeit vom Klick bis zum Bild schwankte während der Messung stark; derselbe alte Stand lieferte für die Wand einmal 247 und einmal 164 ms. Deshalb ist hier die Renderzeit des Profilers angegeben und nicht die Gesamtzeit.
+
+**Nachweis:**
+
+- Browser (Gesamtmodell 3 000): Kontur und `aria-pressed` folgen der Auswahl.
+  - Wand 1, dann Wand 2: Die erste wird wieder normal, die zweite hervorgehoben.
+  - Fenster.
+  - Gemischt Wand, Fenster und Linie (Strg-Klick, „3 selected“).
+  - Abwählen.
+- 1556 Tests grün, Typprüfung, Lint, Architekturprüfung ohne Befund, Hash unverändert.
+
+**Grenze:** Türen sind nicht im Browser geprüft, das Testmodell hat keine. Sie gehen denselben Weg wie Fenster.
