@@ -114,3 +114,21 @@ Nutzerhinweis: Das Wechseln der Tabs war nicht ganz flüssig. Gemessen wurde vom
 - **Speicher:** Bis zu drei Zeichenflächen bestehen gleichzeitig.
 - **Ungeklärter Rest:** Layoutbuch → Grundriss braucht bei 20 000 Elementen noch etwa 0,45 s; nicht weiter zerlegt.
 - **Tests:** Für die stabilen Hüllen und das Halten der Flächen gibt es keinen eigenen Test, weil die Testläufe keine React-Komponenten rendern. Belegt sind sie durch die Browserprobe.
+
+## Nachtrag: Layoutbuch → Grundriss (03.11.2026)
+
+**Befund:** Beim Zurückwechseln aus dem Layoutbuch renderte der Grundriss bei 20 000 Elementen etwa 240 ms neu. Aus 3D kommend waren es nur 14 ms. Die einzige Eingabe, die sich zusätzlich änderte, war die Auswahl: Das Layoutbuch leert sie beim Betreten. Der Grundriss baute daraus eine neue, ebenfalls leere Menge. Weil jeder Zeichnungslauf die Auswahlmenge bekommt, renderten alle Läufe neu.
+
+**Umsetzung** (`BimPlan.tsx`): Die Auswahlmenge bleibt dasselbe Objekt, solange dieselben Elemente gewählt sind. Ohne Auswahl ist es immer dieselbe leere Menge.
+
+**Ergebnis** (20 000 Elemente, Entwicklungsserver):
+
+- Layoutbuch → Grundriss: 0,17–0,19 s statt 0,45 s, beim ersten Wechsel 0,32 s.
+- Der Grundriss rendert dabei in etwa 20 ms.
+
+**Nachweis:**
+
+- Im Browser lassen sich Wände auswählen und abwählen; `aria-pressed` und die Anzeige „1 selected“/„0 selected“ folgen.
+- 1553 Tests grün, Typprüfung und Architekturprüfung ohne Befund, Hash unverändert.
+
+**Grenze:** Eine echte Änderung der Auswahl rendert weiter alle Läufe neu. Bei 20 000 Elementen kostet ein Auswahlklick deshalb weiterhin etwa 0,2 s. Die Auswahl je Lauf aufzuteilen ginge nur mit Vorsicht, weil Fenster und Türen im Wand-Lauf gezeichnet werden. Das wäre ein eigener Auftrag.
