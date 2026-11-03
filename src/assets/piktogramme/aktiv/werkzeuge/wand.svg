@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+<title>Wandwerkzeug (aktiv)</title>
+<mask id="k-werkzeuge-wand" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect width="24" height="24" fill="#fff"/><path d="M4.889 11.262L15.556 16.596M4.889 8.293L15.556 13.627" stroke="#000"/><path d="M10.222 16.889L10.222 13.929M7.556 12.596L7.556 9.627M12.889 15.262L12.889 12.293M10.222 10.96L10.222 8" stroke="#000"/></mask>
+<g mask="url(#k-werkzeuge-wand)"><path class="accent-voll" d="M5.783 14.669L14.661 19.108Q15.556 19.556 15.556 18.556L15.556 11.667Q15.556 10.667 14.661 10.219L5.783 5.781Q4.889 5.333 4.889 6.333L4.889 13.222Q4.889 14.222 5.783 14.669Z" fill="currentColor" stroke="none"/></g>
+<path d="M14.661 19.108L5.783 14.669Q4.889 14.222 4.889 13.222L4.889 6.333Q4.889 5.333 5.783 4.886L6.217 4.669Q7.111 4.222 8.006 4.669L16.883 9.108Q17.778 9.556 17.778 10.556L17.778 17.444Q17.778 18.444 16.883 18.892L16.45 19.108Q15.556 19.556 14.661 19.108Z"/>
+<path d="M4.889 5.333L14.661 10.219Q15.556 10.667 16.45 10.219L17.778 9.556"/>
+<path d="M15.556 10.667L15.556 19.556"/>
+</svg>

@@ -18,7 +18,12 @@ export type ToolId =
   | "hatch"
   | "dimension"
   | "text"
-  | "drawing";
+  | "drawing"
+  // Planned tools, shown greyed in the rail until they exist (docs/WERKZEUGLEISTE.md, WL3):
+  // Dachflächenfenster (L41), Geländer (L42), Gelände (L43).
+  | "roofWindow"
+  | "railing"
+  | "terrain";
 export type ViewMode = "2D" | "3D";
 export type ViewportLayout = "single" | "horizontal" | "vertical" | "three" | "four";
 export type AiState = "idle" | "listening" | "preview";
@@ -29,6 +34,10 @@ export type CadTool = {
   shortcut: string;
   /** Lucide icon or an own pictogram (tool-icons.tsx). */
   icon: ComponentType<{ className?: string; strokeWidth?: number }>;
+  /** Pictogram of the package (Pictogram.tsx), inactive and active; replaces the icon in the rail. */
+  pictogram?: string;
+  /** Not built yet: greyed, cannot be chosen, "kommt später". */
+  planned?: boolean;
 };
 
 export type TreeNode = {
@@ -36,4 +45,6 @@ export type TreeNode = {
   label: string;
   kind: "group" | "item";
   children?: TreeNode[];
+  /** Navigator pictogram of the package (docs/WERKZEUGLEISTE.md, WL3), active while chosen. */
+  pictogram?: "gesamtuebersicht" | "grundriss" | "schnitt" | "ansicht" | "auswertung";
 };

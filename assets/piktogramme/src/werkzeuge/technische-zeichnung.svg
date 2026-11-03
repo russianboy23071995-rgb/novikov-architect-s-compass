@@ -1,0 +1,5 @@
+<svg viewBox="0 0 24 24">
+<title>Technische Zeichnung Werkzeug</title>
+<path class="accent" fill-rule="evenodd" d="M4 20V4l16 16zM7.5 16.5v-4.05l4.05 4.05z"/>
+<path d="M4 20V4l16 16z"/><path d="M7.5 16.5v-4.05l4.05 4.05z"/><path data-knock="1" d="M4 8h2M4 11.5h1.5M8 20v-1.5M12 20v-2M16 20v-1.5"/>
+</svg>

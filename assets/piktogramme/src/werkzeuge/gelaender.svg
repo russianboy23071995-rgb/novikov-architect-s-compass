@@ -1,0 +1,6 @@
+<svg viewBox="0 0 24 24">
+<title>Geländerwerkzeug</title>
+<path class="accent" d="M5 4 19 11V20L5 13Z"/>
+<path d="M5 4 19 11"/><path d="M5 4V13M19 11V20"/><path d="M5 13 19 20"/>
+<path data-knock="1" d="M8.5 5.75V14.75M12 7.5V16.5M15.5 9.25V18.25"/>
+</svg>

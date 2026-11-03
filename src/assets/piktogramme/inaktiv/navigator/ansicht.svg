@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+<title>Ansicht</title>
+<path class="accent" d="M5.778 18.111L5.778 11.222Q5.778 10.222 6.537 9.571L11.241 5.54Q12 4.889 12.759 5.54L17.463 9.571Q18.222 10.222 18.222 11.222L18.222 18.111Q18.222 19.111 17.222 19.111L6.778 19.111Q5.778 19.111 5.778 18.111Z" fill="currentColor" stroke="none" fill-opacity="0.2"/>
+<path d="M3.111 19.111L20.889 19.111"/>
+<path d="M5.778 19.111L5.778 11.222Q5.778 10.222 6.537 9.571L11.241 5.54Q12 4.889 12.759 5.54L17.463 9.571Q18.222 10.222 18.222 11.222L18.222 19.111"/>
+<path d="M10.667 19.111L10.667 16.111Q10.667 15.111 11.667 15.111L12.333 15.111Q13.333 15.111 13.333 16.111L13.333 19.111"/>
+<rect x="7.556" y="11.556" width="2.667" height="2.222" rx="0.5"/>
+<rect x="13.778" y="11.556" width="2.667" height="2.222" rx="0.5"/>
+</svg>

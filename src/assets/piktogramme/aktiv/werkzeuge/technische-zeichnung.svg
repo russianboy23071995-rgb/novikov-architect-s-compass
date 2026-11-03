@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+<title>Technische Zeichnung Werkzeug (aktiv)</title>
+<mask id="k-werkzeuge-technische-zeichnung" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect width="24" height="24" fill="#fff"/><path d="M4.889 8.444L6.667 8.444M4.889 11.556L6.222 11.556M8.444 19.111L8.444 17.778M12 19.111L12 17.333M15.556 19.111L15.556 17.778" stroke="#000"/></mask>
+<g mask="url(#k-werkzeuge-technische-zeichnung)"><path class="accent-voll" d="M4.889 18.111L4.889 5.889Q4.889 4.889 5.596 5.596L18.404 18.404Q19.111 19.111 18.111 19.111L5.889 19.111Q4.889 19.111 4.889 18.111ZM8 15L8 13.4Q8 12.4 8.707 13.107L10.893 15.293Q11.6 16 10.6 16L9 16Q8 16 8 15Z" fill-rule="evenodd" fill="currentColor" stroke="none"/></g>
+<path d="M4.889 18.111L4.889 5.889Q4.889 4.889 5.596 5.596L18.404 18.404Q19.111 19.111 18.111 19.111L5.889 19.111Q4.889 19.111 4.889 18.111Z"/>
+<path d="M8 15L8 13.4Q8 12.4 8.707 13.107L10.893 15.293Q11.6 16 10.6 16L9 16Q8 16 8 15Z"/>
+</svg>

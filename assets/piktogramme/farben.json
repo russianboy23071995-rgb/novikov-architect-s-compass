@@ -1,0 +1,13 @@
+{
+  "hell": {
+    "linie": "#1D2125",
+    "aktiv": "#42D9DF"
+  },
+  "dunkel": {
+    "linie": "#E6E8EB",
+    "aktiv": "#42D9DF"
+  },
+  "duoton_deckkraft": 0.2,
+  "strichstaerke": 1.25,
+  "eckenradius": 1.0
+}

@@ -1,0 +1,6 @@
+<svg viewBox="0 0 24 24">
+<title>Ansicht</title>
+<path class="accent" d="M5 20V10L12 4L19 10V20Z"/>
+<path d="M2 20h20"/><path d="M5 20V10l7-6 7 6v10"/><path data-knock="1" d="M10.5 20v-4.5h3V20"/>
+<rect data-knock="1" data-r="0.5" x="7" y="11.5" width="3" height="2.5"/><rect data-knock="1" data-r="0.5" x="14" y="11.5" width="3" height="2.5"/>
+</svg>

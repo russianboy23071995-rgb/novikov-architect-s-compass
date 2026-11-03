@@ -5,7 +5,21 @@ import { DEFAULT_TOOL_LAYOUT, moveTool, normalizeToolLayout, stepTool } from "./
 // docs/WERKZEUGLEISTE.md, WL1.
 test("default groups: 3D, 2D and documentation tools; select is not part of them", () => {
   assert.deepEqual(DEFAULT_TOOL_LAYOUT, {
-    "3d": ["wall", "column", "stair", "window", "door", "slab", "slabOpening", "roof", "room"],
+    "3d": [
+      "wall",
+      "column",
+      "stair",
+      "window",
+      "door",
+      "slab",
+      "slabOpening",
+      "roof",
+      "room",
+      // Planned tools, greyed until they exist (WL3).
+      "roofWindow",
+      "railing",
+      "terrain",
+    ],
     "2d": ["line", "hatch", "text", "drawing"],
     doc: ["dimension", "section", "elevation"],
   });
@@ -56,7 +70,8 @@ test("stored layouts are made safe: unknown and repeated tools dropped, new tool
   // Every rail tool exactly once; missing ones return to their default group.
   const all = [...l["3d"], ...l["2d"], ...l.doc];
   assert.equal(all.length, new Set(all).size);
-  assert.equal(all.length, 16);
+  // 16 tools and the three planned ones (WL3).
+  assert.equal(all.length, 19);
   assert.ok(l["3d"].includes("door"));
   assert.ok(l.doc.includes("dimension"));
   assert.ok(!all.includes("select" as never));

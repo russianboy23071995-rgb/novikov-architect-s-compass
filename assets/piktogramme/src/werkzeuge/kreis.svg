@@ -1,0 +1,5 @@
+<svg viewBox="0 0 24 24">
+<title>Kreiswerkzeug</title>
+<circle class="accent" cx="12" cy="12" r="8.49"/><circle cx="12" cy="12" r="8.49"/><path data-knock="1" d="m12 12 6-6"/>
+<circle data-knock="1" cx="12" cy="12" r="1.25" fill="#000"/><circle cx="18" cy="6" r="1.25" fill="#000"/>
+</svg>
