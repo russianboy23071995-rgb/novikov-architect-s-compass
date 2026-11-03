@@ -249,6 +249,7 @@ export function CadViewport({
             draftContour: _contour,
             draftFill: _fill,
             draftShape: _shape,
+            placedSnap: _placedSnap,
             draftCircle: _circle,
             ...sheet
           } = model;

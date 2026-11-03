@@ -65,3 +65,36 @@ Aus einer abgezweigten Sitzung weitergeleitet, Wortlaut sinngemäß. Freigabe de
   - Wo sich die beiden Zeichnungen überlappen: kein Hinweis auf überlagerte Elemente. Der Klick wählt die obere Zeichnung, das Menü bietet Bewegen, X, Y, Werkzeugeigenschaften und Löschen.
   - Strg+Y, dann „PDF exportieren“: Der Plan wird vorher aktualisiert (Wand 3 m, Symbol weg). Die PDF „Plan 1.pdf“ wurde erzeugt und im Speicher abgefangen, nicht gespeichert.
   - Keine Konsolenfehler.
+
+## Fang auf eingefügte Zeichnungen (03.11.2026)
+
+Nutzerwunsch (03.11.2026): Die eingefügte Zeichnung bleibt unveränderlich, aber der Fang soll auf ihren Inhalt greifen. So lassen sich etwa an den Ecken einer Wand oder Decke eigene Elemente ansetzen, zum Beispiel eine halbtransparente Schraffur, die einen Schönheitsfehler kaschiert. Freigabe der Karte am 03.11.2026.
+
+### Verhalten
+
+- **Grundriss-Zeichnungen:** Gefangen werden alle Punkte des dargestellten Geschosses, wie im Modell: Wandecken, -achsen und -mitten, Ecken und Kantenmitten von Decken, Räumen, Dächern, Stützen, Durchbrüchen, Schraffuren, Linien und Fenstern bzw. Türen sowie die Schnittpunkte. Elemente auf Ebenen, die das Abbild ausblendet, fangen nicht.
+- **Schnitt- und Ansichtszeichnungen:** Gefangen werden die Ecken und Kantenmitten der geschnittenen Flächen, die offenen Schnittstücke und die sichtbaren Kanten dahinter.
+- **Lage auf dem Blatt:** Jeder Punkt wird mit Lage, Maßstab und Mitte der Zeichnung auf das Blatt umgerechnet. Er fängt nur innerhalb der Maske; Kanten fangen nur, wenn sie ganz in der Maske liegen.
+- **Gezeigter Stand:** Gefangen wird der gezeigte Stand. Wartet ein Plan auf seine Aktualisierung (gelbes Symbol), fängt der Fang den alten, angezeigten Inhalt.
+- **Nur lesend:** Die Zeichnung bleibt unverändert; es gibt keine Auswahl und keine Griffe in ihrem Inhalt.
+
+### Umsetzung
+
+- `application/snapping/placed-sources.ts`: `placedDrawingSnap` baut aus den platzierten Zeichnungen eine zusätzliche Fangquelle. Sie ist gleich aufgebaut wie die der Transparenzpause (`{ sources, ids }`), die Kennungen lauten `<Zeichnung>/<Element>`.
+  - Bei Grundrissen dienen die Fangteile des Quellgeschosses (`projectSnapParts`) als Grundlage.
+  - Bei Schnitten sind es die Umrisse und Kanten der gezeigten Zeichnung, über `ringSnapPart` und `pathSnapPart` in `project-references.ts`.
+  - Die Fangteile werden je gezeigtem Inhalt und je Satz ausgeblendeter Ebenen gemerkt.
+- `CadWorkspace.tsx` baut die Quelle aus den gezeigten Zeichnungen und baut sie nur neu, wenn sich Lage, Maske, Maßstab oder der gezeigte Inhalt ändern. `BimPlan.tsx` hängt sie an den Fang wie die Transparenzpause.
+
+### Nachweis
+
+- **Tests** in `src/application/snapping/placed-sources.test.ts`:
+  - Eine Wandecke fängt an der umgerechneten Stelle auf dem Blatt (1:100).
+  - Punkte außerhalb der Maske fangen nicht, eine größere Maske zeigt die Linie.
+  - Eine ausgeblendete Ebene nimmt die Linie wieder heraus. Dieser Fall deckte einen Fehler im Zwischenspeicher auf, der behoben ist.
+  - Bei einem Schnitt fangen Umriss und Kante.
+- **Prüfungen:** 1541 Tests grün, Typprüfung, Lint, Architekturprüfung; 14-Modell-Hash unverändert.
+- **Browser** (Gesamtmodell 3 000, Plan 1 mit dem Grundriss des EG im Maßstab 1:500):
+  - Schraffur als Polygon: Klicks jeweils 2 px neben zwei Ecken der Wand `s0-b5` in der Zeichnung, dazu ein freier Punkt.
+  - Der Fang zeigte „Endpunkt“. Die Ecken der Schraffur liegen genau auf den Wandecken (Abstand 0,0000 px).
+  - Keine Konsolenfehler.
