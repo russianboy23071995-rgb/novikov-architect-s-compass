@@ -10,6 +10,8 @@ import {
   tabLayoutId,
   sectionTab,
   tabSectionId,
+  canvasTabKind,
+  titleBlockTab,
   withCanvasTab,
 } from "./canvas-tabs.ts";
 
@@ -57,4 +59,38 @@ test("layouts open as tabs named after the layout; removed layouts lose their ta
   );
   assert.deepEqual(existingCanvasTabs(tabs, new Set(["s1"])), ["plan", "section:s1"]);
   assert.deepEqual(existingCanvasTabs(tabs, new Set(["s1"]), new Set(["l1"])), tabs);
+});
+
+// docs/TABS.md, user decision 03.11.2026: one tab per kind; a view of an open kind replaces its
+// content in place.
+test("one tab per kind: plans, sections and elevations, 3D, layout book; content changes in place", () => {
+  let tabs = withCanvasTab(withCanvasTab(["plan"], sectionTab("s1")), "3d");
+  tabs = withCanvasTab(tabs, layoutTab("l1"));
+  assert.deepEqual(tabs, ["plan", "section:s1", "3d", "layout:l1"]);
+  // Another section or elevation takes the place of the section tab.
+  assert.deepEqual(withCanvasTab(tabs, sectionTab("s2")), [
+    "plan",
+    "section:s2",
+    "3d",
+    "layout:l1",
+  ]);
+  // Layouts, master layouts and the Plankopfplaner share the layout book's tab.
+  assert.deepEqual(withCanvasTab(tabs, titleBlockTab("b1")), [
+    "plan",
+    "section:s1",
+    "3d",
+    "titleblock:b1",
+  ]);
+  assert.deepEqual(withCanvasTab(tabs, "plan"), tabs);
+  assert.deepEqual(
+    ["plan", "3d", "section:x", "layout:y", "titleblock:z"].map((v) =>
+      canvasTabKind(v as Parameters<typeof canvasTabKind>[0]),
+    ),
+    ["plan", "3d", "section", "layout", "layout"],
+  );
+  // States with several tabs of a kind (from before) keep only the first, now with the new view.
+  assert.deepEqual(withCanvasTab(["plan", "section:a", "section:b"], sectionTab("c")), [
+    "plan",
+    "section:c",
+  ]);
 });

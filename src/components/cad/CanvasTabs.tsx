@@ -1,8 +1,10 @@
 import { Plus, X } from "lucide-react";
 import {
-  CANVAS_VIEWS,
-  CANVAS_VIEW_LABELS,
+  CANVAS_TAB_KINDS,
+  CANVAS_TAB_KIND_LABELS,
+  canvasTabKind,
   canvasTabLabel,
+  type CanvasTabKind,
   type CanvasView,
 } from "@/application/views/canvas-tabs";
 import { Button } from "@/components/ui/button";
@@ -14,7 +16,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
-/** Tab bar over the canvas (docs/SCHNITT.md, SC1): open views, close, add a view. */
+/** Tab bar over the canvas (docs/SCHNITT.md, SC1; docs/TABS.md): one tab per kind, close, open a
+ * kind from the menu. */
 export function CanvasTabs({
   tabs,
   active,
@@ -23,6 +26,8 @@ export function CanvasTabs({
   layouts = [],
   onSelect,
   onClose,
+  onOpenKind,
+  available,
 }: {
   tabs: readonly CanvasView[];
   active: CanvasView;
@@ -32,6 +37,10 @@ export function CanvasTabs({
   layouts?: readonly { id: string; name: string }[];
   onSelect: (view: CanvasView) => void;
   onClose: (view: CanvasView) => void;
+  /** Opens the tab of a kind: its last content, else the first view of that kind. */
+  onOpenKind: (kind: CanvasTabKind) => void;
+  /** Kinds that have something to show (a project without sections has no section tab). */
+  available: ReadonlySet<CanvasTabKind>;
 }) {
   return (
     <div
@@ -83,10 +92,14 @@ export function CanvasTabs({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
-          {CANVAS_VIEWS.map((view) => (
-            <DropdownMenuItem key={view} onSelect={() => onSelect(view)}>
-              {CANVAS_VIEW_LABELS[view]}
-              {tabs.includes(view) ? " (offen)" : ""}
+          {CANVAS_TAB_KINDS.map((kind) => (
+            <DropdownMenuItem
+              key={kind}
+              disabled={!available.has(kind)}
+              onSelect={() => onOpenKind(kind)}
+            >
+              {CANVAS_TAB_KIND_LABELS[kind]}
+              {tabs.some((t) => canvasTabKind(t) === kind) ? " (offen)" : ""}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>

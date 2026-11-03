@@ -19,3 +19,20 @@ export function recallCamera(key: string | undefined): PlanCamera | null {
   const camera = key ? cameras.get(key) : undefined;
   return camera ? { center: { ...camera.center }, pixelsPerMetre: camera.pixelsPerMetre } : null;
 }
+
+type SectionBox = { x: number; y: number; w: number; h: number };
+// The view box of each section or elevation (docs/TABS.md): they share one tab, so a section that
+// comes back takes up its zoom again. Session only, like the plan cameras.
+const sectionBoxes = new Map<string, SectionBox>();
+
+/** Remembers the zoom of a section; null (fitted) forgets it. */
+export function rememberSectionBox(sectionId: string, box: SectionBox | null) {
+  sectionBoxes.delete(sectionId);
+  if (box) sectionBoxes.set(sectionId, { ...box });
+  while (sectionBoxes.size > LIMIT) sectionBoxes.delete(sectionBoxes.keys().next().value!);
+}
+
+export function recallSectionBox(sectionId: string): SectionBox | null {
+  const box = sectionBoxes.get(sectionId);
+  return box ? { ...box } : null;
+}

@@ -190,6 +190,7 @@ import { LayerManager } from "./LayerManager";
 import { CanvasTabs } from "./CanvasTabs";
 import {
   canvasModeOf,
+  canvasTabKind,
   canvasViewOf,
   closeCanvasTab,
   existingCanvasTabs,
@@ -200,6 +201,7 @@ import {
   titleBlockTab,
   tabTitleBlockId,
   withCanvasTab,
+  type CanvasTabKind,
   type CanvasView,
 } from "@/application/views/canvas-tabs";
 import {
@@ -316,6 +318,7 @@ export function CadWorkspace({
   // Canvas tabs (docs/SCHNITT.md, SC1): the active tab is the current mode; a mode without a
   // tab opens one, wherever the mode is switched.
   const [canvasTabs, setCanvasTabs] = useState<CanvasView[]>(["plan"]);
+  const lastOfKind = useRef(new Map<CanvasTabKind, CanvasView>());
   // A section tab over the model views (docs/SCHNITT.md, SC2); null: the mode's view.
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
   // A layout or master layout open as a canvas tab (docs/LAYOUTS.md, LA4).
@@ -2675,6 +2678,28 @@ export function CadWorkspace({
     cancelInteraction();
     setActiveSectionId(sectionId);
   }
+  // The last content of each tab kind (docs/TABS.md): the menu opens a kind with it again.
+  lastOfKind.current.set(canvasTabKind(activeView), activeView);
+  const firstLayout = projectLayouts(realProject)[0] ?? projectMasterLayouts(realProject)[0];
+  const availableKinds = new Set<CanvasTabKind>([
+    "plan",
+    "3d",
+    ...(sectionIds.size ? (["section"] as const) : []),
+    ...(layoutIds.size ? (["layout"] as const) : []),
+  ]);
+  const openCanvasKind = (kind: CanvasTabKind) => {
+    const open = shownTabs.find((t) => canvasTabKind(t) === kind);
+    const last = lastOfKind.current.get(kind);
+    const lastExists = last && existingCanvasTabs([last], sectionIds, layoutIds).length > 0;
+    const fallback =
+      kind === "section"
+        ? sections?.[0] && sectionTab(sections[0].id)
+        : kind === "layout"
+          ? firstLayout && layoutTab(firstLayout.id)
+          : kind;
+    const view = open ?? (lastExists ? last : fallback);
+    if (view) selectCanvasTab(view);
+  };
   /** A section or elevation document opens the tab of its section (docs/ABBILDER.md). */
   const openSectionDocument = (documentId: string) => {
     const doc = realProject.drawingDocuments?.find((d) => d.id === documentId);
@@ -3552,6 +3577,8 @@ export function CadWorkspace({
                   sections={sections ?? []}
                   layouts={layoutNames}
                   onSelect={selectCanvasTab}
+                  onOpenKind={openCanvasKind}
+                  available={availableKinds}
                   onClose={(view) => {
                     const next = closeCanvasTab(shownTabs, view, activeView);
                     setCanvasTabs(next.tabs);

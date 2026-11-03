@@ -1,6 +1,8 @@
 /**
- * Canvas tabs (docs/SCHNITT.md, SC1/SC2): the views open over the canvas. The active tab is the
- * current view; switching to a view that has no tab opens one. A section opens as its own tab.
+ * Canvas tabs (docs/SCHNITT.md, SC1/SC2; docs/TABS.md, user decision 03.11.2026): the views open
+ * over the canvas, at most one tab per kind – Draufsicht (plans and plan documents), Schnitt /
+ * Ansicht (sections, elevations and their documents), 3D and Layoutbuch (layouts, master layouts,
+ * Plankopfplaner). Opening a view replaces the content of its kind's tab, which keeps its place.
  * Session state only: not part of the project and no undo step.
  */
 export const CANVAS_VIEWS = ["plan", "3d"] as const;
@@ -16,6 +18,21 @@ export const CANVAS_VIEW_LABELS: Record<ModelView, string> = {
 
 export const canvasViewOf = (mode: "2D" | "3D"): ModelView => (mode === "3D" ? "3d" : "plan");
 export const canvasModeOf = (view: ModelView): "2D" | "3D" => (view === "3d" ? "3D" : "2D");
+
+/** The kind whose single tab shows a view. Reserved for later: evaluations (Auswertungen,
+ * Bauteilnachweise) as a fifth kind. */
+export type CanvasTabKind = "plan" | "section" | "3d" | "layout";
+export const CANVAS_TAB_KINDS: readonly CanvasTabKind[] = ["plan", "section", "3d", "layout"];
+export const CANVAS_TAB_KIND_LABELS: Record<CanvasTabKind, string> = {
+  plan: "Draufsicht",
+  section: "Schnitt / Ansicht",
+  "3d": "3D-Ansicht",
+  layout: "Layoutbuch",
+};
+export function canvasTabKind(view: CanvasView): CanvasTabKind {
+  if (view === "plan" || view === "3d") return view;
+  return view.startsWith("section:") ? "section" : "layout";
+}
 
 export const sectionTab = (id: string): CanvasView => `section:${id}`;
 /** The section id of a section tab, else null. */
@@ -48,9 +65,14 @@ export function canvasTabLabel(
   return view === "plan" ? `${CANVAS_VIEW_LABELS.plan} ${storeyName}` : CANVAS_VIEW_LABELS["3d"];
 }
 
-/** The tabs with `view` open; an open view keeps its place. */
-export const withCanvasTab = (tabs: readonly CanvasView[], view: CanvasView): CanvasView[] =>
-  tabs.includes(view) ? [...tabs] : [...tabs, view];
+/** The tabs with `view` open: it takes the place of its kind's tab, or a new one at the end. */
+export function withCanvasTab(tabs: readonly CanvasView[], view: CanvasView): CanvasView[] {
+  const kind = canvasTabKind(view);
+  const index = tabs.findIndex((t) => canvasTabKind(t) === kind);
+  if (index < 0) return [...tabs, view];
+  // Older states could hold several tabs of a kind; only the first stays.
+  return tabs.flatMap((t, i) => (i === index ? [view] : canvasTabKind(t) === kind ? [] : [t]));
+}
 
 /** Tabs of sections or layouts that no longer exist are dropped (deleted, or undone). */
 export const existingCanvasTabs = (
