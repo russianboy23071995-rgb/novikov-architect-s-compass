@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import { withStableHandlers } from "./stable-handlers";
 import { Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -20,7 +21,8 @@ type ToolRailProps = {
 };
 
 /** Compact tool rail without labels (user decision 01.11.2026): name and key in the tooltip. */
-export function ToolRail({
+/** Memoised with stable callbacks (docs/TABS.md). */
+export const ToolRail = withStableHandlers(function ToolRail({
   activeTool,
   layout,
   onSelect,
@@ -106,4 +108,4 @@ export function ToolRail({
       </div>
     </aside>
   );
-}
+});

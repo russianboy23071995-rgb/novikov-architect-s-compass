@@ -105,7 +105,16 @@ import { segmentKey } from "@/application/snapping/reference-selection";
 import { useSnapDensity } from "./useSnapDensity";
 import { cursorGuide } from "@/constraints/guides/directions";
 import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentProps,
+} from "react";
 import {
   createToolSourceQuery,
   createVisibleToolSourceQuery,
@@ -150,6 +159,59 @@ type PlacedSection = {
   drawing: SectionDrawing;
   marks: readonly SectionHeightMarks[];
 };
+/**
+ * What a placed plan draws, memoised (docs/TABS.md): with the same content, scale and zoom it is
+ * not walked again, e.g. when the layout book's tab comes back or the layout re-renders.
+ */
+const PlacedPlanRuns = memo(function PlacedPlanRuns({
+  content,
+  documentId,
+  denominator,
+  pixelsPerMetre,
+  wallOutlineWidth,
+  cutFill,
+  showRenovation,
+  handlers,
+}: {
+  content: PlacedPlan;
+  documentId: string;
+  denominator: number;
+  pixelsPerMetre: number;
+  wallOutlineWidth: number;
+  cutFill: CutFill;
+  showRenovation: boolean;
+  handlers: ComponentProps<typeof PlanSceneRun>["handlers"];
+}) {
+  const scene = placedScene(content);
+  const runs = useMemo(() => planSceneRuns(scene, []), [scene]);
+  const scaleContext = useMemo(
+    () => ({
+      view: { kind: "drawing-document" as const, projectId: content.source.id, documentId },
+      denominator,
+    }),
+    [content.source.id, documentId, denominator],
+  );
+  return runs.map((run) => (
+    <PlanSceneRun
+      scaleContext={scaleContext}
+      key={`zw:${run.kind}:${run.ids[0]}`}
+      {...run}
+      scene={scene}
+      selectedIds={NOTHING_SELECTED}
+      drawing={false}
+      placement={false}
+      pixelsPerMetre={pixelsPerMetre}
+      wallOutlineWidth={wallOutlineWidth}
+      cutFill={cutFill}
+      showRenovation={showRenovation}
+      cornerGeometry={undefined}
+      allowsShown={ALLOW_ALL}
+      canPick={PICK_NOTHING}
+      handlers={handlers}
+    />
+  ));
+});
+
 const placedScenes = new WeakMap<Project, Map<string, ReturnType<typeof derivePlanScene>>>();
 /** The plan scene of a drawing document, kept per source project and hidden layers. */
 function placedScene(view: PlacedPlan) {
@@ -1558,32 +1620,16 @@ export function BimPlan({
                       marks={content.marks}
                     />
                   ) : (
-                    planSceneRuns(placedScene(content), []).map((run) => (
-                      <PlanSceneRun
-                        scaleContext={{
-                          view: {
-                            kind: "drawing-document",
-                            projectId: content.source.id,
-                            documentId: view.documentId,
-                          },
-                          denominator: view.denominator,
-                        }}
-                        key={`zw:${run.kind}:${run.ids[0]}`}
-                        {...run}
-                        scene={placedScene(content)}
-                        selectedIds={NOTHING_SELECTED}
-                        drawing={false}
-                        placement={false}
-                        pixelsPerMetre={camera.pixelsPerMetre / view.denominator}
-                        wallOutlineWidth={wallOutlineWidth}
-                        cutFill={cutFill}
-                        showRenovation={showRenovation}
-                        cornerGeometry={undefined}
-                        allowsShown={ALLOW_ALL}
-                        canPick={PICK_NOTHING}
-                        handlers={sceneHandlers}
-                      />
-                    ))
+                    <PlacedPlanRuns
+                      content={content}
+                      documentId={view.documentId}
+                      denominator={view.denominator}
+                      pixelsPerMetre={camera.pixelsPerMetre / view.denominator}
+                      wallOutlineWidth={wallOutlineWidth}
+                      cutFill={cutFill}
+                      showRenovation={showRenovation}
+                      handlers={sceneHandlers}
+                    />
                   )}
                 </g>
               </g>

@@ -138,7 +138,7 @@ import { visibleLayerTarget } from "@/application/layers/visibility";
 import type { LayerVisibilityContext } from "@/application/layers/visibility";
 import { useReferenceSelection } from "./useReferenceSelection";
 import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from "react";
 import { PanelRightOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PALETTE_GAP, PROPERTIES_HEIGHT, paletteInsets } from "./palette-layout";
@@ -286,7 +286,8 @@ export function CadWorkspace({
   const getPlanCapture = useCallback(() => {
     if (activeDocumentId || !capturedPlan.current) return null;
     const canvas = document
-      .querySelector('[aria-label="BIM floor plan"]')
+      // The shown drawing area; hidden tabs keep theirs (docs/TABS.md).
+      .querySelector('[data-canvas-kind]:not([data-hidden-tab]) [aria-label="BIM floor plan"]')
       ?.closest('[aria-label$=" viewport"]');
     if (
       canvas instanceof HTMLElement &&
@@ -319,6 +320,10 @@ export function CadWorkspace({
   // tab opens one, wherever the mode is switched.
   const [canvasTabs, setCanvasTabs] = useState<CanvasView[]>(["plan"]);
   const lastOfKind = useRef(new Map<CanvasTabKind, CanvasView>());
+  // One drawing area per tab kind (docs/TABS.md): the hidden ones keep their content and render
+  // nothing until shown again; switching back only shows them.
+  const keptViewports = useRef(new Map<"plan" | "3d" | "layout", ReactElement>());
+  const keptProjectId = useRef<string | null>(null);
   // A section tab over the model views (docs/SCHNITT.md, SC2); null: the mode's view.
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
   // A layout or master layout open as a canvas tab (docs/LAYOUTS.md, LA4).
@@ -629,17 +634,34 @@ export function CadWorkspace({
   })();
   const autosave = useLocalAutosave(realProject, editing.projectLoad ?? realProject.id);
   const activeDocument = project.drawingDocuments?.find((d) => d.id === activeDocumentId);
-  const viewContext = useMemo(
-    () =>
-      activeDocument
-        ? resolveDocumentView(project, {
-            kind: "drawing-document",
-            projectId: project.id,
-            documentId: activeDocument.id,
-          })
-        : resolveWorkingView(project, undefined, layerVisibility),
-    [project, layerVisibility, activeDocument],
-  );
+  // The last view contexts by what they are derived from: a tab that comes back (the plan after
+  // the layout book) gets the same object, so its drawing area need not derive anew (docs/TABS.md).
+  const viewContexts = useRef<
+    {
+      project: Project;
+      layers: unknown;
+      document: unknown;
+      context: ReturnType<typeof resolveWorkingView> | ReturnType<typeof resolveDocumentView>;
+    }[]
+  >([]);
+  const viewContext = (() => {
+    const known = viewContexts.current.find(
+      (c) => c.project === project && c.layers === layerVisibility && c.document === activeDocument,
+    );
+    if (known) return known.context;
+    const context = activeDocument
+      ? resolveDocumentView(project, {
+          kind: "drawing-document",
+          projectId: project.id,
+          documentId: activeDocument.id,
+        })
+      : resolveWorkingView(project, undefined, layerVisibility);
+    viewContexts.current = [
+      { project, layers: layerVisibility, document: activeDocument, context },
+      ...viewContexts.current.slice(0, 3),
+    ];
+    return context;
+  })();
   const visibility = viewContext.visibility;
   const visibilityHistory = activeDocumentId
     ? editing.documentVisibilityHistories?.[documentVisibilityKey(project, activeDocumentId)]
@@ -2700,6 +2722,36 @@ export function CadWorkspace({
     const view = open ?? (lastExists ? last : fallback);
     if (view) selectCanvasTab(view);
   };
+  /**
+   * The drawing areas of the plan, 3D and layout book tabs (docs/TABS.md). The shown one
+   * renders with the current state; the others stay mounted, invisible and inert with the content
+   * they last showed, so a tab that comes back appears without being built anew. Behind the
+   * section tab the shown one stays as it was, too. A new project drops them.
+   */
+  const keepViewport = (viewport: ReactElement) => {
+    const kept = keptViewports.current;
+    if (keptProjectId.current !== realProject.id) {
+      kept.clear();
+      keptProjectId.current = realProject.id;
+    }
+    const shown = space ? "layout" : mode === "3D" ? "3d" : "plan";
+    if (!activeSection || !kept.has(shown)) kept.set(shown, viewport);
+    return [...kept].map(([kind, element]) => (
+      <div
+        key={kind}
+        // content-visibility, not display: the browser skips a hidden area's rendering work but
+        // keeps its state, so showing it again needs no new layout of its many SVG elements.
+        className="absolute inset-0"
+        style={kind === shown ? undefined : { contentVisibility: "hidden" }}
+        aria-hidden={kind !== shown || undefined}
+        inert={kind !== shown}
+        data-canvas-kind={kind}
+        data-hidden-tab={kind !== shown || undefined}
+      >
+        {element}
+      </div>
+    ));
+  };
   /** A section or elevation document opens the tab of its section (docs/ABBILDER.md). */
   const openSectionDocument = (documentId: string) => {
     const doc = realProject.drawingDocuments?.find((d) => d.id === documentId);
@@ -3738,121 +3790,140 @@ export function CadWorkspace({
                         : { inset: 0 }
                     }
                   >
-                    <ViewportManager
-                      safe={insets}
-                      startupNotice={
-                        autosave.startupOffer && autosave.startupOffer.kind !== "empty" ? (
-                          <RecoveryStartupNotice
-                            offer={autosave.startupOffer}
-                            onContinue={autosave.continueStartup}
-                            onOpen={() => setRecoveryOpen(true)}
-                          />
-                        ) : undefined
-                      }
-                      key={viewKey}
-                      cameraKey={viewKey}
-                      pdfRequest={
-                        pdfRequest && space && pdfRequest.target === `${space.kind}:${space.id}`
-                          ? pdfRequest
-                          : null
-                      }
-                      backdrop={space ? spaceBackdrop(realProject, space) : undefined}
-                      underlay={
-                        activeBlock
-                          ? titleBlockUnderlay(activeBlock.sheet)
-                          : layoutSpace
-                            ? layoutUnderlay(layoutSpace.sheet)
-                            : undefined
-                      }
-                      documentFraming={activeDocument?.framing}
-                      onPlanCapture={onPlanCapture}
-                      viewContext={viewContext}
-                      onScale={(denominator) =>
-                        viewContext.binding.kind === "drawing-document"
-                          ? dispatchEditing({
-                              type: "document",
-                              base: project,
-                              action: {
-                                kind: "scale",
-                                id: viewContext.binding.documentId,
+                    {keepViewport(
+                      <ViewportManager
+                        safe={insets}
+                        startupNotice={
+                          autosave.startupOffer && autosave.startupOffer.kind !== "empty" ? (
+                            <RecoveryStartupNotice
+                              offer={autosave.startupOffer}
+                              onContinue={autosave.continueStartup}
+                              onOpen={() => setRecoveryOpen(true)}
+                            />
+                          ) : undefined
+                        }
+                        key={viewKey}
+                        cameraKey={viewKey}
+                        pdfRequest={
+                          pdfRequest && space && pdfRequest.target === `${space.kind}:${space.id}`
+                            ? pdfRequest
+                            : null
+                        }
+                        backdrop={space ? spaceBackdrop(realProject, space) : undefined}
+                        underlay={
+                          activeBlock
+                            ? titleBlockUnderlay(activeBlock.sheet)
+                            : layoutSpace
+                              ? layoutUnderlay(layoutSpace.sheet)
+                              : undefined
+                        }
+                        documentFraming={activeDocument?.framing}
+                        onPlanCapture={onPlanCapture}
+                        viewContext={viewContext}
+                        onScale={(denominator) =>
+                          viewContext.binding.kind === "drawing-document"
+                            ? dispatchEditing({
+                                type: "document",
+                                base: project,
+                                action: {
+                                  kind: "scale",
+                                  id: viewContext.binding.documentId,
+                                  denominator,
+                                },
+                              })
+                            : dispatchEditing({
+                                type: "view-scale",
+                                view: viewContext.binding,
                                 denominator,
-                              },
-                            })
-                          : dispatchEditing({
-                              type: "view-scale",
-                              view: viewContext.binding,
-                              denominator,
-                            })
-                      }
-                      pickupScope={measurementContext}
-                      onPickup={pickupFrom}
-                      onContextMenu={openContextMenu}
-                      onElementSettings={openElementSettings}
-                      zoomSlot={zoomSlot}
-                      placement={
-                        windowPlacement
-                          ? {
-                              measurement:
-                                measurement.adapter && measurementMode === "distance"
-                                  ? measurement.value
-                                  : undefined,
-                              angleMeasurement:
-                                measurement.adapter && measurementMode === "angle"
-                                  ? measurement.angle
-                                  : undefined,
-                              areaMeasurement:
-                                measurement.adapter && measurementMode === "area"
-                                  ? measurement.area
-                                  : undefined,
-                              finish:
-                                measurement.adapter && measurementMode === "area"
-                                  ? measurement.finish
-                                  : undefined,
-                              target: interaction.target,
-                              previewProject: windowPlacement.previewProject,
-                              aim: interaction.draft.move,
-                              pick: (point, candidate) => {
-                                interaction.pick(point, candidate);
-                                if (windowTool.pickingHost || doorTool.pickingHost)
-                                  setDemandPosition({
-                                    x: lastPointer.current.x + 16,
-                                    y: lastPointer.current.y + 16,
-                                  });
-                              },
-                            }
-                          : groupMove.active
+                              })
+                        }
+                        pickupScope={measurementContext}
+                        onPickup={pickupFrom}
+                        onContextMenu={openContextMenu}
+                        onElementSettings={openElementSettings}
+                        zoomSlot={zoomSlot}
+                        placement={
+                          windowPlacement
                             ? {
+                                measurement:
+                                  measurement.adapter && measurementMode === "distance"
+                                    ? measurement.value
+                                    : undefined,
+                                angleMeasurement:
+                                  measurement.adapter && measurementMode === "angle"
+                                    ? measurement.angle
+                                    : undefined,
+                                areaMeasurement:
+                                  measurement.adapter && measurementMode === "area"
+                                    ? measurement.area
+                                    : undefined,
+                                finish:
+                                  measurement.adapter && measurementMode === "area"
+                                    ? measurement.finish
+                                    : undefined,
                                 target: interaction.target,
-                                geometryPreview: groupMove.adapter?.geometryPreview,
-                                axisConstraint: groupMove.adapter?.axisConstraint,
+                                previewProject: windowPlacement.previewProject,
                                 aim: interaction.draft.move,
-                                pick: groupMove.pickingOrigin
-                                  ? (point) => {
-                                      groupMove.pickOrigin(point);
-                                      setDemandPosition({
-                                        x: lastPointer.current.x + 16,
-                                        y: lastPointer.current.y + 16,
-                                      });
-                                    }
-                                  : interaction.pick,
+                                pick: (point, candidate) => {
+                                  interaction.pick(point, candidate);
+                                  if (windowTool.pickingHost || doorTool.pickingHost)
+                                    setDemandPosition({
+                                      x: lastPointer.current.x + 16,
+                                      y: lastPointer.current.y + 16,
+                                    });
+                                },
                               }
-                            : undefined
-                      }
-                      project={project}
-                      drawingPreview={activeChain?.preview}
-                      drawingProjectAt={
-                        drawingOrigin ? interaction.adapter?.previewProject : undefined
-                      }
-                      referenceSelection={referenceSelection}
-                      selection={selection}
-                      selections={selections}
-                      onSelectMany={selectMany}
-                      snapping={
-                        interaction.adapter?.snapping ??
-                        (tool === "wall" ? wallStartSnapPolicy : null)
-                      }
-                      drawing={
-                        (tool === "wall" ||
+                            : groupMove.active
+                              ? {
+                                  target: interaction.target,
+                                  geometryPreview: groupMove.adapter?.geometryPreview,
+                                  axisConstraint: groupMove.adapter?.axisConstraint,
+                                  aim: interaction.draft.move,
+                                  pick: groupMove.pickingOrigin
+                                    ? (point) => {
+                                        groupMove.pickOrigin(point);
+                                        setDemandPosition({
+                                          x: lastPointer.current.x + 16,
+                                          y: lastPointer.current.y + 16,
+                                        });
+                                      }
+                                    : interaction.pick,
+                                }
+                              : undefined
+                        }
+                        project={project}
+                        drawingPreview={activeChain?.preview}
+                        drawingProjectAt={
+                          drawingOrigin ? interaction.adapter?.previewProject : undefined
+                        }
+                        referenceSelection={referenceSelection}
+                        selection={selection}
+                        selections={selections}
+                        onSelectMany={selectMany}
+                        snapping={
+                          interaction.adapter?.snapping ??
+                          (tool === "wall" ? wallStartSnapPolicy : null)
+                        }
+                        drawing={
+                          (tool === "wall" ||
+                            tool === "column" ||
+                            tool === "stair" ||
+                            tool === "section" ||
+                            tool === "elevation" ||
+                            tool === "dimension" ||
+                            tool === "text" ||
+                            tool === "drawing" ||
+                            pathDrawing ||
+                            tool === "roof" ||
+                            tool === "room") &&
+                          mode === "2D"
+                        }
+                        endpointSnap={
+                          pathDrawing ||
+                          tool === "roof" ||
+                          tool === "measure" ||
+                          tool === "select" ||
+                          tool === "wall" ||
                           tool === "column" ||
                           tool === "stair" ||
                           tool === "section" ||
@@ -3860,174 +3931,172 @@ export function CadWorkspace({
                           tool === "dimension" ||
                           tool === "text" ||
                           tool === "drawing" ||
-                          pathDrawing ||
-                          tool === "roof" ||
-                          tool === "room") &&
-                        mode === "2D"
-                      }
-                      endpointSnap={
-                        pathDrawing ||
-                        tool === "roof" ||
-                        tool === "measure" ||
-                        tool === "select" ||
-                        tool === "wall" ||
-                        tool === "column" ||
-                        tool === "stair" ||
-                        tool === "section" ||
-                        tool === "elevation" ||
-                        tool === "dimension" ||
-                        tool === "text" ||
-                        tool === "drawing" ||
-                        tool === "window" ||
-                        tool === "door"
-                      }
-                      hoverDwellMs={hoverDwellMs}
-                      start={
-                        pathDrawing
-                          ? (pathPoints.at(-1) ?? null)
-                          : tool === "section" || tool === "elevation"
-                            ? sectionEnd
-                              ? null
-                              : sectionStart
-                            : tool === "stair"
-                              ? // After the run direction only the side of the turn is chosen.
-                                stairDirection === null
-                                ? stairStart
-                                : null
-                              : wallStart
-                      }
-                      draftPoints={pathDrawing ? pathPoints : []}
-                      draftFinishable={
-                        tool === "dimension"
-                          ? (dimensionDraft?.points.length ?? 0) >= 2
-                          : tool === "wall"
-                            ? (activeChain?.wallIds.length ?? 0) > 0
-                            : pathPoints.length >= 2
-                      }
-                      closeAtStart={pathClosure !== "none"}
-                      roofGuide={roofLine ? { ...roofLine, rise: roofRise } : null}
-                      draftFill={
-                        tool === "hatch"
-                          ? hatchFill
-                          : tool === "drawing"
-                            ? { color: "#0284c7", opacity: 0.08 }
-                            : undefined
-                      }
-                      placedDrawings={placedDrawingViews}
-                      onDrawingMask={(id, mask) => {
-                        const view = placedDrawingViews?.find((v) => v.id === id);
-                        if (!view) return;
-                        try {
-                          dispatchEditing({
-                            type: "project",
-                            project: setDrawing(project, id, { mask }, view.limit),
-                          });
-                          setModelError("");
-                        } catch (error) {
-                          setModelError(
-                            error instanceof Error ? error.message : "Maske nicht möglich.",
-                          );
+                          tool === "window" ||
+                          tool === "door"
                         }
-                      }}
-                      draftPattern={
-                        tool === "hatch" ? toolDefaults.hatch.patternDefinition : undefined
-                      }
-                      draftShape={
-                        tool === "slab"
-                          ? "slab"
-                          : tool === "slabOpening"
-                            ? "slabOpening"
-                            : tool === "room" && !roomByWalls
-                              ? "room"
-                              : roofPhase === "outline"
-                                ? "roof"
-                                : undefined
-                      }
-                      draftCircle={
-                        circleTool
-                          ? (point) =>
-                              pathPoints[0]
-                                ? {
-                                    center: pathPoints[0],
-                                    diameter:
-                                      2 *
-                                      Math.hypot(
-                                        point.x - pathPoints[0].x,
-                                        point.y - pathPoints[0].y,
-                                      ),
-                                  }
-                                : null
-                          : undefined
-                      }
-                      draftPatternRotation={toolDefaults.hatch.patternRotation}
-                      draftPatternSize={toolDefaults.hatch.patternSize}
-                      draftContour={
-                        tool === "drawing" && drawingSource(toolDefaults.drawing.documentId)
-                          ? (point) => {
-                              const source = drawingSource(toolDefaults.drawing.documentId)!;
-                              return maskOnPaper({
-                                position: point,
-                                mask: frameMask(source.framing, source.document.denominator),
-                              });
-                            }
-                          : areaTool && construction !== "polygon"
+                        hoverDwellMs={hoverDwellMs}
+                        start={
+                          pathDrawing
+                            ? (pathPoints.at(-1) ?? null)
+                            : tool === "section" || tool === "elevation"
+                              ? sectionEnd
+                                ? null
+                                : sectionStart
+                              : tool === "stair"
+                                ? // After the run direction only the side of the turn is chosen.
+                                  stairDirection === null
+                                  ? stairStart
+                                  : null
+                                : wallStart
+                        }
+                        draftPoints={pathDrawing ? pathPoints : []}
+                        draftFinishable={
+                          tool === "dimension"
+                            ? (dimensionDraft?.points.length ?? 0) >= 2
+                            : tool === "wall"
+                              ? (activeChain?.wallIds.length ?? 0) > 0
+                              : pathPoints.length >= 2
+                        }
+                        closeAtStart={pathClosure !== "none"}
+                        roofGuide={roofLine ? { ...roofLine, rise: roofRise } : null}
+                        draftFill={
+                          tool === "hatch"
+                            ? hatchFill
+                            : tool === "drawing"
+                              ? { color: "#0284c7", opacity: 0.08 }
+                              : undefined
+                        }
+                        placedDrawings={placedDrawingViews}
+                        onDrawingMask={(id, mask) => {
+                          const view = placedDrawingViews?.find((v) => v.id === id);
+                          if (!view) return;
+                          try {
+                            dispatchEditing({
+                              type: "project",
+                              project: setDrawing(project, id, { mask }, view.limit),
+                            });
+                            setModelError("");
+                          } catch (error) {
+                            setModelError(
+                              error instanceof Error ? error.message : "Maske nicht möglich.",
+                            );
+                          }
+                        }}
+                        draftPattern={
+                          tool === "hatch" ? toolDefaults.hatch.patternDefinition : undefined
+                        }
+                        draftShape={
+                          tool === "slab"
+                            ? "slab"
+                            : tool === "slabOpening"
+                              ? "slabOpening"
+                              : tool === "room" && !roomByWalls
+                                ? "room"
+                                : roofPhase === "outline"
+                                  ? "roof"
+                                  : undefined
+                        }
+                        draftCircle={
+                          circleTool
                             ? (point) =>
-                                circleTool
-                                  ? slabOpeningOutline({
-                                      circle: {
-                                        center: pathPoints[0] ?? point,
-                                        diameter:
-                                          2 *
-                                          Math.hypot(
-                                            point.x - (pathPoints[0] ?? point).x,
-                                            point.y - (pathPoints[0] ?? point).y,
-                                          ),
-                                      },
-                                    })
-                                  : construction === "boundary"
-                                    ? (findHatchBoundary?.(point) ?? [])
-                                    : rectangleContour(construction, [...pathPoints, point])
+                                pathPoints[0]
+                                  ? {
+                                      center: pathPoints[0],
+                                      diameter:
+                                        2 *
+                                        Math.hypot(
+                                          point.x - pathPoints[0].x,
+                                          point.y - pathPoints[0].y,
+                                        ),
+                                    }
+                                  : null
                             : undefined
-                      }
-                      wallOutlineWidth={wallWidth}
-                      cutFill={cutFill}
-                      showRenovation={showRenovation}
-                      gridSettings={gridSettings}
-                      snap={snap}
-                      ortho={ortho}
-                      onSelect={selectElement}
-                      onContourStretch={(target, index, anchor) => {
-                        if (
-                          target.kind === "reference" ||
-                          target.kind === "door" ||
-                          target.kind === "column" ||
-                          target.kind === "dimension" ||
-                          target.kind === "text" ||
-                          target.kind === "stair"
-                        )
-                          return;
-                        if (
-                          referenceSelection.selecting ||
-                          !visibleLayerTarget(
-                            visibilityNow.current.project,
-                            visibilityNow.current.visibility,
-                            target,
-                          )
-                        )
-                          return;
-                        // Mask edges of a placed drawing come with ZW3.
-                        if (target.kind === "drawing") return;
-                        cancelInteraction();
-                        setSelection(target);
-                        setTool("select");
-                        setDemandOpen(false);
-                        setModelError("");
-                        dispatchEditing({ type: "begin", target, action: "edge", index, anchor });
-                      }}
-                      onCornerPick={(target, index, anchor) => {
-                        // E1: columns and stairs move whole, with the clicked corner as handle.
-                        if (target.kind === "column" || target.kind === "stair") {
+                        }
+                        draftPatternRotation={toolDefaults.hatch.patternRotation}
+                        draftPatternSize={toolDefaults.hatch.patternSize}
+                        draftContour={
+                          tool === "drawing" && drawingSource(toolDefaults.drawing.documentId)
+                            ? (point) => {
+                                const source = drawingSource(toolDefaults.drawing.documentId)!;
+                                return maskOnPaper({
+                                  position: point,
+                                  mask: frameMask(source.framing, source.document.denominator),
+                                });
+                              }
+                            : areaTool && construction !== "polygon"
+                              ? (point) =>
+                                  circleTool
+                                    ? slabOpeningOutline({
+                                        circle: {
+                                          center: pathPoints[0] ?? point,
+                                          diameter:
+                                            2 *
+                                            Math.hypot(
+                                              point.x - (pathPoints[0] ?? point).x,
+                                              point.y - (pathPoints[0] ?? point).y,
+                                            ),
+                                        },
+                                      })
+                                    : construction === "boundary"
+                                      ? (findHatchBoundary?.(point) ?? [])
+                                      : rectangleContour(construction, [...pathPoints, point])
+                              : undefined
+                        }
+                        wallOutlineWidth={wallWidth}
+                        cutFill={cutFill}
+                        showRenovation={showRenovation}
+                        gridSettings={gridSettings}
+                        snap={snap}
+                        ortho={ortho}
+                        onSelect={selectElement}
+                        onContourStretch={(target, index, anchor) => {
                           if (
+                            target.kind === "reference" ||
+                            target.kind === "door" ||
+                            target.kind === "column" ||
+                            target.kind === "dimension" ||
+                            target.kind === "text" ||
+                            target.kind === "stair"
+                          )
+                            return;
+                          if (
+                            referenceSelection.selecting ||
+                            !visibleLayerTarget(
+                              visibilityNow.current.project,
+                              visibilityNow.current.visibility,
+                              target,
+                            )
+                          )
+                            return;
+                          // Mask edges of a placed drawing come with ZW3.
+                          if (target.kind === "drawing") return;
+                          cancelInteraction();
+                          setSelection(target);
+                          setTool("select");
+                          setDemandOpen(false);
+                          setModelError("");
+                          dispatchEditing({ type: "begin", target, action: "edge", index, anchor });
+                        }}
+                        onCornerPick={(target, index, anchor) => {
+                          // E1: columns and stairs move whole, with the clicked corner as handle.
+                          if (target.kind === "column" || target.kind === "stair") {
+                            if (
+                              referenceSelection.selecting ||
+                              !visibleLayerTarget(
+                                visibilityNow.current.project,
+                                visibilityNow.current.visibility,
+                                target,
+                              )
+                            )
+                              return false;
+                            cancelInteraction();
+                            setDemandOpen(false);
+                            setModelError("");
+                            groupMove.begin(anchor);
+                            return true;
+                          }
+                          if (
+                            !(target.kind === "wall" || isVertexTarget(target)) ||
                             referenceSelection.selecting ||
                             !visibleLayerTarget(
                               visibilityNow.current.project,
@@ -4037,161 +4106,152 @@ export function CadWorkspace({
                           )
                             return false;
                           cancelInteraction();
+                          setPickedPoint({ index, anchor, edgeIndex: null });
+                          setTool("select");
                           setDemandOpen(false);
                           setModelError("");
-                          groupMove.begin(anchor);
-                          return true;
-                        }
-                        if (
-                          !(target.kind === "wall" || isVertexTarget(target)) ||
-                          referenceSelection.selecting ||
-                          !visibleLayerTarget(
-                            visibilityNow.current.project,
-                            visibilityNow.current.visibility,
-                            target,
-                          )
-                        )
-                          return false;
-                        cancelInteraction();
-                        setPickedPoint({ index, anchor, edgeIndex: null });
-                        setTool("select");
-                        setDemandOpen(false);
-                        setModelError("");
-                        dispatchEditing({ type: "begin", target, action: "point", index, anchor });
-                        return true;
-                      }}
-                      onEditCancel={() =>
-                        measurement.adapter
-                          ? interaction.cancel()
-                          : dispatchEditing({ type: "cancel" })
-                      }
-                      onPoint={(point, candidate) =>
-                        referenceSelection.selecting
-                          ? undefined
-                          : interaction.adapter
-                            ? interaction.pick(point, candidate)
-                            : drawPoint(point, candidate)
-                      }
-                      editSession={editSession?.base === project ? editSession : null}
-                      numericTarget={editSession ? interaction.target : undefined}
-                      drawingTarget={drawingOrigin ? interaction.target : undefined}
-                      onDrawingAim={drawingOrigin ? interaction.draft.move : undefined}
-                      onEditAim={(_session, point) => interaction.draft.move(point)}
-                      onEditDirection={(_session, point, candidate) =>
-                        interaction.pick(point, candidate)
-                      }
-                      onEditCommit={(_session, point, candidate) =>
-                        interaction.pick(point, candidate)
-                      }
-                      {...(tool === "dimension" ? { onFinish: finishDimension } : {})}
-                      textPreview={
-                        tool === "text" && textDraft?.content.trim()
-                          ? {
-                              ...toolDefaults.text,
-                              position: textDraft.position,
-                              content: textDraft.content,
-                            }
-                          : undefined
-                      }
-                      // Section symbols belong to the building plan, not to a sheet (ZW4).
-                      sections={space ? undefined : sections}
-                      onSectionSettings={openSectionWindow}
-                      selectedSectionId={tool === "select" ? selectedSectionId : null}
-                      onSectionSelect={tool === "select" ? selectSection : undefined}
-                      onSectionLine={moveSectionLine}
-                      selectionAnchor={pickedPoint.anchor}
-                      tracing={tracingView}
-                      placedSnap={placedSnap}
-                      onLineLength={(lineId, segment, length, direction) => {
-                        try {
                           dispatchEditing({
-                            type: "project",
-                            project: setLineSegmentLength(
-                              project,
-                              lineId,
-                              segment,
-                              length,
-                              direction,
-                            ),
+                            type: "begin",
+                            target,
+                            action: "point",
+                            index,
+                            anchor,
                           });
-                          setModelError("");
-                        } catch (error) {
-                          setModelError(
-                            error instanceof Error ? error.message : "Länge nicht möglich.",
-                          );
+                          return true;
+                        }}
+                        onEditCancel={() =>
+                          measurement.adapter
+                            ? interaction.cancel()
+                            : dispatchEditing({ type: "cancel" })
                         }
-                      }}
-                      sectionDraft={
-                        tool === "section" && sectionStart
-                          ? {
-                              start: sectionStart,
-                              end: sectionEnd,
-                              mark: nextSectionLabel(project, sectionDefaults).mark,
-                              symbolSize: sectionDefaults.symbolSize,
-                            }
-                          : tool === "elevation" && sectionStart
+                        onPoint={(point, candidate) =>
+                          referenceSelection.selecting
+                            ? undefined
+                            : interaction.adapter
+                              ? interaction.pick(point, candidate)
+                              : drawPoint(point, candidate)
+                        }
+                        editSession={editSession?.base === project ? editSession : null}
+                        numericTarget={editSession ? interaction.target : undefined}
+                        drawingTarget={drawingOrigin ? interaction.target : undefined}
+                        onDrawingAim={drawingOrigin ? interaction.draft.move : undefined}
+                        onEditAim={(_session, point) => interaction.draft.move(point)}
+                        onEditDirection={(_session, point, candidate) =>
+                          interaction.pick(point, candidate)
+                        }
+                        onEditCommit={(_session, point, candidate) =>
+                          interaction.pick(point, candidate)
+                        }
+                        {...(tool === "dimension" ? { onFinish: finishDimension } : {})}
+                        textPreview={
+                          tool === "text" && textDraft?.content.trim()
+                            ? {
+                                ...toolDefaults.text,
+                                position: textDraft.position,
+                                content: textDraft.content,
+                              }
+                            : undefined
+                        }
+                        // Section symbols belong to the building plan, not to a sheet (ZW4).
+                        sections={space ? undefined : sections}
+                        onSectionSettings={openSectionWindow}
+                        selectedSectionId={tool === "select" ? selectedSectionId : null}
+                        onSectionSelect={tool === "select" ? selectSection : undefined}
+                        onSectionLine={moveSectionLine}
+                        selectionAnchor={pickedPoint.anchor}
+                        tracing={tracingView}
+                        placedSnap={placedSnap}
+                        onLineLength={(lineId, segment, length, direction) => {
+                          try {
+                            dispatchEditing({
+                              type: "project",
+                              project: setLineSegmentLength(
+                                project,
+                                lineId,
+                                segment,
+                                length,
+                                direction,
+                              ),
+                            });
+                            setModelError("");
+                          } catch (error) {
+                            setModelError(
+                              error instanceof Error ? error.message : "Länge nicht möglich.",
+                            );
+                          }
+                        }}
+                        sectionDraft={
+                          tool === "section" && sectionStart
                             ? {
                                 start: sectionStart,
                                 end: sectionEnd,
-                                mark: nextSectionLabel(project, elevationDefaults, "elevation")
-                                  .mark,
-                                symbolSize: elevationDefaults.symbolSize,
-                                kind: "elevation" as const,
+                                mark: nextSectionLabel(project, sectionDefaults).mark,
+                                symbolSize: sectionDefaults.symbolSize,
+                              }
+                            : tool === "elevation" && sectionStart
+                              ? {
+                                  start: sectionStart,
+                                  end: sectionEnd,
+                                  mark: nextSectionLabel(project, elevationDefaults, "elevation")
+                                    .mark,
+                                  symbolSize: elevationDefaults.symbolSize,
+                                  kind: "elevation" as const,
+                                }
+                              : undefined
+                        }
+                        stairDraft={
+                          tool === "stair" && stairStart
+                            ? {
+                                start: stairStart,
+                                direction: stairDirection,
+                                values:
+                                  stairTread !== null
+                                    ? { ...stairValues(toolDefaults.stair), tread: stairTread }
+                                    : stairValues(toolDefaults.stair),
+                                storeyHeight: storeyOf(project).height ?? null,
                               }
                             : undefined
-                      }
-                      stairDraft={
-                        tool === "stair" && stairStart
-                          ? {
-                              start: stairStart,
-                              direction: stairDirection,
-                              values:
-                                stairTread !== null
-                                  ? { ...stairValues(toolDefaults.stair), tread: stairTread }
-                                  : stairValues(toolDefaults.stair),
-                              storeyHeight: storeyOf(project).height ?? null,
-                            }
-                          : undefined
-                      }
-                      dimensionDraft={
-                        tool === "dimension" &&
-                        dimensionDraft &&
-                        (dimensionDraft.edit || toolDefaults.dimension.orientation !== "height")
-                          ? {
-                              orientation:
-                                dimensionDraft.edit?.orientation ??
-                                (toolDefaults.dimension.orientation === "height"
-                                  ? "horizontal"
-                                  : toolDefaults.dimension.orientation),
-                              line: dimensionDraft.line,
-                              points: dimensionDraft.points,
-                              mode: dimensionDraft.edit?.mode,
-                              style: dimensionDraft.edit
-                                ? (storeyOf(project).dimensions?.find(
-                                    (d) => d.id === dimensionDraft.edit!.id,
-                                  ) ?? {})
-                                : toolDefaults.dimension,
-                            }
-                          : undefined
-                      }
-                      {...(tool === "wall" ||
-                      (tool === "line" && lineKind === "polyline") ||
-                      (areaTool && construction === "polygon")
-                        ? {
-                            onFinish: () => {
-                              if (!referenceSelection.selecting) {
-                                if (tool === "wall") finishChain();
-                                else finishPath();
+                        }
+                        dimensionDraft={
+                          tool === "dimension" &&
+                          dimensionDraft &&
+                          (dimensionDraft.edit || toolDefaults.dimension.orientation !== "height")
+                            ? {
+                                orientation:
+                                  dimensionDraft.edit?.orientation ??
+                                  (toolDefaults.dimension.orientation === "height"
+                                    ? "horizontal"
+                                    : toolDefaults.dimension.orientation),
+                                line: dimensionDraft.line,
+                                points: dimensionDraft.points,
+                                mode: dimensionDraft.edit?.mode,
+                                style: dimensionDraft.edit
+                                  ? (storeyOf(project).dimensions?.find(
+                                      (d) => d.id === dimensionDraft.edit!.id,
+                                    ) ?? {})
+                                  : toolDefaults.dimension,
                               }
-                            },
-                          }
-                        : {})}
-                      layout={layout}
-                      mode={mode}
-                      grid={grid && !layoutSpace}
-                      active={activeViewport}
-                      onActive={setActiveViewport}
-                    />
+                            : undefined
+                        }
+                        {...(tool === "wall" ||
+                        (tool === "line" && lineKind === "polyline") ||
+                        (areaTool && construction === "polygon")
+                          ? {
+                              onFinish: () => {
+                                if (!referenceSelection.selecting) {
+                                  if (tool === "wall") finishChain();
+                                  else finishPath();
+                                }
+                              },
+                            }
+                          : {})}
+                        layout={layout}
+                        mode={mode}
+                        grid={grid && !layoutSpace}
+                        active={activeViewport}
+                        onActive={setActiveViewport}
+                      />,
+                    )}
                   </div>
                   {(groupMove.adapter ||
                     (editSession && ["move", "point"].includes(editSession.action))) &&
