@@ -4,6 +4,7 @@ import { cutPaint, type CutFill } from "./cut-fill";
 import { MARK_PAPER, sectionGraphicExtent } from "./section-graphic";
 import { HeightMark } from "./HeightMark";
 import { SectionLayerGraphic } from "./SectionLayerGraphic";
+import { CAD_TURQUOISE } from "@/rendering/viewport/highlight";
 
 const svgPoints = (points: readonly SectionPoint[]) =>
   points.map((p) => `${p.x},${-p.y}`).join(" ");
@@ -19,29 +20,37 @@ const HATCH_PAPER = 0.0015;
  * height marks, cut parts in the cut fill and the border at both ends of the line. SVG in
  * drawing metres, y flipped. Shared by the section tab and a section placed on a layout
  * (docs/ZEICHNUNG.md, ZW4); there the height marks are drawn here too (`marks`), in the tab
- * they stay editable and are drawn by the tab.
+ * they stay editable and are drawn by the tab. Selected elements (`selectedIds`, e.g. found by the
+ * filter, docs/FILTER.md) are drawn in the selection colour.
  */
 export function SectionGraphic({
   drawing,
   cutFill,
   denominator,
   marks,
+  selectedIds,
 }: {
   drawing: SectionDrawing;
   cutFill: CutFill;
   denominator: number;
   marks?: readonly SectionHeightMarks[] | undefined;
+  selectedIds?: ReadonlySet<string> | undefined;
 }) {
   const paint = cutPaint(cutFill);
   const mark = MARK_PAPER * denominator;
   const markGap = mark * 1.5;
   const extent = sectionGraphicExtent(drawing, denominator);
+  const picked = (id: string) => selectedIds?.has(id) ?? false;
+  const ink = (id: string) => (picked(id) ? CAD_TURQUOISE : "var(--foreground)");
   return (
     <>
       <g aria-label="Ansicht">
         {drawing.views.map((v, i) => (
-          <g key={i}>
+          <g key={i} data-element-id={v.id} data-selected={picked(v.id) || undefined}>
             <polygon points={svgPoints(v.points)} fill="var(--background)" />
+            {picked(v.id) && (
+              <polygon points={svgPoints(v.points)} fill={CAD_TURQUOISE} fillOpacity={0.25} />
+            )}
             {v.edges.map(([a, b], j) => (
               <line
                 key={j}
@@ -49,8 +58,8 @@ export function SectionGraphic({
                 y1={-a.y}
                 x2={b.x}
                 y2={-b.y}
-                stroke="var(--foreground)"
-                strokeWidth={0.75}
+                stroke={ink(v.id)}
+                strokeWidth={picked(v.id) ? 1.25 : 0.75}
                 vectorEffect="non-scaling-stroke"
               />
             ))}
@@ -106,7 +115,7 @@ export function SectionGraphic({
       </g>
       <g aria-label="Geschnittene Bauteile">
         {drawing.cuts.map((cut) => (
-          <g key={cut.id}>
+          <g key={cut.id} data-element-id={cut.id} data-selected={picked(cut.id) || undefined}>
             {cut.layers && cut.loops.length > 0 && (
               <SectionLayerGraphic
                 clip={loopPath(cut.loops)}
@@ -125,9 +134,17 @@ export function SectionGraphic({
                 // Walls with a build-up show their layers below (docs/WANDAUFBAU.md, SA3).
                 fill={cut.layers ? "none" : cut.kind === "part" ? paint.fill : "var(--background)"}
                 fillOpacity={cut.kind === "part" ? paint.fillOpacity : 1}
-                stroke="var(--foreground)"
+                stroke={ink(cut.id)}
                 strokeWidth={stroke[cut.kind]}
                 vectorEffect="non-scaling-stroke"
+              />
+            )}
+            {picked(cut.id) && cut.loops.length > 0 && (
+              <path
+                d={loopPath(cut.loops)}
+                fillRule="evenodd"
+                fill={CAD_TURQUOISE}
+                fillOpacity={0.55}
               />
             )}
             {cut.open.map((piece, i) => (
@@ -135,7 +152,7 @@ export function SectionGraphic({
                 key={i}
                 points={svgPoints(piece)}
                 fill="none"
-                stroke="var(--foreground)"
+                stroke={ink(cut.id)}
                 strokeWidth={stroke[cut.kind]}
                 vectorEffect="non-scaling-stroke"
               />

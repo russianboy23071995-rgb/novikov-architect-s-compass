@@ -11,6 +11,8 @@ import { assemblyLibraryOf, wallLayerBands } from "./wall-layers.ts";
 export type SectionPoint = { x: number; y: number };
 /** Building part seen beyond the cut: polygon and its visible edges, farthest first. */
 export type SectionView = {
+  /** The element the face belongs to (docs/FILTER.md, L45). */
+  id: string;
   points: SectionPoint[];
   edges: [SectionPoint, SectionPoint][];
   /** Opening symbol of a sash pane (FL3), dashed when the sash opens away from the viewer. */
@@ -43,6 +45,10 @@ export type SectionDrawing = {
   width: number;
   bounds: { minX: number; minY: number; maxX: number; maxY: number } | null;
 };
+
+/** Elements the drawing shows, cut or beyond the line (docs/FILTER.md, L45). */
+export const sectionShownIds = (drawing: SectionDrawing): Set<string> =>
+  new Set([...drawing.cuts.map((c) => c.id), ...drawing.views.map((v) => v.id)]);
 
 const EPS = 1e-9;
 const key = (p: readonly number[]) => p.map((v) => Math.round(v * 1e5)).join(",");
@@ -182,6 +188,7 @@ export function sectionDrawing(project: Project, section: Section): SectionDrawi
     views.push({
       depth,
       view: {
+        id: face.wallId,
         points: part.map((q) => out(q.p)),
         edges,
         ...(symbol.length ? { marks: { segments: symbol, dashed: face.marks!.dashed } } : {}),

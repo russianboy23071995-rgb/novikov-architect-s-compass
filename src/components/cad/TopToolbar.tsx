@@ -1,6 +1,7 @@
 import type { VisibilityAction } from "@/application/layers/visibility-actions";
 import {
   Ruler,
+  Filter,
   EyeOff,
   Focus,
   Layers2,
@@ -48,6 +49,11 @@ type TopToolbarProps = {
   onLineCreator: () => void;
   onHatchLibrary: () => void;
   onMeasure: () => void;
+  /** Filter (docs/FILTER.md, L45): a function, opens its window. */
+  onFilter: () => void;
+  filterOpen: boolean;
+  /** Why the filter is not available in this view; undefined when it is. */
+  filterBlocked?: string | undefined;
   measuring: boolean;
   onImportImage: () => void;
   onCanvasDisplay: () => void;
@@ -287,6 +293,14 @@ export function TopToolbar(props: TopToolbarProps) {
         <div className="flex items-center gap-0.5 border-r border-border pr-2">
           <IconControl label="Messen" onClick={props.onMeasure} active={props.measuring}>
             <Ruler className="size-4" />
+          </IconControl>
+          <IconControl
+            label="Filter"
+            onClick={props.onFilter}
+            active={props.filterOpen}
+            {...(props.filterBlocked ? { hint: props.filterBlocked } : {})}
+          >
+            <Filter className="size-4" />
           </IconControl>
           <IconControl
             label="Undo"

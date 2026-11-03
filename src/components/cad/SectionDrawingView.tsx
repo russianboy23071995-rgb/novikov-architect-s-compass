@@ -7,12 +7,12 @@ import {
   snapSectionPoint,
   type SectionSnap,
 } from "@/rendering/viewport/section-snap";
-import { sectionDrawing, type SectionPoint } from "@/rendering/viewport/section-drawing";
+import type { SectionPoint } from "@/rendering/viewport/section-drawing";
 import { Button } from "@/components/ui/button";
 import type { CutFill } from "./cut-fill";
 import { HeightMark } from "./HeightMark";
 import { SectionGraphic } from "./SectionGraphic";
-import { MARK_PAPER, sectionGraphicExtent } from "./section-graphic";
+import { cachedSectionDrawing, MARK_PAPER, sectionGraphicExtent } from "./section-graphic";
 
 type Box = { x: number; y: number; w: number; h: number };
 
@@ -40,6 +40,7 @@ export function SectionDrawingView({
   onRemoveHeightMarks,
   document,
   onSaveDocument,
+  selectedIds,
 }: {
   /** The drawing document shown, with its drawing name and scale (docs/ABBILDER.md, AB2). */
   document?: { name: string; scale: string } | null | undefined;
@@ -57,8 +58,10 @@ export function SectionDrawingView({
   onUpdateHeightMarks?:
     ((id: string, changes: Partial<Pick<SectionHeightMarks, "x" | "kind">>) => void) | undefined;
   onRemoveHeightMarks?: ((id: string) => void) | undefined;
+  /** Selected elements, drawn in the selection colour (docs/FILTER.md, L45). */
+  selectedIds?: ReadonlySet<string> | undefined;
 }) {
-  const drawing = useMemo(() => sectionDrawing(project, section), [project, section]);
+  const drawing = useMemo(() => cachedSectionDrawing(project, section), [project, section]);
   const fit = useMemo((): Box => {
     const e = sectionGraphicExtent(drawing, denominator);
     return { x: e.minX, y: -e.maxY, w: e.maxX - e.minX, h: e.maxY - e.minY };
@@ -265,7 +268,12 @@ export function SectionDrawingView({
           }}
           onPointerLeave={() => setHover(null)}
         >
-          <SectionGraphic drawing={drawing} cutFill={cutFill} denominator={denominator} />
+          <SectionGraphic
+            drawing={drawing}
+            cutFill={cutFill}
+            denominator={denominator}
+            selectedIds={selectedIds}
+          />
           <g aria-label="Höhenkoten">
             {marks.map((set) => {
               const x = moveX?.id === set.id ? moveX.x : set.x;

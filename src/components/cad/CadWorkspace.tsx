@@ -4,6 +4,9 @@ import { nextProjectRoomNumber } from "@/application/rooms/actions";
 import { isDefaultHeightLineList } from "@/domain/elements/room/height-line";
 import { RoomListPanel } from "./RoomListPanel";
 import { ElementListPanel } from "./ElementListPanel";
+import { FilterWindow, type FilterPlace } from "./FilterWindow";
+import { filterElements, NO_CRITERIA, similarCriteria } from "@/application/selection/filter";
+import { sectionShownIds } from "@/rendering/viewport/section-drawing";
 import { ToolSettingsWindow } from "./ToolSettingsWindow";
 import { OpeningInsertFields } from "./OpeningInsertFields";
 import { setOpeningInsert } from "@/application/openings/inserts";
@@ -294,6 +297,7 @@ export function CadWorkspace({
   const [layersOpen, setLayersOpen] = useState(false);
   const [roomListOpen, setRoomListOpen] = useState(false);
   const [elementListOpen, setElementListOpen] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
   const [measurementMode, setMeasurementMode] = useState<MeasurementMode>("distance");
   const [tool, setTool] = useState<ToolId>("select");
   const [mode, setMode] = useState<ViewMode>("2D");
@@ -559,6 +563,7 @@ export function CadWorkspace({
   const cancelGroup = useRef(groupMove.cancel);
   cancelGroup.current = groupMove.cancel;
   const selectedLayerId = selectedLayerElement(project, selection)?.layerId;
+  const selectedIdSet = useMemo(() => new Set(selections.map((t) => t.id)), [selections]);
   const currentSelection = useRef(selection);
   currentSelection.current = selection;
   const [wallChain, setWallChain] = useState<WallChain | null>(null);
@@ -758,6 +763,8 @@ export function CadWorkspace({
           if (!event.repeat) navigateHistory(key === "y" || event.shiftKey ? "redo" : "undo");
         } else if ((key === "c" || key === "x" || key === "v") && !event.repeat) {
           if (clipboardShortcut.current?.(key)) event.preventDefault();
+        } else if (key === "a" && !event.repeat) {
+          if (selectAllShortcut.current?.()) event.preventDefault();
         }
         return;
       }
@@ -1641,6 +1648,23 @@ export function CadWorkspace({
         run: () => single && pickupFrom(single),
       },
       {
+        id: "similar",
+        label: "Ähnliche auswählen",
+        disabled:
+          (filterPlace.kind !== "plan" && "Nur im Grundriss.") ||
+          (single ? false : "Ein Element auswählen."),
+        run: () =>
+          single &&
+          selectMany(
+            filterElements(
+              project,
+              visibility,
+              { kind: "storey" },
+              similarCriteria(project, single),
+            ),
+          ),
+      },
+      {
         id: "tool-settings",
         label: "Werkzeugeinstellungen…",
         run: () => openToolSettings(target),
@@ -1689,6 +1713,13 @@ export function CadWorkspace({
       selectElement(target, { x, y });
     setDemandOpen(false);
     setContextMenu({ x, y, target });
+  };
+  // Strg+A (docs/FILTER.md): every visible element of the working storey, in the plan only.
+  const selectAllShortcut = useRef<(() => boolean) | null>(null);
+  selectAllShortcut.current = () => {
+    if (filterPlace.kind !== "plan" || editSession || groupMove.active) return false;
+    selectMany(filterElements(project, visibility, { kind: "storey" }, NO_CRITERIA));
+    return true;
   };
   const clipboardShortcut = useRef<((key: string) => boolean) | null>(null);
   clipboardShortcut.current = (key) => {
@@ -2410,6 +2441,17 @@ export function CadWorkspace({
     layoutIds,
   );
   if (shownTabs.join("|") !== canvasTabs.join("|")) setCanvasTabs(shownTabs);
+  const shownSection = activeSection ? sections!.find((s) => s.id === activeSection)! : null;
+  const filterPlace: FilterPlace =
+    activeBlock || activeLayout || (!shownSection && mode === "3D")
+      ? { kind: "blocked", reason: "Der Filter wirkt nur im Grundriss, Schnitt oder Ansicht." }
+      : shownSection
+        ? {
+            kind: "section",
+            label: shownSection.kind === "elevation" ? "dieser Ansicht" : "diesem Schnitt",
+            ids: sectionShownIds(cachedSectionDrawing(project, shownSection)),
+          }
+        : { kind: "plan" };
   function selectCanvasTab(view: CanvasView) {
     const sectionId = tabSectionId(view),
       layoutId = tabLayoutId(view),
@@ -2949,6 +2991,18 @@ export function CadWorkspace({
         project={realProject}
         onSelectRoom={(id) => selectElement({ kind: "room", id })}
       />
+      <FilterWindow
+        open={filterOpen}
+        onClose={() => setFilterOpen(false)}
+        project={project}
+        policy={visibility}
+        place={filterPlace}
+        selection={selections}
+        onSelect={(targets) => {
+          selectMany(targets);
+          showNotice(`${targets.length} Element(e) ausgewählt`);
+        }}
+      />
       <ElementListPanel
         open={elementListOpen}
         onOpenChange={setElementListOpen}
@@ -3069,6 +3123,9 @@ export function CadWorkspace({
           onLineCreator={() => setLineCreatorOpen(true)}
           onHatchLibrary={() => setHatchLibraryOpen(true)}
           onMeasure={() => selectTool("measure")}
+          onFilter={() => setFilterOpen((o) => !o)}
+          filterOpen={filterOpen}
+          filterBlocked={filterPlace.kind === "blocked" ? filterPlace.reason : undefined}
           measuring={tool === "measure"}
           onImportImage={() => {
             if (activeDocumentId) {
@@ -3412,6 +3469,7 @@ export function CadWorkspace({
                             : null
                         }
                         onSaveDocument={() => setSectionDocumentWindow(section.id)}
+                        selectedIds={selectedIdSet}
                         onSettings={() => openSectionWindow(section.id)}
                         heightTool={
                           tool === "dimension" && toolDefaults.dimension.orientation === "height"
