@@ -11,6 +11,7 @@ export type ToolId =
   | "section"
   | "elevation"
   | "slab"
+  | "slabOpening"
   | "roof"
   | "room"
   | "line"

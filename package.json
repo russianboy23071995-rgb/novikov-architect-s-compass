@@ -196,6 +196,7 @@
     "src/application/references/actions.test.ts",
     "src/application/selection/state.test.ts",
     "src/application/selection/filter.test.ts",
+    "src/application/slabs/openings.test.ts",
     "src/application/selection/move.test.ts",
     "src/application/commands/selection-command.test.ts",
     "src/application/commands/selection-voice.test.ts",

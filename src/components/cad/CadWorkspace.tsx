@@ -111,6 +111,7 @@ import { WindowPlacementFields } from "./WindowPlacementFields";
 import { useWindowPlacement } from "./useWindowPlacement";
 import { useDoorPlacement } from "./useDoorPlacement";
 import { SlabToolFields } from "./SlabToolFields";
+import { SlabOpeningToolFields } from "./SlabOpeningToolFields";
 import { DoorPlacementFields } from "./DoorPlacementFields";
 import { useSelectionMove } from "./useSelectionMove";
 import { useElementSelection } from "./useElementSelection";
@@ -584,6 +585,7 @@ export function CadWorkspace({
   const areaTool =
     tool === "hatch" ||
     tool === "slab" ||
+    tool === "slabOpening" ||
     roofPhase === "outline" ||
     (tool === "room" && !roomByWalls);
   const pathDrawing = tool === "line" || areaTool || roofPhase === "line";
@@ -862,6 +864,7 @@ export function CadWorkspace({
       next === "line" ||
       next === "hatch" ||
       next === "slab" ||
+      next === "slabOpening" ||
       next === "roof" ||
       next === "room" ||
       next === "column" ||
@@ -881,6 +884,7 @@ export function CadWorkspace({
       next === "line" ||
       next === "hatch" ||
       next === "slab" ||
+      next === "slabOpening" ||
       next === "roof" ||
       next === "room" ||
       next === "column" ||
@@ -1011,6 +1015,7 @@ export function CadWorkspace({
       // A placed drawing moves as a whole; its size is fixed (docs/ZEICHNUNG.md).
       selection.kind === "drawing" ||
       selection.kind === "slab" ||
+      selection.kind === "slabOpening" ||
       selection.kind === "roof" ||
       selection.kind === "room" ||
       selection.kind === "column" ||
@@ -1030,21 +1035,23 @@ export function CadWorkspace({
         pickedPoint.anchor ??
         (selection.kind === "slab"
           ? storeyOf(project).slabs!.find((slab) => slab.id === selection.id)!.points[0]!
-          : selection.kind === "roof"
-            ? storeyOf(project).roofs!.find((roof) => roof.id === selection.id)!.points[0]!
-            : selection.kind === "room"
-              ? storeyOf(project).rooms!.find((room) => room.id === selection.id)!.points[0]!
-              : selection.kind === "column"
-                ? storeyOf(project).columns!.find((c) => c.id === selection.id)!.position
-                : selection.kind === "stair"
-                  ? storeyOf(project).stairs!.find((s) => s.id === selection.id)!.start
-                  : selection.kind === "dimension"
-                    ? storeyOf(project).dimensions!.find((d) => d.id === selection.id)!.points[0]!
-                    : selection.kind === "text"
-                      ? storeyOf(project).texts!.find((t) => t.id === selection.id)!.position
-                      : selection.kind === "drawing"
-                        ? storeyOf(project).drawings!.find((d) => d.id === selection.id)!.position
-                        : editAnchor(project, selection));
+          : selection.kind === "slabOpening"
+            ? storeyOf(project).slabOpenings!.find((o) => o.id === selection.id)!.points[0]!
+            : selection.kind === "roof"
+              ? storeyOf(project).roofs!.find((roof) => roof.id === selection.id)!.points[0]!
+              : selection.kind === "room"
+                ? storeyOf(project).rooms!.find((room) => room.id === selection.id)!.points[0]!
+                : selection.kind === "column"
+                  ? storeyOf(project).columns!.find((c) => c.id === selection.id)!.position
+                  : selection.kind === "stair"
+                    ? storeyOf(project).stairs!.find((s) => s.id === selection.id)!.start
+                    : selection.kind === "dimension"
+                      ? storeyOf(project).dimensions!.find((d) => d.id === selection.id)!.points[0]!
+                      : selection.kind === "text"
+                        ? storeyOf(project).texts!.find((t) => t.id === selection.id)!.position
+                        : selection.kind === "drawing"
+                          ? storeyOf(project).drawings!.find((d) => d.id === selection.id)!.position
+                          : editAnchor(project, selection));
       cancelInteraction();
       try {
         const axis =
@@ -1078,12 +1085,21 @@ export function CadWorkspace({
         room: ["Raum", "der Raum", "Räume"],
         column: ["Stützen", "die Stütze", "Stützen"],
         stair: ["Treppen", "die Treppe", "Treppen"],
+        slabOpening: ["Deckendurchbruchs", "der Deckendurchbruch", "Deckendurchbrüche"],
         dimension: ["Maßketten", "die Maßkette", "Maßketten"],
         text: ["Texte", "der Text", "Texte"],
         drawing: ["Zeichnungen", "die Zeichnung", "Zeichnungen"],
       }[
         selection.kind as
-          "slab" | "roof" | "room" | "column" | "stair" | "dimension" | "text" | "drawing"
+          | "slab"
+          | "slabOpening"
+          | "roof"
+          | "room"
+          | "column"
+          | "stair"
+          | "dimension"
+          | "text"
+          | "drawing"
       ];
       showNotice(
         inSolid
@@ -1252,6 +1268,7 @@ export function CadWorkspace({
     window: "Fenster",
     door: "Tür",
     slab: "Decke",
+    slabOpening: "Deckendurchbruch",
     hatch: "Schraffur",
     line: "Linie",
     drawing: "Zeichnung",
@@ -1365,6 +1382,14 @@ export function CadWorkspace({
         onPrecision={doorTool.setPrecision}
         pickingHost={doorTool.pickingHost}
         choosingSide={doorTool.choosingSide}
+      />
+    ) : owner === "slabOpening" ? (
+      <SlabOpeningToolFields
+        construction={hatchConstruction}
+        onConstruction={(construction) => {
+          cancelInteraction();
+          setHatchConstruction(construction);
+        }}
       />
     ) : owner === "slab" ? (
       <SlabToolFields
@@ -1792,12 +1817,14 @@ export function CadWorkspace({
           ? "hatch"
           : tool === "slab"
             ? "slab"
-            : tool === "roof"
-              ? "roof"
-              : tool === "room"
-                ? "room"
-                : "line";
-      const id = `${kind}-${crypto.randomUUID()}`;
+            : tool === "slabOpening"
+              ? "slabOpening"
+              : tool === "roof"
+                ? "roof"
+                : tool === "room"
+                  ? "room"
+                  : "line";
+      const id = `${kind === "slabOpening" ? "slab-opening" : kind}-${crypto.randomUUID()}`;
       changeProject(
         createDrawing(
           base!,
@@ -1807,36 +1834,38 @@ export function CadWorkspace({
             ? { kind: "hatch", points, ...toolDefaults.hatch }
             : tool === "slab"
               ? { kind: "slab", points, ...toolDefaults.slab }
-              : tool === "room"
-                ? {
-                    kind: "room",
-                    points,
-                    ...(toolDefaults.room.name.trim()
-                      ? { name: toolDefaults.room.name.trim() }
-                      : {}),
-                    ...(toolDefaults.room.floorBuildUpEnabled
-                      ? { floorBuildUp: toolDefaults.room.floorBuildUp }
-                      : {}),
-                    ...(isDefaultHeightLineList(toolDefaults.room.heightLines)
-                      ? {}
-                      : { heightLines: toolDefaults.room.heightLines }),
-                    layerId: toolDefaults.room.layerId,
-                  }
-                : tool === "roof"
+              : tool === "slabOpening"
+                ? { kind: "slabOpening", points }
+                : tool === "room"
                   ? {
-                      kind: "roof",
+                      kind: "room",
                       points,
-                      referenceLine: roofLine!,
-                      rise: roofRise!,
-                      ...toolDefaults.roof,
+                      ...(toolDefaults.room.name.trim()
+                        ? { name: toolDefaults.room.name.trim() }
+                        : {}),
+                      ...(toolDefaults.room.floorBuildUpEnabled
+                        ? { floorBuildUp: toolDefaults.room.floorBuildUp }
+                        : {}),
+                      ...(isDefaultHeightLineList(toolDefaults.room.heightLines)
+                        ? {}
+                        : { heightLines: toolDefaults.room.heightLines }),
+                      layerId: toolDefaults.room.layerId,
                     }
-                  : {
-                      kind: "line",
-                      lineKind,
-                      points,
-                      appearance: lineAppearance,
-                      layerId: toolDefaults.line.layerId,
-                    },
+                  : tool === "roof"
+                    ? {
+                        kind: "roof",
+                        points,
+                        referenceLine: roofLine!,
+                        rise: roofRise!,
+                        ...toolDefaults.roof,
+                      }
+                    : {
+                        kind: "line",
+                        lineKind,
+                        points,
+                        appearance: lineAppearance,
+                        layerId: toolDefaults.line.layerId,
+                      },
           viewContext.binding,
         ),
         { kind, id },
@@ -1847,11 +1876,15 @@ export function CadWorkspace({
       setModelError(
         tool === "roof" || tool === "room"
           ? roofErrorMessage(error)
-          : tool === "slab"
-            ? "Decke prüfen: mindestens drei verschiedene Eckpunkte ohne Kreuzungen oder Überlappung; Stärke größer als null. Nach Modelländerung erneut beginnen."
-            : tool === "hatch"
-              ? "Schraffur prüfen: mindestens drei verschiedene Eckpunkte ohne Kreuzungen oder Überlappung; Deckkraft 0–100 %. Nach Modelländerung erneut beginnen."
-              : "Linie benötigt unterschiedliche Punkte und eine Strichstärke von 0,05 bis 2 mm.",
+          : tool === "slabOpening"
+            ? error instanceof Error && !error.message.startsWith("[")
+              ? error.message
+              : "Deckendurchbruch prüfen: mindestens drei Eckpunkte ohne Kreuzungen, ganz innerhalb einer Decke. Nach Modelländerung erneut beginnen."
+            : tool === "slab"
+              ? "Decke prüfen: mindestens drei verschiedene Eckpunkte ohne Kreuzungen oder Überlappung; Stärke größer als null. Nach Modelländerung erneut beginnen."
+              : tool === "hatch"
+                ? "Schraffur prüfen: mindestens drei verschiedene Eckpunkte ohne Kreuzungen oder Überlappung; Deckkraft 0–100 %. Nach Modelländerung erneut beginnen."
+                : "Linie benötigt unterschiedliche Punkte und eine Strichstärke von 0,05 bis 2 mm.",
       );
     }
   };
@@ -4209,7 +4242,11 @@ export function CadWorkspace({
                     layers={project.layers}
                     phase={roofPhase ?? "line"}
                   />
-                ) : (tool === "slab" || tool === "hatch" || tool === "line") && mode === "2D" ? (
+                ) : (tool === "slab" ||
+                    tool === "slabOpening" ||
+                    tool === "hatch" ||
+                    tool === "line") &&
+                  mode === "2D" ? (
                   toolFields(tool)
                 ) : selection?.kind === "drawing" && selections.length === 1 ? (
                   drawingElementFields(selection.id, true)

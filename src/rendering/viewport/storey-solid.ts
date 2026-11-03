@@ -219,7 +219,10 @@ export function buildPreviewSolid(project: ModelGeometry, elevation: number): So
   // Disposable scopes may omit the height; their slabs then stay out, like an unknown height.
   const height = "height" in storey && typeof storey.height === "number" ? storey.height : null;
   const bodies: { faces: Face[]; volume: number }[] = (storey.slabs ?? []).flatMap((slab) => {
-    const body = slabBody(slab, height === null ? null : elevation + height);
+    const holes = ("slabOpenings" in storey ? (storey.slabOpenings ?? []) : [])
+      .filter((o) => o.slabId === slab.id)
+      .map((o) => o.points);
+    const body = slabBody(slab, height === null ? null : elevation + height, holes);
     return body ? [body] : [];
   });
   // Roofs of this storey: relative to the storey floor only (docs/ROOF_ELEMENT.md, D2).

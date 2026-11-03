@@ -53,6 +53,7 @@ import {
   projectV47Schema,
   projectV48Schema,
   projectV49Schema,
+  projectV50Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
@@ -271,6 +272,14 @@ export function migrateProjectData(value: unknown): Project {
   if (value.schemaVersion === 36)
     return migrateProjectData(
       withColumnLayer(withoutBoundHeights({ ...projectV36Schema.parse(value), schemaVersion: 37 })),
+    );
+  // Schema 50 files carry no slab openings; the strict v50 schema rejects smuggled ones.
+  if (value.schemaVersion === 50)
+    return validateProject(
+      withoutBoundHeights({
+        ...projectV50Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
     );
   // Schema 49 files carry no placed drawings; the strict v49 schema rejects smuggled ones.
   if (value.schemaVersion === 49)

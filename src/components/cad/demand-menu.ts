@@ -7,6 +7,7 @@ import { lineLength } from "../../lib/bim/lines.ts";
 import type { Selection } from "./bim-view.ts";
 import { doorDinHand } from "../../domain/elements/door/model.ts";
 import { slabArea } from "../../domain/elements/slab/model.ts";
+import { slabOpeningArea } from "../../domain/elements/slab/opening.ts";
 import { roomArea, type Room } from "../../domain/elements/room/model.ts";
 import {
   workingRoomClearHeights,
@@ -118,6 +119,15 @@ export function selectionSummary(project: Project, selection: Selection) {
       ? {
           title: "Decke",
           details: `Stärke ${metres(slab.thickness)} · Fläche ${slabArea(slab).toLocaleString("de-DE", { maximumFractionDigits: 2 })} m²`,
+        }
+      : null;
+  }
+  if (selection.kind === "slabOpening") {
+    const opening = storeyOf(project).slabOpenings?.find((item) => item.id === selection.id);
+    return opening
+      ? {
+          title: "Deckendurchbruch",
+          details: `Fläche ${slabOpeningArea(opening).toLocaleString("de-DE", { maximumFractionDigits: 2 })} m² · Decke ${opening.slabId}`,
         }
       : null;
   }

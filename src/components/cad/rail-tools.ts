@@ -15,6 +15,7 @@ import {
   SectionIcon,
   ElevationIcon,
   SlabIcon,
+  SlabOpeningIcon,
   StairIcon,
   WallIcon,
   WindowIcon,
@@ -37,6 +38,13 @@ export const RAIL_TOOLS: Partial<Record<ToolId, CadTool>> = {
   window: { id: "window", label: "Fenster", shortcut: "", icon: WindowIcon },
   door: { id: "door", label: "Tür", shortcut: "T", icon: DoorOpen },
   slab: { id: "slab", label: "Decke", shortcut: "S", icon: SlabIcon },
+  // Opening through a slab (docs/DECKENDURCHBRUCH.md, L40).
+  slabOpening: {
+    id: "slabOpening",
+    label: "Deckendurchbruch",
+    shortcut: "",
+    icon: SlabOpeningIcon,
+  },
   // No letter yet: D and Ctrl+D are reserved for rotating (Masterplan §8).
   roof: { id: "roof", label: "Dach", shortcut: "", icon: RoofIcon },
   room: { id: "room", label: "Raum", shortcut: "", icon: Grid2x2 },

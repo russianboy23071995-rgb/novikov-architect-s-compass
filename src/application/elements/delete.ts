@@ -8,7 +8,7 @@ import { sameTargets } from "../selection/move.ts";
 type Storey = Project["storeys"][number];
 
 /** One delete operation for key, menu, text and voice (user decision 24.10.2026).
- * Windows and doors of a deleted wall are deleted with it; corner and T connections of a
+ * Windows and doors of a deleted wall are deleted with it, slab openings with their slab; corner and T connections of a
  * deleted wall are dissolved and neighbours keep their geometry; image assets no reference
  * uses any more are removed. Preview and commit are the same result, one Undo step.
  */
@@ -33,7 +33,16 @@ export function previewDeleteSelection(
   const followers = [...storey.windows, ...(storey.doors ?? [])].filter(
     (o) => walls.has(o.wallId) && !selected.has(o.id),
   );
-  const removed = new Set([...selected, ...followers.map((o) => o.id)]);
+  // Slab openings follow their deleted slab (docs/DECKENDURCHBRUCH.md).
+  const slabs = new Set((storey.slabs ?? []).filter((s) => selected.has(s.id)).map((s) => s.id));
+  const slabFollowers = (storey.slabOpenings ?? []).filter(
+    (o) => slabs.has(o.slabId) && !selected.has(o.id),
+  );
+  const removed = new Set([
+    ...selected,
+    ...followers.map((o) => o.id),
+    ...slabFollowers.map((o) => o.id),
+  ]);
   const next: Record<string, unknown> = { ...storey };
   for (const kind of elementKinds) {
     const list = storey[ELEMENT_KINDS[kind].list];
@@ -80,6 +89,12 @@ export function previewDeleteSelection(
       followers.length === 1
         ? "1 Fenster/Tür der Wand wird mitgelöscht"
         : `${followers.length} Fenster/Türen der Wände werden mitgelöscht`,
+    );
+  if (slabFollowers.length)
+    parts.push(
+      slabFollowers.length === 1
+        ? "1 Deckendurchbruch der Decke wird mitgelöscht"
+        : `${slabFollowers.length} Deckendurchbrüche der Decken werden mitgelöscht`,
     );
   if (untrimmed)
     parts.push(

@@ -11,6 +11,7 @@ export const ELEMENT_KINDS = {
   window: { list: "windows", label: "Fenster" },
   door: { list: "doors", label: "Tür" },
   slab: { list: "slabs", label: "Decke" },
+  slabOpening: { list: "slabOpenings", label: "Deckendurchbruch" },
   roof: { list: "roofs", label: "Dach" },
   room: { list: "rooms", label: "Raum" },
   column: { list: "columns", label: "Stütze" },

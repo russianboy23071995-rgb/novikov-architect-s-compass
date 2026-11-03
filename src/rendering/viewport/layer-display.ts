@@ -38,6 +38,7 @@ export function visiblePlanGeometry(project: ModelGeometry, allows: (id: string)
     walls,
     references: storeyOf(project).references.filter((r) => allows(r.id)),
     slabs: (storeyOf(project).slabs ?? []).filter((s) => allows(s.id)),
+    slabOpenings: (storeyOf(project).slabOpenings ?? []).filter((o) => allows(o.id)),
     roofs: (storeyOf(project).roofs ?? []).filter((r) => allows(r.id)),
     rooms: (storeyOf(project).rooms ?? []).filter((r) => allows(r.id)),
     columns: (storeyOf(project).columns ?? []).filter((c) => allows(c.id)),

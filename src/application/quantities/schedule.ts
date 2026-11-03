@@ -9,6 +9,7 @@ import {
 import { doorOpening } from "../../domain/elements/door/model.ts";
 import { columnLevels, type Column } from "../../domain/elements/column/model.ts";
 import { slabArea } from "../../domain/elements/slab/model.ts";
+import { slabOpeningArea } from "../../domain/elements/slab/opening.ts";
 import { roofFaceRings } from "../../domain/elements/roof/geometry.ts";
 import { roofBody } from "../../domain/elements/roof/body.ts";
 import { STAIR_SHAPE_LABELS, stairGeometry } from "../../domain/elements/stair/model.ts";
@@ -297,7 +298,7 @@ export function quantitySchedule(project: Project): QuantitySchedule {
     project,
     "slabs",
     "Decken",
-    "Grundfläche des Umrisses × Dicke; Öffnungen und Durchdringungen nicht abgezogen.",
+    "Grundfläche des Umrisses ohne Deckendurchbrüche × Dicke; Durchdringungen nicht abgezogen.",
     [
       { key: "area", label: "Fläche", unit: "m²", digits: 2, sum: true },
       { key: "thickness", label: "Dicke", unit: "m", digits: 3 },
@@ -306,7 +307,11 @@ export function quantitySchedule(project: Project): QuantitySchedule {
     ],
     (storey) => ({
       rows: (storey.slabs ?? []).map((s) => {
-        const area = slabArea(s);
+        const area =
+          slabArea(s) -
+          (storey.slabOpenings ?? [])
+            .filter((o) => o.slabId === s.id)
+            .reduce((sum, o) => sum + slabOpeningArea(o), 0);
         return {
           storeyId: storey.id,
           elementId: s.id,
