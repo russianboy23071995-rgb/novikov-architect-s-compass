@@ -2,6 +2,7 @@ import type { DimensionStyle } from "./DimensionStyleFields";
 import { slabOpeningOutline, slabOpeningSymbol } from "@/domain/elements/slab/opening";
 import { TextGraphic } from "./TextGraphic";
 import { SectionGraphic } from "./SectionGraphic";
+import { runSelection, selectedRunKinds } from "./run-selection";
 import type { SectionDrawing } from "@/rendering/viewport/section-drawing";
 import type { SectionHeightMarks } from "@/domain/views/sections";
 import type { PlanText } from "@/domain/elements/text/model";
@@ -1097,10 +1098,17 @@ export function BimPlan({
   const listPosition = referenceSelection?.hits.length ? referenceSelection.position : null;
   // The same set while the same elements are selected (also none): a new but equal selection,
   // e.g. after the layout book's tab, re-renders no run of the plan (docs/TABS.md).
-  const selectionKey = (selections ?? (selection ? [selection] : [])).map((t) => t.id).join("\n");
+  const selectedTargets = selections ?? (selection ? [selection] : []);
+  const selectionKey = selectedTargets.map((t) => t.id).join("\n");
   const selectedIds = useMemo(
     () => (selectionKey ? new Set(selectionKey.split("\n")) : NOTHING_SELECTED),
     [selectionKey],
+  );
+  // Only the runs that draw a selected element get the selection (docs/TABS.md, Auswahlklick).
+  const kindKey = selectedTargets.map((t) => t.kind).join("\n");
+  const runKinds = useMemo(
+    () => selectedRunKinds(kindKey ? kindKey.split("\n").map((kind) => ({ kind })) : []),
+    [kindKey],
   );
   const latestSelect = useRef(selectProps);
   latestSelect.current = selectProps;
@@ -1121,7 +1129,7 @@ export function BimPlan({
       key={`${run.kind}:${run.ids[0]}`}
       {...run}
       scene={run.affected && previewScene ? previewScene : scene}
-      selectedIds={selectedIds}
+      selectedIds={runSelection(run.kind, runKinds, selectedIds, NOTHING_SELECTED)}
       drawing={drawing}
       placement={!!placement}
       pixelsPerMetre={camera.pixelsPerMetre}

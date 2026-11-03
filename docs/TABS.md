@@ -132,3 +132,38 @@ Nutzerhinweis: Das Wechseln der Tabs war nicht ganz flüssig. Gemessen wurde vom
 - 1553 Tests grün, Typprüfung und Architekturprüfung ohne Befund, Hash unverändert.
 
 **Grenze:** Eine echte Änderung der Auswahl rendert weiter alle Läufe neu. Bei 20 000 Elementen kostet ein Auswahlklick deshalb weiterhin etwa 0,2 s. Die Auswahl je Lauf aufzuteilen ginge nur mit Vorsicht, weil Fenster und Türen im Wand-Lauf gezeichnet werden. Das wäre ein eigener Auftrag.
+
+## Auswahlklick: Auswahl nur an die betroffenen Läufe (03.11.2026)
+
+Freigabe der Änderungskarte „Auswahlklick schneller“, Schritt 1, durch den Nutzer am 03.11.2026.
+
+**Befund:** Jeder Zeichnungslauf des Grundrisses bekam die ganze Auswahlmenge. Läufe gibt es je Art: Räume, Decken, Schraffuren, Wände, Linien, Maße, Texte. Bei jedem Klick renderten deshalb alle Läufe neu.
+
+**Umsetzung** (`components/cad/run-selection.ts`, `BimPlan.tsx`): Ein Lauf bekommt die Auswahl nur, wenn ein gewähltes Element in ihm gezeichnet wird. Fenster und Türen zählen zum Wand-Lauf, alle anderen Arten zu ihrem eigenen. Die übrigen Läufe bekommen immer dieselbe leere Menge und rendern nicht neu.
+
+**Ergebnis** (20 000 Elemente, Entwicklungsserver, Median aus 3–12 Klicks):
+
+| Klick             | vorher | nachher |
+| ----------------- | -----: | ------: |
+| Linie             | 220 ms |  145 ms |
+| Abwählen (Escape) | 374 ms |  122 ms |
+| Wand              | 247 ms |  247 ms |
+| Fenster           | 225 ms |  240 ms |
+
+Bei Wand und Fenster bleibt die Zeit gleich. Laut Profiler rendert der Grundriss dabei 130–164 ms, fast alles im Wand-Lauf: Er zeichnet alle Wände des Geschosses mit ihren Öffnungen neu, um eine hervorzuheben. Das ist Schritt 2 der Karte, also Wände einzeln memoisieren, und noch nicht umgesetzt. Die obere Leiste rendert bei einer Wandauswahl zu Recht neu (etwa 25 ms), weil sich ihre Werte ändern, etwa Trimmen und Pipette.
+
+**Nachweis:**
+
+- `benchmarks/run-selection.test.ts`: Zuordnung der Arten zu den Läufen; Läufe ohne gewähltes Element bekommen dieselbe leere Menge.
+- Browser (Gesamtmodell 3 000): `aria-pressed` und Hervorhebung stimmen für
+  - Wand, Fenster und Linie einzeln,
+  - Wand und Fenster gemeinsam,
+  - Wand und Linie gemeinsam, also über zwei Läufe hinweg,
+  - das Entfernen der Wand aus der Mehrfachauswahl (Strg-Klick),
+  - das Abwählen.
+
+  Keine Konsolenfehler.
+
+- 1554 Tests grün, Typprüfung, Lint, Architekturprüfung ohne Befund, Hash unverändert.
+
+**Grenze:** Der Raum-Lauf ist nicht eigens geprüft. Die Messung fand kein auswählbares Raum-Element unter „Select room“.
