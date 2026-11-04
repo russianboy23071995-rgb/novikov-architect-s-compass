@@ -11,7 +11,7 @@ So benutzt du sie:
 
 Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus dieser Liste wird beim Auftrag dort eingetragen.
 
-**Stand:** 04.11.2026 · main nach PR634
+**Stand:** 04.11.2026 · main nach PR635
 
 ## Deine Wünsche
 
@@ -41,7 +41,7 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 | L41 | Werkzeug Dachflächenfenster (Fenster in Dachflächen) |      | erledigt: D1 Modell, Loch im Dach, 3D, IFC (PR631), D2 Werkzeug, Grundriss (PR632), D3 Verschieben, Fang, Pipette, Schnitt (PR633), Strichelung und Laibung nach Velux (PR634); offen: Drehen, Eindeckrahmen | docs/DACHFLAECHENFENSTER.md |
 | L42 | Werkzeug Geländer |      | erledigt: G1 Modell, 3D, IFC (PR628), G2 Werkzeug, Grundriss (PR629), G3 Verschieben, Fang, Pipette, Schnitt (PR630); offen: Punkte einzeln bearbeiten | docs/GELAENDER.md |
 | L43 | Werkzeug Gelände (Geländemodell) |      | offen (Nutzerwunsch 02.11.2026) | |
-| L44 | Objektbibliothek (Möbel, Sanitär, eigene Objekte platzieren) |      | offen (Nutzerwunsch 02.11.2026) | |
+| L44 | Objektbibliothek (Möbel, Sanitär, eigene Objekte platzieren) |      | erledigt: O1 Element, Katalog, 3D, IFC (PR635); offen: O2 Werkzeug, O3 eigene Objekte | docs/OBJEKTBIBLIOTHEK.md |
 
 ## Pläne und Dokumentation
 
