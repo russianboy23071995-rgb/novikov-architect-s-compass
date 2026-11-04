@@ -18,6 +18,7 @@ import { slabOpeningOutline } from "../../domain/elements/slab/opening.ts";
 import { roofBody } from "./roof-solid.ts";
 import { columnBody } from "./column-solid.ts";
 import { railingBody } from "./railing-solid.ts";
+import { roofWindowSolid } from "./roof-solid.ts";
 import { openingInsertBodies } from "./opening-insert-solid.ts";
 
 export type Vec3 = [number, number, number];
@@ -35,6 +36,8 @@ export type Face = {
   stair?: true;
   /** Railing face (docs/GELAENDER.md). */
   railing?: true;
+  /** Roof window face (docs/DACHFLAECHENFENSTER.md). */
+  roofWindow?: true;
   /** Facet of a curved surface (round slab opening): no drawn edge to a smooth neighbour. */
   smooth?: true;
   /** Face of a window or door element in an opening (docs/FENSTER_TUEREN.md, FT2). */
@@ -236,8 +239,13 @@ export function buildPreviewSolid(project: ModelGeometry, elevation: number): So
     return body ? [body] : [];
   });
   // Roofs of this storey: relative to the storey floor only (docs/ROOF_ELEMENT.md, D2).
-  for (const roof of "roofs" in storey ? (storey.roofs ?? []) : [])
-    bodies.push(roofBody(roof, elevation));
+  // Roof windows cut their roof and stand in the opening (docs/DACHFLAECHENFENSTER.md).
+  const roofWindows = "roofWindows" in storey ? (storey.roofWindows ?? []) : [];
+  for (const roof of "roofs" in storey ? (storey.roofs ?? []) : []) {
+    const own = roofWindows.filter((w) => w.roofId === roof.id);
+    bodies.push(roofBody(roof, elevation, own));
+    for (const window of own) bodies.push(roofWindowSolid(roof, window, elevation));
+  }
   // Stairs of this storey (docs/TREPPE.md); a bound top needs the storey height.
   for (const stair of "stairs" in storey ? (storey.stairs ?? []) : []) {
     const body = stairBody(stair, elevation, height);

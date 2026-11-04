@@ -25,6 +25,8 @@ export type DisplaySurfaces = Pick<Solid, "min" | "max"> & {
     stair?: true;
     /** Railing face; absent on walls (docs/GELAENDER.md). */
     railing?: true;
+    /** Roof window face (docs/DACHFLAECHENFENSTER.md). */
+    roofWindow?: true;
     /** Window or door element face (docs/FENSTER_TUEREN.md, FT2); glass marks the pane. */
     opening?: "window" | "door";
     glass?: true;
@@ -46,6 +48,7 @@ export function visiblePlanGeometry(project: ModelGeometry, allows: (id: string)
     columns: (storeyOf(project).columns ?? []).filter((c) => allows(c.id)),
     stairs: (storeyOf(project).stairs ?? []).filter((s) => allows(s.id)),
     railings: (storeyOf(project).railings ?? []).filter((r) => allows(r.id)),
+    roofWindows: (storeyOf(project).roofWindows ?? []).filter((w) => allows(w.id)),
     dimensions: (storeyOf(project).dimensions ?? []).filter((d) => allows(d.id)),
     texts: (storeyOf(project).texts ?? []).filter((t) => allows(t.id)),
     hatches: storeyOf(project).hatches.filter((h) => allows(h.id)),

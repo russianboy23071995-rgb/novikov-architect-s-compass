@@ -98,19 +98,21 @@ export function pickSolidElement(
   let depth = wall?.depth ?? Infinity;
   let target: ElementTarget | null = wall
     ? {
-        kind: wall.opening
-          ? wall.opening
-          : wall.slab
-            ? "slab"
-            : wall.roof
-              ? "roof"
-              : wall.column
-                ? "column"
-                : wall.stair
-                  ? "stair"
-                  : wall.railing
-                    ? "railing"
-                    : "wall",
+        kind: wall.roofWindow
+          ? "roofWindow"
+          : wall.opening
+            ? wall.opening
+            : wall.slab
+              ? "slab"
+              : wall.roof
+                ? "roof"
+                : wall.column
+                  ? "column"
+                  : wall.stair
+                    ? "stair"
+                    : wall.railing
+                      ? "railing"
+                      : "wall",
         id: wall.wallId,
       }
     : null;

@@ -183,6 +183,15 @@ export function selectionSummary(project: Project, selection: Selection) {
       details: `${section} · ${column.topBinding ? "bis Geschoss darüber" : `Höhe ${metres(column.height!)}`}`,
     };
   }
+  if (selection.kind === "roofWindow") {
+    const w = storeyOf(project).roofWindows?.find((item) => item.id === selection.id);
+    if (!w) return null;
+    const cm = (m: number) => String(Math.round(m * 100));
+    return {
+      title: "Dachflächenfenster",
+      details: `${cm(w.width)} × ${cm(w.length)} cm · Rahmen ${cm(w.frame)} cm`,
+    };
+  }
   if (selection.kind === "railing") {
     const railing = storeyOf(project).railings?.find((item) => item.id === selection.id);
     if (!railing) return null;

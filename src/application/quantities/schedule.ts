@@ -345,7 +345,11 @@ export function quantitySchedule(project: Project): QuantitySchedule {
             thickness: r.thickness,
             planArea,
             area: planArea / Math.cos((r.pitch * Math.PI) / 180),
-            volume: roofBody(r, 0).volume,
+            volume: roofBody(
+              r,
+              0,
+              (storey.roofWindows ?? []).filter((w) => w.roofId === r.id),
+            ).volume,
             count: 1,
           },
         };

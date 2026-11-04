@@ -30,6 +30,9 @@ import {
   type WindowInsert,
 } from "../../domain/elements/window/insert.ts";
 import { roofBody } from "../../domain/elements/roof/body.ts";
+import { roofWindowBody } from "../../domain/elements/roof/window-body.ts";
+import { roofWindowRings } from "../../domain/elements/roof/window.ts";
+import { roofFrame, roofTopAt } from "../../domain/elements/roof/geometry.ts";
 import { localTrimPlane } from "../../domain/elements/wall/roof-trim.ts";
 import { trimExtrusionBelowPlane } from "../../geometry/solids/plane-trim.ts";
 import { extrudeProfileWithOpenings } from "../../geometry/solids/profile-openings.ts";
@@ -1023,7 +1026,9 @@ export async function writeIfc(
     // aggregating one IfcSlab ROOF whose body is the closed roof surface as a faceted B-rep
     // (the same faces as in 3D, coordinates relative to the storey placement).
     for (const roof of floor.roofs ?? []) {
-      const body = roofBody(roof, 0);
+      // Its roof windows cut the body (docs/DACHFLAECHENFENSTER.md).
+      const roofWindows = (floor.roofWindows ?? []).filter((w) => w.roofId === roof.id);
+      const body = roofBody(roof, 0, roofWindows);
       const points = new Map<string, string>();
       const vertex = (v: readonly number[]) => {
         const k = v.join(",");
@@ -1051,6 +1056,81 @@ export async function writeIfc(
         `${await guid("roof-aggregate", roof.id)},$,$,$,${roofRef},(${surface})`,
       );
       elements.push(roofRef);
+      // Roof windows: an opening perpendicular to the roof surface voids the roof slab and an
+      // IfcWindow SKYLIGHT fills it; its body is the same frame and pane as in 3D.
+      for (const window of roofWindows) {
+        const f = roofFrame(roof);
+        const up = [-f.rise.x * f.sin, -f.rise.y * f.sin, f.cos];
+        const top = roofWindowRings(roof, window).top;
+        const centre = {
+          x: top.reduce((n, p) => n + p.x, 0) / 4,
+          y: top.reduce((n, p) => n + p.y, 0) / 4,
+        };
+        const lift = 0.01;
+        const origin3 = [
+          centre.x + up[0]! * lift,
+          centre.y + up[1]! * lift,
+          roofTopAt(roof, centre) + up[2]! * lift,
+        ];
+        const openingAxis = add(
+          "IFCAXIS2PLACEMENT3D",
+          `${point(origin3)},${direction(up.map((v) => -v))},${direction([f.along.x, f.along.y, 0])}`,
+        );
+        const profile = add(
+          "IFCRECTANGLEPROFILEDEF",
+          `.AREA.,$,${add("IFCAXIS2PLACEMENT2D", `${point([0, 0])},$`)},${real(window.width)},${real(window.length)}`,
+        );
+        const openingSolid = add(
+          "IFCEXTRUDEDAREASOLID",
+          `${profile},${openingAxis},${direction([0, 0, 1])},${real(roof.thickness + 2 * lift)}`,
+        );
+        const openingShape = add(
+          "IFCSHAPEREPRESENTATION",
+          `${context},'Body','SweptSolid',(${openingSolid})`,
+        );
+        const openingRef = add(
+          "IFCOPENINGELEMENT",
+          `${await guid("roof-window-opening", window.id)},$,${label("Opening " + window.id)},$,$,${placement(roofPlacement)},${add("IFCPRODUCTDEFINITIONSHAPE", `$,$,(${openingShape})`)},$,.OPENING.`,
+        );
+        add(
+          "IFCRELVOIDSELEMENT",
+          `${await guid("roof-window-void", window.id)},$,$,$,${surface},${openingRef}`,
+        );
+        const parts = roofWindowBody(roof, window, 0).parts.map((part) => {
+          const loops = part.faces.map((face) => {
+            const loop = add("IFCPOLYLOOP", `(${face.vertices.map(vertex).join(",")})`);
+            return add("IFCFACE", `(${add("IFCFACEOUTERBOUND", `${loop},.T.`)})`);
+          });
+          return add("IFCFACETEDBREP", add("IFCCLOSEDSHELL", `(${loops.join(",")})`));
+        });
+        const windowShape = add(
+          "IFCSHAPEREPRESENTATION",
+          `${context},'Body','Brep',(${parts.join(",")})`,
+        );
+        const windowRef = add(
+          "IFCWINDOW",
+          `${await guid("roof-window", window.id)},$,${label(window.id)},$,$,${placement(roofPlacement)},${add("IFCPRODUCTDEFINITIONSHAPE", `$,$,(${windowShape})`)},${label(window.id)},${real(window.length)},${real(window.width)},.SKYLIGHT.,.NOTDEFINED.,$`,
+        );
+        add(
+          "IFCRELFILLSELEMENT",
+          `${await guid("roof-window-fill", window.id)},$,$,$,${openingRef},${windowRef}`,
+        );
+        elements.push(windowRef);
+        await properties(
+          windowRef,
+          "roofWindow",
+          window.id,
+          [["Status", `IFCLABEL(${text(IFC_RENOVATION_STATUS[wallRenovation(window)])})`]],
+          "Pset_WindowCommon",
+        );
+        await properties(windowRef, "roofWindow", window.id, [
+          ["RoofId", `IFCTEXT(${text(window.roofId)})`],
+          ["Along", `IFCLENGTHMEASURE(${real(window.along)})`],
+          ["Slope", `IFCLENGTHMEASURE(${real(window.slope)})`],
+          ["Frame", `IFCLENGTHMEASURE(${real(window.frame)})`],
+          ["Renovation", `IFCLABEL(${text(wallRenovation(window))})`],
+        ]);
+      }
       await properties(roofRef, "roof", roof.id, [
         ["PitchDegrees", `IFCREAL(${real(roof.pitch)})`],
         ["Thickness", `IFCLENGTHMEASURE(${real(roof.thickness)})`],

@@ -1,3 +1,4 @@
+import { roofWindowRings } from "../../domain/elements/roof/window.ts";
 import { stairGeometry, stairLayout, stairOutline } from "../../domain/elements/stair/model.ts";
 import { maskOnPaper } from "../../domain/elements/drawing/model.ts";
 import { textBox } from "../../domain/elements/text/model.ts";
@@ -95,6 +96,11 @@ const PLAN_SHAPES: {
   }),
   // Picked along its line like a polyline (docs/GELAENDER.md).
   railing: (r) => ({ points: r.points, closed: false }),
+  // Its opening on the roof top, seen from above (docs/DACHFLAECHENFENSTER.md).
+  roofWindow: (w, { project }) => {
+    const roof = storeyOf(project).roofs?.find((r) => r.id === w.roofId);
+    return { points: roof ? roofWindowRings(roof, w).top : [], closed: true };
+  },
 };
 
 /** Short caption per kind for hints: the user-facing number or mark where one exists. */
@@ -115,6 +121,7 @@ const PLAN_CAPTIONS: { [K in ElementKind]: (element: ElementOf<K>) => string | u
   text: (t) => t.content.split("\n")[0]!.slice(0, 24),
   stair: () => undefined,
   railing: () => undefined,
+  roofWindow: () => undefined,
 };
 
 /** Shape order of the box selection (kept stable for existing callers). */
@@ -134,6 +141,7 @@ const SHAPE_ORDER: readonly ElementKind[] = [
   "text",
   "stair",
   "railing",
+  "roofWindow",
 ];
 
 /** Plan paint order, topmost first (lines over walls with their openings over hatches over
@@ -144,6 +152,8 @@ const PICK_RANK: Record<ElementKind, number> = {
   text: 0,
   stair: 2,
   railing: 2,
+  // In its roof, so a click on it picks the window.
+  roofWindow: 3.5,
   window: 1,
   door: 1,
   wall: 2,

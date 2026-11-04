@@ -23,6 +23,7 @@ import { dimensionSchema } from "../elements/dimension/model.ts";
 import { textSchema } from "../elements/text/model.ts";
 import { stairGeometry, stairSchema } from "../elements/stair/model.ts";
 import { railingSchema } from "../elements/railing/model.ts";
+import { roofWindowProblem, roofWindowSchema } from "../elements/roof/window.ts";
 import { sectionSchema } from "../views/sections.ts";
 import { roomNumberKey, roomSchema, roomV32Schema, roomV33Schema } from "../elements/room/model.ts";
 import {
@@ -733,15 +734,29 @@ export const projectV53Schema = projectV45Schema.extend({
   projectInfo: projectInfoSchema.optional(),
 });
 /** Schema 54: railings (Geländer, docs/GELAENDER.md, L42). */
-const storeySchema = storeyV53Schema.extend({
+const storeyV54Schema = storeyV53Schema.extend({
   railings: z.array(railingSchema).max(5000).optional(),
 });
-const layoutDrawingV54Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
+const layoutDrawingV54Schema = z.object({ layoutId: id, storey: storeyV54Schema }).strict();
+export const projectV54Schema = projectV45Schema.extend({
+  schemaVersion: z.literal(54),
+  storeys: z.array(storeyV54Schema).min(1),
+  modelViews: z.array(anyModelViewSchema).optional(),
+  layoutDrawings: z.array(layoutDrawingV54Schema).max(5000).optional(),
+  masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
+  layouts: z.array(layoutV49Schema).max(5000).optional(),
+  projectInfo: projectInfoSchema.optional(),
+});
+/** Schema 55: roof windows (Dachflächenfenster, docs/DACHFLAECHENFENSTER.md, L41). */
+const storeySchema = storeyV54Schema.extend({
+  roofWindows: z.array(roofWindowSchema).max(5000).optional(),
+});
+const layoutDrawingV55Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
 const projectSchema = projectV45Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z.array(storeySchema).min(1),
   modelViews: z.array(anyModelViewSchema).optional(),
-  layoutDrawings: z.array(layoutDrawingV54Schema).max(5000).optional(),
+  layoutDrawings: z.array(layoutDrawingV55Schema).max(5000).optional(),
   masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
   layouts: z.array(layoutV49Schema).max(5000).optional(),
   projectInfo: projectInfoSchema.optional(),
@@ -1188,6 +1203,7 @@ export function validateProject(
       ...(s.texts ?? []),
       ...(s.stairs ?? []),
       ...((s as { railings?: readonly { id: string }[] }).railings ?? []),
+      ...((s as { roofWindows?: readonly { id: string }[] }).roofWindows ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,
@@ -1245,6 +1261,7 @@ export function validateProject(
     validateStoreyRooms(storey, project.layers);
     validateStoreyColumns(storey, project.layers);
     validateStoreyRailings(storey, project.layers);
+    validateStoreyRoofWindows(storey, project.layers);
     // Stairs: existing layer and a climbable height (docs/TREPPE.md).
     for (const stair of storey.stairs ?? []) {
       if (!project.layers.some((l) => l.id === stair.layerId))
@@ -1424,6 +1441,27 @@ function validateStoreyRailings(
   const layerIds = new Set(layers.map((l) => l.id));
   for (const railing of storey.railings)
     if (!layerIds.has(railing.layerId)) throw new Error("Unknown layer: " + railing.layerId);
+}
+
+/** Roof windows reference an existing layer and a roof of the same storey and lie strictly
+ * inside it, apart from each other (docs/DACHFLAECHENFENSTER.md). */
+function validateStoreyRoofWindows(
+  storey: Project["storeys"][number],
+  layers: { id: string }[],
+): void {
+  const windows = storey.roofWindows ?? [];
+  if (!windows.length) return;
+  const layerIds = new Set(layers.map((l) => l.id));
+  for (const w of windows) {
+    if (!layerIds.has(w.layerId)) throw new Error("Unknown layer: " + w.layerId);
+    if (!storey.roofs?.some((roof) => roof.id === w.roofId))
+      throw new Error(`Dachflächenfenster ${w.id}: Dach fehlt.`);
+  }
+  for (const roof of storey.roofs ?? []) {
+    const own = windows.filter((w) => w.roofId === roof.id);
+    const problem = own.length ? roofWindowProblem(roof, own) : null;
+    if (problem) throw new Error(problem);
+  }
 }
 
 /** Roofs reference an existing layer; outline, values and end cuts are checked by the schema. */
@@ -1620,6 +1658,7 @@ function drawingSheetPatterns(
     storey.columns,
     storey.stairs,
     storey.railings,
+    storey.roofWindows,
     storey.references,
     storey.wallJoins,
     storey.wallTJunctions,
