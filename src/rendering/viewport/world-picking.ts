@@ -57,7 +57,9 @@ function* triangles(
                 ? "column"
                 : f.stair
                   ? "stair"
-                  : "wall",
+                  : f.railing
+                    ? "railing"
+                    : "wall",
         id: f.wallId,
       });
       yield;

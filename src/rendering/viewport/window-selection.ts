@@ -108,7 +108,9 @@ export function pickSolidElement(
                 ? "column"
                 : wall.stair
                   ? "stair"
-                  : "wall",
+                  : wall.railing
+                    ? "railing"
+                    : "wall",
         id: wall.wallId,
       }
     : null;

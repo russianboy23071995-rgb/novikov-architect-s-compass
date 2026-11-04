@@ -41,15 +41,15 @@ export function standardLayerId(
   return layers.find(
     (l) =>
       l.id === `layer:${key}` ||
-      (l.id.startsWith(`layer:${key}:`) && /^[1-9]d*$/.test(l.id.slice(`layer:${key}:`.length))),
+      (l.id.startsWith(`layer:${key}:`) && /^[1-9]\d*$/.test(l.id.slice(`layer:${key}:`.length))),
   )?.id;
 }
 
 /** A standard layer added to an older project, with a collision suffix like the other
- * standard layers; unchanged when it exists (Stütze 36 → 37, Treppe 39 → 40). */
+ * standard layers; unchanged when it exists (Stütze 36 → 37, Treppe 39 → 40, Geländer 53 → 54). */
 export function withStandardLayer<T extends { layers: Layer[] }>(
   project: T,
-  key: "column" | "stair",
+  key: "column" | "stair" | "railing",
 ): T {
   if (standardLayerId(project.layers, key)) return project;
   const occupied = new Set(project.layers.map((l) => l.id));

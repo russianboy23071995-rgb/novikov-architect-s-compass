@@ -55,6 +55,7 @@ import {
   projectV49Schema,
   projectV50Schema,
   projectV51Schema,
+  projectV53Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
@@ -274,15 +275,21 @@ export function migrateProjectData(value: unknown): Project {
     return migrateProjectData(
       withColumnLayer(withoutBoundHeights({ ...projectV36Schema.parse(value), schemaVersion: 37 })),
     );
-  // Schema 52 files have the same structure; their slabs now are the floor of their storey
-  // (docs/SLAB_ELEMENT.md, user decision 03.11.2026: no data moved, test projects only).
-  if (value.schemaVersion === 52)
+  // Schema 53 files carry no railings; the strict v53 schema rejects smuggled ones. They get
+  // the standard Geländer layer when it is missing (docs/GELAENDER.md).
+  if (value.schemaVersion === 53)
     return validateProject(
-      withoutBoundHeights({
-        ...(value as unknown as Parameters<typeof withoutBoundHeights>[0]),
-        schemaVersion: PROJECT_SCHEMA_VERSION,
-      }),
+      withStandardLayer(
+        withoutBoundHeights({
+          ...projectV53Schema.parse(value),
+          schemaVersion: PROJECT_SCHEMA_VERSION,
+        }),
+        "railing",
+      ),
     );
+  // Schema 52 files have the same structure as 53; their slabs now are the floor of their
+  // storey (docs/SLAB_ELEMENT.md, user decision 03.11.2026: no data moved, test projects only).
+  if (value.schemaVersion === 52) return migrateProjectData({ ...value, schemaVersion: 53 });
   // Schema 51 files carry outlined slab openings only; the strict v51 schema rejects circles.
   if (value.schemaVersion === 51)
     return validateProject(

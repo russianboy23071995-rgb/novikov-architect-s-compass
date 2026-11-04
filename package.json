@@ -314,6 +314,7 @@
     "src/application/walls/assembly.test.ts",
     "src/application/quantities/schedule.test.ts",
     "src/application/columns/actions.test.ts",
+    "src/application/railings/actions.test.ts",
     "src/application/dimensions/actions.test.ts",
     "src/application/texts/actions.test.ts",
     "src/application/stairs/actions.test.ts",

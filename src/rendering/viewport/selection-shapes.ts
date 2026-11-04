@@ -93,6 +93,8 @@ const PLAN_SHAPES: {
     ),
     closed: true,
   }),
+  // Picked along its line like a polyline (docs/GELAENDER.md).
+  railing: (r) => ({ points: r.points, closed: false }),
 };
 
 /** Short caption per kind for hints: the user-facing number or mark where one exists. */
@@ -112,6 +114,7 @@ const PLAN_CAPTIONS: { [K in ElementKind]: (element: ElementOf<K>) => string | u
   dimension: () => undefined,
   text: (t) => t.content.split("\n")[0]!.slice(0, 24),
   stair: () => undefined,
+  railing: () => undefined,
 };
 
 /** Shape order of the box selection (kept stable for existing callers). */
@@ -130,6 +133,7 @@ const SHAPE_ORDER: readonly ElementKind[] = [
   "dimension",
   "text",
   "stair",
+  "railing",
 ];
 
 /** Plan paint order, topmost first (lines over walls with their openings over hatches over
@@ -139,6 +143,7 @@ const PICK_RANK: Record<ElementKind, number> = {
   dimension: 0,
   text: 0,
   stair: 2,
+  railing: 2,
   window: 1,
   door: 1,
   wall: 2,

@@ -6,6 +6,7 @@ import {
 } from "../../domain/elements/wall/assembly.ts";
 import { stairBody } from "../../domain/elements/stair/body.ts";
 import { columnLevels } from "../../domain/elements/column/model.ts";
+import { railingLength, railingMembers } from "../../domain/elements/railing/model.ts";
 import { IFC_RENOVATION_STATUS, wallRenovation } from "../../domain/elements/wall/renovation.ts";
 import { wallBase } from "../../domain/elements/wall/heights.ts";
 import { resolveStoreyLevels } from "../../domain/storeys/heights.ts";
@@ -870,6 +871,60 @@ export async function writeIfc(
         ["BaseOffset", `IFCLENGTHMEASURE(${real(column.baseOffset)})`],
         ["Height", `IFCLENGTHMEASURE(${real(levels.top - levels.bottom)})`],
         ["Renovation", `IFCLABEL(${text(wallRenovation(column))})`],
+      ]);
+    }
+    // Railings (docs/GELAENDER.md): IfcRailing .GUARDRAIL. whose body holds one swept
+    // rectangle per member (handrail, posts, bottom rail, bars or panels), so receiving tools see
+    // the real members; storey coordinates, foot and top relative to the storey floor.
+    for (const railing of floor.railings ?? []) {
+      const members = railingMembers(railing);
+      const items: string[] = [];
+      for (const member of members) {
+        const dx = member.end.x - member.start.x,
+          dy = member.end.y - member.start.y;
+        const length = Math.hypot(dx, dy);
+        const depth = member.top - member.bottom;
+        if (length <= 1e-9 || depth <= 1e-9) continue;
+        const centre = add("IFCAXIS2PLACEMENT2D", `${point([0, 0])},$`);
+        const profile = add(
+          "IFCRECTANGLEPROFILEDEF",
+          `.AREA.,$,${centre},${real(length)},${real(member.width)}`,
+        );
+        const position = axis(
+          (member.start.x + member.end.x) / 2,
+          (member.start.y + member.end.y) / 2,
+          member.bottom,
+          dx / length,
+          dy / length,
+        );
+        items.push(add("IFCEXTRUDEDAREASOLID", `${profile},${position},${up},${real(depth)}`));
+      }
+      if (!items.length) continue;
+      const shape = add(
+        "IFCSHAPEREPRESENTATION",
+        `${context},'Body','SweptSolid',(${items.join(",")})`,
+      );
+      const railingRef = add(
+        "IFCRAILING",
+        `${await guid("railing", railing.id)},$,${label(railing.id)},$,$,${placement(storeyPlacement)},${add("IFCPRODUCTDEFINITIONSHAPE", `$,$,(${shape})`)},${label(railing.id)},.GUARDRAIL.`,
+      );
+      elements.push(railingRef);
+      await properties(
+        railingRef,
+        "railing",
+        railing.id,
+        [
+          ["Height", `IFCPOSITIVELENGTHMEASURE(${real(railing.height)})`],
+          ["Status", `IFCLABEL(${text(IFC_RENOVATION_STATUS[wallRenovation(railing)])})`],
+        ],
+        "Pset_RailingCommon",
+      );
+      await properties(railingRef, "railing", railing.id, [
+        ["Length", `IFCLENGTHMEASURE(${real(railingLength(railing))})`],
+        ["BaseOffset", `IFCLENGTHMEASURE(${real(railing.baseOffset)})`],
+        ["PostSpacing", `IFCLENGTHMEASURE(${real(railing.postSpacing)})`],
+        ["Infill", `IFCLABEL(${text(railing.infill)})`],
+        ["Renovation", `IFCLABEL(${text(wallRenovation(railing))})`],
       ]);
     }
     // Stairs (docs/TREPPE.md, TR1/TR3): IfcStair (straight, quarter or half turn) aggregating

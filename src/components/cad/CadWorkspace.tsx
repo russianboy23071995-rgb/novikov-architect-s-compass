@@ -1169,7 +1169,8 @@ export function CadWorkspace({
   };
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
-    if (!selection || selection.kind === "reference") return;
+    // Railings are edited with G3 (docs/GELAENDER.md).
+    if (!selection || selection.kind === "reference" || selection.kind === "railing") return;
     const inSolid = mode === "3D";
     // Slabs and roofs: outline edited in the plan, moved as a whole (SLAB_/ROOF_ELEMENT.md).
     // Columns move as a whole too (docs/STUETZEN.md, P3).
@@ -4152,7 +4153,8 @@ export function CadWorkspace({
                             target.kind === "column" ||
                             target.kind === "dimension" ||
                             target.kind === "text" ||
-                            target.kind === "stair"
+                            target.kind === "stair" ||
+                            target.kind === "railing"
                           )
                             return;
                           if (
