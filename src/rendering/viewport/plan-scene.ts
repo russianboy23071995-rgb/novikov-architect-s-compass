@@ -3,6 +3,7 @@ import { columnLevels, columnOutline } from "../../domain/elements/column/model.
 import { stairGeometry, stairPlan } from "../../domain/elements/stair/model.ts";
 import { railingMembers } from "../../domain/elements/railing/model.ts";
 import { railingMemberCorners } from "./railing-solid.ts";
+import { roofWindowRings } from "../../domain/elements/roof/window.ts";
 import { slabOpeningSymbol } from "../../domain/elements/slab/opening.ts";
 import type { HatchPatternDefinition } from "../../domain/elements/hatch/pattern.ts";
 import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
@@ -133,7 +134,27 @@ export function derivePlanScene(
       ),
     ),
     // Cut at 1 m, outline below and above it (docs/ROOF_ELEMENT.md, D4).
-    roofViews: new Map(plan.roofs.map((r) => [r.id, roofPlanView(r)])),
+    roofViews: new Map(
+      plan.roofs.map((r) => [
+        r.id,
+        roofPlanView(
+          r,
+          undefined,
+          ("roofWindows" in storey ? (storey.roofWindows ?? []) : []).filter(
+            (w) => w.roofId === r.id,
+          ),
+        ),
+      ]),
+    ),
+    // Roof windows: their opening on the roof top, seen from below the roof like its outline
+    // above the cut (docs/DACHFLAECHENFENSTER.md, D2). A window whose roof is hidden is not drawn.
+    roofWindows: new Map(plan.roofWindows.map((w) => [w.id, w])),
+    roofWindowViews: new Map(
+      plan.roofWindows.flatMap((w) => {
+        const roof = plan.roofs.find((r) => r.id === w.roofId);
+        return roof ? [[w.id, roofWindowRings(roof, w).top] as const] : [];
+      }),
+    ),
     hatches: new Map(plan.hatches.map((h) => [h.id, h])),
     lines: new Map(plan.lines.map((l) => [l.id, l])),
     references: new Map(plan.references.map((r) => [r.id, r])),
@@ -152,6 +173,7 @@ export type PlanRun = {
     | "column"
     | "stair"
     | "railing"
+    | "roofWindow"
     | "line"
     | "dimension"
     | "text";
@@ -183,6 +205,7 @@ export function planSceneRuns(scene: PlanScene, replacedIds: readonly string[]):
     ["slabOpening", scene.plan.slabOpenings],
     // Roof outline as seen from below the roof (docs/ROOF_ELEMENT.md, D3; cut view in D4).
     ["roof", scene.plan.roofs],
+    ["roofWindow", scene.plan.roofWindows],
     ["hatch", scene.plan.hatches],
     ["wall", scene.plan.walls],
     ["column", scene.plan.columns],

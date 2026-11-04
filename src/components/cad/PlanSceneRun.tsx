@@ -497,6 +497,7 @@ export function PlanSceneContent({
     columns: kind === "column" ? ids.map((id) => scene.columns.get(id)!) : [],
     stairs: kind === "stair" ? ids.map((id) => scene.stairs.get(id)!) : [],
     railings: kind === "railing" ? ids.map((id) => scene.railings.get(id)!) : [],
+    roofWindows: kind === "roofWindow" ? ids.map((id) => scene.roofWindows.get(id)!) : [],
     dimensions: kind === "dimension" ? ids.map((id) => scene.dimensions.get(id)!) : [],
     texts: kind === "text" ? ids.map((id) => scene.texts.get(id)!) : [],
     lines: kind === "line" ? ids.map((id) => scene.lines.get(id)!) : [],
@@ -947,6 +948,53 @@ export function PlanSceneContent({
               pixelsPerMetre={pixelsPerMetre}
               color={selectedIds.has(stair.id) ? "#0284c7" : "var(--primary)"}
               width={wallOutlineWidth}
+            />
+          </g>
+        );
+      })}
+      {plan.roofWindows.map((window) => {
+        // Roof window (docs/DACHFLAECHENFENSTER.md, D2): above the 1 m cut, so its opening is
+        // dashed like the roof outline above the cut, with a cross as the window symbol.
+        const ring = scene.roofWindowViews.get(window.id);
+        if (!ring) return null;
+        const points = ring.map((p) => `${p.x},${-p.y}`).join(" ");
+        const selected = selectedIds.has(window.id);
+        const color = selected ? "#0284c7" : "var(--primary)";
+        const [a, b, c, d] = ring;
+        return (
+          <g key={window.id} aria-label={`Dachflächenfenster ${window.id}`}>
+            {selected && (
+              <polygon
+                points={points}
+                fill="#38bdf8"
+                fillOpacity={0.15}
+                stroke="#38bdf8"
+                strokeOpacity={0.5}
+                strokeWidth={4}
+                vectorEffect="non-scaling-stroke"
+                pointerEvents="none"
+              />
+            )}
+            <polygon
+              {...selectProps("roofWindow", window.id)}
+              points={points}
+              fill="var(--background)"
+              fillOpacity={0.01}
+              stroke={color}
+              strokeWidth={1.2}
+              strokeDasharray="6 3"
+              vectorEffect="non-scaling-stroke"
+              pointerEvents={placement ? "none" : "all"}
+              className="cursor-pointer outline-none"
+            />
+            <path
+              d={`M${a!.x},${-a!.y} L${c!.x},${-c!.y} M${b!.x},${-b!.y} L${d!.x},${-d!.y}`}
+              fill="none"
+              stroke={color}
+              strokeWidth={0.8}
+              strokeDasharray="6 3"
+              vectorEffect="non-scaling-stroke"
+              pointerEvents="none"
             />
           </g>
         );
