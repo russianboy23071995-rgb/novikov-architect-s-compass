@@ -36,6 +36,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { CanvasContextMenu, type ContextMenuEntry } from "./CanvasContextMenu";
+import { commandForKey, isCopyToggle, resetHotkeys, setHotkey } from "@/application/hotkeys/keys";
+import { HotkeySettings } from "./HotkeySettings";
+import { copyTransformed } from "@/application/selection/copy-transform";
+import { CopyCursorBadge } from "./CopyCursorBadge";
+import { hotkeyLabel, resolvedHotkeys, type HotkeyCommand } from "@/domain/hotkeys/model";
 import {
   clipboardSummary,
   copySelection,
@@ -337,6 +342,7 @@ export function CadWorkspace({
     return capturedPlan.current;
   }, [activeDocumentId]);
   const [penSetsOpen, setPenSetsOpen] = useState(false);
+  const [hotkeysOpen, setHotkeysOpen] = useState(false);
   const [lineCreatorOpen, setLineCreatorOpen] = useState(false);
   const [hatchLibraryOpen, setHatchLibraryOpen] = useState(false);
   const [layersOpen, setLayersOpen] = useState(false);
@@ -728,9 +734,29 @@ export function CadWorkspace({
     setSelection,
     selectCommitted,
   } = useElementSelection(project, visibility);
-  const groupMove = useSelectionMove(project, selections, visibility, (next) =>
-    dispatchEditing({ type: "project", project: next }),
-  );
+  // Kopie bewegen (docs/TASTENKUERZEL.md, B1): the copy switch during a move leaves the
+  // originals in place and sets down copies of them, one undo step, the copies selected.
+  const [copyMove, setCopyMove] = useState(false);
+  const groupMove = useSelectionMove(project, selections, visibility, (next) => {
+    if (!copyMove) return dispatchEditing({ type: "project", project: next });
+    try {
+      const copied = copyTransformed(
+        project,
+        next,
+        selections,
+        (kind) => `${kind}-${crypto.randomUUID()}`,
+      );
+      dispatchEditing({ type: "project", project: copied.project });
+      selectManyCommitted(copied.project, copied.targets);
+      showNotice(clipboardSummary(copied.content, "kopiert und bewegt"));
+      setModelError("");
+    } catch (error) {
+      setModelError(error instanceof Error ? error.message : "Kopie nicht möglich.");
+    }
+  });
+  useEffect(() => {
+    if (!groupMove.active) setCopyMove(false);
+  }, [groupMove.active]);
   const cancelGroup = useRef(groupMove.cancel);
   cancelGroup.current = groupMove.cancel;
   const selectedLayerId = selectedLayerElement(project, selection)?.layerId;
@@ -916,33 +942,53 @@ export function CadWorkspace({
       if (referenceSelection.selecting) return;
       if (
         event.target instanceof Element &&
-        (event.target.closest(
+        event.target.closest(
           'input, textarea, select, [contenteditable=true], [role="dialog"], [role="alertdialog"]',
-        ) ||
-          event.altKey)
+        )
       )
         return;
-      if (event.ctrlKey || event.metaKey) {
-        const key = event.key.toLowerCase();
-        if (key === "z" || key === "y") {
-          event.preventDefault();
-          if (!event.repeat) navigateHistory(key === "y" || event.shiftKey ? "redo" : "undo");
-        } else if ((key === "c" || key === "x" || key === "v") && !event.repeat) {
-          if (clipboardShortcut.current?.(key)) event.preventDefault();
-        } else if (key === "a" && !event.repeat) {
-          if (selectAllShortcut.current?.()) event.preventDefault();
-        }
+      // Every shortcut comes from the project's list (docs/TASTENKUERZEL.md, B1).
+      const hotkeys = hotkeysNow.current;
+      if (!event.repeat && isCopyToggle(hotkeys, event) && copyToggleShortcut.current?.()) {
+        event.preventDefault();
         return;
       }
-      const map: Record<string, ToolId> = {
-        v: "select",
-        w: "wall",
-        s: "slab",
-        l: "line",
-        h: "hatch",
-        t: "door",
+      const command = commandForKey(hotkeys, event);
+      if (!command && event.key !== "Escape") return;
+      const toolOf: Partial<Record<HotkeyCommand, ToolId>> = {
+        "tool-select": "select",
+        "tool-wall": "wall",
+        "tool-slab": "slab",
+        "tool-line": "line",
+        "tool-hatch": "hatch",
+        "tool-door": "door",
       };
-      const next = map[event.key.toLowerCase()];
+      if (command === "undo" || command === "redo") {
+        event.preventDefault();
+        if (!event.repeat) navigateHistory(command);
+        return;
+      }
+      if (command === "copy" || command === "cut" || command === "paste") {
+        const key = command === "copy" ? "c" : command === "cut" ? "x" : "v";
+        if (!event.repeat && clipboardShortcut.current?.(key)) event.preventDefault();
+        return;
+      }
+      if (command === "select-all") {
+        if (!event.repeat && selectAllShortcut.current?.()) event.preventDefault();
+        return;
+      }
+      if (command === "move" || command === "rotate" || command === "mirror") {
+        event.preventDefault();
+        if (!event.repeat) commandShortcut.current?.(command);
+        return;
+      }
+      if (command === "delete") {
+        if (!deleteShortcut.current) return;
+        event.preventDefault();
+        if (!event.repeat) deleteShortcut.current();
+        return;
+      }
+      const next = command ? toolOf[command] : undefined;
       if (next) {
         cancelInteraction();
         setTool(next);
@@ -968,11 +1014,6 @@ export function CadWorkspace({
           next === "room"
         )
           setMode("2D");
-      }
-      if ((event.key === "Delete" || event.key === "Backspace") && deleteShortcut.current) {
-        event.preventDefault();
-        if (!event.repeat) deleteShortcut.current();
-        return;
       }
       if (event.key === "Escape") {
         const step = escapeStep({ consumed: event.defaultPrevented, ...escapeState.current });
@@ -1171,14 +1212,17 @@ export function CadWorkspace({
     } else showSelection(next, anchor, index, modelPoint, edgeIndex);
   };
 
-  const selectMany = (targets: SelectionSet) => {
+  const selectMany = (targets: SelectionSet, committed?: Project) => {
     cancelInteraction();
-    choose(targets);
+    if (committed) selectCommitted(committed, targets);
+    else choose(targets);
     setDemandOpen(targets.length > 0);
     setDemandPosition({ x: lastPointer.current.x + 16, y: lastPointer.current.y + 16 });
     setPickedPoint({ index: null, anchor: null, edgeIndex: null });
     setTool("select");
   };
+  /** New elements (paste, copy move): checked against the committed model, not this render's. */
+  const selectManyCommitted = (next: Project, targets: SelectionSet) => selectMany(targets, next);
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
     if (!selection || selection.kind === "reference") return;
@@ -1423,7 +1467,7 @@ export function CadWorkspace({
     try {
       const pasted = pasteClipboard(project, content, (kind) => `${kind}-${crypto.randomUUID()}`);
       dispatchEditing({ type: "project", project: pasted.project });
-      selectMany(pasted.targets);
+      selectManyCommitted(pasted.project, pasted.targets);
       showNotice(clipboardSummary(content, "eingefügt"));
       setModelError("");
     } catch (error) {
@@ -1853,6 +1897,17 @@ export function CadWorkspace({
     const single = target ?? (selections.length === 1 ? selections[0]! : null);
     return [
       {
+        id: "move",
+        label: "Bewegen",
+        shortcut: `${hotkeyLabel(resolvedHotkeys(project.hotkeys).move)} · danach ${hotkeyLabel(resolvedHotkeys(project.hotkeys)["copy-toggle"])}: Kopie`,
+        disabled:
+          none ||
+          (!canEditSelection && "Gerade nicht möglich.") ||
+          (mode === "3D" && "Nur im Grundriss."),
+        run: () => commandShortcut.current?.("move"),
+      },
+      "separator",
+      {
         id: "cut",
         label: "Ausschneiden",
         shortcut: "Strg+X",
@@ -1954,6 +2009,29 @@ export function CadWorkspace({
       selectElement(target, { x, y });
     setDemandOpen(false);
     setContextMenu({ x, y, target });
+  };
+  // Shortcuts of the project (docs/TASTENKUERZEL.md, B1).
+  const hotkeysNow = useRef(project.hotkeys);
+  hotkeysNow.current = project.hotkeys;
+  const commandShortcut = useRef<((command: "move" | "rotate" | "mirror") => void) | null>(null);
+  commandShortcut.current = (command) => {
+    if (command !== "move")
+      return setModelError(
+        command === "rotate"
+          ? "Drehen folgt mit B2 (docs/TASTENKUERZEL.md)."
+          : "Spiegeln folgt mit B3 (docs/TASTENKUERZEL.md).",
+      );
+    if (groupMove.active || editSession) return;
+    if (!selections.length || !selection) return setModelError("Erst ein Element auswählen.");
+    if (mode === "3D") return setModelError("Bewegen per Tastenkürzel nur im Grundriss.");
+    setCopyMove(false);
+    startEdit("move");
+  };
+  const copyToggleShortcut = useRef<(() => boolean) | null>(null);
+  copyToggleShortcut.current = () => {
+    if (!groupMove.active) return false;
+    setCopyMove((on) => !on);
+    return true;
   };
   // Strg+A (docs/FILTER.md): every visible element of the working storey, in the plan only.
   const selectAllShortcut = useRef<(() => boolean) | null>(null);
@@ -3016,6 +3094,16 @@ export function CadWorkspace({
 
   return (
     <CadAppearanceProvider projectId={project.id} penSet={project.penSet ?? defaultPenSet}>
+      <HotkeySettings
+        open={hotkeysOpen}
+        onClose={() => setHotkeysOpen(false)}
+        hotkeys={project.hotkeys}
+        onChange={(command, combo) =>
+          dispatchEditing({ type: "project", project: setHotkey(project, command, combo) })
+        }
+        onReset={() => dispatchEditing({ type: "project", project: resetHotkeys(project) })}
+      />
+      <CopyCursorBadge active={groupMove.active && copyMove} />
       <CanvasDisplaySettings
         open={displaySettingsOpen}
         onOpenChange={setDisplaySettingsOpen}
@@ -3625,6 +3713,7 @@ export function CadWorkspace({
             imageInput.current?.click();
           }}
           onCanvasDisplay={() => setDisplaySettingsOpen(true)}
+          onHotkeys={() => setHotkeysOpen(true)}
           onLayers={() => {
             cancelInteraction();
             setDemandOpen(false);

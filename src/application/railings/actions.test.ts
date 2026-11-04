@@ -148,14 +148,14 @@ test("add: tool start values on the Geländer layer; invalid railings are refuse
 });
 
 test("schema 54: files round-trip; v53 files get the layer and refuse smuggled railings", () => {
-  assert.equal(PROJECT_SCHEMA_VERSION, 57);
+  assert.equal(PROJECT_SCHEMA_VERSION, 58);
   const p = withRailings();
   const back = readProjectFile(serializeProject(p));
   assert.deepEqual(storeyOf(back).railings, storeyOf(p).railings);
   const stored = JSON.parse(serializeProject(createStandardProject("p", "eg", "og")));
   stored.layers = stored.layers.filter((l: { name: string }) => l.name !== "Geländer");
   const loaded = loadProjectData({ ...stored, schemaVersion: 53 });
-  assert.equal(loaded.schemaVersion, 57);
+  assert.equal(loaded.schemaVersion, 58);
   assert.ok(loaded.layers.some((l) => l.id === "layer:railing" && l.name === "Geländer"));
   // A project that keeps its Geländer layer is unchanged.
   const kept = loadProjectData({

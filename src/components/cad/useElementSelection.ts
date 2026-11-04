@@ -35,9 +35,10 @@ export function useElementSelection(project: Project, visibility: LayerVisibilit
   );
   // Model commit and selection request are batched. Validate a newly created ID
   // against the committed snapshot, not the previous render's model.
-  const selectCommitted = (next: Project, target: SelectionSet[number] | null) => {
+  const selectCommitted = (next: Project, target: SelectionSet[number] | SelectionSet | null) => {
     const policy = createLayerVisibilityPolicy(next, visibility.context);
-    setRequested(eligibleSelection(next, policy, target ? [target] : []));
+    const wanted = !target ? [] : Array.isArray(target) ? target : [target];
+    setRequested(eligibleSelection(next, policy, wanted));
   };
   return { targets, selection: singleTarget(targets), choose, setSelection, selectCommitted };
 }

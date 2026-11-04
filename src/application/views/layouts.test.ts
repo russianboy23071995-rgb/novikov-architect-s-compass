@@ -183,7 +183,7 @@ test("master layouts: following layouts take a changed sheet; a used master stay
 
 test("schema 43 files load without layouts; smuggled layouts are refused", () => {
   const stored = JSON.parse(serializeProject(createStandardProject("p", "eg", "og")));
-  assert.equal(loadProjectData({ ...stored, schemaVersion: 43 }).schemaVersion, 57);
+  assert.equal(loadProjectData({ ...stored, schemaVersion: 43 }).schemaVersion, 58);
   assert.throws(() =>
     loadProjectData({
       ...stored,
