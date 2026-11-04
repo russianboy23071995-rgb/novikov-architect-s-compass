@@ -120,3 +120,5 @@ Vorgaben (Empfehlung der Karte, vom Nutzer nicht anders bestimmt): frei als Lini
 - **Bindung:** Ein Geländer hängt nicht an Decke oder Treppe. Bewegt man diese, bleibt das Geländer stehen.
 - **Ecken und Maße:** Ecken sind nicht auf Gehrung geschnitten, die Maße der Bauteile stehen fest.
 - **Darstellung:** Ein eigenes Geländer-Symbol im Schnitt (Schraffur oder Linienart) gibt es nicht. Geschnittene Teile sehen aus wie andere geschnittene Bauteile.
+
+**Korrektur 04.11.2026 (PR „Dachflächenfenster Laibung“):** Die Mittellinie bei Stäben war entgegen der Meldung in G2 nicht sichtbar gestrichelt. Die Strichlänge stand in Metern (6 m Strich, 3 m Lücke) und wirkte deshalb durchgezogen. Jetzt sind es 6 Pixel Strich und 3 Pixel Lücke in jedem Maßstab.

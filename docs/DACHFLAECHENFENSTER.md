@@ -129,3 +129,30 @@ Vorgaben aus der Karte:
 - **Bauteil:** ohne Eindeckrahmen, Flügel oder Öffnungsart; das IFC kennt die Öffnungsart nicht.
 - **Vorschau:** Beim Verschieben eines Dachs folgen seine Fenster in der laufenden Vorschau nicht sichtbar mit. Nach dem Absetzen sind sie richtig.
 - **Mengen:** Die Mengenliste zeigt Grundfläche und Dachfläche brutto. Nur das Volumen zieht die Fenster ab.
+
+## Nachtrag: Strichelung im Grundriss und Laibung (Dateiversion 56)
+
+Nutzerauftrag 04.11.2026: das Fenster im Grundriss sichtbar gestrichelt; die Laibungen wahlweise nach Velux-Vorgabe (oben waagerecht, unten lotrecht). Änderungskarte mit „Go“ freigegeben, Startwert rechtwinklig.
+
+- **Strichelung:** Umriss und Kreuz waren mit „6 3“ in Metern gestrichelt, also 6 m Strich, und sahen durchgezogen aus (Fehler aus D2, im Browser damals falsch als gestrichelt gemeldet). Jetzt 6 Pixel Strich, 3 Pixel Lücke in jedem Maßstab, wie der Dachumriss über dem Schnitt. Dieselbe Korrektur beim Geländer (Stäbe).
+- **Modell:** `upperReveal` („square“ | „horizontal“) und `lowerReveal` („square“ | „plumb“), beide optional; fehlend heißt rechtwinklig zur Dachfläche.
+- **Öffnung** (`roofWindowOpening`): Auf der Dachoberseite bleibt das Rechteck. Auf der Unterseite liegen die Kanten bergauf versetzt um
+  - rechtwinklig: Stärke · sin(Neigung),
+  - untere Kante lotrecht: 0, senkrecht unter der Oberkante,
+  - obere Kante waagerecht: Stärke ÷ sin(Neigung), auf Höhe der Oberkante.
+  - Die Seitenlaibungen bleiben rechtwinklig. Die Öffnung weitet sich so zum Raum hin.
+- **Rahmen und Glas** bleiben rechtwinklig im Kern der Öffnung (`roofWindowRings`).
+- **Prüfung:** Auch die Unterseite der Öffnung muss ganz im Dach liegen, und zwei Fenster dürfen sich auch unten nicht überschneiden. Sonst wird die Änderung abgelehnt. Bei flachen Dächern wird die waagerechte obere Laibung lang (bei 15° und 24 cm Stärke rund 93 cm im Grundriss).
+- **Folgen von selbst:** 3D, Schnitt, Dachschnitt im Grundriss, Volumen in der Mengenliste.
+- **Bedienung:** Auswahlfelder „Obere Laibung“ und „Untere Laibung“ in Werkzeugleiste, Einstellungsfenster und Eigenschaften; eine Änderung ist ein Rückgängig-Schritt; die Pipette übernimmt sie. Neue Fenster beginnen rechtwinklig.
+- **Schema 56:** Eine 55er Datei mit Laibungsangabe wird abgelehnt; 55er Dateien laden unverändert, rechtwinklig.
+- **IFC:** Das Dach trägt das aufgeweitete Loch. Das `IfcOpeningElement` bleibt rechtwinklig (Grenze).
+
+**Nachweis:**
+
+- **Prüfungen:** 1592 Tests grün, davon 4 neu: Lage der Unterkanten (lotrecht, waagerecht auf Höhe der Oberkante), Volumen (das Dach verliert genau die Keile Breite · Stärke² · tan(Neigung) / 2 unten und Breite · Stärke² / (2 · tan(Neigung)) oben), Einstellungen, Pipette und Ablehnung am First, Dateiversion 55/56. Dazu Typprüfung beider Projekte, Lint, Architekturprüfung ohne Befund, 14-Modell-Hash unverändert.
+- **Browser** (Pultdach 8 × 5 m, 35°, Fenster dfw-1 mit Velux-Laibung, dfw-2 rechtwinklig, Schnitte A-A und B-B quer durch beide):
+  - Grundriss: Strich auf dem Bildschirm nachgemessen 6,0 Pixel.
+  - Schnitt A-A durch dfw-1: Das untere Dachstück endet mit einer lotrechten Kante, das obere mit einer waagerechten; Rahmen und Glas stehen rechtwinklig dazwischen.
+  - Schnitt B-B durch dfw-2: beide Laibungen rechtwinklig zur Dachfläche, wie bisher.
+  - Eigenschaften von dfw-1 zeigen „waagerecht (Velux)“ und „lotrecht (Velux)“. Obere Laibung auf rechtwinklig gestellt und übernommen, mit Strg+Z wieder auf waagerecht (dass es genau ein Schritt ist, belegt der Test der Eigenschaften, nicht der Browser).

@@ -1,4 +1,9 @@
-import { ROOF_WINDOW_DEFAULTS, type RoofWindow } from "../../domain/elements/roof/window.ts";
+import {
+  ROOF_WINDOW_DEFAULTS,
+  type RoofWindow,
+  type RoofWindowLowerReveal,
+  type RoofWindowUpperReveal,
+} from "../../domain/elements/roof/window.ts";
 import type { WallRenovation } from "../../domain/elements/wall/renovation.ts";
 
 /**
@@ -9,13 +14,21 @@ export type RoofWindowDefaults = {
   width: number;
   length: number;
   frame: number;
+  upperReveal: RoofWindowUpperReveal;
+  lowerReveal: RoofWindowLowerReveal;
   renovation: WallRenovation;
   layerId: string;
 };
 
-/** Tool defaults: 78 × 118 cm, frame 6 cm, Neubau like new walls. */
+/** Tool defaults: 78 × 118 cm, frame 6 cm, reveals square, Neubau like new walls. */
 export function roofWindowToolDefaults(layerId: string): RoofWindowDefaults {
-  return { ...ROOF_WINDOW_DEFAULTS, renovation: "new", layerId };
+  return {
+    ...ROOF_WINDOW_DEFAULTS,
+    upperReveal: "square",
+    lowerReveal: "square",
+    renovation: "new",
+    layerId,
+  };
 }
 
 /** The stored values of the settings (all but id, roof and place). */
@@ -27,6 +40,8 @@ export function roofWindowValues(
     width: d.width,
     length: d.length,
     frame: d.frame,
+    upperReveal: d.upperReveal,
+    lowerReveal: d.lowerReveal,
     renovation: d.renovation,
   };
 }
@@ -37,6 +52,8 @@ export function roofWindowSettings(window: RoofWindow): RoofWindowDefaults {
     width: window.width,
     length: window.length,
     frame: window.frame,
+    upperReveal: window.upperReveal ?? "square",
+    lowerReveal: window.lowerReveal ?? "square",
     renovation: window.renovation ?? "existing",
     layerId: window.layerId,
   };

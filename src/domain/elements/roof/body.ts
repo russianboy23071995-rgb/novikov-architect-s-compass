@@ -1,5 +1,5 @@
 import { triangulatePolygonWithHoles } from "../../../geometry/polygons/triangulate.ts";
-import { roofWindowRings, type RoofWindow } from "./window.ts";
+import { roofWindowOpening, type RoofWindow } from "./window.ts";
 import { roofFaceRings, roofFrame, roofTopAt, roofUndersideAt } from "./geometry.ts";
 import type { Roof } from "./model.ts";
 
@@ -35,11 +35,12 @@ function newell(points: readonly Vec3[]): Vec3 {
 export function roofBody(
   roof: Roof,
   elevation: number,
-  /** Its roof windows (docs/DACHFLAECHENFENSTER.md): openings perpendicular to the surface. */
-  windows: readonly Pick<RoofWindow, "along" | "slope" | "width" | "length">[] = [],
+  /** Its roof windows (docs/DACHFLAECHENFENSTER.md): openings with their reveals. */
+  windows: readonly (Pick<RoofWindow, "along" | "slope" | "width" | "length"> &
+    Partial<Pick<RoofWindow, "upperReveal" | "lowerReveal">>)[] = [],
 ): { faces: RoofBodyFace[]; volume: number } {
   const { top, bottom } = roofFaceRings(roof);
-  const holes = windows.map((w) => roofWindowRings(roof, w));
+  const holes = windows.map((w) => roofWindowOpening(roof, w));
   const holesTop = holes.map((h) => h.top),
     holesBottom = holes.map((h) => h.bottom);
   const { rise, sin, cos } = roofFrame(roof);

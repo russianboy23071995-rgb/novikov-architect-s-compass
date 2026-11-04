@@ -57,6 +57,7 @@ import {
   projectV51Schema,
   projectV53Schema,
   projectV54Schema,
+  projectV55Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
@@ -275,6 +276,14 @@ export function migrateProjectData(value: unknown): Project {
   if (value.schemaVersion === 36)
     return migrateProjectData(
       withColumnLayer(withoutBoundHeights({ ...projectV36Schema.parse(value), schemaVersion: 37 })),
+    );
+  // Schema 55 roof windows carry no reveal settings (square); the strict v55 schema rejects one.
+  if (value.schemaVersion === 55)
+    return validateProject(
+      withoutBoundHeights({
+        ...projectV55Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
     );
   // Schema 54 files carry no roof windows; the strict v54 schema rejects smuggled ones.
   if (value.schemaVersion === 54)
