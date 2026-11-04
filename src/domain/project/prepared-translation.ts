@@ -38,6 +38,44 @@ function freeze<T>(value: T): T {
 }
 const pointKey = (p: Point, z: number) => JSON.stringify([p.x, p.y, z]);
 
+/**
+ * A plan transform (docs/TASTENKUERZEL.md, B2): every point maps, turned fields (columns,
+ * objects, texts, stairs, images) add `degrees` counterclockwise. A move is the transform
+ * with `delta` and 0°; a turn has no `delta`. Hatch patterns keep their angle.
+ */
+export type PlanTransform = Readonly<{
+  point: (p: Point) => Point;
+  degrees: number;
+  delta?: Point;
+}>;
+export function translationTransform(delta: Point): PlanTransform {
+  return { point: (p) => translatePoint(p, delta), degrees: 0, delta };
+}
+/** Exact for quarter turns: 90°, 180° and 270° leave no rounding residue. */
+export function rotationTransform(pivot: Point, degrees: number): PlanTransform {
+  if (![pivot.x, pivot.y, degrees].every(Number.isFinite)) throw new Error("Ungültige Drehung.");
+  const quarter = degrees / 90;
+  const exact = Number.isInteger(quarter) ? ((quarter % 4) + 4) % 4 : null;
+  const a = (degrees * Math.PI) / 180;
+  const cos = exact === null ? Math.cos(a) : [1, 0, -1, 0][exact]!;
+  const sin = exact === null ? Math.sin(a) : [0, 1, 0, -1][exact]!;
+  return {
+    degrees,
+    point: (p) => {
+      const dx = p.x - pivot.x,
+        dy = p.y - pivot.y;
+      return { x: pivot.x + dx * cos - dy * sin, y: pivot.y + dx * sin + dy * cos };
+    },
+  };
+}
+const identityTransform = (t: PlanTransform) =>
+  t.delta ? t.delta.x === 0 && t.delta.y === 0 : t.degrees % 360 === 0;
+/** Degrees in [0, 360), never -0. */
+const turnedDegrees = (value: number, by: number) => {
+  const next = (((value + by) % 360) + 360) % 360;
+  return next === 0 ? 0 : next;
+};
+
 /** One full preparation. Per-target work uses this owned immutable snapshot only. */
 function prepareStoreyTranslation(base: Project, selectedIds: readonly string[]) {
   const ids = new Set(selectedIds);
@@ -189,12 +227,14 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
     ? prepareDetachedEndSolids(stationary)
     : createPreparedWallSolids(storeyOf(affected).walls.map((w) => w.id));
 
-  function evaluate(delta: Point): GeometryPreview {
-    if (!Number.isFinite(delta.x) || !Number.isFinite(delta.y))
+  function evaluate(t: PlanTransform): GeometryPreview {
+    if (t.delta && (!Number.isFinite(t.delta.x) || !Number.isFinite(t.delta.y)))
       throw new Error("Ungültige Bewegung.");
-    if (delta.x === 0 && delta.y === 0) return freeze({ geometry: affected, replacedIds });
+    if (!Number.isFinite(t.degrees)) throw new Error("Ungültige Drehung.");
+    if (identityTransform(t)) return freeze({ geometry: affected, replacedIds });
+    const turn = t.degrees % 360 !== 0;
     const translate = (p: Point) => {
-      const next = translatePoint(p, delta);
+      const next = t.point(p);
       if (!Number.isFinite(next.x) || !Number.isFinite(next.y))
         throw new Error("Ungültige Bewegung.");
       return next;
@@ -231,6 +271,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
         references: storeyOf(affected).references.map((r) => ({
           ...r,
           origin: translate(r.origin),
+          ...(turn ? { rotation: r.rotation + (t.degrees * Math.PI) / 180 } : {}),
         })),
         ...(storeyOf(affected).slabs
           ? {
@@ -278,6 +319,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
               columns: storeyOf(affected).columns!.map((column) => ({
                 ...column,
                 position: translate(column.position),
+                ...(turn ? { rotation: turnedDegrees(column.rotation, t.degrees) } : {}),
               })),
             }
           : {}),
@@ -295,6 +337,9 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
         ...(storeyOf(affected).roofWindows
           ? {
               roofWindows: storeyOf(affected).roofWindows!.map((w) => {
+                // Turned only with its roof (B2): then it follows the roof by itself.
+                if (!t.delta) throw new Error("Dachflächenfenster drehen nur mit ihrem Dach.");
+                const delta = t.delta;
                 const roof = storeyOf(base).roofs!.find((r) => r.id === w.roofId)!;
                 const f = roofFrame(roof);
                 return {
@@ -311,6 +356,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
               objects: storeyOf(affected).objects!.map((o) => ({
                 ...o,
                 position: translate(o.position),
+                ...(turn ? { rotation: turnedDegrees(o.rotation, t.degrees) } : {}),
               })),
             }
           : {}),
@@ -320,14 +366,16 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
               stairs: storeyOf(affected).stairs!.map((stair) => ({
                 ...stair,
                 start: translate(stair.start),
+                ...(turn ? { direction: turnedDegrees(stair.direction, t.degrees) } : {}),
               })),
             }
           : {}),
         ...(storeyOf(affected).texts
           ? {
-              texts: storeyOf(affected).texts!.map((t) => ({
-                ...t,
-                position: translate(t.position),
+              texts: storeyOf(affected).texts!.map((text) => ({
+                ...text,
+                position: translate(text.position),
+                ...(turn ? { rotation: turnedDegrees(text.rotation, t.degrees) } : {}),
               })),
             }
           : {}),
@@ -343,13 +391,24 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
         ...(storeyOf(affected).dimensions
           ? {
               dimensions: storeyOf(affected).dimensions!.map((d) => {
+                // Turned only in quarter turns (B2): an odd one swaps the orientation.
+                const quarter = t.degrees / 90;
+                if (!Number.isInteger(quarter))
+                  throw new Error("Maßketten drehen nur in 90°-Schritten.");
+                const swap = Math.abs(quarter) % 2 === 1;
+                const orientation = swap
+                  ? d.orientation === "horizontal"
+                    ? ("vertical" as const)
+                    : ("horizontal" as const)
+                  : d.orientation;
                 const moved = translate(
                   d.orientation === "horizontal" ? { x: 0, y: d.offset } : { x: d.offset, y: 0 },
                 );
                 return {
                   ...d,
+                  ...(swap ? { orientation } : {}),
                   points: d.points.map(translate),
-                  offset: d.orientation === "horizontal" ? moved.y : moved.x,
+                  offset: orientation === "horizontal" ? moved.y : moved.x,
                 };
               }),
             }
@@ -408,9 +467,9 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
     return freeze({ geometry, replacedIds });
   }
 
-  function materialize(delta: Point) {
-    const patch = evaluate(delta);
-    if (delta.x === 0 && delta.y === 0) return s;
+  function materialize(t: PlanTransform) {
+    const patch = evaluate(t);
+    if (identityTransform(t)) return s;
     const replace = <T extends { id: string }>(all: readonly T[], changed: readonly T[]): T[] => {
       const byId = new Map(changed.map((e) => [e.id, e]));
       return all.map((e) => byId.get(e.id) ?? e);
@@ -511,20 +570,26 @@ export function prepareStoreysTranslation(source: Project, selectedIds: readonly
     },
     replacedIds: [],
   };
+  /** Any plan transform (B2: turn about a point), with the move's checks and joins. */
+  const evaluateTransform = (t: PlanTransform): GeometryPreview => {
+    if (parts.length === 1 && parts[0]!.id === activeId) return parts[0]!.action.evaluate(t);
+    const patches = parts.map((p) => ({ storeyId: p.id, ...p.action.evaluate(t) }));
+    const active = patches.find((p) => p.storeyId === activeId) ?? empty;
+    return { ...active, storeyPatches: patches };
+  };
+  const materializeTransform = (current: Project, t: PlanTransform): Project => {
+    snapshot.assertCurrent(current);
+    const changed = new Map(parts.map((p) => [p.id, p.action.materialize(t)]));
+    if (identityTransform(t)) return current;
+    return validateProject({ ...base, storeys: base.storeys.map((s) => changed.get(s.id) ?? s) });
+  };
   return Object.freeze({
     replacedIds: parts.find((p) => p.id === activeId)?.action.replacedIds ?? [],
-    evaluate(delta: Point): GeometryPreview {
-      if (parts.length === 1 && parts[0]!.id === activeId) return parts[0]!.action.evaluate(delta);
-      const patches = parts.map((p) => ({ storeyId: p.id, ...p.action.evaluate(delta) }));
-      const active = patches.find((p) => p.storeyId === activeId) ?? empty;
-      return { ...active, storeyPatches: patches };
-    },
-    materialize(current: Project, delta: Point): Project {
-      snapshot.assertCurrent(current);
-      const changed = new Map(parts.map((p) => [p.id, p.action.materialize(delta)]));
-      if (delta.x === 0 && delta.y === 0) return current;
-      return validateProject({ ...base, storeys: base.storeys.map((s) => changed.get(s.id) ?? s) });
-    },
+    evaluate: (delta: Point): GeometryPreview => evaluateTransform(translationTransform(delta)),
+    materialize: (current: Project, delta: Point): Project =>
+      materializeTransform(current, translationTransform(delta)),
+    evaluateTransform,
+    materializeTransform,
   });
 }
 

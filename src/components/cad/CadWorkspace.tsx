@@ -40,6 +40,7 @@ import { commandForKey, isCopyToggle, resetHotkeys, setHotkey } from "@/applicat
 import { HotkeySettings } from "./HotkeySettings";
 import { copyTransformed } from "@/application/selection/copy-transform";
 import { CopyCursorBadge } from "./CopyCursorBadge";
+import { useSelectionRotate } from "./useSelectionRotate";
 import { hotkeyLabel, resolvedHotkeys, type HotkeyCommand } from "@/domain/hotkeys/model";
 import {
   clipboardSummary,
@@ -754,11 +755,38 @@ export function CadWorkspace({
       setModelError(error instanceof Error ? error.message : "Kopie nicht möglich.");
     }
   });
+  // Drehen (docs/TASTENKUERZEL.md, B2): three clicks; the same copy switch as the move.
+  const groupRotate = useSelectionRotate(project, selections, visibility, (next, degrees) => {
+    const turned = `${degrees.toLocaleString("de-DE", { maximumFractionDigits: 2 })}°`;
+    if (!copyMove) {
+      dispatchEditing({ type: "project", project: next });
+      showNotice(`Auswahl um ${turned} gedreht`);
+      return;
+    }
+    try {
+      const copied = copyTransformed(
+        project,
+        next,
+        selections,
+        (kind) => `${kind}-${crypto.randomUUID()}`,
+      );
+      dispatchEditing({ type: "project", project: copied.project });
+      selectManyCommitted(copied.project, copied.targets);
+      showNotice(clipboardSummary(copied.content, `kopiert und um ${turned} gedreht`));
+      setModelError("");
+    } catch (error) {
+      setModelError(error instanceof Error ? error.message : "Kopie nicht möglich.");
+    }
+  });
+  const transformActive = groupMove.active || groupRotate.active;
   useEffect(() => {
-    if (!groupMove.active) setCopyMove(false);
-  }, [groupMove.active]);
+    if (!transformActive) setCopyMove(false);
+  }, [transformActive]);
   const cancelGroup = useRef(groupMove.cancel);
-  cancelGroup.current = groupMove.cancel;
+  cancelGroup.current = () => {
+    groupMove.cancel();
+    groupRotate.cancel();
+  };
   const selectedLayerId = selectedLayerElement(project, selection)?.layerId;
   const selectedIdSet = useMemo(() => new Set(selections.map((t) => t.id)), [selections]);
   const currentSelection = useRef(selection);
@@ -1430,14 +1458,14 @@ export function CadWorkspace({
   const deleteShortcut = useRef<(() => void) | null>(null);
   const selectedSection = (project.sections ?? []).find((s) => s.id === selectedSectionId);
   deleteShortcut.current =
-    tool === "select" && !editSession && !groupMove.active && selectedSection
+    tool === "select" && !editSession && !transformActive && selectedSection
       ? () => {
           setSelectedSectionId(null);
           setSectionWindow(null);
           dispatchEditing({ type: "project", project: removeSection(project, selectedSection.id) });
           showNotice(`${selectedSection.name} gelöscht`);
         }
-      : tool === "select" && !editSession && !groupMove.active && selections.length
+      : tool === "select" && !editSession && !transformActive && selections.length
         ? deleteSelection
         : null;
 
@@ -1449,7 +1477,7 @@ export function CadWorkspace({
     y: number;
     target: NonNullable<Selection> | null;
   } | null>(null);
-  const canEditSelection = tool === "select" && !editSession && !groupMove.active;
+  const canEditSelection = tool === "select" && !editSession && !transformActive;
   const copySelected = (cut = false) => {
     try {
       const content = copySelection(project, selections);
@@ -1906,6 +1934,16 @@ export function CadWorkspace({
           (mode === "3D" && "Nur im Grundriss."),
         run: () => commandShortcut.current?.("move"),
       },
+      {
+        id: "rotate",
+        label: "Drehen",
+        shortcut: `${hotkeyLabel(resolvedHotkeys(project.hotkeys).rotate)} · danach ${hotkeyLabel(resolvedHotkeys(project.hotkeys)["copy-toggle"])}: Kopie`,
+        disabled:
+          none ||
+          (!canEditSelection && "Gerade nicht möglich.") ||
+          (mode === "3D" && "Nur im Grundriss."),
+        run: () => commandShortcut.current?.("rotate"),
+      },
       "separator",
       {
         id: "cut",
@@ -2015,34 +2053,42 @@ export function CadWorkspace({
   hotkeysNow.current = project.hotkeys;
   const commandShortcut = useRef<((command: "move" | "rotate" | "mirror") => void) | null>(null);
   commandShortcut.current = (command) => {
-    if (command !== "move")
+    if (command === "mirror")
+      return setModelError("Spiegeln folgt mit B3 (docs/TASTENKUERZEL.md).");
+    if (transformActive || editSession) return;
+    if (!selections.length || !selection) return setModelError("Erst ein Element auswählen.");
+    if (mode === "3D")
       return setModelError(
         command === "rotate"
-          ? "Drehen folgt mit B2 (docs/TASTENKUERZEL.md)."
-          : "Spiegeln folgt mit B3 (docs/TASTENKUERZEL.md).",
+          ? "Drehen nur im Grundriss."
+          : "Bewegen per Tastenkürzel nur im Grundriss.",
       );
-    if (groupMove.active || editSession) return;
-    if (!selections.length || !selection) return setModelError("Erst ein Element auswählen.");
-    if (mode === "3D") return setModelError("Bewegen per Tastenkürzel nur im Grundriss.");
     setCopyMove(false);
-    startEdit("move");
+    if (command === "move") return startEdit("move");
+    try {
+      setDemandOpen(false);
+      groupRotate.begin();
+      setModelError("");
+    } catch (error) {
+      setModelError(error instanceof Error ? error.message : "Drehen nicht möglich.");
+    }
   };
   const copyToggleShortcut = useRef<(() => boolean) | null>(null);
   copyToggleShortcut.current = () => {
-    if (!groupMove.active) return false;
+    if (!transformActive) return false;
     setCopyMove((on) => !on);
     return true;
   };
   // Strg+A (docs/FILTER.md): every visible element of the working storey, in the plan only.
   const selectAllShortcut = useRef<(() => boolean) | null>(null);
   selectAllShortcut.current = () => {
-    if (filterPlace.kind !== "plan" || editSession || groupMove.active) return false;
+    if (filterPlace.kind !== "plan" || editSession || transformActive) return false;
     selectMany(filterElements(project, visibility, { kind: "storey" }, NO_CRITERIA));
     return true;
   };
   const clipboardShortcut = useRef<((key: string) => boolean) | null>(null);
   clipboardShortcut.current = (key) => {
-    if (key === "v" && clipboard.current && !editSession && !groupMove.active) {
+    if (key === "v" && clipboard.current && !editSession && !transformActive) {
       pasteFromClipboard();
       return true;
     }
@@ -2701,7 +2747,7 @@ export function CadWorkspace({
   cancelCalibration.current = calibration.cancel;
   const recoveryBusy =
     !!pendingSession ||
-    groupMove.active ||
+    transformActive ||
     tool !== "select" ||
     readingFile ||
     !!pendingFile ||
@@ -2729,7 +2775,7 @@ export function CadWorkspace({
     running:
       tool !== "select" ||
       !!pendingSession ||
-      groupMove.active ||
+      transformActive ||
       imageTool.active ||
       calibration.active ||
       // The on-demand menu opens with every selection; it closes with the selection.
@@ -2755,6 +2801,7 @@ export function CadWorkspace({
   const interaction = useToolInteraction(
     windowPlacement ??
       groupMove.adapter ??
+      groupRotate.adapter ??
       (editSession
         ? editInteraction(
             editSession,
@@ -3103,7 +3150,7 @@ export function CadWorkspace({
         }
         onReset={() => dispatchEditing({ type: "project", project: resetHotkeys(project) })}
       />
-      <CopyCursorBadge active={groupMove.active && copyMove} />
+      <CopyCursorBadge active={transformActive && copyMove} />
       <CanvasDisplaySettings
         open={displaySettingsOpen}
         onOpenChange={setDisplaySettingsOpen}
@@ -3810,7 +3857,7 @@ export function CadWorkspace({
         />
         {demandOpen &&
           !imageTool.active &&
-          !groupMove.active &&
+          !transformActive &&
           !referenceSelection.selecting &&
           (mode === "2D" || (tool === "select" && selections.length > 0 && !editSession)) && (
             <DemandMenu
@@ -4216,7 +4263,23 @@ export function CadWorkspace({
                                       }
                                     : interaction.pick,
                                 }
-                              : undefined
+                              : groupRotate.active
+                                ? {
+                                    target: interaction.target,
+                                    geometryPreview: groupRotate.adapter?.geometryPreview,
+                                    rotationGuide: groupRotate.pivot
+                                      ? {
+                                          pivot: groupRotate.pivot,
+                                          reference: groupRotate.session?.reference ?? null,
+                                        }
+                                      : undefined,
+                                    aim: interaction.draft.move,
+                                    pick:
+                                      groupRotate.stage === "pivot"
+                                        ? (point) => groupRotate.pickPivot(point)
+                                        : interaction.pick,
+                                  }
+                                : undefined
                         }
                         project={project}
                         drawingPreview={activeChain?.preview}
@@ -4597,6 +4660,18 @@ export function CadWorkspace({
                         }}
                       />
                     )}
+                  {groupRotate.active && (
+                    <p
+                      role="status"
+                      className="pointer-events-none absolute bottom-12 left-3 rounded bg-popover px-2 py-1 text-xs"
+                    >
+                      {groupRotate.stage === "pivot"
+                        ? "Drehen: Drehpunkt anklicken · Esc verwirft"
+                        : groupRotate.stage === "reference"
+                          ? "Drehen: Bezugsrichtung anklicken · Umschalt 45° · Esc verwirft"
+                          : `Drehen: Zielrichtung anklicken · Tab: Winkel · Umschalt 45° · ${hotkeyLabel(resolvedHotkeys(project.hotkeys)["copy-toggle"])}: Kopie · Esc verwirft`}
+                    </p>
+                  )}
                   {groupMove.active && (
                     <p
                       role="status"

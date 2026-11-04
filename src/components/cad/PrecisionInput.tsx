@@ -14,6 +14,7 @@ export function PrecisionInput({
   lengthHint,
   axisLabel,
   scalar = false,
+  angleOnly = false,
   mouseHint = "Mausrichtung · Tab: Länge ↔ Winkel",
   onChange,
   onCaptureDirection,
@@ -33,6 +34,8 @@ export function PrecisionInput({
   lengthHint: string;
   axisLabel: string | null;
   scalar?: boolean;
+  /** Only the angle field (B2: the turn); Tab always goes there. */
+  angleOnly?: boolean;
   mouseHint?: string;
   onChange: (angle: string, length: string) => void;
   onCaptureDirection: () => void;
@@ -44,8 +47,8 @@ export function PrecisionInput({
   const angleField = useRef<HTMLInputElement>(null);
   const lengthField = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    if (focusLengthToken) lengthField.current?.focus();
-  }, [focusLengthToken]);
+    if (focusLengthToken) (angleOnly ? angleField : lengthField).current?.focus();
+  }, [focusLengthToken, angleOnly]);
   const panel = useRef<HTMLFormElement>(null);
   useEffect(() => {
     const tab = (event: KeyboardEvent) => {
@@ -65,6 +68,11 @@ export function PrecisionInput({
       )
         return;
       event.preventDefault();
+      if (angleOnly) {
+        angleField.current?.focus();
+        angleField.current?.select();
+        return;
+      }
       const inside = active === lengthField.current || active === angleField.current;
       if (!inside && !angle.trim() && !axisLabel) onCaptureDirection();
       const target =
@@ -74,7 +82,7 @@ export function PrecisionInput({
     };
     window.addEventListener("keydown", tab, true);
     return () => window.removeEventListener("keydown", tab, true);
-  }, [angle, axisLabel, onCaptureDirection, scalar]);
+  }, [angle, axisLabel, onCaptureDirection, scalar, angleOnly]);
   const drag = useRef<{ pointer: Point2; origin: Point2; id: number } | null>(null);
   const [bounds, setBounds] = useState({
     width: 1024,
@@ -187,13 +195,13 @@ export function PrecisionInput({
       >
         ⠿ Eingabe
       </button>
-      <div className={scalar ? "grid gap-1" : "grid grid-cols-2 gap-1"}>
+      <div className={scalar || angleOnly ? "grid gap-1" : "grid grid-cols-2 gap-1"}>
         {!scalar && (
           <label>
-            Winkel °
+            {angleOnly ? "Drehwinkel °" : "Winkel °"}
             <input
               ref={angleField}
-              aria-label="Bewegungswinkel (Grad)"
+              aria-label={angleOnly ? "Drehwinkel (Grad)" : "Bewegungswinkel (Grad)"}
               className={field}
               inputMode="decimal"
               value={angle}
@@ -204,7 +212,7 @@ export function PrecisionInput({
             />
           </label>
         )}
-        <label>
+        <label hidden={angleOnly}>
           {scalar ? "Z-Versatz m" : "Länge m"}
           <input
             ref={lengthField}
