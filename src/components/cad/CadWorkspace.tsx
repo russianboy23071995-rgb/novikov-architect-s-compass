@@ -1195,6 +1195,7 @@ export function CadWorkspace({
       selection.kind === "column" ||
       selection.kind === "railing" ||
       selection.kind === "roofWindow" ||
+      selection.kind === "object" ||
       selection.kind === "stair" ||
       selection.kind === "dimension" ||
       selection.kind === "text";
@@ -1225,17 +1226,20 @@ export function CadWorkspace({
                     ? storeyOf(project).railings!.find((r) => r.id === selection.id)!.points[0]!
                     : selection.kind === "roofWindow"
                       ? roofWindowCentre(project, selection.id)
-                      : selection.kind === "stair"
-                        ? storeyOf(project).stairs!.find((s) => s.id === selection.id)!.start
-                        : selection.kind === "dimension"
-                          ? storeyOf(project).dimensions!.find((d) => d.id === selection.id)!
-                              .points[0]!
-                          : selection.kind === "text"
-                            ? storeyOf(project).texts!.find((t) => t.id === selection.id)!.position
-                            : selection.kind === "drawing"
-                              ? storeyOf(project).drawings!.find((d) => d.id === selection.id)!
+                      : selection.kind === "object"
+                        ? storeyOf(project).objects!.find((o) => o.id === selection.id)!.position
+                        : selection.kind === "stair"
+                          ? storeyOf(project).stairs!.find((s) => s.id === selection.id)!.start
+                          : selection.kind === "dimension"
+                            ? storeyOf(project).dimensions!.find((d) => d.id === selection.id)!
+                                .points[0]!
+                            : selection.kind === "text"
+                              ? storeyOf(project).texts!.find((t) => t.id === selection.id)!
                                   .position
-                              : editAnchor(project, selection));
+                              : selection.kind === "drawing"
+                                ? storeyOf(project).drawings!.find((d) => d.id === selection.id)!
+                                    .position
+                                : editAnchor(project, selection));
       cancelInteraction();
       try {
         const axis =
@@ -1262,7 +1266,12 @@ export function CadWorkspace({
     }
 
     // A railing only moves as a whole (handled above); its points are not edited yet.
-    if (selection.kind === "railing" || selection.kind === "roofWindow") return;
+    if (
+      selection.kind === "railing" ||
+      selection.kind === "roofWindow" ||
+      selection.kind === "object"
+    )
+      return;
     // Slab outlines are edited in the plan (docs/SLAB_ELEMENT.md, E1); in 3D the slab moves whole.
     if (area && (inSolid || action === "axis")) {
       const words = {
@@ -4289,7 +4298,8 @@ export function CadWorkspace({
                             target.kind === "text" ||
                             target.kind === "stair" ||
                             target.kind === "railing" ||
-                            target.kind === "roofWindow"
+                            target.kind === "roofWindow" ||
+                            target.kind === "object"
                           )
                             return;
                           if (

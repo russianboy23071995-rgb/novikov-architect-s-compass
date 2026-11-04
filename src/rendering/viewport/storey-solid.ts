@@ -18,6 +18,7 @@ import { slabOpeningOutline } from "../../domain/elements/slab/opening.ts";
 import { roofBody } from "./roof-solid.ts";
 import { columnBody } from "./column-solid.ts";
 import { railingBody } from "./railing-solid.ts";
+import { objectBody } from "./object-solid.ts";
 import { roofWindowSolid } from "./roof-solid.ts";
 import { openingInsertBodies } from "./opening-insert-solid.ts";
 
@@ -38,6 +39,8 @@ export type Face = {
   railing?: true;
   /** Roof window face (docs/DACHFLAECHENFENSTER.md). */
   roofWindow?: true;
+  /** Placed object face (docs/OBJEKTBIBLIOTHEK.md). */
+  object?: true;
   /** Facet of a curved surface (round slab opening): no drawn edge to a smooth neighbour. */
   smooth?: true;
   /** Face of a window or door element in an opening (docs/FENSTER_TUEREN.md, FT2). */
@@ -259,6 +262,9 @@ export function buildPreviewSolid(project: ModelGeometry, elevation: number): So
   // Railings of this storey (docs/GELAENDER.md): relative to the storey floor only.
   for (const railing of "railings" in storey ? (storey.railings ?? []) : [])
     bodies.push(railingBody(railing, elevation));
+  // Placed objects (docs/OBJEKTBIBLIOTHEK.md): relative to the storey floor only.
+  for (const object of "objects" in storey ? (storey.objects ?? []) : [])
+    bodies.push(objectBody(object, elevation));
   // Window and door elements in their openings (docs/FENSTER_TUEREN.md, FT2).
   if ("walls" in storey) bodies.push(...openingInsertBodies(storey, elevation));
   if (bodies.length) {

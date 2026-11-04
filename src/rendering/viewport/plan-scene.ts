@@ -4,6 +4,7 @@ import { stairGeometry, stairPlan } from "../../domain/elements/stair/model.ts";
 import { railingMembers } from "../../domain/elements/railing/model.ts";
 import { railingMemberCorners } from "./railing-solid.ts";
 import { roofWindowRings } from "../../domain/elements/roof/window.ts";
+import { objectOutline, objectSymbol } from "../../domain/elements/object/model.ts";
 import { slabOpeningSymbol } from "../../domain/elements/slab/opening.ts";
 import type { HatchPatternDefinition } from "../../domain/elements/hatch/pattern.ts";
 import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
@@ -149,6 +150,14 @@ export function derivePlanScene(
     // Roof windows: their opening on the roof top, seen from below the roof like its outline
     // above the cut (docs/DACHFLAECHENFENSTER.md, D2). A window whose roof is hidden is not drawn.
     roofWindows: new Map(plan.roofWindows.map((w) => [w.id, w])),
+    // Objects: outline and catalogue symbol in thin lines, seen from above
+    // (docs/OBJEKTBIBLIOTHEK.md, O1).
+    objects: new Map(plan.objects.map((o) => [o.id, o])),
+    objectViews: new Map(
+      plan.objects.map(
+        (o) => [o.id, { outline: objectOutline(o), symbol: objectSymbol(o) }] as const,
+      ),
+    ),
     roofWindowViews: new Map(
       plan.roofWindows.flatMap((w) => {
         const roof = plan.roofs.find((r) => r.id === w.roofId);
@@ -174,6 +183,7 @@ export type PlanRun = {
     | "stair"
     | "railing"
     | "roofWindow"
+    | "object"
     | "line"
     | "dimension"
     | "text";
@@ -207,6 +217,8 @@ export function planSceneRuns(scene: PlanScene, replacedIds: readonly string[]):
     ["roof", scene.plan.roofs],
     ["roofWindow", scene.plan.roofWindows],
     ["hatch", scene.plan.hatches],
+    // Furniture lies beneath the walls that bound it (docs/OBJEKTBIBLIOTHEK.md).
+    ["object", scene.plan.objects],
     ["wall", scene.plan.walls],
     ["column", scene.plan.columns],
     ["stair", scene.plan.stairs],

@@ -23,6 +23,7 @@ import { dimensionSchema } from "../elements/dimension/model.ts";
 import { textSchema } from "../elements/text/model.ts";
 import { stairGeometry, stairSchema } from "../elements/stair/model.ts";
 import { railingSchema } from "../elements/railing/model.ts";
+import { objectSchema } from "../elements/object/model.ts";
 import {
   roofWindowProblem,
   roofWindowSchema,
@@ -766,15 +767,29 @@ export const projectV55Schema = projectV45Schema.extend({
   projectInfo: projectInfoSchema.optional(),
 });
 /** Schema 56: roof window reveals (upper horizontal, lower plumb; docs/DACHFLAECHENFENSTER.md). */
-const storeySchema = storeyV54Schema.extend({
+const storeyV56Schema = storeyV54Schema.extend({
   roofWindows: z.array(roofWindowSchema).max(5000).optional(),
 });
-const layoutDrawingV56Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
+const layoutDrawingV56Schema = z.object({ layoutId: id, storey: storeyV56Schema }).strict();
+export const projectV56Schema = projectV45Schema.extend({
+  schemaVersion: z.literal(56),
+  storeys: z.array(storeyV56Schema).min(1),
+  modelViews: z.array(anyModelViewSchema).optional(),
+  layoutDrawings: z.array(layoutDrawingV56Schema).max(5000).optional(),
+  masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
+  layouts: z.array(layoutV49Schema).max(5000).optional(),
+  projectInfo: projectInfoSchema.optional(),
+});
+/** Schema 57: placed objects (Objektbibliothek, docs/OBJEKTBIBLIOTHEK.md, L44). */
+const storeySchema = storeyV56Schema.extend({
+  objects: z.array(objectSchema).max(20000).optional(),
+});
+const layoutDrawingV57Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
 const projectSchema = projectV45Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z.array(storeySchema).min(1),
   modelViews: z.array(anyModelViewSchema).optional(),
-  layoutDrawings: z.array(layoutDrawingV56Schema).max(5000).optional(),
+  layoutDrawings: z.array(layoutDrawingV57Schema).max(5000).optional(),
   masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
   layouts: z.array(layoutV49Schema).max(5000).optional(),
   projectInfo: projectInfoSchema.optional(),
@@ -1222,6 +1237,7 @@ export function validateProject(
       ...(s.stairs ?? []),
       ...((s as { railings?: readonly { id: string }[] }).railings ?? []),
       ...((s as { roofWindows?: readonly { id: string }[] }).roofWindows ?? []),
+      ...((s as { objects?: readonly { id: string }[] }).objects ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,
@@ -1279,6 +1295,7 @@ export function validateProject(
     validateStoreyRooms(storey, project.layers);
     validateStoreyColumns(storey, project.layers);
     validateStoreyRailings(storey, project.layers);
+    validateStoreyObjects(storey, project.layers);
     validateStoreyRoofWindows(storey, project.layers);
     // Stairs: existing layer and a climbable height (docs/TREPPE.md).
     for (const stair of storey.stairs ?? []) {
@@ -1459,6 +1476,15 @@ function validateStoreyRailings(
   const layerIds = new Set(layers.map((l) => l.id));
   for (const railing of storey.railings)
     if (!layerIds.has(railing.layerId)) throw new Error("Unknown layer: " + railing.layerId);
+}
+
+/** Objects reference an existing layer; catalogue entry and values are checked by the schema
+ * (docs/OBJEKTBIBLIOTHEK.md). */
+function validateStoreyObjects(storey: Project["storeys"][number], layers: { id: string }[]): void {
+  if (!storey.objects?.length) return;
+  const layerIds = new Set(layers.map((l) => l.id));
+  for (const object of storey.objects)
+    if (!layerIds.has(object.layerId)) throw new Error("Unknown layer: " + object.layerId);
 }
 
 /** Roof windows reference an existing layer and a roof of the same storey and lie strictly
@@ -1677,6 +1703,7 @@ function drawingSheetPatterns(
     storey.stairs,
     storey.railings,
     storey.roofWindows,
+    storey.objects,
     storey.references,
     storey.wallJoins,
     storey.wallTJunctions,

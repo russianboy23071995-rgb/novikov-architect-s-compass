@@ -12,6 +12,8 @@ import type { Project, Point } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../../application/selection/target.ts";
 import { connectedWallContours } from "../../domain/elements/wall/connections.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
+import { objectOutline } from "../../domain/elements/object/model.ts";
+import { objectDefinition } from "../../domain/elements/object/catalog.ts";
 import { contains } from "../../geometry/polygons/contains.ts";
 import {
   ELEMENT_KINDS,
@@ -96,6 +98,8 @@ const PLAN_SHAPES: {
   }),
   // Picked along its line like a polyline (docs/GELAENDER.md).
   railing: (r) => ({ points: r.points, closed: false }),
+  // The object's box in plan (docs/OBJEKTBIBLIOTHEK.md).
+  object: (o) => ({ points: objectOutline(o), closed: true }),
   // Its opening on the roof top, seen from above (docs/DACHFLAECHENFENSTER.md).
   roofWindow: (w, { project }) => {
     const roof = storeyOf(project).roofs?.find((r) => r.id === w.roofId);
@@ -122,6 +126,7 @@ const PLAN_CAPTIONS: { [K in ElementKind]: (element: ElementOf<K>) => string | u
   stair: () => undefined,
   railing: () => undefined,
   roofWindow: () => undefined,
+  object: (o) => objectDefinition(o.catalogId).name,
 };
 
 /** Shape order of the box selection (kept stable for existing callers). */
@@ -142,6 +147,7 @@ const SHAPE_ORDER: readonly ElementKind[] = [
   "stair",
   "railing",
   "roofWindow",
+  "object",
 ];
 
 /** Plan paint order, topmost first (lines over walls with their openings over hatches over
@@ -154,6 +160,8 @@ const PICK_RANK: Record<ElementKind, number> = {
   railing: 2,
   // In its roof, so a click on it picks the window.
   roofWindow: 3.5,
+  // Beneath walls and columns, above hatches and rooms (docs/OBJEKTBIBLIOTHEK.md).
+  object: 2.5,
   window: 1,
   door: 1,
   wall: 2,
