@@ -318,6 +318,7 @@
     "src/application/roof-windows/actions.test.ts",
     "src/application/objects/actions.test.ts",
     "src/application/hotkeys/keys.test.ts",
+    "src/application/selection/rotate.test.ts",
     "src/application/dimensions/actions.test.ts",
     "src/application/texts/actions.test.ts",
     "src/application/stairs/actions.test.ts",

@@ -15,8 +15,8 @@ import { comboFromKey } from "@/application/hotkeys/keys";
  * shortcut records the next key press; Escape stops recording. Changes go into the project
  * (one undo step each) and travel with it.
  */
-/** Commands listed already, implemented with B2 (rotate) and B3 (mirror). */
-const SOON = new Set<HotkeyCommand>(["rotate", "mirror"]);
+/** Commands listed already, implemented with B3 (mirror). */
+const SOON = new Set<HotkeyCommand>(["mirror"]);
 
 export function HotkeySettings({
   open,

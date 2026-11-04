@@ -5,7 +5,7 @@ Nutzerauftrag 04.11.2026: Bewegen, Drehen und Spiegeln für alle Elemente über 
 | Teil | Inhalt                                                                          | Stand    |
 | ---- | ------------------------------------------------------------------------------- | -------- |
 | B1   | Kürzelliste, Fenster Edit → Tastenkürzel, Dateiformat 58, Strg+E, Kopie bewegen | erledigt |
-| B2   | Drehen Strg+D mit Kreis 0–360°, Tab-Eingabe, Umschalt 45°, Kopie                | offen    |
+| B2   | Drehen Strg+D mit Kreis 0–360°, Tab-Eingabe, Umschalt 45°, Kopie                | erledigt |
 | B3   | Spiegeln Strg+M über Achse mit Vorschau, Umschalt 45°, Kopie                    | offen    |
 | B4   | Abgleich mit den Objekten (Möblierung)                                          | offen    |
 
@@ -91,8 +91,63 @@ Testprojekt mit 17 Objekten.
 
 Grenze der Abnahme: Das Testwerkzeug sendet „Strg allein“ nur über den Tastennamen „Control“. Mit einer echten Tastatur ist das ein normaler Druck auf Strg.
 
-## Teil B2 und B3 (offen)
+## Teil B2: Drehen
 
-- **Drehen:** Strg+D, drei Klicks, Kreis 0–360° während des Drehens, Tab für die Winkeleingabe, Umschalt rastet auf 45°.
+- **Bedienung:** Elemente auswählen, Strg+D drücken, dann drei Klicks:
+  1. Drehpunkt
+  2. Bezugsrichtung (Umschalt rastet auf 45°)
+  3. Zielrichtung
+
+  Die Auswahl dreht um den Winkel zwischen Bezugs- und Zielrichtung, gegen den Uhrzeigersinn positiv. Das Drehen gilt nur im Grundriss. Esc bricht in jeder Stufe ab. Die Hinweiszeile unten links nennt jeweils den nächsten Schritt. „Drehen“ steht auch im Rechtsklick-Menü, mit dem eingestellten Kürzel.
+
+- **Kreis** (`RotationGuideOverlay.tsx`):
+  - Um den Drehpunkt liegt ein Kreis von 0 bis 360° mit Strichen alle 15° und den Zahlen 0, 90, 180 und 270.
+  - Vor dem Bezugsklick zeigt 0° nach +x, danach liegt 0° auf der Bezugsrichtung.
+  - Gezeichnet werden außerdem der Strahl zur Maus, der gestrichelte Bezug, der Bogen dazwischen und der Winkel als Zahl („+45°“).
+  - Die Vorschau zeigt die gedrehte Auswahl.
+- **Umschalt** rastet die Zielrichtung in 45°-Schritten ab der Bezugsrichtung, nicht ab der x-Achse.
+- **Tab:** Die Eingabe hat beim Drehen nur das Feld „Drehwinkel °“ (`angleOnly`), Tab setzt die Schreibmarke dorthin. Enter übernimmt.
+- **Strg** schaltet wie beim Bewegen auf Kopie mit „+“ am Cursor:
+  - Das Original bleibt, die gedrehte Kopie entsteht mit neuen IDs und ist danach ausgewählt.
+  - Meldung „… kopiert und um 30° gedreht“.
+  - Rückgängig ist ein Schritt.
+- **Rechenkern** (`domain/project/prepared-translation.ts`): Das Bewegen rechnet jetzt mit einer ebenen Transformation (`PlanTransform`). Verschieben ist der Fall mit `delta` und 0°, Drehen ist `rotationTransform(Drehpunkt, Grad)`.
+  - Daraus folgt für das Drehen dasselbe wie für das Bewegen:
+    - dieselben Prüfungen
+    - dieselbe Behandlung von Wandanschlüssen: Anschlüsse zwischen gedrehten und stehenden Wänden werden gelöst, Anschlüsse innerhalb der Auswahl bleiben
+    - dieselbe Vorschau
+  - Vierteldrehungen rechnen exakt, ohne Rundungsrest. Die Prüfsumme der 14 Testmodelle ist unverändert.
+  - Die Bedienschicht steckt in `application/selection/rotate.ts` und `useSelectionRotate.ts`.
+- **Je Elementart:**
+  - Wände, Linien, Schraffur-Umrisse, Decken, Deckenöffnungen, Dächer (mit Bezugslinie), Räume und Geländer: Alle Punkte drehen mit.
+  - Fenster und Türen behalten ihre Lage auf der Wand.
+  - Stützen, Objekte und Texte: Mittelpunkt und `rotation` drehen mit (0–360°). Bei Treppen dreht die Laufrichtung, bei Bildern der Winkel im Bogenmaß.
+  - Maßketten drehen nur in 90°-Schritten, eine ungerade Vierteldrehung tauscht waagerecht und senkrecht. Bei einem anderen Winkel wird die ganze Drehung abgelehnt: „Maßketten drehen nur in 90°-Schritten.“
+  - Dachflächenfenster drehen nur mit ihrem Dach und behalten dabei ihre Lage in der Dachfläche. Allein: „Dachflächenfenster drehen nur mit ihrem Dach.“
+  - Das Schraffurmuster behält seinen Winkel, nur sein Ursprung dreht mit.
+  - Platzierte Zeichnungen werden nur verschoben, sie haben kein Drehfeld.
+- **Dateiformat:** bleibt bei 58.
+
+### Abnahme im Browser (04.11.2026)
+
+Testprojekt mit 17 Objekten, gedreht wurde die Spüle mit ihrem außermittigen Becken.
+
+- **Strg+D und die drei Klicks:**
+  - Die Hinweiszeile wechselt von „Drehpunkt“ über „Bezugsrichtung“ zu „Zielrichtung“.
+  - Kreis, Skala, Strahlen und „+90°“ werden gezeichnet.
+  - Die Vorschau zeigt das Becken links statt oben, der Fang rastet „Vertikal“ ein.
+  - Ergebnis: „Auswahl um 90° gedreht“, weiter 17 Elemente.
+- **Tab, Kopie, Enter:** Tab setzt die Schreibmarke in „Drehwinkel °“, Eingabe 30, Strg zeigt das „+“, Enter setzt ab. Ergebnis: 18 Elemente, „1 Element kopiert und um 30° gedreht“, die Kopie ist ausgewählt. Strg+Z führt zurück auf 17.
+- **Umschalt:** Die Mausrichtung bei etwa 49° rastet auf „+45°“, Ergebnis: „Auswahl um 45° gedreht“.
+- **Rechtsklick-Menü:** „Drehen · Strg+D · danach Strg: Kopie“ startet das Drehen, Esc bricht ab. Konsole ohne Fehler.
+- **Beim Test gefunden und behoben:**
+  - Der gestrichelte Bezugsstrahl war 1 m breit, weil `vector-effect` fehlte.
+  - Tab sprang ins Längenfeld, das beim Drehen keinen Sinn hat. Seitdem gibt es die Betriebsart „nur Winkel“.
+
+Grenze der Abnahme: Das Testwerkzeug drückt beim Klick mit Umschalt keine echte Umschalttaste. Die App liest Umschalt über die Taste selbst, deshalb wurde Umschalt per Tastenereignis gesendet. Mit einer echten Tastatur ist das ein normaler Druck auf Umschalt.
+
+## Teil B3 (offen)
+
 - **Spiegeln:** Strg+M, erster Punkt der Achse per Klick, die Achse folgt mit Vorschau der Maus, Umschalt rastet auf 45°.
-- **Kopie:** Strg schaltet bei beiden wie beim Bewegen auf Kopie.
+- **Kopie:** Strg schaltet wie beim Bewegen und Drehen auf Kopie.
+- **Umsetzung:** Spiegeln wird eine weitere `PlanTransform` im selben Rechenkern.
