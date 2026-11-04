@@ -18,6 +18,7 @@ export const ELEMENT_KINDS = {
   dimension: { list: "dimensions", label: "Maßkette" },
   text: { list: "texts", label: "Text" },
   stair: { list: "stairs", label: "Treppe" },
+  railing: { list: "railings", label: "Geländer" },
   line: { list: "lines", label: "Linie" },
   hatch: { list: "hatches", label: "Schraffur" },
   reference: { list: "references", label: "Referenzbild" },

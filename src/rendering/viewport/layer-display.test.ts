@@ -129,6 +129,7 @@ test("hidden host removes plan symbols and solid surfaces but independent drawin
     rooms: [],
     columns: [],
     stairs: [],
+    railings: [],
     dimensions: [],
     texts: [],
     hatches: [],

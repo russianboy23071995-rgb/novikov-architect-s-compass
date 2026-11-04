@@ -454,16 +454,16 @@ test("a slab drawn in a storey is its floor on the Decke layer and round-trips",
   assert.deepEqual(storeySlabLevels(p, "eg", slab), { top: 0, bottom: -0.2 });
   const reopened = readProjectFile(serializeProject(p));
   assert.equal(reopened.schemaVersion, PROJECT_SCHEMA_VERSION);
-  assert.equal(PROJECT_SCHEMA_VERSION, 53);
+  assert.equal(PROJECT_SCHEMA_VERSION, 54);
   assert.deepEqual(reopened, p);
 });
 
-test("schema 52 files load as 53 unchanged; their slabs now are the floor of their storey", () => {
+test("schema 52 files load unchanged; their slabs now are the floor of their storey", () => {
   const p = addSlab(slabBase(), { id: "s", points: lShape, ...SLAB_DEFAULTS });
   const raw = JSON.parse(serializeProject(p));
   raw.schemaVersion = 52;
   const loaded = readProjectFile(JSON.stringify(raw));
-  assert.equal(loaded.schemaVersion, 53);
+  assert.equal(loaded.schemaVersion, 54);
   assert.deepEqual(storeyOf(loaded).slabs, storeyOf(p).slabs);
   assert.deepEqual(storeySlabLevels(loaded, "eg", storeyOf(loaded).slabs![0]!), {
     top: 0,

@@ -17,6 +17,7 @@ import { slabBody } from "./slab-solid.ts";
 import { slabOpeningOutline } from "../../domain/elements/slab/opening.ts";
 import { roofBody } from "./roof-solid.ts";
 import { columnBody } from "./column-solid.ts";
+import { railingBody } from "./railing-solid.ts";
 import { openingInsertBodies } from "./opening-insert-solid.ts";
 
 export type Vec3 = [number, number, number];
@@ -32,6 +33,8 @@ export type Face = {
   column?: true;
   /** Stair face (docs/TREPPE.md). */
   stair?: true;
+  /** Railing face (docs/GELAENDER.md). */
+  railing?: true;
   /** Facet of a curved surface (round slab opening): no drawn edge to a smooth neighbour. */
   smooth?: true;
   /** Face of a window or door element in an opening (docs/FENSTER_TUEREN.md, FT2). */
@@ -245,6 +248,9 @@ export function buildPreviewSolid(project: ModelGeometry, elevation: number): So
     const body = columnBody(column, elevation, height);
     if (body) bodies.push(body);
   }
+  // Railings of this storey (docs/GELAENDER.md): relative to the storey floor only.
+  for (const railing of "railings" in storey ? (storey.railings ?? []) : [])
+    bodies.push(railingBody(railing, elevation));
   // Window and door elements in their openings (docs/FENSTER_TUEREN.md, FT2).
   if ("walls" in storey) bodies.push(...openingInsertBodies(storey, elevation));
   if (bodies.length) {

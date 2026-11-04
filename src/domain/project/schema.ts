@@ -22,6 +22,7 @@ import { columnLevels, columnSchema } from "../elements/column/model.ts";
 import { dimensionSchema } from "../elements/dimension/model.ts";
 import { textSchema } from "../elements/text/model.ts";
 import { stairGeometry, stairSchema } from "../elements/stair/model.ts";
+import { railingSchema } from "../elements/railing/model.ts";
 import { sectionSchema } from "../views/sections.ts";
 import { roomNumberKey, roomSchema, roomV32Schema, roomV33Schema } from "../elements/room/model.ts";
 import {
@@ -718,15 +719,29 @@ export const projectV51Schema = projectV45Schema.extend({
 });
 /** Schema 52: round slab openings (circle with centre and diameter). Schema 53: same structure,
  * a slab is the floor of its storey (docs/SLAB_ELEMENT.md). */
-const storeySchema = drawingStoreySchema.extend({
+const storeyV53Schema = drawingStoreySchema.extend({
   slabOpenings: z.array(slabOpeningSchema).max(5000).optional(),
 });
-const layoutDrawingV52Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
+const layoutDrawingV52Schema = z.object({ layoutId: id, storey: storeyV53Schema }).strict();
+export const projectV53Schema = projectV45Schema.extend({
+  schemaVersion: z.literal(53),
+  storeys: z.array(storeyV53Schema).min(1),
+  modelViews: z.array(anyModelViewSchema).optional(),
+  layoutDrawings: z.array(layoutDrawingV52Schema).max(5000).optional(),
+  masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
+  layouts: z.array(layoutV49Schema).max(5000).optional(),
+  projectInfo: projectInfoSchema.optional(),
+});
+/** Schema 54: railings (Geländer, docs/GELAENDER.md, L42). */
+const storeySchema = storeyV53Schema.extend({
+  railings: z.array(railingSchema).max(5000).optional(),
+});
+const layoutDrawingV54Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
 const projectSchema = projectV45Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z.array(storeySchema).min(1),
   modelViews: z.array(anyModelViewSchema).optional(),
-  layoutDrawings: z.array(layoutDrawingV52Schema).max(5000).optional(),
+  layoutDrawings: z.array(layoutDrawingV54Schema).max(5000).optional(),
   masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
   layouts: z.array(layoutV49Schema).max(5000).optional(),
   projectInfo: projectInfoSchema.optional(),
@@ -1172,6 +1187,7 @@ export function validateProject(
       ...(s.dimensions ?? []),
       ...(s.texts ?? []),
       ...(s.stairs ?? []),
+      ...((s as { railings?: readonly { id: string }[] }).railings ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,
@@ -1228,6 +1244,7 @@ export function validateProject(
     validateStoreyRoofs(storey, project.layers);
     validateStoreyRooms(storey, project.layers);
     validateStoreyColumns(storey, project.layers);
+    validateStoreyRailings(storey, project.layers);
     // Stairs: existing layer and a climbable height (docs/TREPPE.md).
     for (const stair of storey.stairs ?? []) {
       if (!project.layers.some((l) => l.id === stair.layerId))
@@ -1395,6 +1412,18 @@ function validateStoreyColumns(storey: Project["storeys"][number], layers: { id:
     if (levels.top - levels.bottom <= 1e-9)
       throw new Error(`Stütze ${column.id}: Oberkante muss über dem Fuß liegen.`);
   }
+}
+
+/** Railings reference an existing layer; line and values are checked by the schema
+ * (docs/GELAENDER.md). */
+function validateStoreyRailings(
+  storey: Project["storeys"][number],
+  layers: { id: string }[],
+): void {
+  if (!storey.railings?.length) return;
+  const layerIds = new Set(layers.map((l) => l.id));
+  for (const railing of storey.railings)
+    if (!layerIds.has(railing.layerId)) throw new Error("Unknown layer: " + railing.layerId);
 }
 
 /** Roofs reference an existing layer; outline, values and end cuts are checked by the schema. */
@@ -1590,6 +1619,7 @@ function drawingSheetPatterns(
     storey.rooms,
     storey.columns,
     storey.stairs,
+    storey.railings,
     storey.references,
     storey.wallJoins,
     storey.wallTJunctions,
