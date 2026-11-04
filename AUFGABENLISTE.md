@@ -11,7 +11,7 @@ So benutzt du sie:
 
 Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus dieser Liste wird beim Auftrag dort eingetragen.
 
-**Stand:** 04.11.2026 · main nach PR633
+**Stand:** 04.11.2026 · main nach PR634
 
 ## Deine Wünsche
 
@@ -38,7 +38,7 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 | L09 | Ungleiche Wandquerschnitte an Anschlüssen                                                                        |      | erledigt: U1 Fußhöhen an Ecke/T (PR574), U2 T-Stoß nach Vorrang im Grundriss (PR575); ungleiche Stärke/Höhe schon PR465/468; Vorrang in 3D/IFC und an Ecken später                                                                                                                                                                                | §6, §8             |
 | L10 | Geschoss ohne oberes Geschoss bzw. Einfügen zwischen gebundenen Geschossen (zurzeit gesperrt, Fachentscheidung)  |      | erledigt durch PR490 (Bindung ans eigene Geschoss)                                                                                                                                   | §9                 |
 | L40 | Werkzeug Deckendurchbruch (Öffnung in Decken, z. B. für Treppen und Schächte) |      | erledigt (PR605, Symbol nach Vorlage und runder Durchbruch PR606), docs/DECKENDURCHBRUCH.md; Luftraum im Geschoss darüber offen | N48 |
-| L41 | Werkzeug Dachflächenfenster (Fenster in Dachflächen) |      | erledigt: D1 Modell, Loch im Dach, 3D, IFC (PR631), D2 Werkzeug, Grundriss (PR632), D3 Verschieben, Fang, Pipette, Schnitt (PR633); offen: Drehen, Eindeckrahmen | docs/DACHFLAECHENFENSTER.md |
+| L41 | Werkzeug Dachflächenfenster (Fenster in Dachflächen) |      | erledigt: D1 Modell, Loch im Dach, 3D, IFC (PR631), D2 Werkzeug, Grundriss (PR632), D3 Verschieben, Fang, Pipette, Schnitt (PR633), Strichelung und Laibung nach Velux (PR634); offen: Drehen, Eindeckrahmen | docs/DACHFLAECHENFENSTER.md |
 | L42 | Werkzeug Geländer |      | erledigt: G1 Modell, 3D, IFC (PR628), G2 Werkzeug, Grundriss (PR629), G3 Verschieben, Fang, Pipette, Schnitt (PR630); offen: Punkte einzeln bearbeiten | docs/GELAENDER.md |
 | L43 | Werkzeug Gelände (Geländemodell) |      | offen (Nutzerwunsch 02.11.2026) | |
 | L44 | Objektbibliothek (Möbel, Sanitär, eigene Objekte platzieren) |      | offen (Nutzerwunsch 02.11.2026) | |
