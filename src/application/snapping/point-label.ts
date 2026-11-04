@@ -10,6 +10,7 @@ const ELEMENT_NAMES = [
   ["rooms", "Raum"],
   ["columns", "Stütze"],
   ["railings", "Geländer"],
+  ["roofWindows", "Dachflächenfenster"],
   ["hatches", "Schraffur"],
   ["lines", "Linie"],
   ["windows", "Fenster"],

@@ -1,6 +1,7 @@
 import type { PlanText } from "../../domain/elements/text/model.ts";
 import { columnSettings, type ColumnDefaults } from "../columns/defaults.ts";
 import { railingSettings, type RailingDefaults } from "../railings/defaults.ts";
+import { roofWindowSettings, type RoofWindowDefaults } from "../roof-windows/defaults.ts";
 import { stairSettings, type StairDefaults } from "../stairs/defaults.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { patternSize } from "../hatches/pattern-size.ts";
@@ -34,6 +35,7 @@ export type ToolDefaults =
   | { tool: "wall"; values: WallDefaults }
   | { tool: "column"; values: ColumnDefaults }
   | { tool: "railing"; values: RailingDefaults }
+  | { tool: "roofWindow"; values: RoofWindowDefaults }
   | { tool: "stair"; values: StairDefaults }
   | { tool: "text"; values: Omit<PlanText, "id" | "position" | "content"> };
 
@@ -92,6 +94,11 @@ export function pickupToolDefaults(
   if (target.kind === "column") {
     const source = storeyOf(project).columns?.find((item) => item.id === target.id);
     return source ? { tool: "column", values: columnSettings(source) } : null;
+  }
+  // Roof windows hand over size, frame, layer and status, not their place (D3).
+  if (target.kind === "roofWindow") {
+    const source = storeyOf(project).roofWindows?.find((item) => item.id === target.id);
+    return source ? { tool: "roofWindow", values: roofWindowSettings(source) } : null;
   }
   // Railings hand over every setting except their line (docs/GELAENDER.md, G3).
   if (target.kind === "railing") {

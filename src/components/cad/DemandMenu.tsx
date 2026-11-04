@@ -292,6 +292,7 @@ export function DemandMenu({
                 selection.kind !== "roof" &&
                 selection.kind !== "column" &&
                 selection.kind !== "railing" &&
+                selection.kind !== "roofWindow" &&
                 selection.kind !== "stair" &&
                 selection.kind !== "text" && (
                   <button

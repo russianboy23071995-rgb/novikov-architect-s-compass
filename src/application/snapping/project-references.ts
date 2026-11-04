@@ -10,6 +10,7 @@ import { segmentIntersectionReferences } from "../../constraints/snapping/segmen
 import type { SnapSegment } from "../../constraints/snapping/segment-references.ts";
 import { createDerivedCache } from "../../domain/project/derived-cache.ts";
 import { columnOutline } from "../../domain/elements/column/model.ts";
+import { roofWindowRings } from "../../domain/elements/roof/window.ts";
 import { maskOnPaper } from "../../domain/elements/drawing/model.ts";
 import { MARGIN_FRAME_SNAP_ID, PAPER_SNAP_ID, rectCorners, sheetFrames } from "./sheet-frames.ts";
 
@@ -120,6 +121,21 @@ export function projectSnapParts(project: Project): readonly (readonly SnapPart[
     // Railing points and segment midpoints like a polyline (docs/GELAENDER.md, G3), after all
     // earlier kinds so their order stays.
     (storey.railings ?? []).map((railing) => remembered(owned, railing, linePart)),
+    // Roof window: corners and edge midpoints of its opening on the roof top and its centre
+    // (docs/DACHFLAECHENFENSTER.md, D3), after all earlier kinds.
+    (storey.roofWindows ?? []).flatMap((w) => {
+      const roof = (storey.roofs ?? []).find((r) => r.id === w.roofId);
+      if (!roof) return [];
+      const top = roofWindowRings(roof, w).top;
+      const outline = hatchPart({ id: w.id, points: top });
+      const centre: SnapReference = {
+        point: { x: top.reduce((n, p) => n + p.x, 0) / 4, y: top.reduce((n, p) => n + p.y, 0) / 4 },
+        entityId: w.id,
+        feature: "centre",
+        directions: [],
+      };
+      return [{ references: [centre, ...outline.references], segments: outline.segments }];
+    }),
     // Paper and margin frame of a Plankopf or layout: corners, edge midpoints and, through
     // the corner directions, the edges themselves (docs/LAYOUTS.md).
     sheetParts(project),
