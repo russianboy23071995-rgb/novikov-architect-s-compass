@@ -7,6 +7,11 @@ import { ROOF_DEFAULTS, type Roof } from "@/domain/elements/roof/model";
 import { defaultRoomLayerId } from "@/application/rooms/actions";
 import { defaultColumnLayerId } from "@/application/columns/actions";
 import { defaultRailingLayerId } from "@/application/railings/actions";
+import { defaultRoofWindowLayerId } from "@/application/roof-windows/actions";
+import {
+  roofWindowToolDefaults,
+  type RoofWindowDefaults,
+} from "@/application/roof-windows/defaults";
 import { railingToolDefaults, type RailingDefaults } from "@/application/railings/defaults";
 import { defaultDimensionLayerId } from "@/application/dimensions/actions";
 import { defaultTextLayerId } from "@/application/texts/actions";
@@ -201,6 +206,21 @@ export function useToolDefaults(project: Project) {
       ? railingValues.layerId
       : defaultRailingLayerId(project),
   };
+  // Roof window tool (docs/DACHFLAECHENFENSTER.md, D2); a vanished layer falls back.
+  const [roofWindowState, setRoofWindowState] = useState<{
+    projectId: string;
+    values: RoofWindowDefaults;
+  } | null>(null);
+  const roofWindowValues =
+    roofWindowState?.projectId === project.id
+      ? roofWindowState.values
+      : roofWindowToolDefaults(defaultRoofWindowLayerId(project));
+  const roofWindowDefaults = {
+    ...roofWindowValues,
+    layerId: project.layers.some((l) => l.id === roofWindowValues.layerId)
+      ? roofWindowValues.layerId
+      : defaultRoofWindowLayerId(project),
+  };
   const [stairState, setStairState] = useState<{
     projectId: string;
     values: StairDefaults;
@@ -335,6 +355,10 @@ export function useToolDefaults(project: Project) {
     column: columnDefaults,
     setColumn(values: ColumnDefaults) {
       setColumnState({ projectId: project.id, values });
+    },
+    roofWindow: roofWindowDefaults,
+    setRoofWindow(values: RoofWindowDefaults) {
+      setRoofWindowState({ projectId: project.id, values });
     },
     railing: railingDefaults,
     setRailing(values: RailingDefaults) {

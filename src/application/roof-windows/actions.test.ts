@@ -25,6 +25,9 @@ import { prepareTranslation } from "../../domain/project/prepared-translation.ts
 import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { selectionSummary } from "../../components/cad/demand-menu.ts";
+import { roofWindowSettings, roofWindowToolDefaults, roofWindowValues } from "./defaults.ts";
+import { derivePlanScene, planSceneRuns } from "../../rendering/viewport/plan-scene.ts";
+import { roofPlanView } from "../../rendering/viewport/roof-plan.ts";
 
 // docs/DACHFLAECHENFENSTER.md, L41 Teil D1.
 // A 8 × 5 m shed roof, eave along y = 0, rising towards +y with 35°, 24 cm thick.
@@ -185,4 +188,42 @@ test("menu summary names the roof window with its size and frame", () => {
     title: "Dachflächenfenster",
     details: "78 × 118 cm · Rahmen 6 cm",
   });
+});
+
+// docs/DACHFLAECHENFENSTER.md, D2: tool settings and plan.
+test("tool settings make a roof window and read one back; the plan draws its opening", () => {
+  const p = withWindow();
+  const defaults = roofWindowToolDefaults(defaultRoofWindowLayerId(p));
+  assert.deepEqual(roofWindowValues(defaults), {
+    layerId: defaultRoofWindowLayerId(p),
+    width: 0.78,
+    length: 1.18,
+    frame: 0.06,
+    renovation: "new",
+  });
+  const placed = addRoofWindowAt(
+    p,
+    { id: "w2", roofId: "dach", ...roofWindowValues({ ...defaults, width: 1.14 }) },
+    { x: 6, y: 3 },
+  );
+  assert.equal(roofWindowSettings(storeyOf(placed).roofWindows![1]!).width, 1.14);
+  const scene = derivePlanScene(placed, () => true);
+  assert.equal(scene.roofWindowViews.get("w2")!.length, 4);
+  const runs = planSceneRuns(scene, []).map((r) => r.kind);
+  assert.ok(runs.indexOf("roofWindow") > runs.indexOf("roof"));
+  // Hidden roof: its windows are not drawn either.
+  assert.equal(derivePlanScene(placed, (id) => id !== "dach").roofWindowViews.size, 0);
+});
+
+test("roof cut at 1 m gets a hole where it meets a roof window", () => {
+  // A low roof whose top passes 1 m: a window on that line is cut by the plan cut.
+  const low = { ...roof, referenceHeight: 0.2 };
+  let p = addRoof(createStandardProject("p", "eg", "og"), low);
+  const plain = roofPlanView(roofOf(p));
+  // Top reaches 1 m where run = (1 − 0,2 − 0,24 / cos 35°) / tan 35° ≈ 0,72 m.
+  p = addRoofWindowAt(p, { id: "w", roofId: "dach" }, { x: 4, y: 0.72 });
+  const holed = roofPlanView(roofOf(p), undefined, storeyOf(p).roofWindows!);
+  assert.ok(
+    holed.cut.length > plain.cut.length || JSON.stringify(holed.cut) !== JSON.stringify(plain.cut),
+  );
 });

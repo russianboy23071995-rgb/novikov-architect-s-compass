@@ -5,7 +5,7 @@ Nutzerauftrag 04.11.2026: das Werkzeug Dachflächenfenster, Änderungskarte mit 
 | PR  | Inhalt                                                                                | Stand    |
 | --- | ------------------------------------------------------------------------------------- | -------- |
 | D1  | Modell, Dateiformat 55, Loch im Dach senkrecht zur Fläche, Rahmen und Glas in 3D, IFC | erledigt |
-| D2  | Werkzeug, Einstellungsfenster, Eigenschaften, Grundriss                               | offen    |
+| D2  | Werkzeug, Einstellungsfenster, Eigenschaften, Grundriss                               | erledigt |
 | D3  | Verschieben in der Dachebene, Fangpunkte, Pipette, Schnitt, Abnahme                   | offen    |
 
 Vorgaben aus der Karte:
@@ -57,6 +57,41 @@ Vorgaben aus der Karte:
 
 **Grenzen D1:**
 
-- **Grundriss:** Das Fenster ist dort noch nicht gezeichnet. Die Schnittdarstellung des Daches bei 1 m kennt die Löcher noch nicht (kommt mit D2).
+- **Grundriss:** In D1 war das Fenster dort noch nicht gezeichnet; das kam mit D2.
 - **Dachumriss:** Ein Dach, dessen Umriss so geändert wird, dass ein Fenster herausfällt, lässt sich nicht speichern, bis das Fenster verschoben oder gelöscht ist.
 - **Bauteil:** Rahmen und Glas sind vereinfacht, ohne Eindeckrahmen und ohne Flügel.
+
+## Teil D2: Werkzeug, Einstellungen, Eigenschaften, Grundriss
+
+- **Werkzeug „Dachflächenfenster“:** Der Knopf in der Werkzeugleiste ist nicht mehr ausgegraut.
+  - Ein Klick in ein sichtbares Dach setzt ein Fenster mit der Mitte auf den Punkt, parallel zur Traufe. Liegen mehrere Dächer übereinander, nimmt es das oberste.
+  - Ein Klick außerhalb meldet „Dachflächenfenster: in eine sichtbare Dachfläche klicken.“ Passt das Fenster nicht oder überschneidet es ein anderes, kommt die Meldung aus D1.
+  - Das Werkzeug bleibt aktiv, ein Rückgängig-Schritt je Fenster.
+- **Vorgaben** (`application/roof-windows/defaults.ts`, nicht im Undo): Breite, Länge, Rahmen, Ebene, Bauzustand (Vorgabe Neubau).
+- **Dieselben Felder** (`RoofWindowFields`) stehen an drei Stellen:
+  - in der Leiste, mit Hinweis,
+  - im Einstellungsfenster (Doppelklick auf das Werkzeug; Reiter „Dachflächenfenster“ und „Bauzustand“),
+  - bei einem gewählten Fenster: Eine Änderung gilt beim Verlassen des Feldes oder mit Enter, ein Rückgängig-Schritt je Änderung. Eine Größe, die nicht mehr ins Dach passt, wird mit Meldung abgelehnt.
+- **Doppelklick auf ein Fenster:** öffnet sein Fenster mit den Reitern Dachflächenfenster, Bauzustand (gilt für alle gewählten) und Ebene.
+- **Grundriss:**
+  - Eigene Zeichenschicht direkt über den Dächern. Das Fenster liegt über der Schnitthöhe von 1 m, daher ist die Öffnung auf der Dachoberseite gestrichelt wie der Dachumriss über dem Schnitt, mit Diagonalkreuz.
+  - Auswahl per Klick in die Fläche, per Rechteckauswahl und per Tab-Auswahl.
+  - Ein Fenster, dessen Dach ausgeblendet ist, wird nicht gezeichnet.
+  - Schneidet die Schnitthöhe ein Fenster, hat die geschnittene Dachfläche dort ein Loch (`roofPlanView` mit Fenstern).
+
+**Nachweis D2:**
+
+- **Prüfungen:** 1584 Tests grün, davon 2 neu (Vorgaben und Grundriss, Loch im Dachschnitt). Typprüfung beider Projekte, Lint (eine Warnung, die es vorher schon gab), Architekturprüfung ohne Befund, 14-Modell-Hash unverändert.
+- **Browser** (Testprojekt mit einem Pultdach 8 × 5 m):
+  - Werkzeug gewählt: Die Leiste zeigt Breite 0,78, Länge 1,18, Rahmen 0,06, Ebene Fenster und den Hinweis.
+  - Zwei Klicks ins Dach: zwei gestrichelte Rechtecke mit Kreuz, im Gefälle länger, weil 1,18 m · cos 35° = 0,97 m.
+  - Ein Klick neben das Dach: Meldung.
+  - Mit dem Auswahlwerkzeug angeklickt: Eigenschaften „Dachflächenfenster“, Menütitel „Dachflächenfenster“.
+  - Breite auf 1,14 geändert: das Rechteck wird 1,14 m breit. Mit Strg+Z zurück auf 0,78.
+  - Doppelklick auf das Fenster: drei Reiter. Doppelklick auf das Werkzeug: Reiter Dachflächenfenster und Bauzustand.
+  - Ladefehler in der Konsole stammten nur von Branch-Wechseln.
+
+**Grenzen D2:**
+
+- **Bearbeiten:** Verschieben, Fangpunkte und Pipette fehlen noch (D3).
+- **Fang beim Setzen:** Beim Setzen fängt der Klick wie jedes Werkzeug an Punkten. Es gibt keinen eigenen Fang „Abstand zum Dachrand“.

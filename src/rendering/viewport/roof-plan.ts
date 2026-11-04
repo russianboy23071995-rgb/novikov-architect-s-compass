@@ -1,6 +1,7 @@
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import { roofFaceRings, roofFrame, roofRun } from "../../domain/elements/roof/geometry.ts";
 import type { Roof } from "../../domain/elements/roof/model.ts";
+import type { RoofWindow } from "../../domain/elements/roof/window.ts";
 import { roofBody } from "./roof-solid.ts";
 
 /**
@@ -88,10 +89,15 @@ function withoutCollinear(loop: Point2[]): Point2[] {
  * with the roof's own values only, never with storey heights.
  * Not yet: inner edges of non-vertical end cuts, other storeys (guest display, N62).
  */
-export function roofPlanView(roof: Roof, cutHeight = PLAN_CUT_HEIGHT) {
+export function roofPlanView(
+  roof: Roof,
+  cutHeight = PLAN_CUT_HEIGHT,
+  /** Its roof windows: where the cut meets one, the cut area has a hole there. */
+  windows: readonly RoofWindow[] = [],
+) {
   const { outline } = roofFaceRings(roof);
   const { tan, cos } = roofFrame(roof);
-  const cut = sectionLoops(roofBody(roof, 0).faces, cutHeight);
+  const cut = sectionLoops(roofBody(roof, 0, windows).faces, cutHeight);
   // Run along the rise where the top resp. the underside reaches the cut height.
   const topReaches = (cutHeight - roof.referenceHeight - roof.thickness / cos) / tan;
   const undersideReaches = (cutHeight - roof.referenceHeight) / tan;
