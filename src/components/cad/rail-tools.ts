@@ -91,7 +91,8 @@ export const RAIL_TOOLS: Partial<Record<ToolId, CadTool>> = {
     icon: ElevationIcon,
     pictogram: "ansicht",
   },
-  // Planned (docs/WERKZEUGLEISTE.md, WL3): greyed buttons until the tools exist.
+  // Planned (docs/WERKZEUGLEISTE.md, WL3): greyed buttons until the tools exist; the railing
+  // exists since docs/GELAENDER.md, G2.
   roofWindow: {
     id: "roofWindow",
     label: "Dachflächenfenster",
@@ -106,7 +107,6 @@ export const RAIL_TOOLS: Partial<Record<ToolId, CadTool>> = {
     shortcut: "",
     icon: RailingIcon,
     pictogram: "gelaender",
-    planned: true,
   },
   terrain: {
     id: "terrain",

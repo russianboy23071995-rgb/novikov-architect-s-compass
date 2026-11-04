@@ -2,6 +2,7 @@ import { RoofProperties } from "./RoofProperties";
 import { WINDOW_INSERT_DEFAULTS } from "@/domain/elements/window/insert";
 import { RoomProperties } from "./RoomProperties";
 import { ColumnProperties } from "./ColumnProperties";
+import { RailingProperties } from "./RailingProperties";
 import { StairProperties } from "./StairProperties";
 import { DimensionProperties } from "./DimensionProperties";
 import { TextProperties } from "./TextProperties";
@@ -130,6 +131,20 @@ export function BimInspector({
       <ColumnProperties
         project={project}
         column={column}
+        selection={selection}
+        onChange={onChange}
+      />
+    );
+  const railing =
+    selection?.kind === "railing"
+      ? storeyOf(project).railings?.find((item) => item.id === selection.id)
+      : undefined;
+  if (railing)
+    return (
+      <RailingProperties
+        key={railing.id}
+        project={project}
+        railing={railing}
         selection={selection}
         onChange={onChange}
       />

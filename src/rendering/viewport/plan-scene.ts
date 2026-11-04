@@ -1,6 +1,8 @@
 import { PLAN_CUT_HEIGHT, roofPlanView } from "./roof-plan.ts";
 import { columnLevels, columnOutline } from "../../domain/elements/column/model.ts";
 import { stairGeometry, stairPlan } from "../../domain/elements/stair/model.ts";
+import { railingMembers } from "../../domain/elements/railing/model.ts";
+import { railingMemberCorners } from "./railing-solid.ts";
 import { slabOpeningSymbol } from "../../domain/elements/slab/opening.ts";
 import type { HatchPatternDefinition } from "../../domain/elements/hatch/pattern.ts";
 import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
@@ -91,6 +93,21 @@ export function derivePlanScene(
         ] as const;
       }),
     ),
+    railings: new Map(plan.railings.map((r) => [r.id, r])),
+    // Railings: the handrail along the line and the posts in true size (docs/GELAENDER.md, G2).
+    railingViews: new Map(
+      plan.railings.map(
+        (r) =>
+          [
+            r.id,
+            {
+              posts: railingMembers(r)
+                .filter((m) => m.kind === "post")
+                .map(railingMemberCorners),
+            },
+          ] as const,
+      ),
+    ),
     dimensions: new Map(plan.dimensions.map((d) => [d.id, d])),
     texts: new Map(plan.texts.map((t) => [t.id, t])),
     // Columns: outline in plan; filled like a cut wall where the 1 m cut plane meets them
@@ -134,6 +151,7 @@ export type PlanRun = {
     | "wall"
     | "column"
     | "stair"
+    | "railing"
     | "line"
     | "dimension"
     | "text";
@@ -169,6 +187,7 @@ export function planSceneRuns(scene: PlanScene, replacedIds: readonly string[]):
     ["wall", scene.plan.walls],
     ["column", scene.plan.columns],
     ["stair", scene.plan.stairs],
+    ["railing", scene.plan.railings],
     ["line", scene.plan.lines],
     // Dimension chains annotate everything below them (docs/MASSKETTE.md).
     ["dimension", scene.plan.dimensions],

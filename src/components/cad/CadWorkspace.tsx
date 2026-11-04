@@ -82,6 +82,7 @@ import {
 import { assemblyThickness, projectWallAssemblies } from "@/domain/elements/wall/assembly";
 import { offsetAtThickness } from "@/domain/elements/wall/axis-position";
 import { ColumnFields } from "./ColumnFields";
+import { RailingFields } from "./RailingFields";
 import { DimensionToolFields } from "./DimensionToolFields";
 import { TextFields } from "./TextFields";
 import { TextEditorOverlay } from "./TextEditorOverlay";
@@ -91,6 +92,8 @@ import { addDimension, updateDimension } from "@/application/dimensions/actions"
 import { dimensionPointAt } from "@/domain/elements/dimension/model";
 import { addColumn, updateColumn } from "@/application/columns/actions";
 import { columnValues } from "@/application/columns/defaults";
+import { addRailing, updateRailing } from "@/application/railings/actions";
+import { railingValues } from "@/application/railings/defaults";
 import { addStair, updateStair } from "@/application/stairs/actions";
 import { stairValues } from "@/application/stairs/defaults";
 import { stairDirectionTo, stairTreadForLength, stairTurnTo } from "@/domain/elements/stair/model";
@@ -750,7 +753,7 @@ export function CadWorkspace({
     tool === "slabOpening" ||
     roofPhase === "outline" ||
     (tool === "room" && !roomByWalls);
-  const pathDrawing = tool === "line" || areaTool || roofPhase === "line";
+  const pathDrawing = tool === "line" || tool === "railing" || areaTool || roofPhase === "line";
   const [hatchConstruction, setHatchConstruction] = useState<HatchConstruction>("polygon");
   // Round Deckendurchbruch (docs/DECKENDURCHBRUCH.md): centre, then a point on the rim.
   const [openingCircle, setOpeningCircle] = useState(false);
@@ -1030,6 +1033,7 @@ export function CadWorkspace({
       next === "roof" ||
       next === "room" ||
       next === "column" ||
+      next === "railing" ||
       next === "stair" ||
       next === "section" ||
       next === "elevation" ||
@@ -1050,6 +1054,7 @@ export function CadWorkspace({
       next === "roof" ||
       next === "room" ||
       next === "column" ||
+      next === "railing" ||
       next === "stair" ||
       next === "section" ||
       next === "elevation" ||
@@ -1425,6 +1430,7 @@ export function CadWorkspace({
   const SETTINGS_TOOLS: Partial<Record<ToolId, string>> = {
     wall: "Wand",
     column: "Stütze",
+    railing: "Geländer",
     stair: "Treppe",
     section: "Schnitt",
     elevation: "Ansicht",
@@ -1520,6 +1526,19 @@ export function CadWorkspace({
         layers={project.layers}
         storeyHeight={storeyOf(project).height ?? null}
       />
+    ) : owner === "railing" ? (
+      <div className="flex flex-wrap items-end gap-3">
+        <RailingFields
+          value={toolDefaults.railing}
+          onChange={toolDefaults.setRailing}
+          layers={project.layers}
+        />
+        {place === "bar" && (
+          <span role="status" className="text-xs text-muted-foreground">
+            Punkte setzen · Doppelklick oder Enter beendet · Esc: Abbruch
+          </span>
+        )}
+      </div>
     ) : owner === "column" ? (
       <ColumnFields
         value={toolDefaults.column}
@@ -1969,6 +1988,29 @@ export function CadWorkspace({
   };
 
   const finishPath = (points = pathPoints, base = drawingBase) => {
+    // Railing (docs/GELAENDER.md, G2): a model element along the drawn line, one undo step.
+    if (tool === "railing") {
+      try {
+        if (base !== project)
+          throw new Error("Das Modell wurde geändert. Zeichnen erneut beginnen.");
+        const id = `railing-${crypto.randomUUID()}`;
+        dispatchEditing({
+          type: "project",
+          project: addRailing(project, { id, points, ...railingValues(toolDefaults.railing) }),
+        });
+        setModelError("");
+        showNotice("Geländer gesetzt");
+      } catch (error) {
+        setModelError(
+          error instanceof Error && !error.message.startsWith("[")
+            ? error.message
+            : "Geländer prüfen: mindestens zwei Punkte, kein Abschnitt kürzer als 1 cm.",
+        );
+      }
+      setPathPoints([]);
+      setDrawingBase(null);
+      return;
+    }
     try {
       const kind =
         tool === "hatch"
@@ -2997,6 +3039,7 @@ export function CadWorkspace({
                       : []),
                   ...(settingsWindow.tool === "wall" ||
                   settingsWindow.tool === "column" ||
+                  settingsWindow.tool === "railing" ||
                   settingsWindow.tool === "stair"
                     ? [
                         {
@@ -3007,14 +3050,18 @@ export function CadWorkspace({
                               value={
                                 settingsWindow.tool === "column"
                                   ? toolDefaults.column.renovation
-                                  : settingsWindow.tool === "stair"
-                                    ? toolDefaults.stair.renovation
-                                    : (toolDefaults.wall.renovation ?? "existing")
+                                  : settingsWindow.tool === "railing"
+                                    ? toolDefaults.railing.renovation
+                                    : settingsWindow.tool === "stair"
+                                      ? toolDefaults.stair.renovation
+                                      : (toolDefaults.wall.renovation ?? "existing")
                               }
                               onChange={(renovation) => {
                                 cancelInteraction();
                                 if (settingsWindow.tool === "column")
                                   toolDefaults.setColumn({ ...toolDefaults.column, renovation });
+                                else if (settingsWindow.tool === "railing")
+                                  toolDefaults.setRailing({ ...toolDefaults.railing, renovation });
                                 else if (settingsWindow.tool === "stair")
                                   toolDefaults.setStair({ ...toolDefaults.stair, renovation });
                                 else toolDefaults.setWall({ ...toolDefaults.wall, renovation });
@@ -3150,7 +3197,10 @@ export function CadWorkspace({
                       },
                     ]
                   : []),
-                ...(target.kind === "wall" || target.kind === "column" || target.kind === "stair"
+                ...(target.kind === "wall" ||
+                target.kind === "column" ||
+                target.kind === "railing" ||
+                target.kind === "stair"
                   ? [
                       {
                         id: "renovation",
@@ -3162,7 +3212,9 @@ export function CadWorkspace({
                                 ? project.storeys.flatMap((s) => s.walls)
                                 : target.kind === "stair"
                                   ? project.storeys.flatMap((s) => s.stairs ?? [])
-                                  : project.storeys.flatMap((s) => s.columns ?? [])
+                                  : target.kind === "railing"
+                                    ? project.storeys.flatMap((s) => s.railings ?? [])
+                                    : project.storeys.flatMap((s) => s.columns ?? [])
                               ).find((e) => e.id === target.id) ?? {},
                             )}
                             onChange={(renovation) => {
@@ -3184,7 +3236,9 @@ export function CadWorkspace({
                                           (p, id) =>
                                             target.kind === "stair"
                                               ? updateStair(p, id, { renovation })
-                                              : updateColumn(p, id, { renovation }),
+                                              : target.kind === "railing"
+                                                ? updateRailing(p, id, { renovation })
+                                                : updateColumn(p, id, { renovation }),
                                           project,
                                         ),
                                 });
@@ -4333,6 +4387,7 @@ export function CadWorkspace({
                         }
                         {...(tool === "wall" ||
                         (tool === "line" && lineKind === "polyline") ||
+                        tool === "railing" ||
                         (areaTool && construction === "polygon")
                           ? {
                               onFinish: () => {
@@ -4581,6 +4636,7 @@ export function CadWorkspace({
                   toolFields("drawing")
                 ) : tool === "wall" ||
                   tool === "column" ||
+                  tool === "railing" ||
                   tool === "stair" ||
                   tool === "section" ||
                   tool === "elevation" ||

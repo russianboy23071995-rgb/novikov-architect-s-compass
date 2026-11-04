@@ -18,6 +18,9 @@ import { exportIfc } from "../../lib/bim/ifc.ts";
 import { previewDeleteSelection } from "../elements/delete.ts";
 import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import type { Project } from "../../domain/project/schema.ts";
+import { selectionSummary } from "../../components/cad/demand-menu.ts";
+import { railingSettings, railingToolDefaults, railingValues } from "./defaults.ts";
+import { derivePlanScene, planSceneRuns } from "../../rendering/viewport/plan-scene.ts";
 
 // docs/GELAENDER.md, L42 Teil G1.
 const straight = [
@@ -203,4 +206,42 @@ test("IFC: IfcRailing GUARDRAIL with one swept member each, height and status", 
       (l.match(/#\d+/g)?.length ?? 0) === members.length + 2, // own id, context, items
   );
   assert.ok(shape, "one body item per member");
+});
+
+// docs/GELAENDER.md, G2: tool settings and plan.
+test("tool settings make a railing and read one back; the plan draws its posts", () => {
+  const p = createStandardProject("p", "eg", "og");
+  const defaults = railingToolDefaults(defaultRailingLayerId(p));
+  assert.deepEqual(railingValues(defaults), {
+    layerId: defaultRailingLayerId(p),
+    height: 1,
+    baseOffset: 0,
+    postSpacing: 1.2,
+    infill: "bars",
+    renovation: "new",
+  });
+  const placed = addRailing(p, {
+    id: "g",
+    points: corner,
+    ...railingValues({ ...defaults, infill: "panel", height: 0.9 }),
+  });
+  const back = railingSettings(storeyOf(placed).railings![0]!);
+  assert.equal(back.infill, "panel");
+  assert.equal(back.height, 0.9);
+  const scene = derivePlanScene(placed, () => true);
+  // 2,00 m and 1,50 m at 1,20 m: five posts, each a 4 × 4 cm square.
+  const posts = scene.railingViews.get("g")!.posts;
+  assert.equal(posts.length, 5);
+  assert.ok(posts.every((c) => c.length === 4));
+  assert.ok(planSceneRuns(scene, []).some((r) => r.kind === "railing" && r.ids[0] === "g"));
+  // Hidden by its layer: neither drawn nor in a run.
+  const hidden = derivePlanScene(placed, (id) => id !== "g");
+  assert.equal(hidden.railings.size, 0);
+});
+
+test("menu summary: Geländer with infill, height and length", () => {
+  assert.deepEqual(selectionSummary(withRailings(), { kind: "railing", id: "g2" }), {
+    title: "Geländer",
+    details: "Platte / Glas · Höhe 1,10 m · Länge 3,50 m",
+  });
 });
