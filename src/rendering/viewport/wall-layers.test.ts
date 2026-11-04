@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { assemblyLibraryOf, insulationZigzag, wallLayerBands } from "./wall-layers.ts";
-import { derivePlanScene } from "./plan-scene.ts";
+import { derivePlanScene, planRunJoints } from "./plan-scene.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { setWallAssembly } from "../../application/walls/assembly.ts";
 import { addWall } from "../../application/walls/actions.ts";
@@ -106,4 +106,16 @@ test("T joint keeps the plain joint unless both walls have a load-bearing layer"
   );
   // Hidden by the layer filter: no joint for a wall that is not drawn.
   assert.equal(derivePlanScene(tee(3), (id) => id !== "in").layerJoints.length, 0);
+});
+
+test("T joint is drawn once, by the wall run of the later of its two walls", () => {
+  const scene = derivePlanScene(tee(3), () => true);
+  const order = scene.plan.walls.map((w) => w.id);
+  const later = order.indexOf("in") > order.indexOf("host") ? "in" : "host";
+  const earlier = later === "in" ? "host" : "in";
+  assert.equal(planRunJoints(scene, [later]).length, 1);
+  assert.equal(planRunJoints(scene, [earlier]).length, 0);
+  assert.equal(planRunJoints(scene, order).length, 1);
+  // Runs that hold neither wall draw no joint.
+  assert.equal(planRunJoints(scene, []).length, 0);
 });

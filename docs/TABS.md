@@ -197,3 +197,35 @@ Beim Abwählen rendert jetzt nur noch die Wand, die vorher gewählt war. Beim Au
 - 1556 Tests grün, Typprüfung, Lint, Architekturprüfung ohne Befund, Hash unverändert.
 
 **Grenze:** Türen sind nicht im Browser geprüft, das Testmodell hat keine. Sie gehen denselben Weg wie Fenster.
+
+## Rest beim Auswählen: Linien in Blöcken, Wandvergleich ohne Listen (04.11.2026)
+
+Freigabe der Änderungskarte „Rest beim Auswählen“ durch den Nutzer („Go“ für beide Schritte).
+
+**Ursache des Rests:** Der Linien-Lauf selbst rechnete nur etwa 0,2 ms. Die Zeit entstand, weil React bei jeder Auswahl jede der 2800 Linien einzeln abglich, im Entwicklungsmodus (StrictMode) sogar doppelt. Das galt auch, als jede Linie schon für sich memoisiert war.
+
+**Umsetzung** (`PlanSceneRun.tsx`, `plan-scene.ts`):
+
+- **Linien:** Jede Linie ist ein memoisierter Baustein (`PlanLine`). Zusätzlich sind je 64 Linien zu einem memoisierten Block (`PlanLineChunk`) zusammengefasst. Ein Klick gleicht dann nur noch die Blöcke ab und die Linien des einen Blocks, in dem sich die Auswahl ändert.
+- **Wände:** Der Vergleich der Wand-Bausteine (`sameWall`) prüft die Auswahl der Wand, ihrer Fenster und Türen direkt. Er baut keine Listen mehr, denn er läuft bei jedem Klick für jede Wand.
+- **Schichtstöße (Fund nebenbei):** Die T-Stöße (L09 U2) wurden bisher in jedem Lauf gezeichnet, also mehrfach und über allen Linien. Jetzt zeichnet sie nur der Wand-Lauf, der die später gezeichnete der beiden Wände enthält (`planRunJoints`). So liegt der Stoß weiter über beiden Wänden. Dafür gibt es einen neuen Test in `wall-layers.test.ts`.
+
+**Ergebnis** (Gesamtmodell 20 000, React-Profiler, Entwicklungsmodus):
+
+| Klick auf eine Linie |      vorher |  nachher |
+| -------------------- | ----------: | -------: |
+| Linien-Lauf          |    75–87 ms |   3–4 ms |
+| Grundriss gesamt     | etwa 100 ms | 17–22 ms |
+
+Ein Wandklick lag nach dem Wandvergleich bei 12–14 ms für den Grundriss, der Wand-Lauf bei etwa 3 ms (vorher 24 ms).
+
+**Nachweis:**
+
+- Browser (Gesamtmodell 20 000): 6 Linienklicks an Anfang, Mitte und Ende, jeweils genau eine Hervorhebung und nach Escape keine. Gemischt mit Strg-Klick: Linie, Linie, Wand („3 selected“), eine Linie wieder abgewählt („2 selected“), Escape („0 selected“). Alle 2800 Linien und 800 Wände bleiben gezeichnet.
+- 1557 Tests grün, Typprüfung, Lint, Architekturprüfung ohne Befund, Hash unverändert.
+
+**Grenzen:**
+
+- Gemessen ist im Entwicklungsmodus; im Produktionsbau ist React schneller, die Verhältnisse bleiben.
+- Das Testmodell hat keine T-Stöße mit Schichten; deren Zeichnung ist nur im Unit-Test geprüft, nicht im Browser.
+- Fügt man eine Linie ein, verschieben sich die Blockgrenzen. Die Blöcke dahinter rendern dann einmal neu. Das betrifft nur das Bearbeiten, nicht das Auswählen.

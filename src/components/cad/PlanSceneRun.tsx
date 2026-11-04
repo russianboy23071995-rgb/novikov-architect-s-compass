@@ -13,7 +13,7 @@ import { CAD_SHIMMER } from "@/rendering/viewport/highlight";
 import { memo } from "react";
 import type { ElementTarget } from "@/application/selection/target";
 import type { Point } from "@/domain/project/schema";
-import type { PlanScene, PlanRun } from "@/rendering/viewport/plan-scene";
+import { planRunJoints, type PlanScene, type PlanRun } from "@/rendering/viewport/plan-scene";
 import type { CornerPreview } from "@/application/walls/corner-preview";
 import { checkedImageUrl } from "@/interop/images/import";
 import { wallLength } from "@/domain/project/schema";
@@ -128,21 +128,33 @@ type WallProps = Pick<
   | "handlers"
 > & { wall: PlanWallScene };
 /** Ids whose selection a wall shows: the wall, its windows and its doors. */
-const wallSelectionIds = (props: WallProps) => [
-  props.wall.id,
-  ...(props.scene.openings.get(props.wall.id) ?? []).map((o) => o.id),
-  ...(props.scene.doors.get(props.wall.id) ?? []).map((d) => d.id),
-];
-/** Same wall drawing: every prop unchanged, the selection only as far as this wall shows it
- * (docs/TABS.md, Auswahlklick Schritt 2). A click then re-renders only the walls whose
- * highlight changes. */
+const WALL_PROPS = [
+  "wall",
+  "scene",
+  "drawing",
+  "pixelsPerMetre",
+  "wallOutlineWidth",
+  "cutFill",
+  "showRenovation",
+  "cornerGeometry",
+  "allowsShown",
+  "canPick",
+  "handlers",
+] as const satisfies readonly Exclude<keyof WallProps, "selectedIds">[];
+/** Same wall drawing: every prop unchanged, the selection only as far as this wall shows it,
+ * i.e. the wall, its windows and its doors (docs/TABS.md, Auswahlklick Schritt 2). A click then
+ * re-renders only the walls whose highlight changes. Checked without building lists: it runs
+ * for every wall on every click. */
 function sameWall(prev: WallProps, next: WallProps) {
-  for (const key of Object.keys(next) as (keyof WallProps)[])
-    if (key !== "selectedIds" && !Object.is(prev[key], next[key])) return false;
-  if (prev.selectedIds === next.selectedIds) return true;
-  return wallSelectionIds(next).every(
-    (id) => prev.selectedIds.has(id) === next.selectedIds.has(id),
-  );
+  for (const key of WALL_PROPS) if (!Object.is(prev[key], next[key])) return false;
+  const a = prev.selectedIds,
+    b = next.selectedIds;
+  if (a === b) return true;
+  const id = next.wall.id;
+  if (a.has(id) !== b.has(id)) return false;
+  for (const o of next.scene.openings.get(id) ?? []) if (a.has(o.id) !== b.has(o.id)) return false;
+  for (const d of next.scene.doors.get(id) ?? []) if (a.has(d.id) !== b.has(d.id)) return false;
+  return true;
 }
 /** One wall of the plan with its windows and doors, memoised (see sameWall). */
 const PlanWall = memo(function PlanWall({
@@ -352,6 +364,109 @@ const PlanWall = memo(function PlanWall({
   );
 }, sameWall);
 
+type PlanLineScene = PlanScene["lines"] extends ReadonlyMap<string, infer L> ? L : never;
+type LineProps = Pick<Props, "selectedIds" | "drawing" | "pixelsPerMetre" | "handlers"> & {
+  line: PlanLineScene;
+};
+/** Same line drawing: every prop unchanged, the selection only for this line (docs/TABS.md). */
+function sameLine(prev: LineProps, next: LineProps) {
+  return (
+    prev.line === next.line &&
+    prev.drawing === next.drawing &&
+    prev.pixelsPerMetre === next.pixelsPerMetre &&
+    prev.handlers === next.handlers &&
+    (prev.selectedIds === next.selectedIds ||
+      prev.selectedIds.has(next.line.id) === next.selectedIds.has(next.line.id))
+  );
+}
+/** One line of the plan, memoised (see sameLine): a click re-renders only the lines whose
+ * highlight changes (docs/TABS.md, Rest beim Auswählen). */
+const PlanLine = memo(function PlanLine({
+  line,
+  selectedIds,
+  drawing,
+  pixelsPerMetre,
+  handlers,
+}: LineProps) {
+  const selectProps = selectPropsFor(selectedIds, drawing, handlers);
+  return (
+    <g key={line.id}>
+      {selectedIds.has(line.id) && (
+        <path
+          d={linePath(line)}
+          fill="none"
+          stroke="#38bdf8"
+          strokeOpacity={0.4}
+          strokeWidth={5}
+          vectorEffect="non-scaling-stroke"
+          pointerEvents="none"
+        />
+      )}
+      {line.style === "custom" ? (
+        <LinePattern line={line} pixelsPerMetre={pixelsPerMetre} />
+      ) : (
+        <path
+          d={linePath(line)}
+          fill="none"
+          stroke={line.color}
+          strokeWidth={(line.penWidth * 96) / 25.4}
+          strokeDasharray={line.style === "dashed" ? "8 5" : undefined}
+          vectorEffect="non-scaling-stroke"
+          pointerEvents="none"
+        />
+      )}
+      <path
+        {...selectProps("line", line.id)}
+        d={linePath(line)}
+        fill="none"
+        stroke="transparent"
+        strokeWidth={12}
+        vectorEffect="non-scaling-stroke"
+        className="cursor-pointer outline-none focus-visible:stroke-sky-300/40"
+      />
+    </g>
+  );
+}, sameLine);
+
+/** Lines per memoised block: a click then reconciles the blocks and the lines of one block
+ * instead of every line of the plan (docs/TABS.md, Rest beim Auswählen). */
+const LINE_CHUNK = 64;
+function lineChunks(lines: PlanLineScene[]) {
+  const chunks: PlanLineScene[][] = [];
+  for (let i = 0; i < lines.length; i += LINE_CHUNK) chunks.push(lines.slice(i, i + LINE_CHUNK));
+  return chunks;
+}
+type LineChunkProps = Omit<LineProps, "line"> & { lines: PlanLineScene[] };
+function sameLineChunk(prev: LineChunkProps, next: LineChunkProps) {
+  if (
+    prev.lines.length !== next.lines.length ||
+    prev.drawing !== next.drawing ||
+    prev.pixelsPerMetre !== next.pixelsPerMetre ||
+    prev.handlers !== next.handlers
+  )
+    return false;
+  for (let i = 0; i < next.lines.length; i++) {
+    const line = next.lines[i]!;
+    if (prev.lines[i] !== line) return false;
+    if (
+      prev.selectedIds !== next.selectedIds &&
+      prev.selectedIds.has(line.id) !== next.selectedIds.has(line.id)
+    )
+      return false;
+  }
+  return true;
+}
+/** A block of lines, memoised (see sameLineChunk); its lines stay memoised one by one. */
+const PlanLineChunk = memo(function PlanLineChunk({ lines, ...rest }: LineChunkProps) {
+  return (
+    <>
+      {lines.map((line) => (
+        <PlanLine key={line.id} line={line} {...rest} />
+      ))}
+    </>
+  );
+}, sameLineChunk);
+
 /** A contiguous paint-order run. Unaffected runs retain every prop across pointer updates. */
 export function PlanSceneContent({
   kind,
@@ -391,6 +506,8 @@ export function PlanSceneContent({
       ? undefined
       : scene.wallLayers.get(wall.id);
   const selectProps = selectPropsFor(selectedIds, drawing, handlers);
+  // A T joint is drawn once, above both of its walls (not repeated in every run).
+  const runJoints = kind === "wall" ? planRunJoints(scene, ids) : [];
   return (
     <>
       {plan.references.map((r) => {
@@ -764,7 +881,7 @@ export function PlanSceneContent({
           handlers={handlers}
         />
       ))}
-      {scene.layerJoints.map((joint) => {
+      {runJoints.map((joint) => {
         // Incoming core through the host's cover layers at a T joint (L09 U2), drawn above both
         // walls; only where both walls show their layers.
         const wall = scene.walls.get(joint.wallId),
@@ -893,42 +1010,15 @@ export function PlanSceneContent({
           </g>
         );
       })}
-      {plan.lines.map((line) => (
-        <g key={line.id}>
-          {selectedIds.has(line.id) && (
-            <path
-              d={linePath(line)}
-              fill="none"
-              stroke="#38bdf8"
-              strokeOpacity={0.4}
-              strokeWidth={5}
-              vectorEffect="non-scaling-stroke"
-              pointerEvents="none"
-            />
-          )}
-          {line.style === "custom" ? (
-            <LinePattern line={line} pixelsPerMetre={pixelsPerMetre} />
-          ) : (
-            <path
-              d={linePath(line)}
-              fill="none"
-              stroke={line.color}
-              strokeWidth={(line.penWidth * 96) / 25.4}
-              strokeDasharray={line.style === "dashed" ? "8 5" : undefined}
-              vectorEffect="non-scaling-stroke"
-              pointerEvents="none"
-            />
-          )}
-          <path
-            {...selectProps("line", line.id)}
-            d={linePath(line)}
-            fill="none"
-            stroke="transparent"
-            strokeWidth={12}
-            vectorEffect="non-scaling-stroke"
-            className="cursor-pointer outline-none focus-visible:stroke-sky-300/40"
-          />
-        </g>
+      {lineChunks(plan.lines).map((lines) => (
+        <PlanLineChunk
+          key={lines[0]!.id}
+          lines={lines}
+          selectedIds={selectedIds}
+          drawing={drawing}
+          pixelsPerMetre={pixelsPerMetre}
+          handlers={handlers}
+        />
       ))}
     </>
   );
