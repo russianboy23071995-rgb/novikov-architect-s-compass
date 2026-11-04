@@ -11,7 +11,7 @@ So benutzt du sie:
 
 Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus dieser Liste wird beim Auftrag dort eingetragen.
 
-**Stand:** 04.11.2026 · main nach PR628
+**Stand:** 04.11.2026 · main nach PR629
 
 ## Deine Wünsche
 
@@ -39,7 +39,7 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 | L10 | Geschoss ohne oberes Geschoss bzw. Einfügen zwischen gebundenen Geschossen (zurzeit gesperrt, Fachentscheidung)  |      | erledigt durch PR490 (Bindung ans eigene Geschoss)                                                                                                                                   | §9                 |
 | L40 | Werkzeug Deckendurchbruch (Öffnung in Decken, z. B. für Treppen und Schächte) |      | erledigt (PR605, Symbol nach Vorlage und runder Durchbruch PR606), docs/DECKENDURCHBRUCH.md; Luftraum im Geschoss darüber offen | N48 |
 | L41 | Werkzeug Dachflächenfenster (Fenster in Dachflächen) |      | offen (Nutzerwunsch 02.11.2026) | |
-| L42 | Werkzeug Geländer |      | G1 Modell, 3D, IFC erledigt (PR628); G2 Werkzeug/Grundriss, G3 Bearbeiten/Schnitt offen | docs/GELAENDER.md |
+| L42 | Werkzeug Geländer |      | G1 Modell, 3D, IFC (PR628) und G2 Werkzeug, Grundriss (PR629) erledigt; G3 Bearbeiten/Schnitt offen | docs/GELAENDER.md |
 | L43 | Werkzeug Gelände (Geländemodell) |      | offen (Nutzerwunsch 02.11.2026) | |
 | L44 | Objektbibliothek (Möbel, Sanitär, eigene Objekte platzieren) |      | offen (Nutzerwunsch 02.11.2026) | |
 
