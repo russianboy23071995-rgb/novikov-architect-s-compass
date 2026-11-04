@@ -1,5 +1,6 @@
 import type { PlanText } from "../../domain/elements/text/model.ts";
 import { columnSettings, type ColumnDefaults } from "../columns/defaults.ts";
+import { railingSettings, type RailingDefaults } from "../railings/defaults.ts";
 import { stairSettings, type StairDefaults } from "../stairs/defaults.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { patternSize } from "../hatches/pattern-size.ts";
@@ -32,6 +33,7 @@ export type ToolDefaults =
   | { tool: "line"; values: LineDefaults }
   | { tool: "wall"; values: WallDefaults }
   | { tool: "column"; values: ColumnDefaults }
+  | { tool: "railing"; values: RailingDefaults }
   | { tool: "stair"; values: StairDefaults }
   | { tool: "text"; values: Omit<PlanText, "id" | "position" | "content"> };
 
@@ -90,6 +92,11 @@ export function pickupToolDefaults(
   if (target.kind === "column") {
     const source = storeyOf(project).columns?.find((item) => item.id === target.id);
     return source ? { tool: "column", values: columnSettings(source) } : null;
+  }
+  // Railings hand over every setting except their line (docs/GELAENDER.md, G3).
+  if (target.kind === "railing") {
+    const source = storeyOf(project).railings?.find((item) => item.id === target.id);
+    return source ? { tool: "railing", values: railingSettings(source) } : null;
   }
   // Stairs hand over every setting, axis and height rule included (docs/TREPPE.md, TR2).
   if (target.kind === "stair") {

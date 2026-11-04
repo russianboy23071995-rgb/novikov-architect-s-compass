@@ -6,7 +6,7 @@ Nutzerauftrag 04.11.2026: das Werkzeug Geländer, freigegeben mit „Go, Geländ
 | --- | ------------------------------------------------------------------------------------- | -------- |
 | G1  | Modell, Dateiformat 54, Standardebene Geländer, Aktionen, 3D-Körper, IFC `IfcRailing` | erledigt |
 | G2  | Werkzeug, Einstellungsfenster, Eigenschaften, Grundriss                               | erledigt |
-| G3  | Bearbeiten, Schnitt, Abnahme                                                          | offen    |
+| G3  | Bearbeiten, Schnitt, Abnahme                                                          | erledigt |
 
 Vorgaben (Empfehlung der Karte, vom Nutzer nicht anders bestimmt): frei als Linienzug gezeichnet, nicht an Treppe oder Decke gebunden; Höhe 1,00 m, Pfosten höchstens 1,20 m auseinander, Füllung Stäbe.
 
@@ -92,3 +92,31 @@ Vorgaben (Empfehlung der Karte, vom Nutzer nicht anders bestimmt): frei als Lini
 
 - **Fang:** An Deckenrand und Treppe fängt der Cursor nur über die vorhandenen Fangpunkte und Kanten. Ein eigener Fang „Deckenrand“ fehlt.
 - **Lesbarkeit:** Bei sehr kleinem Maßstab ist der Handlauf nur noch als Mittellinie zu erkennen.
+
+## Teil G3: Bearbeiten, Fangpunkte, Pipette, Schnitt
+
+- **Verschieben:** Ein Geländer bewegt sich als Ganzes mit allen Punkten:
+  - Einträge im Menü am Element: „Element frei bewegen“, „Element auf X-Achse“, „Element auf Y-Achse“,
+  - auch zusammen mit anderen gewählten Elementen, über den vorbereiteten Verschiebepfad `prepared-translation.ts`,
+  - Bezugspunkt ist der angeklickte Punkt, sonst der erste Punkt des Geländers,
+  - „Entlang Achse“ wird nicht angeboten.
+- **Kopieren, Ausschneiden, Einfügen:** über das gemeinsame Bauteilregister; die Kopie bekommt eine neue Kennung.
+- **Fangpunkte:** jeder Punkt und jede Abschnittsmitte, beschriftet „Geländer · Punkt n“. Andere Werkzeuge, etwa Wand, Maßkette oder ein zweites Geländer, fangen daran.
+- **Pipette:** übernimmt alle Einstellungen eines Geländers außer seiner Linie in das Werkzeug.
+- **Schnitt und Ansicht:** Das Geländer erscheint ohne eigenen Code, denn der Schnitt nutzt dieselben 3D-Flächen. Auf der Schnittlinie wird es geschnitten, dahinter gesehen.
+
+**Nachweis G3:**
+
+- **Prüfungen:** 1573 Tests grün, davon 4 neu (Verschieben, Fangpunkte, Pipette, Schnitt geschnitten und gesehen). Typprüfung beider Projekte, Lint (eine Warnung, die es vorher schon gab), Architekturprüfung ohne Befund, 14-Modell-Hash unverändert.
+- **Browser:**
+  - Geländer gezeichnet und angeklickt. Das Menü zeigt „Geländer“ mit Referenzen, „Element frei bewegen“, X-Achse, Y-Achse, Werkzeugeigenschaften und Löschen.
+  - „Element auf Y-Achse“: um 0,41 m verschoben, x unverändert.
+  - Schnitt A-A quer durch das Geländer gelegt. Im Schnitt-Tab sind Handlauf, Unterholm und ein Stab geschnitten, gut 1 m hoch über dem Erdgeschoss.
+  - Ladefehler in der Konsole stammten nur aus dem kurzen Branch-Wechsel und waren zwei Sekunden später behoben.
+
+**Grenzen G3 und Ausblick:**
+
+- **Punkte:** Einzelne Punkte eines Geländers lassen sich noch nicht verschieben, einfügen oder löschen. Ändern heißt vorerst neu zeichnen.
+- **Bindung:** Ein Geländer hängt nicht an Decke oder Treppe. Bewegt man diese, bleibt das Geländer stehen.
+- **Ecken und Maße:** Ecken sind nicht auf Gehrung geschnitten, die Maße der Bauteile stehen fest.
+- **Darstellung:** Ein eigenes Geländer-Symbol im Schnitt (Schraffur oder Linienart) gibt es nicht. Geschnittene Teile sehen aus wie andere geschnittene Bauteile.

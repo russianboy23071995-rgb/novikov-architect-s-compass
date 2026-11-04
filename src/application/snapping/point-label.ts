@@ -9,6 +9,7 @@ const ELEMENT_NAMES = [
   ["roofs", "Dach"],
   ["rooms", "Raum"],
   ["columns", "Stütze"],
+  ["railings", "Geländer"],
   ["hatches", "Schraffur"],
   ["lines", "Linie"],
   ["windows", "Fenster"],
@@ -58,6 +59,7 @@ export function snapPointLabel(
         index = 0;
       return `${name} · Punkt ${index + 1}`;
     }
+    if (key === "railings") return `${name} · Punkt ${index + 1}`;
     return `${name} · Ecke ${index + 1}`;
   }
   if (feature === "centre") return `${name} · Mitte`;
