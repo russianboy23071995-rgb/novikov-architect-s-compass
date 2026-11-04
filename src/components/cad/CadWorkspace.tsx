@@ -98,6 +98,7 @@ import { addRailing, updateRailing } from "@/application/railings/actions";
 import { railingValues } from "@/application/railings/defaults";
 import { addRoofWindowAt, updateRoofWindow } from "@/application/roof-windows/actions";
 import { roofWindowValues } from "@/application/roof-windows/defaults";
+import { roofWindowCentre } from "@/application/roof-windows/actions";
 import { addStair, updateStair } from "@/application/stairs/actions";
 import { stairValues } from "@/application/stairs/defaults";
 import { stairDirectionTo, stairTreadForLength, stairTurnTo } from "@/domain/elements/stair/model";
@@ -1180,8 +1181,7 @@ export function CadWorkspace({
   };
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
-    // Roof windows are moved with D3 (docs/DACHFLAECHENFENSTER.md).
-    if (!selection || selection.kind === "reference" || selection.kind === "roofWindow") return;
+    if (!selection || selection.kind === "reference") return;
     const inSolid = mode === "3D";
     // Slabs and roofs: outline edited in the plan, moved as a whole (SLAB_/ROOF_ELEMENT.md).
     // Columns and railings move as a whole too (docs/STUETZEN.md, P3; docs/GELAENDER.md, G3).
@@ -1194,6 +1194,7 @@ export function CadWorkspace({
       selection.kind === "room" ||
       selection.kind === "column" ||
       selection.kind === "railing" ||
+      selection.kind === "roofWindow" ||
       selection.kind === "stair" ||
       selection.kind === "dimension" ||
       selection.kind === "text";
@@ -1222,17 +1223,19 @@ export function CadWorkspace({
                   ? storeyOf(project).columns!.find((c) => c.id === selection.id)!.position
                   : selection.kind === "railing"
                     ? storeyOf(project).railings!.find((r) => r.id === selection.id)!.points[0]!
-                    : selection.kind === "stair"
-                      ? storeyOf(project).stairs!.find((s) => s.id === selection.id)!.start
-                      : selection.kind === "dimension"
-                        ? storeyOf(project).dimensions!.find((d) => d.id === selection.id)!
-                            .points[0]!
-                        : selection.kind === "text"
-                          ? storeyOf(project).texts!.find((t) => t.id === selection.id)!.position
-                          : selection.kind === "drawing"
-                            ? storeyOf(project).drawings!.find((d) => d.id === selection.id)!
-                                .position
-                            : editAnchor(project, selection));
+                    : selection.kind === "roofWindow"
+                      ? roofWindowCentre(project, selection.id)
+                      : selection.kind === "stair"
+                        ? storeyOf(project).stairs!.find((s) => s.id === selection.id)!.start
+                        : selection.kind === "dimension"
+                          ? storeyOf(project).dimensions!.find((d) => d.id === selection.id)!
+                              .points[0]!
+                          : selection.kind === "text"
+                            ? storeyOf(project).texts!.find((t) => t.id === selection.id)!.position
+                            : selection.kind === "drawing"
+                              ? storeyOf(project).drawings!.find((d) => d.id === selection.id)!
+                                  .position
+                              : editAnchor(project, selection));
       cancelInteraction();
       try {
         const axis =
@@ -1259,7 +1262,7 @@ export function CadWorkspace({
     }
 
     // A railing only moves as a whole (handled above); its points are not edited yet.
-    if (selection.kind === "railing") return;
+    if (selection.kind === "railing" || selection.kind === "roofWindow") return;
     // Slab outlines are edited in the plan (docs/SLAB_ELEMENT.md, E1); in 3D the slab moves whole.
     if (area && (inSolid || action === "axis")) {
       const words = {

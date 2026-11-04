@@ -6,7 +6,7 @@ Nutzerauftrag 04.11.2026: das Werkzeug Dachflächenfenster, Änderungskarte mit 
 | --- | ------------------------------------------------------------------------------------- | -------- |
 | D1  | Modell, Dateiformat 55, Loch im Dach senkrecht zur Fläche, Rahmen und Glas in 3D, IFC | erledigt |
 | D2  | Werkzeug, Einstellungsfenster, Eigenschaften, Grundriss                               | erledigt |
-| D3  | Verschieben in der Dachebene, Fangpunkte, Pipette, Schnitt, Abnahme                   | offen    |
+| D3  | Verschieben in der Dachebene, Fangpunkte, Pipette, Schnitt, Abnahme                   | erledigt |
 
 Vorgaben aus der Karte:
 
@@ -93,5 +93,39 @@ Vorgaben aus der Karte:
 
 **Grenzen D2:**
 
-- **Bearbeiten:** Verschieben, Fangpunkte und Pipette fehlen noch (D3).
+- **Bearbeiten:** Verschieben, Fangpunkte und Pipette kamen mit D3.
 - **Fang beim Setzen:** Beim Setzen fängt der Klick wie jedes Werkzeug an Punkten. Es gibt keinen eigenen Fang „Abstand zum Dachrand“.
+
+## Teil D3: Verschieben, Fangpunkte, Pipette, Schnitt
+
+- **Verschieben in der Dachebene:** Ein Fenster bewegt sich als Ganzes.
+  - Menü am Element: „Element frei bewegen“, „Element auf X-Achse“, „Element auf Y-Achse“, auch zusammen mit anderen gewählten Elementen.
+  - Die Bewegung im Grundriss wird in die Dachebene umgerechnet: der Anteil entlang der Traufe auf `along`, der Anteil bergauf geteilt durch cos(Neigung) auf `slope`. Die Seiten bleiben parallel zur Traufe.
+  - Bezugspunkt ist der angeklickte Punkt, sonst die Mitte der Öffnung auf der Dachoberseite.
+  - Wandert das Fenster dabei aus dem Dach oder auf ein anderes Fenster, wird die Bewegung abgelehnt.
+  - Werden Dach und Fenster zusammen verschoben, bleibt das Fenster an seinem Platz im Dach.
+  - „Entlang Achse“ wird nicht angeboten.
+- **Fangpunkte:** Mitte, vier Ecken und Kantenmitten der Öffnung auf der Dachoberseite, beschriftet „Dachflächenfenster · Mitte“ bzw. „· Ecke n“.
+- **Pipette:** übernimmt Breite, Länge, Rahmen, Ebene und Bauzustand, nicht die Lage.
+- **Schnitt und Ansicht:** Wie beim Geländer ohne eigenen Code, über die 3D-Flächen. Ein Schnitt durch das Fenster zeigt das Dach mit Loch, die Rahmenteile senkrecht zur Dachfläche und die Scheibe.
+
+**Nachweis D3:**
+
+- **Prüfungen:** 1588 Tests grün, davon 4 neu:
+  - Verschieben (allein, mit dem Dach, aus dem Dach heraus abgelehnt, Mitte),
+  - Fangpunkte und Beschriftung,
+  - Pipette,
+  - Schnitt durch Fenster und Dach.
+
+  Dazu Typprüfung beider Projekte, Lint (eine Warnung, die es vorher schon gab), Architekturprüfung ohne Befund, 14-Modell-Hash unverändert.
+
+- **Browser** (Pultdach 8 × 5 m mit zwei Fenstern):
+  - Das kleine Fenster angeklickt und „Element auf X-Achse“ gewählt: um 1,38 m entlang der Traufe verschoben, y unverändert, keine Meldung.
+  - Schnitt A-A quer durch das verschobene Fenster gelegt. Im Schnitt-Tab ist das geneigte Dach geschnitten, mit dem Fenster darin: Rahmenteile senkrecht zur Dachfläche, Glas in der Mitte der Dachstärke.
+
+**Grenzen und Ausblick L41:**
+
+- **Ausrichtung:** Drehen in der Dachebene ist nicht möglich, das Fenster bleibt parallel zur Traufe.
+- **Bauteil:** ohne Eindeckrahmen, Flügel oder Öffnungsart; das IFC kennt die Öffnungsart nicht.
+- **Vorschau:** Beim Verschieben eines Dachs folgen seine Fenster in der laufenden Vorschau nicht sichtbar mit. Nach dem Absetzen sind sie richtig.
+- **Mengen:** Die Mengenliste zeigt Grundfläche und Dachfläche brutto. Nur das Volumen zieht die Fenster ab.

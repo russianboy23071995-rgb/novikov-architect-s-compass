@@ -25,6 +25,14 @@ import { prepareTranslation } from "../../domain/project/prepared-translation.ts
 import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { selectionSummary } from "../../components/cad/demand-menu.ts";
+import { roofWindowCentre } from "./actions.ts";
+import { validateProject } from "../../domain/project/schema.ts";
+import { projectSnapReferences } from "../snapping/project-references.ts";
+import { snapPointLabel } from "../snapping/point-label.ts";
+import { pickupToolDefaults } from "../tools/pickup.ts";
+import { createLayerVisibilityPolicy, ALL_LAYERS_VISIBLE } from "../layers/visibility.ts";
+import { addSection } from "../sections/actions.ts";
+import { sectionDrawing } from "../../rendering/viewport/section-drawing.ts";
 import { roofWindowSettings, roofWindowToolDefaults, roofWindowValues } from "./defaults.ts";
 import { derivePlanScene, planSceneRuns } from "../../rendering/viewport/plan-scene.ts";
 import { roofPlanView } from "../../rendering/viewport/roof-plan.ts";
@@ -225,5 +233,67 @@ test("roof cut at 1 m gets a hole where it meets a roof window", () => {
   const holed = roofPlanView(roofOf(p), undefined, storeyOf(p).roofWindows!);
   assert.ok(
     holed.cut.length > plain.cut.length || JSON.stringify(holed.cut) !== JSON.stringify(plain.cut),
+  );
+});
+
+// docs/DACHFLAECHENFENSTER.md, D3: move in the roof plane, snap points, pipette, section.
+test("move: a plan move shifts the window along the eave and up the slope", () => {
+  const p = withWindow();
+  const cos = Math.cos((35 * Math.PI) / 180);
+  const moved = prepareTranslation(p, ["w1"]).materialize(p, { x: 1, y: 0.5 });
+  const w = storeyOf(moved).roofWindows![0]!;
+  assert.ok(near(w.along, 3) && near(w.slope, 2 + 0.5 / cos));
+  assert.deepEqual(storeyOf(moved).roofs, storeyOf(p).roofs);
+  // Window and roof together: the roof moves, the window keeps its place in it.
+  const both = prepareTranslation(p, ["dach", "w1"]).materialize(p, { x: 1, y: 0.5 });
+  assert.deepEqual(storeyOf(both).roofWindows, storeyOf(p).roofWindows);
+  // Moved out of the roof: refused.
+  assert.throws(() =>
+    validateProject(prepareTranslation(p, ["w1"]).materialize(p, { x: 7, y: 0 })),
+  );
+  assert.deepEqual(
+    roofWindowCentre(p, "w1"),
+    roofWindowRings(roofOf(p), storeyOf(p).roofWindows![0]!).top.reduce(
+      (c, q) => ({ x: c.x + q.x / 4, y: c.y + q.y / 4 }),
+      { x: 0, y: 0 },
+    ),
+  );
+});
+
+test("snap points: centre, corners and edge midpoints of the opening, labelled", () => {
+  const p = withWindow();
+  const refs = projectSnapReferences(p).filter((r) => r.entityId === "w1");
+  assert.ok(refs.some((r) => r.feature === "centre"));
+  assert.equal(refs.filter((r) => r.feature.startsWith("vertex-")).length, 4);
+  assert.equal(snapPointLabel(p, "w1", "centre"), "Dachflächenfenster · Mitte");
+  assert.equal(snapPointLabel(p, "w1", "vertex-0"), "Dachflächenfenster · Ecke 1");
+});
+
+test("pipette hands size, frame, layer and status to the tool", () => {
+  const p = updateRoofWindow(withWindow(), "w1", { width: 1.14, renovation: "existing" });
+  const picked = pickupToolDefaults(p, createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE), {
+    kind: "roofWindow",
+    id: "w1",
+  });
+  assert.equal(picked?.tool, "roofWindow");
+  if (picked?.tool !== "roofWindow") throw new Error("Expected roof window");
+  assert.deepEqual(picked.values, roofWindowSettings(storeyOf(p).roofWindows![0]!));
+});
+
+test("section through a roof window cuts its frame and glass", () => {
+  let p = withWindow();
+  // Window centre along x = 2: a section along y at x = 2 crosses it.
+  p = addSection(p, { id: "s", start: { x: 2, y: -1 }, end: { x: 2, y: 6 }, look: "left" });
+  const drawing = sectionDrawing(
+    p,
+    p.sections!.find((s) => s.id === "s")!,
+  );
+  assert.ok(
+    drawing.cuts.some((c) => c.id === "w1"),
+    "window cut",
+  );
+  assert.ok(
+    drawing.cuts.some((c) => c.id === "dach"),
+    "roof cut",
   );
 });

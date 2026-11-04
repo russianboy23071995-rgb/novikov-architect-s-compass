@@ -4,6 +4,8 @@ import { dimensionSchema } from "../elements/dimension/model.ts";
 import { columnSchema } from "../elements/column/model.ts";
 import { stairSchema } from "../elements/stair/model.ts";
 import { railingSchema } from "../elements/railing/model.ts";
+import { roofWindowSchema } from "../elements/roof/window.ts";
+import { roofFrame } from "../elements/roof/geometry.ts";
 import { translatePoint } from "../../geometry/primitives/point.ts";
 import { wallDependencyClosure } from "../elements/wall/dependency-closure.ts";
 import { prepareProjectSnapshot } from "./prepared-snapshot.ts";
@@ -50,6 +52,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(s.columns ?? []),
       ...(s.stairs ?? []),
       ...(s.railings ?? []),
+      ...(s.roofWindows ?? []),
       ...(s.dimensions ?? []),
       ...(s.texts ?? []),
       ...(s.drawings ?? []),
@@ -93,6 +96,10 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(s.columns ? { columns: s.columns.filter((column) => ids.has(column.id)) } : {}),
       ...(s.stairs ? { stairs: s.stairs.filter((stair) => ids.has(stair.id)) } : {}),
       ...(s.railings ? { railings: s.railings.filter((r) => ids.has(r.id)) } : {}),
+      // A roof window moves on its own only; with its roof it follows that roof by itself.
+      ...(s.roofWindows
+        ? { roofWindows: s.roofWindows.filter((w) => ids.has(w.id) && !ids.has(w.roofId)) }
+        : {}),
       ...(s.dimensions ? { dimensions: s.dimensions.filter((d) => ids.has(d.id)) } : {}),
       ...(s.texts ? { texts: s.texts.filter((t) => ids.has(t.id)) } : {}),
       ...(s.drawings ? { drawings: s.drawings.filter((d) => ids.has(d.id)) } : {}),
@@ -136,6 +143,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(storeyOf(affected).columns ?? []),
       ...(storeyOf(affected).stairs ?? []),
       ...(storeyOf(affected).railings ?? []),
+      ...(storeyOf(affected).roofWindows ?? []),
       ...(storeyOf(affected).dimensions ?? []),
       ...(storeyOf(affected).texts ?? []),
       ...(storeyOf(affected).drawings ?? []),
@@ -278,6 +286,21 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
               })),
             }
           : {}),
+        // A roof window moves in its roof's plane (docs/DACHFLAECHENFENSTER.md, D3): the plan
+        // move along the eave and up the slope, its sides stay parallel to the eave.
+        ...(storeyOf(affected).roofWindows
+          ? {
+              roofWindows: storeyOf(affected).roofWindows!.map((w) => {
+                const roof = storeyOf(base).roofs!.find((r) => r.id === w.roofId)!;
+                const f = roofFrame(roof);
+                return {
+                  ...w,
+                  along: w.along + delta.x * f.along.x + delta.y * f.along.y,
+                  slope: w.slope + (delta.x * f.rise.x + delta.y * f.rise.y) / f.cos,
+                };
+              }),
+            }
+          : {}),
         // A stair moves with its start point (docs/TREPPE.md, TR2).
         ...(storeyOf(affected).stairs
           ? {
@@ -352,6 +375,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
     for (const column of storeyOf(geometry).columns ?? []) columnSchema.parse(column);
     for (const stair of storeyOf(geometry).stairs ?? []) stairSchema.parse(stair);
     for (const railing of storeyOf(geometry).railings ?? []) railingSchema.parse(railing);
+    for (const w of storeyOf(geometry).roofWindows ?? []) roofWindowSchema.parse(w);
     for (const d of storeyOf(geometry).dimensions ?? []) dimensionSchema.parse(d);
     for (const t of storeyOf(geometry).texts ?? []) textSchema.parse(t);
     for (const d of storeyOf(geometry).drawings ?? []) placedDrawingSchema.parse(d);
@@ -394,6 +418,9 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(s.railings
         ? { railings: replace(s.railings, storeyOf(patch.geometry).railings ?? []) }
         : {}),
+      ...(s.roofWindows
+        ? { roofWindows: replace(s.roofWindows, storeyOf(patch.geometry).roofWindows ?? []) }
+        : {}),
       ...(s.texts ? { texts: replace(s.texts, storeyOf(patch.geometry).texts ?? []) } : {}),
       ...(s.drawings
         ? { drawings: replace(s.drawings, storeyOf(patch.geometry).drawings ?? []) }
@@ -426,6 +453,7 @@ export function prepareStoreysTranslation(source: Project, selectedIds: readonly
       ...(s.columns ?? []),
       ...(s.stairs ?? []),
       ...(s.railings ?? []),
+      ...(s.roofWindows ?? []),
       ...(s.dimensions ?? []),
       ...(s.texts ?? []),
       ...(s.drawings ?? []),
@@ -498,6 +526,7 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
       ...(s.columns ?? []),
       ...(s.stairs ?? []),
       ...(s.railings ?? []),
+      ...(s.roofWindows ?? []),
       ...(s.dimensions ?? []),
       ...(s.texts ?? []),
       ...(s.drawings ?? []),

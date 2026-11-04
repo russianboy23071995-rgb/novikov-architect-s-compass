@@ -5,6 +5,7 @@ import type { Point, Project } from "../../domain/project/schema.ts";
 import {
   ROOF_WINDOW_DEFAULTS,
   roofWindowPlace,
+  roofWindowRings,
   type RoofWindow,
 } from "../../domain/elements/roof/window.ts";
 
@@ -61,4 +62,16 @@ export function updateRoofWindow(
       roofWindows: windows.map((w) => (w.id === windowId ? { ...w, ...changes, id: w.id } : w)),
     }),
   });
+}
+
+/** Plan centre of a roof window's opening on the roof top (its move handle, D3). */
+export function roofWindowCentre(project: Project, windowId: string): Point {
+  const window = storeyOf(project).roofWindows?.find((w) => w.id === windowId);
+  const roof = window && storeyOf(project).roofs?.find((r) => r.id === window.roofId);
+  if (!window || !roof) throw new Error(`Unbekanntes Dachflächenfenster: ${windowId}`);
+  const top = roofWindowRings(roof, window).top;
+  return {
+    x: top.reduce((n, p) => n + p.x, 0) / 4,
+    y: top.reduce((n, p) => n + p.y, 0) / 4,
+  };
 }
