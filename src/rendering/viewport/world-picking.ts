@@ -47,19 +47,21 @@ function* triangles(
     for (const [a, b, c] of faceTriangles(f.vertices.length)) {
       add([f.vertices[a]!, f.vertices[b]!, f.vertices[c]!], {
         // Window and door elements select their window or door (S1), like the fallback picking.
-        kind: f.opening
-          ? f.opening
-          : f.slab
-            ? "slab"
-            : f.roof
-              ? "roof"
-              : f.column
-                ? "column"
-                : f.stair
-                  ? "stair"
-                  : f.railing
-                    ? "railing"
-                    : "wall",
+        kind: f.roofWindow
+          ? "roofWindow"
+          : f.opening
+            ? f.opening
+            : f.slab
+              ? "slab"
+              : f.roof
+                ? "roof"
+                : f.column
+                  ? "column"
+                  : f.stair
+                    ? "stair"
+                    : f.railing
+                      ? "railing"
+                      : "wall",
         id: f.wallId,
       });
       yield;

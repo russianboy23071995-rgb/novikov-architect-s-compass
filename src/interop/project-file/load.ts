@@ -56,6 +56,7 @@ import {
   projectV50Schema,
   projectV51Schema,
   projectV53Schema,
+  projectV54Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
@@ -274,6 +275,14 @@ export function migrateProjectData(value: unknown): Project {
   if (value.schemaVersion === 36)
     return migrateProjectData(
       withColumnLayer(withoutBoundHeights({ ...projectV36Schema.parse(value), schemaVersion: 37 })),
+    );
+  // Schema 54 files carry no roof windows; the strict v54 schema rejects smuggled ones.
+  if (value.schemaVersion === 54)
+    return validateProject(
+      withoutBoundHeights({
+        ...projectV54Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
     );
   // Schema 53 files carry no railings; the strict v53 schema rejects smuggled ones. They get
   // the standard Geländer layer when it is missing (docs/GELAENDER.md).

@@ -38,10 +38,18 @@ export function previewDeleteSelection(
   const slabFollowers = (storey.slabOpenings ?? []).filter(
     (o) => slabs.has(o.slabId) && !selected.has(o.id),
   );
+  // Roof windows follow their deleted roof (docs/DACHFLAECHENFENSTER.md).
+  const deletedRoofs = new Set(
+    (storey.roofs ?? []).filter((r) => selected.has(r.id)).map((r) => r.id),
+  );
+  const roofFollowers = (storey.roofWindows ?? []).filter(
+    (w) => deletedRoofs.has(w.roofId) && !selected.has(w.id),
+  );
   const removed = new Set([
     ...selected,
     ...followers.map((o) => o.id),
     ...slabFollowers.map((o) => o.id),
+    ...roofFollowers.map((w) => w.id),
   ]);
   const next: Record<string, unknown> = { ...storey };
   for (const kind of elementKinds) {

@@ -30,6 +30,9 @@ export type ClipboardContent = Readonly<{
 
 const hosted = (element: object): element is { wallId: string } =>
   "wallId" in element && typeof (element as { wallId: unknown }).wallId === "string";
+/** Roof windows (docs/DACHFLAECHENFENSTER.md) travel only with their roof, like openings. */
+const roofHosted = (element: object): element is { roofId: string } =>
+  "roofId" in element && typeof (element as { roofId: unknown }).roofId === "string";
 
 /** Copy of the selection (any storey). Throws a readable message when nothing can be copied. */
 export function copySelection(
@@ -45,9 +48,17 @@ export function copySelection(
     const walls = new Set(
       storey.walls.filter((w) => selected.has(`wall:${w.id}`)).map((w) => w.id),
     );
+    const roofs = new Set(
+      (storey.roofs ?? []).filter((r) => selected.has(`roof:${r.id}`)).map((r) => r.id),
+    );
     for (const kind of elementKinds)
       for (const element of storeyElements(storey, kind) as readonly ElementOf<ElementKind>[]) {
         const chosen = selected.has(`${kind}:${element.id}`);
+        if (roofHosted(element)) {
+          if (roofs.has(element.roofId)) items.push({ kind, element: structuredClone(element) });
+          else if (chosen) skippedHosted++;
+          continue;
+        }
         if (hosted(element)) {
           // Openings come with their copied wall; alone they would duplicate in place.
           if (walls.has(element.wallId)) items.push({ kind, element: structuredClone(element) });
@@ -100,6 +111,7 @@ export function pasteClipboard(
     const copy = structuredClone(element) as ElementOf<ElementKind> & Record<string, unknown>;
     copy.id = ids.get(element.id)!;
     if (hosted(copy)) copy.wallId = wallId(copy.wallId);
+    if (roofHosted(copy)) copy.roofId = ids.get(copy.roofId) ?? copy.roofId;
     if (kind === "room") {
       copy.number = nextRoomNumber(rooms);
       rooms.push(copy as ElementOf<"room">);

@@ -91,7 +91,7 @@ test("the drawing sheet holds drawing elements only and keeps its own checks", (
 
 test("schema 44 files load without title blocks; smuggled title blocks are refused", () => {
   const stored = JSON.parse(serializeProject(start()));
-  assert.equal(loadProjectData({ ...stored, schemaVersion: 44 }).schemaVersion, 54);
+  assert.equal(loadProjectData({ ...stored, schemaVersion: 44 }).schemaVersion, 55);
   const withBlock = JSON.parse(
     serializeProject(run(start(), { kind: "create", id: "tb1", name: "Plankopf" })),
   );

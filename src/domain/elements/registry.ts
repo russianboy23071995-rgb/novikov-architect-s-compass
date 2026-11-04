@@ -19,6 +19,7 @@ export const ELEMENT_KINDS = {
   text: { list: "texts", label: "Text" },
   stair: { list: "stairs", label: "Treppe" },
   railing: { list: "railings", label: "Geländer" },
+  roofWindow: { list: "roofWindows", label: "Dachflächenfenster" },
   line: { list: "lines", label: "Linie" },
   hatch: { list: "hatches", label: "Schraffur" },
   reference: { list: "references", label: "Referenzbild" },

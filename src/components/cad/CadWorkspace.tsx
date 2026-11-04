@@ -1174,7 +1174,8 @@ export function CadWorkspace({
   };
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
-    if (!selection || selection.kind === "reference") return;
+    // Roof windows are moved with D3 (docs/DACHFLAECHENFENSTER.md).
+    if (!selection || selection.kind === "reference" || selection.kind === "roofWindow") return;
     const inSolid = mode === "3D";
     // Slabs and roofs: outline edited in the plan, moved as a whole (SLAB_/ROOF_ELEMENT.md).
     // Columns and railings move as a whole too (docs/STUETZEN.md, P3; docs/GELAENDER.md, G3).
@@ -4214,7 +4215,8 @@ export function CadWorkspace({
                             target.kind === "dimension" ||
                             target.kind === "text" ||
                             target.kind === "stair" ||
-                            target.kind === "railing"
+                            target.kind === "railing" ||
+                            target.kind === "roofWindow"
                           )
                             return;
                           if (

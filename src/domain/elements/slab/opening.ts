@@ -99,8 +99,8 @@ function segmentsMeet(a: Point2, b: Point2, c: Point2, d: Point2) {
 }
 const edges = (ring: readonly Point2[]) =>
   ring.map((p, i) => [p, ring[(i + 1) % ring.length]!] as const);
-/** The rings neither cross nor touch. */
-const apart = (a: readonly Point2[], b: readonly Point2[]) =>
+/** The rings neither cross nor touch (also used by roof windows). */
+export const ringsApart = (a: readonly Point2[], b: readonly Point2[]) =>
   !edges(a).some(([p, q]) => edges(b).some(([r, s]) => segmentsMeet(p, q, r, s)));
 
 /**
@@ -115,11 +115,15 @@ export function slabOpeningProblem(
   const rings = openings.map(slabOpeningOutline);
   for (const [index, opening] of openings.entries()) {
     const ring = rings[index]!;
-    if (!apart(ring, slab.points) || !contains(slab.points, ring[0]!))
+    if (!ringsApart(ring, slab.points) || !contains(slab.points, ring[0]!))
       return `Deckendurchbruch ${opening.id} liegt nicht ganz in der Decke.`;
     for (const [k, other] of openings.slice(0, index).entries()) {
       const otherRing = rings[k]!;
-      if (!apart(ring, otherRing) || contains(otherRing, ring[0]!) || contains(ring, otherRing[0]!))
+      if (
+        !ringsApart(ring, otherRing) ||
+        contains(otherRing, ring[0]!) ||
+        contains(ring, otherRing[0]!)
+      )
         return `Deckendurchbrüche ${other.id} und ${opening.id} überschneiden sich.`;
     }
   }

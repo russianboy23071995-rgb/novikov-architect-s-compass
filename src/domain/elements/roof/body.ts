@@ -1,4 +1,5 @@
-import { triangulateSimplePolygon } from "../../../geometry/polygons/triangulate.ts";
+import { triangulatePolygonWithHoles } from "../../../geometry/polygons/triangulate.ts";
+import { roofWindowRings, type RoofWindow } from "./window.ts";
 import { roofFaceRings, roofFrame, roofTopAt, roofUndersideAt } from "./geometry.ts";
 import type { Roof } from "./model.ts";
 
@@ -31,20 +32,30 @@ function newell(points: readonly Vec3[]): Vec3 {
  * roof's own values, so the body depends on its storey only (A08).
  * Volume by the divergence theorem over the closed surface.
  */
-export function roofBody(roof: Roof, elevation: number): { faces: RoofBodyFace[]; volume: number } {
+export function roofBody(
+  roof: Roof,
+  elevation: number,
+  /** Its roof windows (docs/DACHFLAECHENFENSTER.md): openings perpendicular to the surface. */
+  windows: readonly Pick<RoofWindow, "along" | "slope" | "width" | "length">[] = [],
+): { faces: RoofBodyFace[]; volume: number } {
   const { top, bottom } = roofFaceRings(roof);
+  const holes = windows.map((w) => roofWindowRings(roof, w));
+  const holesTop = holes.map((h) => h.top),
+    holesBottom = holes.map((h) => h.bottom);
   const { rise, sin, cos } = roofFrame(roof);
   const lift = (p: { x: number; y: number }, z: number): Vec3 => [p.x, p.y, elevation + z];
-  const topPoints = top.map((p) => lift(p, roofTopAt(roof, p)));
-  const bottomPoints = bottom.map((p) => lift(p, roofUndersideAt(roof, p)));
+  const topRing = [...top, ...holesTop.flat()],
+    bottomRing = [...bottom, ...holesBottom.flat()];
+  const topPoints = topRing.map((p) => lift(p, roofTopAt(roof, p)));
+  const bottomPoints = bottomRing.map((p) => lift(p, roofUndersideAt(roof, p)));
   const up = unit([-rise.x * sin, -rise.y * sin, cos]);
   const faces: RoofBodyFace[] = [];
-  for (const [a, b, c] of triangulateSimplePolygon(top))
+  for (const [a, b, c] of triangulatePolygonWithHoles(top, holesTop))
     faces.push({
       vertices: [topPoints[a]!, topPoints[b]!, topPoints[c]!],
       normal: up,
     });
-  for (const [a, b, c] of triangulateSimplePolygon(bottom))
+  for (const [a, b, c] of triangulatePolygonWithHoles(bottom, holesBottom))
     faces.push({
       vertices: [bottomPoints[a]!, bottomPoints[c]!, bottomPoints[b]!],
       normal: [-up[0], -up[1], -up[2]],
@@ -54,6 +65,16 @@ export function roofBody(roof: Roof, elevation: number): { faces: RoofBodyFace[]
     const vertices: Vec3[] = [bottomPoints[i]!, bottomPoints[j]!, topPoints[j]!, topPoints[i]!];
     faces.push({ vertices, normal: newell(vertices) });
   }
+  // Reveal of every window opening, facing into the hole (its rings run counterclockwise).
+  holes.forEach((_, k) => {
+    const start = top.length + 4 * k;
+    for (let i = 0; i < 4; i++) {
+      const a = start + i,
+        b = start + ((i + 1) % 4);
+      const vertices: Vec3[] = [bottomPoints[b]!, bottomPoints[a]!, topPoints[a]!, topPoints[b]!];
+      faces.push({ vertices, normal: newell(vertices) });
+    }
+  });
   let volume = 0;
   for (const face of faces)
     for (let k = 1; k + 1 < face.vertices.length; k++) {
