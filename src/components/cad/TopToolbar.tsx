@@ -46,6 +46,8 @@ type TopToolbarProps = {
   measuring: boolean;
   onImportImage: () => void;
   onCanvasDisplay: () => void;
+  /** Edit → Tastenkürzel (docs/TASTENKUERZEL.md). */
+  onHotkeys: () => void;
   navigatorOpen: boolean;
   demandOpen: boolean;
   onNavigator: () => void;
@@ -172,6 +174,21 @@ export const TopToolbar = withStableHandlers(function TopToolbar(props: TopToolb
                   <DropdownMenuItem onSelect={props.onRecovery}>
                     Lokale Wiederherstellung…
                   </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : item === "Edit" ? (
+              <DropdownMenu key={item}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
+                  >
+                    Edit
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onSelect={props.onHotkeys}>Tastenkürzel…</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : item === "Tools" ? (

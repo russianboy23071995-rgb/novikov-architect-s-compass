@@ -59,6 +59,7 @@ import {
   projectV54Schema,
   projectV55Schema,
   projectV56Schema,
+  projectV57Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
@@ -277,6 +278,14 @@ export function migrateProjectData(value: unknown): Project {
   if (value.schemaVersion === 36)
     return migrateProjectData(
       withColumnLayer(withoutBoundHeights({ ...projectV36Schema.parse(value), schemaVersion: 37 })),
+    );
+  // Schema 57 files carry no shortcuts (all defaults); the strict v57 schema rejects them.
+  if (value.schemaVersion === 57)
+    return validateProject(
+      withoutBoundHeights({
+        ...projectV57Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
     );
   // Schema 56 files carry no objects; the strict v56 schema rejects smuggled ones
   // (docs/OBJEKTBIBLIOTHEK.md). Their Möblierung layer exists since version 1.

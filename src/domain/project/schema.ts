@@ -24,6 +24,7 @@ import { textSchema } from "../elements/text/model.ts";
 import { stairGeometry, stairSchema } from "../elements/stair/model.ts";
 import { railingSchema } from "../elements/railing/model.ts";
 import { objectSchema } from "../elements/object/model.ts";
+import { hotkeyConflicts, hotkeysSchema, resolvedHotkeys } from "../hotkeys/model.ts";
 import {
   roofWindowProblem,
   roofWindowSchema,
@@ -785,6 +786,16 @@ const storeySchema = storeyV56Schema.extend({
   objects: z.array(objectSchema).max(20000).optional(),
 });
 const layoutDrawingV57Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
+export const projectV57Schema = projectV45Schema.extend({
+  schemaVersion: z.literal(57),
+  storeys: z.array(storeySchema).min(1),
+  modelViews: z.array(anyModelViewSchema).optional(),
+  layoutDrawings: z.array(layoutDrawingV57Schema).max(5000).optional(),
+  masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
+  layouts: z.array(layoutV49Schema).max(5000).optional(),
+  projectInfo: projectInfoSchema.optional(),
+});
+/** Schema 58: the user's keyboard shortcuts travel with the project (docs/TASTENKUERZEL.md). */
 const projectSchema = projectV45Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z.array(storeySchema).min(1),
@@ -793,6 +804,7 @@ const projectSchema = projectV45Schema.extend({
   masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
   layouts: z.array(layoutV49Schema).max(5000).optional(),
   projectInfo: projectInfoSchema.optional(),
+  hotkeys: hotkeysSchema.optional(),
 });
 type SingleProject = z.infer<typeof projectV23Schema>;
 export function validateProjectV18(value: unknown) {
@@ -1177,6 +1189,9 @@ export function validateProject(
     parsed.storeys = parsed.storeys.map((storey, i) =>
       early.known[i] ? (input!.storeys[i] as typeof storey) : storey,
     );
+  // Two commands on one shortcut would make one of them unreachable (docs/TASTENKUERZEL.md).
+  if (parsed.hotkeys && hotkeyConflicts(resolvedHotkeys(parsed.hotkeys)).length)
+    throw new Error("Zwei Befehle haben dasselbe Tastenkürzel.");
   const project = resolveRoofTrims(resolveBoundWallHeights(parsed));
   const levels = resolveStoreyLevels(project.storeys, project.groundStoreyId, project.groundDatum);
   if (
