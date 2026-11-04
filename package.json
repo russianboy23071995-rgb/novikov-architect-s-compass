@@ -151,6 +151,7 @@
     "src/application/views/auto-texts.test.ts",
     "src/application/drawings/actions.test.ts",
     "src/application/views/canvas-tabs.test.ts",
+    "src/application/views/canvas-split.test.ts",
     "src/application/sections/actions.test.ts",
     "src/rendering/viewport/section-drawing.test.ts",
     "src/rendering/viewport/wall-layers.test.ts",

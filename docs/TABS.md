@@ -15,6 +15,7 @@ Nutzerentscheidung vom 03.11.2026: Die Leiste bleibt, wie sie aussieht. Es gibt 
 - Das Plus-Menü bietet die vier Arten an und öffnet den zuletzt gezeigten Inhalt der Art, sonst den ersten. Eine Art ohne Inhalt ist ausgegraut, etwa ein Projekt ohne Schnitte.
 - Schließen bleibt wie bisher: Der letzte Tab bleibt offen.
 - Ein fünfter Tab für Auswertungen und Bauteilnachweise ist im Code als Art vorgesehen (`CanvasTabKind`), aber noch nicht sichtbar.
+- Zwei Tabs verschiedener Art lassen sich nebeneinander oder untereinander zeigen (Rechtsklick auf einen Tab, `docs/SPLITSCREEN.md`).
 
 ## Zoom je Inhalt
 

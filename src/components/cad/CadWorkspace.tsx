@@ -139,7 +139,28 @@ import { visibleLayerTarget } from "@/application/layers/visibility";
 import type { LayerVisibilityContext } from "@/application/layers/visibility";
 import { useReferenceSelection } from "./useReferenceSelection";
 import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from "react";
+import {
+  cloneElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+  type ComponentProps,
+  type ReactElement,
+} from "react";
+import { cn } from "@/lib/utils";
+import {
+  keptSplit,
+  openSplit,
+  shownSplit,
+  splitFieldRect,
+  splitFieldTab,
+  type CanvasSplit,
+  type SplitDirection,
+} from "@/application/views/canvas-split";
+import { SplitDivider } from "./SplitDivider";
 import { PanelRightOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PALETTE_GAP, PROPERTIES_HEIGHT, paletteInsets } from "./palette-layout";
@@ -184,7 +205,7 @@ import { applySelectionCommand } from "@/application/commands/selection-command"
 import type { Point, Project } from "@/domain/project/schema";
 import { createStartProject } from "./bim-view";
 import type { Selection } from "./bim-view";
-import type { ToolId, ViewMode, ViewportLayout } from "./cad-types";
+import type { ToolId, ViewMode } from "./cad-types";
 import { LineStyleFields } from "./LineControls";
 import { LayerProperties } from "./LayerProperties";
 import { LayerManager } from "./LayerManager";
@@ -320,6 +341,8 @@ export function CadWorkspace({
   // Canvas tabs (docs/SCHNITT.md, SC1): the active tab is the current mode; a mode without a
   // tab opens one, wherever the mode is switched.
   const [canvasTabs, setCanvasTabs] = useState<CanvasView[]>(["plan"]);
+  // Two tabs side by side or one above the other (docs/SPLITSCREEN.md); session state only.
+  const [canvasSplit, setCanvasSplit] = useState<CanvasSplit | null>(null);
   const lastOfKind = useRef(new Map<CanvasTabKind, CanvasView>());
   // One drawing area per tab kind (docs/TABS.md): the hidden ones keep their content and render
   // nothing until shown again; switching back only shows them.
@@ -348,7 +371,6 @@ export function CadWorkspace({
   const [tracingState, setTracing] = useState<Tracing | null>(null);
   // Selected section line in plan (SC5): grips to move it, lengthen or shorten it.
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
-  const [layout, setLayout] = useState<ViewportLayout>("single");
   const [zoomSlot, setZoomSlot] = useState<HTMLDivElement | null>(null);
   const [grid, setGrid] = useState(true);
   const [snap, setSnap] = useState(true);
@@ -756,7 +778,6 @@ export function CadWorkspace({
       : "none";
   const pathOrigin = pathDrawing ? (pathPoints.at(-1) ?? null) : null;
   const drawingOrigin = tool === "wall" ? wallStart : pathOrigin;
-  const [activeViewport, setActiveViewport] = useState(0);
   const [referenceEpoch, setReferenceEpoch] = useState(0);
   const referenceScope = useMemo(
     () => ({
@@ -766,21 +787,9 @@ export function CadWorkspace({
       tool,
       lineKind,
       mode,
-      layout,
       referenceEpoch,
-      activeViewport,
     }),
-    [
-      project,
-      visibility,
-      editSession,
-      tool,
-      lineKind,
-      mode,
-      layout,
-      referenceEpoch,
-      activeViewport,
-    ],
+    [project, visibility, editSession, tool, lineKind, mode, referenceEpoch],
   );
   const referenceSelection = useReferenceSelection(project, referenceScope, visibility);
   const lineAppearance = toolDefaults.line;
@@ -1161,7 +1170,7 @@ export function CadWorkspace({
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
     if (!selection || selection.kind === "reference") return;
-    const inSolid = mode === "3D" && activeViewport === 0;
+    const inSolid = mode === "3D";
     // Slabs and roofs: outline edited in the plan, moved as a whole (SLAB_/ROOF_ELEMENT.md).
     // Columns move as a whole too (docs/STUETZEN.md, P3).
     const area =
@@ -1224,7 +1233,7 @@ export function CadWorkspace({
           inSolid ? undefined : origin,
           action === "x" || action === "y" ? action : (axis ?? undefined),
         );
-        if (layout === "single" && !inSolid) setMode("2D");
+        if (!inSolid) setMode("2D");
         setModelError("");
       } catch (error) {
         setModelError(error instanceof Error ? error.message : "Bewegung nicht möglich.");
@@ -1296,7 +1305,7 @@ export function CadWorkspace({
             : pickedPoint.index,
       ...(pickedPoint.anchor ? { anchor: pickedPoint.anchor } : {}),
     });
-    if (layout === "single" && !solidMove) setMode("2D");
+    if (!solidMove) setMode("2D");
     setModelError("");
   };
 
@@ -2511,8 +2520,8 @@ export function CadWorkspace({
     return () => holdRecovery("workspace", false);
   }, [recoveryBusy, holdRecovery]);
   const measurementContext = useMemo(
-    () => ({ project, visibility, mode, activeViewport, layout, tool, measurementMode }),
-    [project, visibility, mode, activeViewport, layout, tool, measurementMode],
+    () => ({ project, visibility, mode, tool, measurementMode }),
+    [project, visibility, mode, tool, measurementMode],
   );
   const measurement = useMeasurement(
     tool === "measure" && mode === "2D",
@@ -2653,6 +2662,48 @@ export function CadWorkspace({
     layoutIds,
   );
   if (shownTabs.join("|") !== canvasTabs.join("|")) setCanvasTabs(shownTabs);
+  if (keptSplit(canvasSplit, shownTabs) !== canvasSplit) setCanvasSplit(null);
+  const split = shownSplit(canvasSplit, shownTabs, activeView);
+  const activeKind = canvasTabKind(activeView);
+  /** The field a kind takes in the split: 0 or 1, null when it is not shown in it. */
+  const splitField = (kind: CanvasTabKind): 0 | 1 | null =>
+    !split ? null : split.kinds[0] === kind ? 0 : split.kinds[1] === kind ? 1 : null;
+  const splitSectionTab = splitField("section") !== null && splitFieldTab(shownTabs, "section");
+  /** The section drawn: the active one, or the split's section field beside the active field. */
+  const fieldSectionId = activeSection ?? (splitSectionTab ? tabSectionId(splitSectionTab) : null);
+  const splitTab = (view: CanvasView, direction: SplitDirection) => {
+    const next = openSplit(shownTabs, view, activeView, direction);
+    if (!next) return;
+    setCanvasSplit(next);
+    if (view !== activeView) selectCanvasTab(view);
+  };
+  /** The tab a click into an inactive field activates (docs/SPLITSCREEN.md). */
+  const activateField = (kind: CanvasTabKind) => {
+    const view = splitFieldTab(shownTabs, kind);
+    if (view && kind !== activeKind) selectCanvasTab(view);
+  };
+  /** Props of a split field's wrapper: its place, its frame and the click that activates it. */
+  const fieldProps = (kind: CanvasTabKind) => {
+    const field = splitField(kind);
+    if (field === null || !split) return null;
+    const active = kind === activeKind;
+    return {
+      style: splitFieldRect(split, field),
+      "data-split-field": field,
+      "data-split-active": active || undefined,
+      className: cn(
+        "absolute overflow-hidden",
+        active ? "ring-2 ring-inset ring-primary/60" : "ring-1 ring-inset ring-border",
+      ),
+      // The first click into the inactive field only activates it, as in every viewport.
+      onClickCapture: active
+        ? undefined
+        : (event: ReactMouseEvent) => {
+            event.stopPropagation();
+            activateField(kind);
+          },
+    };
+  };
   const shownSection = activeSection ? sections!.find((s) => s.id === activeSection)! : null;
   const filterPlace: FilterPlace =
     activeBlock || activeLayout || (!shownSection && mode === "3D")
@@ -2730,29 +2781,56 @@ export function CadWorkspace({
    * they last showed, so a tab that comes back appears without being built anew. Behind the
    * section tab the shown one stays as it was, too. A new project drops them.
    */
-  const keepViewport = (viewport: ReactElement) => {
+  const keepViewport = (viewport: ReactElement<ComponentProps<typeof ViewportManager>>) => {
     const kept = keptViewports.current;
     if (keptProjectId.current !== realProject.id) {
       kept.clear();
       keptProjectId.current = realProject.id;
     }
     const shown = space ? "layout" : mode === "3D" ? "3d" : "plan";
-    if (!activeSection || !kept.has(shown)) kept.set(shown, viewport);
-    return [...kept].map(([kind, element]) => (
-      <div
-        key={kind}
-        // content-visibility, not display: the browser skips a hidden area's rendering work but
-        // keeps its state, so showing it again needs no new layout of its many SVG elements.
-        className="absolute inset-0"
-        style={kind === shown ? undefined : { contentVisibility: "hidden" }}
-        aria-hidden={kind !== shown || undefined}
-        inert={kind !== shown}
-        data-canvas-kind={kind}
-        data-hidden-tab={kind !== shown || undefined}
-      >
-        {element}
-      </div>
-    ));
+    const live = splitField(shown) !== null;
+    if (!activeSection || !kept.has(shown) || live)
+      kept.set(
+        shown,
+        live && activeKind !== shown
+          ? cloneElement(viewport, { active: false, onActivate: () => activateField(shown) })
+          : viewport,
+      );
+    // A split field of the other model kind stays live too (docs/SPLITSCREEN.md): the same
+    // viewport in the other mode, without input until the field is activated.
+    const other = shown === "plan" ? "3d" : shown === "3d" ? "plan" : null;
+    if (other && splitField(other) !== null)
+      kept.set(
+        other,
+        cloneElement(viewport, {
+          key: other === "3d" ? "building-3d" : "plan",
+          cameraKey: other === "3d" ? "building-3d" : "plan",
+          mode: other === "3d" ? "3D" : "2D",
+          active: activeKind === other,
+          onActivate: () => activateField(other),
+        }),
+      );
+    return [...kept].map(([kind, element]) => {
+      const field = fieldProps(kind);
+      const visible = field ? true : !split && kind === shown;
+      return (
+        <div
+          key={kind}
+          // content-visibility, not display: the browser skips a hidden area's rendering work but
+          // keeps its state, so showing it again needs no new layout of its many SVG elements.
+          className={field?.className ?? "absolute inset-0"}
+          style={visible ? field?.style : { contentVisibility: "hidden" }}
+          aria-hidden={!visible || undefined}
+          inert={!visible}
+          data-canvas-kind={kind}
+          data-hidden-tab={!visible || undefined}
+          data-split-field={field?.["data-split-field"]}
+          data-split-active={field?.["data-split-active"]}
+        >
+          {element}
+        </div>
+      );
+    });
   };
   /** A section or elevation document opens the tab of its section (docs/ABBILDER.md). */
   const openSectionDocument = (documentId: string) => {
@@ -3451,15 +3529,8 @@ export function CadWorkspace({
               setModelError((cause as Error).message);
             }
           }}
-          layout={layout}
           navigatorOpen={navigatorOpen}
           demandOpen={demandOpen}
-          onLayout={(next) => {
-            groupMove.cancel();
-            dispatchEditing({ type: "cancel" });
-            setLayout(next);
-            setActiveViewport(0);
-          }}
           onNavigator={() => setNavigatorOpen((value) => !value)}
           onDemand={() => setDemandOpen((value) => !value)}
           onAction={showNotice}
@@ -3521,7 +3592,7 @@ export function CadWorkspace({
                 ) : undefined
               }
               project={project}
-              solid={mode === "3D" && activeViewport === 0}
+              solid={mode === "3D"}
               selectionCount={selections.length}
               onMoveSelection={
                 selections.length > 1 || selection?.kind === "reference"
@@ -3636,6 +3707,10 @@ export function CadWorkspace({
                   onSelect={selectCanvasTab}
                   onOpenKind={openCanvasKind}
                   available={availableKinds}
+                  canSplit={(view) => openSplit(shownTabs, view, activeView, "row") !== null}
+                  onSplit={splitTab}
+                  split={split !== null}
+                  onUnsplit={() => setCanvasSplit(null)}
                   onClose={(view) => {
                     const next = closeCanvasTab(shownTabs, view, activeView);
                     setCanvasTabs(next.tabs);
@@ -3643,6 +3718,12 @@ export function CadWorkspace({
                   }}
                 />
               </div>
+              {split && (
+                <SplitDivider
+                  split={split}
+                  onRatio={(ratio) => setCanvasSplit((s) => (s ? { ...s, ratio } : s))}
+                />
+              )}
               {activeBlock && (
                 <TitleBlockBar
                   block={activeBlock}
@@ -3714,14 +3795,22 @@ export function CadWorkspace({
                   onClose={() => setLayoutWindow(null)}
                 />
               )}
-              {activeSection &&
+              {fieldSectionId &&
                 (() => {
-                  const section = sections!.find((s) => s.id === activeSection)!;
+                  const section = sections!.find((s) => s.id === fieldSectionId)!;
+                  // In a split the section field stays live beside the other one; only the
+                  // active field takes the height tool (docs/SPLITSCREEN.md).
+                  const field = fieldProps("section");
+                  const sectionActive = section.id === activeSection;
                   return (
                     <div
                       role="tabpanel"
                       aria-label={section.name}
-                      className="absolute inset-0 z-30"
+                      className={cn("z-30", field?.className ?? "absolute inset-0")}
+                      style={field?.style}
+                      data-split-field={field?.["data-split-field"]}
+                      data-split-active={field?.["data-split-active"]}
+                      onClickCapture={field?.onClickCapture}
                     >
                       <SectionDrawingView
                         key={section.id}
@@ -3741,7 +3830,9 @@ export function CadWorkspace({
                         selectedIds={selectedIdSet}
                         onSettings={() => openSectionWindow(section.id)}
                         heightTool={
-                          tool === "dimension" && toolDefaults.dimension.orientation === "height"
+                          sectionActive &&
+                          tool === "dimension" &&
+                          toolDefaults.dimension.orientation === "height"
                             ? { kind: toolDefaults.dimension.heightKind ?? "shell" }
                             : null
                         }
@@ -3785,7 +3876,7 @@ export function CadWorkspace({
                   <div
                     className="absolute isolate"
                     style={
-                      layout === "single"
+                      !split
                         ? {
                             left: -insets.left,
                             top: -insets.top,
@@ -3797,7 +3888,7 @@ export function CadWorkspace({
                   >
                     {keepViewport(
                       <ViewportManager
-                        safe={insets}
+                        safe={split ? undefined : insets}
                         startupNotice={
                           autosave.startupOffer && autosave.startupOffer.kind !== "empty" ? (
                             <RecoveryStartupNotice
@@ -4250,11 +4341,8 @@ export function CadWorkspace({
                               },
                             }
                           : {})}
-                        layout={layout}
                         mode={mode}
                         grid={grid && !layoutSpace}
-                        active={activeViewport}
-                        onActive={setActiveViewport}
                       />,
                     )}
                   </div>
