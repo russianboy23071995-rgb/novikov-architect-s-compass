@@ -25,7 +25,6 @@ export type ToolId =
   | "railing"
   | "terrain";
 export type ViewMode = "2D" | "3D";
-export type ViewportLayout = "single" | "horizontal" | "vertical" | "three" | "four";
 export type AiState = "idle" | "listening" | "preview";
 
 export type CadTool = {

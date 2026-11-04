@@ -18,7 +18,7 @@ import { Focus, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { ViewMode, ViewportLayout } from "./cad-types";
+import type { ViewMode } from "./cad-types";
 import { BimPlan } from "./BimPlan";
 import type { BimPlanProps } from "./BimPlan";
 import { captureSheet } from "@/interop/pdf/svg-capture";
@@ -465,11 +465,10 @@ export function CadViewport({
 
 export function ViewportManager({
   documentFraming,
-  layout,
   mode,
   grid,
-  active,
-  onActive,
+  active = true,
+  onActivate = () => {},
   onScale,
   onPlanCapture,
   startupNotice,
@@ -487,40 +486,30 @@ export function ViewportManager({
   onPlanCapture?: ((frame: DocumentFraming | null) => void) | undefined;
   onScale: (denominator: number) => void;
   zoomSlot?: HTMLElement | null;
-  layout: ViewportLayout;
   mode: ViewMode;
   grid: boolean;
-  active: number;
-  onActive: (index: number) => void;
+  /** False in the inactive field of a split (docs/SPLITSCREEN.md): shown live, no input; the
+   * first click activates it. */
+  active?: boolean;
+  onActivate?: () => void;
 }) {
-  const count =
-    layout === "single"
-      ? 1
-      : layout === "horizontal" || layout === "vertical"
-        ? 2
-        : layout === "three"
-          ? 3
-          : 4;
   return (
-    <div className={cn("viewport-grid h-full min-h-0 gap-px bg-border", `layout-${layout}`)}>
-      {Array.from({ length: count }, (_, index) => (
-        <CadViewport
-          key={`${layout}-${index}`}
-          onScale={onScale}
-          onPlanCapture={onPlanCapture}
-          startupNotice={startupNotice}
-          safe={layout === "single" ? safe : undefined}
-          documentFraming={documentFraming}
-          cameraKey={cameraKey && `${cameraKey}#${index}`}
-          pdfRequest={pdfRequest}
-          {...model}
-          index={index}
-          mode={mode}
-          grid={grid}
-          active={active === index}
-          onActivate={() => onActive(index)}
-        />
-      ))}
+    <div className="viewport-grid layout-single h-full min-h-0 gap-px bg-border">
+      <CadViewport
+        onScale={onScale}
+        onPlanCapture={onPlanCapture}
+        startupNotice={startupNotice}
+        safe={safe}
+        documentFraming={documentFraming}
+        cameraKey={cameraKey && `${cameraKey}#0`}
+        pdfRequest={pdfRequest}
+        {...model}
+        index={0}
+        mode={mode}
+        grid={grid}
+        active={active}
+        onActivate={onActivate}
+      />
     </div>
   );
 }

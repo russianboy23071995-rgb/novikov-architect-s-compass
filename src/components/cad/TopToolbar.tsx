@@ -8,8 +8,6 @@ import {
   Layers2,
   Contrast,
   Bot,
-  Check,
-  LayoutGrid,
   Menu,
   Mic,
   PanelRightOpen,
@@ -28,21 +26,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { ViewportLayout } from "./cad-types";
-
-const layouts: { id: ViewportLayout; label: string; cells: string }[] = [
-  { id: "single", label: "Single View", cells: "▣" },
-  { id: "horizontal", label: "2 Views Horizontal", cells: "⬒" },
-  { id: "vertical", label: "2 Views Vertical", cells: "◫" },
-  { id: "three", label: "3 Views", cells: "▦" },
-  { id: "four", label: "4 Views", cells: "田" },
-];
 
 type TopToolbarProps = {
   storeyName: string;
@@ -58,10 +46,8 @@ type TopToolbarProps = {
   measuring: boolean;
   onImportImage: () => void;
   onCanvasDisplay: () => void;
-  layout: ViewportLayout;
   navigatorOpen: boolean;
   demandOpen: boolean;
-  onLayout: (layout: ViewportLayout) => void;
   onNavigator: () => void;
   onDemand: () => void;
   onAction: (text: string) => void;
@@ -396,38 +382,6 @@ export const TopToolbar = withStableHandlers(function TopToolbar(props: TopToolb
           </IconControl>
         </div>
         <div className="ml-auto flex shrink-0 items-center gap-0.5">
-          <DropdownMenu>
-            <Tooltip delayDuration={300}>
-              <TooltipTrigger asChild>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-8 text-muted-foreground"
-                    aria-label="Viewport layout"
-                  >
-                    <LayoutGrid />
-                  </Button>
-                </DropdownMenuTrigger>
-              </TooltipTrigger>
-              <TooltipContent>Viewport layout</TooltipContent>
-            </Tooltip>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel className="text-xs">Viewport layout</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {layouts.map((layout) => (
-                <DropdownMenuItem
-                  key={layout.id}
-                  onClick={() => props.onLayout(layout.id)}
-                  className="text-xs"
-                >
-                  <span className="w-5 font-mono text-primary">{layout.cells}</span>
-                  {layout.label}
-                  {props.layout === layout.id && <Check className="ml-auto" />}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
           <IconControl label="Orbit view" onClick={() => props.onAction("Orbit mode")}>
             <Rotate3D />
           </IconControl>
