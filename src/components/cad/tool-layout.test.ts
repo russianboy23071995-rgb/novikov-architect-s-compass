@@ -70,7 +70,7 @@ test("stored layouts are made safe: unknown and repeated tools dropped, new tool
   // Every rail tool exactly once; missing ones return to their default group.
   const all = [...l["3d"], ...l["2d"], ...l.doc];
   assert.equal(all.length, new Set(all).size);
-  // 16 tools and the three planned ones (WL3).
+  // 17 tools (the railing since G2) and the two planned ones (WL3).
   assert.equal(all.length, 19);
   assert.ok(l["3d"].includes("door"));
   assert.ok(l.doc.includes("dimension"));

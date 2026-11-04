@@ -6,6 +6,8 @@ import { defaultRoofLayerId } from "@/application/roofs/actions";
 import { ROOF_DEFAULTS, type Roof } from "@/domain/elements/roof/model";
 import { defaultRoomLayerId } from "@/application/rooms/actions";
 import { defaultColumnLayerId } from "@/application/columns/actions";
+import { defaultRailingLayerId } from "@/application/railings/actions";
+import { railingToolDefaults, type RailingDefaults } from "@/application/railings/defaults";
 import { defaultDimensionLayerId } from "@/application/dimensions/actions";
 import { defaultTextLayerId } from "@/application/texts/actions";
 import { TEXT_DEFAULTS } from "@/domain/elements/text/model";
@@ -184,6 +186,21 @@ export function useToolDefaults(project: Project) {
       ? columnValues.layerId
       : defaultColumnLayerId(project),
   };
+  // Railing tool (docs/GELAENDER.md, G2); a vanished layer falls back to the Geländer layer.
+  const [railingState, setRailingState] = useState<{
+    projectId: string;
+    values: RailingDefaults;
+  } | null>(null);
+  const railingValues =
+    railingState?.projectId === project.id
+      ? railingState.values
+      : railingToolDefaults(defaultRailingLayerId(project));
+  const railingDefaults = {
+    ...railingValues,
+    layerId: project.layers.some((l) => l.id === railingValues.layerId)
+      ? railingValues.layerId
+      : defaultRailingLayerId(project),
+  };
   const [stairState, setStairState] = useState<{
     projectId: string;
     values: StairDefaults;
@@ -318,6 +335,10 @@ export function useToolDefaults(project: Project) {
     column: columnDefaults,
     setColumn(values: ColumnDefaults) {
       setColumnState({ projectId: project.id, values });
+    },
+    railing: railingDefaults,
+    setRailing(values: RailingDefaults) {
+      setRailingState({ projectId: project.id, values });
     },
     stair: stairDefaults,
     setStair(values: StairDefaults) {

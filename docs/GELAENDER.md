@@ -5,7 +5,7 @@ Nutzerauftrag 04.11.2026: das Werkzeug Geländer, freigegeben mit „Go, Geländ
 | PR  | Inhalt                                                                                | Stand    |
 | --- | ------------------------------------------------------------------------------------- | -------- |
 | G1  | Modell, Dateiformat 54, Standardebene Geländer, Aktionen, 3D-Körper, IFC `IfcRailing` | erledigt |
-| G2  | Werkzeug, Einstellungsfenster, Eigenschaften, Grundriss                               | offen    |
+| G2  | Werkzeug, Einstellungsfenster, Eigenschaften, Grundriss                               | erledigt |
 | G3  | Bearbeiten, Schnitt, Abnahme                                                          | offen    |
 
 Vorgaben (Empfehlung der Karte, vom Nutzer nicht anders bestimmt): frei als Linienzug gezeichnet, nicht an Treppe oder Decke gebunden; Höhe 1,00 m, Pfosten höchstens 1,20 m auseinander, Füllung Stäbe.
@@ -45,10 +45,50 @@ Vorgaben (Empfehlung der Karte, vom Nutzer nicht anders bestimmt): frei als Lini
 
   Dazu Typprüfung beider Projekte, Lint (eine Warnung, die es vorher schon gab), Architekturprüfung ohne Befund, 14-Modell-Hash `e42aa36e…` unverändert.
 
-- **Browser:** Testprojekt mit zwei Geländern geladen, eines mit Stäben und Ecke, eines mit Glas, 1,10 m hoch. In 3D ist bei beiden die Ecke geschlossen. Ein Klick wählt das Geländer aus: Ebene „Geländer“, das Menü am Element zeigt „Geländer“ und „Löschen (Entf)“. Keine Konsolenfehler.
+- **Browser:** Testprojekt mit zwei Geländern geladen, eines mit Stäben und Ecke, eines mit Glas, 1,10 m hoch. In 3D ist bei beiden die Ecke geschlossen. Ein Klick wählt das Geländer aus: Ebene „Geländer“, das Menü am Element bietet „Löschen (Entf)“. Keine Konsolenfehler.
+- **Korrektur (G2):** Hier stand zuerst, der Menütitel laute „Geländer“. Tatsächlich lautete er „Fanghilfen“, weil die Kurzbeschreibung des Geländers fehlte. Das ist mit G2 behoben.
 
 **Grenzen G1:**
 
 - **Ecken:** Die Handläufe überlappen sich an der Ecke; sie sind nicht auf Gehrung geschnitten.
 - **Maße:** Die Maße von Handlauf, Pfosten und Stäben sind fest.
 - **3D-Farbe:** Das Geländer hat in 3D dieselbe Farbe wie Wände.
+
+## Teil G2: Werkzeug, Einstellungen, Eigenschaften, Grundriss
+
+- **Werkzeug „Geländer“:** Der Knopf in der Werkzeugleiste ist nicht mehr ausgegraut.
+  - Punkte setzt man Klick für Klick, mit Fang wie beim Linienzug. Doppelklick oder Enter beendet, Esc bricht ab. Ein Hinweis in der Leiste sagt das.
+  - Das Geländer folgt der gezeichneten offenen Linie, ein Rückgängig-Schritt.
+  - Hat sich das Modell während des Zeichnens geändert, wird neu begonnen.
+- **Vorgaben** (`application/railings/defaults.ts`, nicht im Undo): Höhe, Füllung, Pfostenabstand, Fuß, Ebene, Bauzustand (Vorgabe Neubau wie bei Wänden). Werte außerhalb der Grenzen übernimmt das Feld nicht.
+- **Dieselben Felder** (`RailingFields`) stehen an drei Stellen:
+  - in der Leiste,
+  - im Einstellungsfenster (Doppelklick auf das Werkzeug; Reiter „Geländer“ und „Bauzustand“),
+  - bei einem gewählten Geländer, mit der Länge in der Überschrift. Eine Änderung gilt beim Verlassen des Feldes, mit Enter oder bei einer Auswahl, ein Rückgängig-Schritt je Änderung.
+- **Doppelklick auf ein Geländer:** öffnet sein Fenster mit den Reitern Geländer, Bauzustand (gilt für alle gewählten Geländer) und Ebene.
+- **Menü am Element:** Titel „Geländer“ mit Füllung, Höhe und Länge, z. B. „Platte / Glas · Höhe 1,10 m · Länge 3,50 m“.
+- **Grundriss:** eigene Zeichenschicht nach den Treppen. Gezeichnet werden:
+  - der Handlauf in echter Breite (5 cm, halb deckend),
+  - eine dünne Mittellinie, die in jedem Maßstab sichtbar bleibt: gestrichelt bei Stäben, durchgezogen bei Platte/Glas,
+  - die Pfosten in echter Größe.
+
+  Ein gewähltes Geländer ist hellblau hervorgehoben. Auswahl per Klick auf die Linie, per Rechteckauswahl und per Tab-Auswahl. Eine ausgeblendete Ebene blendet es aus.
+
+- **Noch nicht** (G3): Verschieben, Punkte bearbeiten, Kopieren, Fangpunkte am Geländer, Pipette, Abnahme im Schnitt.
+
+**Nachweis G2:**
+
+- **Prüfungen:** 1569 Tests grün, davon 2 neu (Vorgaben und Grundriss, Menütitel). Typprüfung beider Projekte, Lint (eine Warnung, die es vorher schon gab), Architekturprüfung ohne Befund, 14-Modell-Hash unverändert.
+- **Browser:**
+  - Werkzeug gewählt: Die Leiste zeigt Höhe 1, Stäbe, 1,2, Fuß 0, Ebene Geländer und den Hinweis.
+  - Drei Punkte gesetzt, mit Doppelklick beendet: Meldung „Geländer gesetzt“, im Grundriss Handlauf mit vier Pfosten.
+  - Mit dem Auswahlwerkzeug angeklickt: Eigenschaften „Geländer · Länge 2,76 m“, Menütitel „Geländer“.
+  - Höhe auf 1,1 geändert, mit Strg+Z zurück auf 1.
+  - Doppelklick auf das Geländer: Fenster mit drei Reitern; Bauzustand von Neubau auf Bestand gestellt.
+  - Doppelklick auf das Werkzeug: Vorgabenfenster mit Reitern Geländer und Bauzustand.
+  - Keine Konsolenfehler.
+
+**Grenzen G2:**
+
+- **Fang:** An Deckenrand und Treppe fängt der Cursor nur über die vorhandenen Fangpunkte und Kanten. Ein eigener Fang „Deckenrand“ fehlt.
+- **Lesbarkeit:** Bei sehr kleinem Maßstab ist der Handlauf nur noch als Mittellinie zu erkennen.

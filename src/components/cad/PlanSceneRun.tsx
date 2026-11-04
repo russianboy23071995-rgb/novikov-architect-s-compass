@@ -27,6 +27,7 @@ const HEIGHT_LINE_REPEAT = 0.5;
 const LABEL_POSITIONS = [0.15, 0.85, 0.3, 0.7];
 import { WALL_AXIS_COLOR } from "@/rendering/viewport/wall-axis";
 import { linePath } from "@/lib/bim/lines";
+import { RAILING_MEMBERS } from "@/domain/elements/railing/model";
 import { doorPlanPath, doorPlanSymbol } from "@/rendering/viewport/door-symbol";
 import {
   doorPlanFrame,
@@ -495,6 +496,7 @@ export function PlanSceneContent({
     walls: kind === "wall" ? ids.map((id) => scene.walls.get(id)!) : [],
     columns: kind === "column" ? ids.map((id) => scene.columns.get(id)!) : [],
     stairs: kind === "stair" ? ids.map((id) => scene.stairs.get(id)!) : [],
+    railings: kind === "railing" ? ids.map((id) => scene.railings.get(id)!) : [],
     dimensions: kind === "dimension" ? ids.map((id) => scene.dimensions.get(id)!) : [],
     texts: kind === "text" ? ids.map((id) => scene.texts.get(id)!) : [],
     lines: kind === "line" ? ids.map((id) => scene.lines.get(id)!) : [],
@@ -945,6 +947,65 @@ export function PlanSceneContent({
               pixelsPerMetre={pixelsPerMetre}
               color={selectedIds.has(stair.id) ? "#0284c7" : "var(--primary)"}
               width={wallOutlineWidth}
+            />
+          </g>
+        );
+      })}
+      {plan.railings.map((railing) => {
+        // Railing (docs/GELAENDER.md, G2): the handrail in true width along the line, a thin
+        // centre line that stays visible at every scale, and the posts in true size.
+        const view = scene.railingViews.get(railing.id)!;
+        const d = railing.points.map((p, i) => `${i ? "L" : "M"}${p.x},${-p.y}`).join(" ");
+        const color = selectedIds.has(railing.id) ? "#0284c7" : "var(--primary)";
+        return (
+          <g key={railing.id} aria-label={`Geländer ${railing.id}`}>
+            {selectedIds.has(railing.id) && (
+              <path
+                d={d}
+                fill="none"
+                stroke="#38bdf8"
+                strokeOpacity={0.4}
+                strokeWidth={5}
+                vectorEffect="non-scaling-stroke"
+                pointerEvents="none"
+              />
+            )}
+            <path
+              d={d}
+              fill="none"
+              stroke={color}
+              strokeOpacity={0.35}
+              strokeWidth={RAILING_MEMBERS.handrail}
+              strokeLinejoin="miter"
+              pointerEvents="none"
+            />
+            <path
+              d={d}
+              fill="none"
+              stroke={color}
+              strokeWidth={1}
+              strokeDasharray={railing.infill === "panel" ? undefined : "6 3"}
+              vectorEffect="non-scaling-stroke"
+              pointerEvents="none"
+            />
+            {view.posts.map((corners, i) => (
+              <polygon
+                key={i}
+                points={corners.map((p) => `${p.x},${-p.y}`).join(" ")}
+                fill={color}
+                stroke="none"
+                pointerEvents="none"
+              />
+            ))}
+            <path
+              {...selectProps("railing", railing.id)}
+              d={d}
+              fill="none"
+              stroke="transparent"
+              strokeWidth={12}
+              vectorEffect="non-scaling-stroke"
+              pointerEvents={placement ? "none" : "stroke"}
+              className="cursor-pointer outline-none focus-visible:stroke-sky-300/40"
             />
           </g>
         );

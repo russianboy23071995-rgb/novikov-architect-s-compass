@@ -1,5 +1,6 @@
 import { dimensionValues, formatDimension } from "../../domain/elements/dimension/model.ts";
 import { stairGeometry } from "../../domain/elements/stair/model.ts";
+import { RAILING_INFILL_LABELS, railingLength } from "../../domain/elements/railing/model.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { wallLength } from "../../domain/project/schema.ts";
 import type { Point, Project } from "../../domain/project/schema.ts";
@@ -180,6 +181,14 @@ export function selectionSummary(project: Project, selection: Selection) {
     return {
       title: "Stütze",
       details: `${section} · ${column.topBinding ? "bis Geschoss darüber" : `Höhe ${metres(column.height!)}`}`,
+    };
+  }
+  if (selection.kind === "railing") {
+    const railing = storeyOf(project).railings?.find((item) => item.id === selection.id);
+    if (!railing) return null;
+    return {
+      title: "Geländer",
+      details: `${RAILING_INFILL_LABELS[railing.infill]} · Höhe ${metres(railing.height)} · Länge ${metres(railingLength(railing))}`,
     };
   }
   if (selection.kind === "stair") {
