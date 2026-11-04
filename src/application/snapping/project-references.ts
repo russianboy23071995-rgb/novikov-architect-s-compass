@@ -10,6 +10,7 @@ import { segmentIntersectionReferences } from "../../constraints/snapping/segmen
 import type { SnapSegment } from "../../constraints/snapping/segment-references.ts";
 import { createDerivedCache } from "../../domain/project/derived-cache.ts";
 import { columnOutline } from "../../domain/elements/column/model.ts";
+import { objectOutline } from "../../domain/elements/object/model.ts";
 import { roofWindowRings } from "../../domain/elements/roof/window.ts";
 import { maskOnPaper } from "../../domain/elements/drawing/model.ts";
 import { MARGIN_FRAME_SNAP_ID, PAPER_SNAP_ID, rectCorners, sheetFrames } from "./sheet-frames.ts";
@@ -121,6 +122,19 @@ export function projectSnapParts(project: Project): readonly (readonly SnapPart[
     // Railing points and segment midpoints like a polyline (docs/GELAENDER.md, G3), after all
     // earlier kinds so their order stays.
     (storey.railings ?? []).map((railing) => remembered(owned, railing, linePart)),
+    // Object: corners and edge midpoints of its box and its centre (docs/OBJEKTBIBLIOTHEK.md).
+    (storey.objects ?? []).map((object) =>
+      remembered(owned, object, (o) => {
+        const outline = hatchPart({ id: o.id, points: objectOutline(o) });
+        const centre: SnapReference = {
+          point: { ...o.position },
+          entityId: o.id,
+          feature: "centre",
+          directions: [],
+        };
+        return { references: [centre, ...outline.references], segments: outline.segments };
+      }),
+    ),
     // Roof window: corners and edge midpoints of its opening on the roof top and its centre
     // (docs/DACHFLAECHENFENSTER.md, D3), after all earlier kinds.
     (storey.roofWindows ?? []).flatMap((w) => {

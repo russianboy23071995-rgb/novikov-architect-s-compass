@@ -11,6 +11,7 @@ const ELEMENT_NAMES = [
   ["columns", "Stütze"],
   ["railings", "Geländer"],
   ["roofWindows", "Dachflächenfenster"],
+  ["objects", "Objekt"],
   ["hatches", "Schraffur"],
   ["lines", "Linie"],
   ["windows", "Fenster"],

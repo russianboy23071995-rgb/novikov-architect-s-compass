@@ -7,6 +7,8 @@ import {
 import { stairBody } from "../../domain/elements/stair/body.ts";
 import { columnLevels } from "../../domain/elements/column/model.ts";
 import { railingLength, railingMembers } from "../../domain/elements/railing/model.ts";
+import { objectBoxes } from "../../domain/elements/object/model.ts";
+import { objectDefinition } from "../../domain/elements/object/catalog.ts";
 import { IFC_RENOVATION_STATUS, wallRenovation } from "../../domain/elements/wall/renovation.ts";
 import { wallBase } from "../../domain/elements/wall/heights.ts";
 import { resolveStoreyLevels } from "../../domain/storeys/heights.ts";
@@ -928,6 +930,50 @@ export async function writeIfc(
         ["PostSpacing", `IFCLENGTHMEASURE(${real(railing.postSpacing)})`],
         ["Infill", `IFCLABEL(${text(railing.infill)})`],
         ["Renovation", `IFCLABEL(${text(wallRenovation(railing))})`],
+      ]);
+    }
+    // Objects (docs/OBJEKTBIBLIOTHEK.md, O1): furniture as IfcFurniture, WC, basins, shower and
+    // bath as IfcSanitaryTerminal, cooker and fridge as IfcElectricAppliance, each with its
+    // predefined type; the body holds one swept rectangle per catalogue box.
+    for (const object of floor.objects ?? []) {
+      const definition = objectDefinition(object.catalogId);
+      const items: string[] = [];
+      for (const box of objectBoxes(object)) {
+        const [p0, p1, , p3] = box.corners;
+        const a = Math.hypot(p1!.x - p0!.x, p1!.y - p0!.y),
+          b = Math.hypot(p3!.x - p0!.x, p3!.y - p0!.y);
+        const depth = box.top - box.bottom;
+        if (a <= 1e-9 || b <= 1e-9 || depth <= 1e-9) continue;
+        const centre = add("IFCAXIS2PLACEMENT2D", `${point([0, 0])},$`);
+        const profile = add("IFCRECTANGLEPROFILEDEF", `.AREA.,$,${centre},${real(a)},${real(b)}`);
+        const position = axis(
+          (p1!.x + p3!.x) / 2,
+          (p1!.y + p3!.y) / 2,
+          box.bottom,
+          (p1!.x - p0!.x) / a,
+          (p1!.y - p0!.y) / a,
+        );
+        items.push(add("IFCEXTRUDEDAREASOLID", `${profile},${position},${up},${real(depth)}`));
+      }
+      if (!items.length) continue;
+      const shape = add(
+        "IFCSHAPEREPRESENTATION",
+        `${context},'Body','SweptSolid',(${items.join(",")})`,
+      );
+      const objectRef = add(
+        definition.ifc.entity,
+        `${await guid("object", object.id)},$,${label(definition.name)},$,${label(object.catalogId)},${placement(storeyPlacement)},${add("IFCPRODUCTDEFINITIONSHAPE", `$,$,(${shape})`)},${label(object.id)},.${definition.ifc.type}.`,
+      );
+      elements.push(objectRef);
+      await properties(objectRef, "object", object.id, [
+        ["Catalog", `IFCLABEL(${text(object.catalogId)})`],
+        ["Width", `IFCLENGTHMEASURE(${real(object.width)})`],
+        ["Depth", `IFCLENGTHMEASURE(${real(object.depth)})`],
+        ["Height", `IFCLENGTHMEASURE(${real(object.height)})`],
+        ["Rotation", `IFCREAL(${real(object.rotation)})`],
+        ["Mirrored", `IFCBOOLEAN(${object.mirrored ? ".T." : ".F."})`],
+        ["BaseOffset", `IFCLENGTHMEASURE(${real(object.baseOffset)})`],
+        ["Renovation", `IFCLABEL(${text(wallRenovation(object))})`],
       ]);
     }
     // Stairs (docs/TREPPE.md, TR1/TR3): IfcStair (straight, quarter or half turn) aggregating

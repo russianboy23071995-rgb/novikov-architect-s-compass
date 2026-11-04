@@ -498,6 +498,7 @@ export function PlanSceneContent({
     stairs: kind === "stair" ? ids.map((id) => scene.stairs.get(id)!) : [],
     railings: kind === "railing" ? ids.map((id) => scene.railings.get(id)!) : [],
     roofWindows: kind === "roofWindow" ? ids.map((id) => scene.roofWindows.get(id)!) : [],
+    objects: kind === "object" ? ids.map((id) => scene.objects.get(id)!) : [],
     dimensions: kind === "dimension" ? ids.map((id) => scene.dimensions.get(id)!) : [],
     texts: kind === "text" ? ids.map((id) => scene.texts.get(id)!) : [],
     lines: kind === "line" ? ids.map((id) => scene.lines.get(id)!) : [],
@@ -949,6 +950,55 @@ export function PlanSceneContent({
               color={selectedIds.has(stair.id) ? "#0284c7" : "var(--primary)"}
               width={wallOutlineWidth}
             />
+          </g>
+        );
+      })}
+      {plan.objects.map((object) => {
+        // Object (docs/OBJEKTBIBLIOTHEK.md, O1): its catalogue symbol seen from above in thin
+        // lines; the box outline is the pick area.
+        const view = scene.objectViews.get(object.id)!;
+        const selected = selectedIds.has(object.id);
+        const color = selected ? "#0284c7" : "var(--primary)";
+        const outline = view.outline.map((p) => `${p.x},${-p.y}`).join(" ");
+        return (
+          <g key={object.id} aria-label={`Objekt ${object.id}`}>
+            {selected && (
+              <polygon
+                points={outline}
+                fill="#38bdf8"
+                fillOpacity={0.15}
+                stroke="#38bdf8"
+                strokeOpacity={0.5}
+                strokeWidth={4}
+                vectorEffect="non-scaling-stroke"
+                pointerEvents="none"
+              />
+            )}
+            <polygon
+              {...selectProps("object", object.id)}
+              points={outline}
+              fill="var(--background)"
+              fillOpacity={0.01}
+              stroke="none"
+              pointerEvents={placement ? "none" : "all"}
+              className="cursor-pointer outline-none"
+            />
+            {view.symbol.map((part, i) => {
+              const d =
+                part.points.map((p, k) => `${k ? "L" : "M"}${p.x},${-p.y}`).join(" ") +
+                (part.closed ? " Z" : "");
+              return (
+                <path
+                  key={i}
+                  d={d}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth={0.8}
+                  vectorEffect="non-scaling-stroke"
+                  pointerEvents="none"
+                />
+              );
+            })}
           </g>
         );
       })}

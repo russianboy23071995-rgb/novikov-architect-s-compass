@@ -49,19 +49,21 @@ function* triangles(
         // Window and door elements select their window or door (S1), like the fallback picking.
         kind: f.roofWindow
           ? "roofWindow"
-          : f.opening
-            ? f.opening
-            : f.slab
-              ? "slab"
-              : f.roof
-                ? "roof"
-                : f.column
-                  ? "column"
-                  : f.stair
-                    ? "stair"
-                    : f.railing
-                      ? "railing"
-                      : "wall",
+          : f.object
+            ? "object"
+            : f.opening
+              ? f.opening
+              : f.slab
+                ? "slab"
+                : f.roof
+                  ? "roof"
+                  : f.column
+                    ? "column"
+                    : f.stair
+                      ? "stair"
+                      : f.railing
+                        ? "railing"
+                        : "wall",
         id: f.wallId,
       });
       yield;

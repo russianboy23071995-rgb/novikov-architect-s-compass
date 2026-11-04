@@ -108,7 +108,7 @@ function buildingEntry(input: Project): BuildingEntry {
     return recent;
   }
   const parts = project.storeys
-    // Storeys with solid elements: walls, slabs, roofs, columns, stairs or railings.
+    // Storeys with solid elements: walls, slabs, roofs, columns, stairs, railings or objects.
     .filter(
       (s) =>
         s.walls.length > 0 ||
@@ -116,7 +116,8 @@ function buildingEntry(input: Project): BuildingEntry {
         (s.roofs?.length ?? 0) > 0 ||
         (s.columns?.length ?? 0) > 0 ||
         (s.stairs?.length ?? 0) > 0 ||
-        (s.railings?.length ?? 0) > 0,
+        (s.railings?.length ?? 0) > 0 ||
+        (s.objects?.length ?? 0) > 0,
     )
     .map((s) => storeyPart(project, s, immutable));
   const result: Solid = {

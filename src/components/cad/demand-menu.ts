@@ -1,6 +1,7 @@
 import { dimensionValues, formatDimension } from "../../domain/elements/dimension/model.ts";
 import { stairGeometry } from "../../domain/elements/stair/model.ts";
 import { RAILING_INFILL_LABELS, railingLength } from "../../domain/elements/railing/model.ts";
+import { objectDefinition } from "../../domain/elements/object/catalog.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { wallLength } from "../../domain/project/schema.ts";
 import type { Point, Project } from "../../domain/project/schema.ts";
@@ -181,6 +182,15 @@ export function selectionSummary(project: Project, selection: Selection) {
     return {
       title: "Stütze",
       details: `${section} · ${column.topBinding ? "bis Geschoss darüber" : `Höhe ${metres(column.height!)}`}`,
+    };
+  }
+  if (selection.kind === "object") {
+    const o = storeyOf(project).objects?.find((item) => item.id === selection.id);
+    if (!o) return null;
+    const cm = (m: number) => String(Math.round(m * 100));
+    return {
+      title: objectDefinition(o.catalogId).name,
+      details: `${cm(o.width)} × ${cm(o.depth)} × ${cm(o.height)} cm${o.rotation ? ` · ${Math.round(o.rotation * 10) / 10}°` : ""}`,
     };
   }
   if (selection.kind === "roofWindow") {
