@@ -140,6 +140,18 @@ export type PlanRun = {
   ids: string[];
   affected: boolean;
 };
+/** The T joints a wall run draws (L09 U2): each joint once, in the run that holds whichever of its
+ * two walls paints later, so it lies above both walls (docs/TABS.md, Rest beim Auswählen). */
+export function planRunJoints(scene: PlanScene, ids: readonly string[]) {
+  if (!scene.layerJoints.length) return [];
+  const run = new Set(ids);
+  const order = new Map(scene.plan.walls.map((w, i) => [w.id, i]));
+  return scene.layerJoints.filter((j) =>
+    run.has(
+      (order.get(j.wallId) ?? -1) >= (order.get(j.hostWallId) ?? -1) ? j.wallId : j.hostWallId,
+    ),
+  );
+}
 /** Partition once per base/selection. Preserve exact drawing order, including overlapping images. */
 export function planSceneRuns(scene: PlanScene, replacedIds: readonly string[]): PlanRun[] {
   const replaced = new Set(replacedIds),
