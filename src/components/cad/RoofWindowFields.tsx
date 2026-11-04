@@ -1,6 +1,11 @@
 import { useState } from "react";
 import type { RoofWindowDefaults } from "@/application/roof-windows/defaults";
-import { ROOF_WINDOW_FRAME, ROOF_WINDOW_SIZE } from "@/domain/elements/roof/window";
+import {
+  ROOF_WINDOW_FRAME,
+  ROOF_WINDOW_SIZE,
+  type RoofWindowLowerReveal,
+  type RoofWindowUpperReveal,
+} from "@/domain/elements/roof/window";
 import type { Layer } from "@/domain/layers/model";
 
 type NumberField = "width" | "length" | "frame";
@@ -13,6 +18,15 @@ const RANGES: Record<NumberField, { min: number; max: number }> = {
   width: ROOF_WINDOW_SIZE,
   length: ROOF_WINDOW_SIZE,
   frame: ROOF_WINDOW_FRAME,
+};
+
+const UPPER_REVEALS: Record<RoofWindowUpperReveal, string> = {
+  square: "rechtwinklig zur Dachfläche",
+  horizontal: "waagerecht (Velux)",
+};
+const LOWER_REVEALS: Record<RoofWindowLowerReveal, string> = {
+  square: "rechtwinklig zur Dachfläche",
+  plumb: "lotrecht (Velux)",
 };
 
 /**
@@ -75,6 +89,44 @@ export function RoofWindowFields({
       {number("width")}
       {number("length")}
       {number("frame")}
+      <label className="text-xs">
+        Obere Laibung
+        <select
+          aria-label="Dachflächenfenster obere laibung"
+          value={value.upperReveal}
+          onChange={(e) => {
+            const next = { ...value, upperReveal: e.target.value as RoofWindowUpperReveal };
+            onChange(next);
+            onCommit?.(next);
+          }}
+          className="block rounded border bg-background p-1"
+        >
+          {Object.entries(UPPER_REVEALS).map(([key, text]) => (
+            <option key={key} value={key}>
+              {text}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="text-xs">
+        Untere Laibung
+        <select
+          aria-label="Dachflächenfenster untere laibung"
+          value={value.lowerReveal}
+          onChange={(e) => {
+            const next = { ...value, lowerReveal: e.target.value as RoofWindowLowerReveal };
+            onChange(next);
+            onCommit?.(next);
+          }}
+          className="block rounded border bg-background p-1"
+        >
+          {Object.entries(LOWER_REVEALS).map(([key, text]) => (
+            <option key={key} value={key}>
+              {text}
+            </option>
+          ))}
+        </select>
+      </label>
       <label className="text-xs">
         Ebene
         <select

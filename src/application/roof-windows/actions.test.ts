@@ -12,7 +12,11 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import { ROOF_DEFAULTS, type Roof } from "../../domain/elements/roof/model.ts";
 import { roofBody } from "../../domain/elements/roof/body.ts";
 import { roofTopAt, roofUndersideAt } from "../../domain/elements/roof/geometry.ts";
-import { roofWindowPlace, roofWindowRings } from "../../domain/elements/roof/window.ts";
+import {
+  roofWindowOpening,
+  roofWindowPlace,
+  roofWindowRings,
+} from "../../domain/elements/roof/window.ts";
 import { roofWindowBody } from "../../domain/elements/roof/window-body.ts";
 import { buildBuildingSolid } from "../../rendering/viewport/building-solid.ts";
 import { serializeProject } from "../../lib/bim/model.ts";
@@ -168,7 +172,7 @@ test("follows its roof: moved with it, deleted with it, copied with it", () => {
 });
 
 test("schema 55 round-trips; v54 files refuse smuggled roof windows", () => {
-  assert.equal(PROJECT_SCHEMA_VERSION, 55);
+  assert.equal(PROJECT_SCHEMA_VERSION, 56);
   const p = withWindow();
   assert.deepEqual(
     storeyOf(readProjectFile(serializeProject(p))).roofWindows,
@@ -177,7 +181,7 @@ test("schema 55 round-trips; v54 files refuse smuggled roof windows", () => {
   const smuggled = JSON.parse(serializeProject(p));
   assert.throws(() => loadProjectData({ ...smuggled, schemaVersion: 54 }));
   const plain = JSON.parse(serializeProject(addRoof(createStandardProject("p", "eg", "og"), roof)));
-  assert.equal(loadProjectData({ ...plain, schemaVersion: 54 }).schemaVersion, 55);
+  assert.equal(loadProjectData({ ...plain, schemaVersion: 54 }).schemaVersion, 56);
 });
 
 test("IFC: opening voids the roof slab, IfcWindow SKYLIGHT fills it", async () => {
@@ -207,6 +211,8 @@ test("tool settings make a roof window and read one back; the plan draws its ope
     width: 0.78,
     length: 1.18,
     frame: 0.06,
+    upperReveal: "square",
+    lowerReveal: "square",
     renovation: "new",
   });
   const placed = addRoofWindowAt(
@@ -296,4 +302,82 @@ test("section through a roof window cuts its frame and glass", () => {
     drawing.cuts.some((c) => c.id === "dach"),
     "roof cut",
   );
+});
+
+// docs/DACHFLAECHENFENSTER.md, Laibung (schema 56).
+const RAD = (35 * Math.PI) / 180;
+
+test("reveal: upper horizontal and lower plumb widen the opening towards the room", () => {
+  const r = roofOf(withWindow());
+  const place = { along: 2, slope: 2, width: 0.78, length: 1.18 };
+  const square = roofWindowOpening(r, place);
+  assert.deepEqual(square, roofWindowRings(r, place));
+  const velux = roofWindowOpening(r, { ...place, upperReveal: "horizontal", lowerReveal: "plumb" });
+  const topYs = velux.top.map((q) => q.y);
+  const low = Math.min(...topYs),
+    high = Math.max(...topYs);
+  velux.top.forEach((q, i) => {
+    const b = velux.bottom[i]!;
+    assert.ok(near(b.x, q.x));
+    if (near(q.y, low)) assert.ok(near(b.y, q.y), "lower reveal plumb");
+    else {
+      assert.ok(near(b.y, q.y + 0.24 / Math.sin(RAD)), "upper reveal reaches uphill");
+      assert.ok(near(roofUndersideAt(r, b), roofTopAt(r, q)), "upper reveal level");
+    }
+  });
+  assert.ok(near(high - low, 1.18 * Math.cos(RAD)));
+});
+
+test("reveal: the roof loses the two wedges below the window", () => {
+  const r = roofOf(withWindow());
+  const place = { along: 2, slope: 2, width: 0.78, length: 1.18 };
+  const square = roofBody(r, 0, [place]).volume;
+  const velux = roofBody(r, 0, [
+    { ...place, upperReveal: "horizontal", lowerReveal: "plumb" },
+  ]).volume;
+  const wedges = (0.78 * 0.24 * 0.24 * (Math.tan(RAD) + 1 / Math.tan(RAD))) / 2;
+  assert.ok(near(square - velux, wedges, 1e-9), `${square - velux} vs ${wedges}`);
+  // Only one edge: one wedge.
+  const plumb = roofBody(r, 0, [{ ...place, lowerReveal: "plumb" }]).volume;
+  assert.ok(near(square - plumb, (0.78 * 0.24 * 0.24 * Math.tan(RAD)) / 2, 1e-9));
+});
+
+test("reveal: settings, values and pipette carry it; a horizontal reveal must fit the roof", () => {
+  let p = withWindow();
+  assert.equal(roofWindowSettings(storeyOf(p).roofWindows![0]!).upperReveal, "square");
+  p = updateRoofWindow(p, "w1", { upperReveal: "horizontal", lowerReveal: "plumb" });
+  const w = storeyOf(p).roofWindows![0]!;
+  const settings = roofWindowSettings(w);
+  assert.equal(settings.upperReveal, "horizontal");
+  assert.equal(settings.lowerReveal, "plumb");
+  assert.equal(roofWindowValues(settings).lowerReveal, "plumb");
+  const picked = pickupToolDefaults(p, createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE), {
+    kind: "roofWindow",
+    id: "w1",
+  });
+  assert.equal(picked?.tool, "roofWindow");
+  assert.equal(picked?.tool === "roofWindow" && picked.values.upperReveal, "horizontal");
+  assert.equal(roofWindowToolDefaults("window").upperReveal, "square");
+  // Near the ridge the square opening fits, the horizontal upper reveal leaves the roof.
+  const ridge = addRoofWindow(withWindow(), { id: "w2", roofId: "dach", along: 6, slope: 5.3 });
+  assert.throws(
+    () => updateRoofWindow(ridge, "w2", { upperReveal: "horizontal" }),
+    /liegt nicht ganz in der Dachfläche/,
+  );
+});
+
+test("schema 56 round-trips reveals; v55 files refuse them and load square", () => {
+  const p = updateRoofWindow(withWindow(), "w1", {
+    upperReveal: "horizontal",
+    lowerReveal: "plumb",
+  });
+  assert.deepEqual(
+    storeyOf(readProjectFile(serializeProject(p))).roofWindows,
+    storeyOf(p).roofWindows,
+  );
+  assert.throws(() => loadProjectData({ ...JSON.parse(serializeProject(p)), schemaVersion: 55 }));
+  const plain = JSON.parse(serializeProject(withWindow()));
+  const loaded = loadProjectData({ ...plain, schemaVersion: 55 });
+  assert.equal(loaded.schemaVersion, 56);
+  assert.equal(storeyOf(loaded).roofWindows![0]!.upperReveal, undefined);
 });

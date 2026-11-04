@@ -18,29 +18,49 @@ export const ROOF_WINDOW_FRAME = { min: 0.03, max: 0.2 } as const;
  * `width` runs along the eave, `length` along the slope; the frame is `frame` wide all round.
  * The opening goes through the roof perpendicular to its surface.
  */
-export const roofWindowSchema = z
-  .object({
-    id: z.string().trim().min(1),
-    layerId: z.string().trim().min(1),
-    roofId: z.string().trim().min(1),
-    along: finite,
-    slope: finite,
-    width: finite.min(ROOF_WINDOW_SIZE.min).max(ROOF_WINDOW_SIZE.max),
-    length: finite.min(ROOF_WINDOW_SIZE.min).max(ROOF_WINDOW_SIZE.max),
-    frame: finite.min(ROOF_WINDOW_FRAME.min).max(ROOF_WINDOW_FRAME.max),
-    renovation: z.enum(WALL_RENOVATIONS).optional(),
+const roofWindowBase = z.object({
+  id: z.string().trim().min(1),
+  layerId: z.string().trim().min(1),
+  roofId: z.string().trim().min(1),
+  along: finite,
+  slope: finite,
+  width: finite.min(ROOF_WINDOW_SIZE.min).max(ROOF_WINDOW_SIZE.max),
+  length: finite.min(ROOF_WINDOW_SIZE.min).max(ROOF_WINDOW_SIZE.max),
+  frame: finite.min(ROOF_WINDOW_FRAME.min).max(ROOF_WINDOW_FRAME.max),
+  renovation: z.enum(WALL_RENOVATIONS).optional(),
+});
+const frameFits = (w: { frame: number; width: number; length: number }) =>
+  2 * w.frame < Math.min(w.width, w.length);
+const FRAME_MESSAGE = "Der Rahmen eines Dachflächenfensters ist breiter als das Fenster.";
+
+/** Upper reveal: square to the roof surface (default) or horizontal (Velux recommendation). */
+export const ROOF_WINDOW_UPPER_REVEALS = ["square", "horizontal"] as const;
+/** Lower reveal: square to the roof surface (default) or plumb (Velux recommendation). */
+export const ROOF_WINDOW_LOWER_REVEALS = ["square", "plumb"] as const;
+export type RoofWindowUpperReveal = (typeof ROOF_WINDOW_UPPER_REVEALS)[number];
+export type RoofWindowLowerReveal = (typeof ROOF_WINDOW_LOWER_REVEALS)[number];
+
+/** Schema 55 roof window: no reveal settings (all reveals square to the roof surface). */
+export const roofWindowV55Schema = roofWindowBase.strict().refine(frameFits, FRAME_MESSAGE);
+/**
+ * Schema 56 (docs/DACHFLAECHENFENSTER.md, Laibung): the upper and lower reveal of the opening
+ * may follow the Velux recommendation, the upper one horizontal and the lower one plumb, so
+ * the opening widens towards the room. Missing means square to the roof surface.
+ */
+export const roofWindowSchema = roofWindowBase
+  .extend({
+    upperReveal: z.enum(ROOF_WINDOW_UPPER_REVEALS).optional(),
+    lowerReveal: z.enum(ROOF_WINDOW_LOWER_REVEALS).optional(),
   })
   .strict()
-  .refine(
-    (w) => 2 * w.frame < Math.min(w.width, w.length),
-    "Der Rahmen eines Dachflächenfensters ist breiter als das Fenster.",
-  );
+  .refine(frameFits, FRAME_MESSAGE);
 export type RoofWindow = z.infer<typeof roofWindowSchema>;
 
 /** Tool start values: 78 × 118 cm, frame 6 cm (docs/DACHFLAECHENFENSTER.md). */
 export const ROOF_WINDOW_DEFAULTS = { width: 0.78, length: 1.18, frame: 0.06 } as const;
 
 type WindowPlace = Pick<RoofWindow, "along" | "slope" | "width" | "length">;
+type WindowOpening = WindowPlace & Partial<Pick<RoofWindow, "upperReveal" | "lowerReveal">>;
 
 /** The plan point of a place in the roof plane: `along` the reference line, `slope` on the top. */
 function planPoint(roof: RoofGeometryInput, along: number, slope: number): Point2 {
@@ -101,16 +121,42 @@ export function roofWindowRings(
 }
 
 /**
+ * Plan rings of the opening through the roof (docs/DACHFLAECHENFENSTER.md, Laibung): on the
+ * roof top the window rectangle, on the underside its lower and upper edge moved uphill by
+ * - square: thickness · sin(pitch) (perpendicular to the surface, as roofWindowRings),
+ * - plumb (lower edge): 0, straight below the top edge,
+ * - horizontal (upper edge): thickness / sin(pitch), level with the top edge.
+ * The side reveals stay square. The frame and pane keep roofWindowRings (square).
+ */
+export function roofWindowOpening(
+  roof: RoofGeometryInput,
+  w: WindowOpening,
+): { top: Point2[]; bottom: Point2[] } {
+  const f = roofFrame(roof);
+  const square = roof.thickness * f.sin;
+  const lower = w.lowerReveal === "plumb" ? 0 : square;
+  const upper = w.upperReveal === "horizontal" ? roof.thickness / f.sin : square;
+  const top = rectangle(roof, w);
+  return {
+    top,
+    bottom: top.map((p) => {
+      const shift = roofWindowPlace(roof, p).slope > w.slope ? upper : lower;
+      return { x: p.x + f.rise.x * shift, y: p.y + f.rise.y * shift };
+    }),
+  };
+}
+
+/**
  * Why the windows do not fit their roof, or null. Each opening lies strictly inside the roof's
  * top and underside faces (the roof stays one piece with holes); windows of one roof neither
  * overlap nor touch.
  */
 export function roofWindowProblem(
   roof: RoofGeometryInput,
-  windows: readonly (WindowPlace & { id: string })[],
+  windows: readonly (WindowOpening & { id: string })[],
 ): string | null {
   const faces = roofFaceRings(roof);
-  const rings = windows.map((w) => roofWindowRings(roof, w));
+  const rings = windows.map((w) => roofWindowOpening(roof, w));
   for (const [index, window] of windows.entries()) {
     const { top, bottom } = rings[index]!;
     if (
@@ -120,11 +166,12 @@ export function roofWindowProblem(
       !contains(faces.bottom, bottom[0]!)
     )
       return `Dachflächenfenster ${window.id} liegt nicht ganz in der Dachfläche.`;
-    for (const [k, other] of windows.slice(0, index).entries()) {
-      const otherTop = rings[k]!.top;
-      if (!ringsApart(top, otherTop) || contains(otherTop, top[0]!) || contains(top, otherTop[0]!))
+    // Widened reveals may meet below the roof top, so both faces are compared.
+    const apart = (a: Point2[], b: Point2[]) =>
+      ringsApart(a, b) && !contains(b, a[0]!) && !contains(a, b[0]!);
+    for (const [k, other] of windows.slice(0, index).entries())
+      if (!apart(top, rings[k]!.top) || !apart(bottom, rings[k]!.bottom))
         return `Dachflächenfenster ${other.id} und ${window.id} überschneiden sich.`;
-    }
   }
   return null;
 }

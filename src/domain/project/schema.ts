@@ -23,7 +23,11 @@ import { dimensionSchema } from "../elements/dimension/model.ts";
 import { textSchema } from "../elements/text/model.ts";
 import { stairGeometry, stairSchema } from "../elements/stair/model.ts";
 import { railingSchema } from "../elements/railing/model.ts";
-import { roofWindowProblem, roofWindowSchema } from "../elements/roof/window.ts";
+import {
+  roofWindowProblem,
+  roofWindowSchema,
+  roofWindowV55Schema,
+} from "../elements/roof/window.ts";
 import { sectionSchema } from "../views/sections.ts";
 import { roomNumberKey, roomSchema, roomV32Schema, roomV33Schema } from "../elements/room/model.ts";
 import {
@@ -748,15 +752,29 @@ export const projectV54Schema = projectV45Schema.extend({
   projectInfo: projectInfoSchema.optional(),
 });
 /** Schema 55: roof windows (Dachflächenfenster, docs/DACHFLAECHENFENSTER.md, L41). */
+const storeyV55Schema = storeyV54Schema.extend({
+  roofWindows: z.array(roofWindowV55Schema).max(5000).optional(),
+});
+const layoutDrawingV55Schema = z.object({ layoutId: id, storey: storeyV55Schema }).strict();
+export const projectV55Schema = projectV45Schema.extend({
+  schemaVersion: z.literal(55),
+  storeys: z.array(storeyV55Schema).min(1),
+  modelViews: z.array(anyModelViewSchema).optional(),
+  layoutDrawings: z.array(layoutDrawingV55Schema).max(5000).optional(),
+  masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
+  layouts: z.array(layoutV49Schema).max(5000).optional(),
+  projectInfo: projectInfoSchema.optional(),
+});
+/** Schema 56: roof window reveals (upper horizontal, lower plumb; docs/DACHFLAECHENFENSTER.md). */
 const storeySchema = storeyV54Schema.extend({
   roofWindows: z.array(roofWindowSchema).max(5000).optional(),
 });
-const layoutDrawingV55Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
+const layoutDrawingV56Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
 const projectSchema = projectV45Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z.array(storeySchema).min(1),
   modelViews: z.array(anyModelViewSchema).optional(),
-  layoutDrawings: z.array(layoutDrawingV55Schema).max(5000).optional(),
+  layoutDrawings: z.array(layoutDrawingV56Schema).max(5000).optional(),
   masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
   layouts: z.array(layoutV49Schema).max(5000).optional(),
   projectInfo: projectInfoSchema.optional(),

@@ -982,7 +982,7 @@ export function PlanSceneContent({
               fillOpacity={0.01}
               stroke={color}
               strokeWidth={1.2}
-              strokeDasharray="6 3"
+              strokeDasharray={`${6 / pixelsPerMetre} ${3 / pixelsPerMetre}`}
               vectorEffect="non-scaling-stroke"
               pointerEvents={placement ? "none" : "all"}
               className="cursor-pointer outline-none"
@@ -992,7 +992,7 @@ export function PlanSceneContent({
               fill="none"
               stroke={color}
               strokeWidth={0.8}
-              strokeDasharray="6 3"
+              strokeDasharray={`${6 / pixelsPerMetre} ${3 / pixelsPerMetre}`}
               vectorEffect="non-scaling-stroke"
               pointerEvents="none"
             />
@@ -1032,7 +1032,11 @@ export function PlanSceneContent({
               fill="none"
               stroke={color}
               strokeWidth={1}
-              strokeDasharray={railing.infill === "panel" ? undefined : "6 3"}
+              strokeDasharray={
+                railing.infill === "panel"
+                  ? undefined
+                  : `${6 / pixelsPerMetre} ${3 / pixelsPerMetre}`
+              }
               vectorEffect="non-scaling-stroke"
               pointerEvents="none"
             />
