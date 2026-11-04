@@ -117,6 +117,9 @@ export function projectSnapParts(project: Project): readonly (readonly SnapPart[
           : circlePart(opening),
       ),
     ),
+    // Railing points and segment midpoints like a polyline (docs/GELAENDER.md, G3), after all
+    // earlier kinds so their order stays.
+    (storey.railings ?? []).map((railing) => remembered(owned, railing, linePart)),
     // Paper and margin frame of a Plankopf or layout: corners, edge midpoints and, through
     // the corner directions, the edges themselves (docs/LAYOUTS.md).
     sheetParts(project),
@@ -283,7 +286,8 @@ function hatchPart(hatch: { id: string; points: readonly { x: number; y: number 
   );
 }
 
-function linePart(line: NonNullable<Project["storeys"][number]["lines"]>[number]): Part {
+/** Points and segment midpoints of a line, polyline or railing (docs/GELAENDER.md, G3). */
+function linePart(line: { id: string; points: readonly { x: number; y: number }[] }): Part {
   return part((midpoint) => [
     ...line.points.map((point, index) => ({
       point: { ...point },

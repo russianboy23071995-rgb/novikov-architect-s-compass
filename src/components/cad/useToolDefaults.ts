@@ -369,6 +369,8 @@ export function useToolDefaults(project: Project) {
         setLineState({ projectId: project.id, values: defaults.values });
       else if (defaults.tool === "column")
         setColumnState({ projectId: project.id, values: defaults.values });
+      else if (defaults.tool === "railing")
+        setRailingState({ projectId: project.id, values: defaults.values });
       else if (defaults.tool === "stair")
         setStairState({ projectId: project.id, values: defaults.values });
       else if (defaults.tool === "text")

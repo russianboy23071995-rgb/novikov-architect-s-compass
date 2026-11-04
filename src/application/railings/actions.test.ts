@@ -18,6 +18,13 @@ import { exportIfc } from "../../lib/bim/ifc.ts";
 import { previewDeleteSelection } from "../elements/delete.ts";
 import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import type { Project } from "../../domain/project/schema.ts";
+import { prepareTranslation } from "../../domain/project/prepared-translation.ts";
+import { projectSnapReferences } from "../snapping/project-references.ts";
+import { snapPointLabel } from "../snapping/point-label.ts";
+import { pickupToolDefaults } from "../tools/pickup.ts";
+import { createLayerVisibilityPolicy, ALL_LAYERS_VISIBLE } from "../layers/visibility.ts";
+import { addSection } from "../sections/actions.ts";
+import { sectionDrawing, sectionShownIds } from "../../rendering/viewport/section-drawing.ts";
 import { selectionSummary } from "../../components/cad/demand-menu.ts";
 import { railingSettings, railingToolDefaults, railingValues } from "./defaults.ts";
 import { derivePlanScene, planSceneRuns } from "../../rendering/viewport/plan-scene.ts";
@@ -244,4 +251,60 @@ test("menu summary: Geländer with infill, height and length", () => {
     title: "Geländer",
     details: "Platte / Glas · Höhe 1,10 m · Länge 3,50 m",
   });
+});
+
+// docs/GELAENDER.md, G3: move, snap points, pipette, section.
+test("move: the railing moves with all its points, others stay", () => {
+  const p = withRailings();
+  const moved = prepareTranslation(p, ["g1"]).materialize(p, { x: 1, y: -0.5 });
+  const [g1, g2] = storeyOf(moved).railings!;
+  assert.deepEqual(g1!.points, [
+    { x: 1, y: -0.5 },
+    { x: 3.4, y: -0.5 },
+  ]);
+  assert.deepEqual(g2!.points, corner);
+});
+
+test("snap points: every railing point and segment midpoint, labelled", () => {
+  const p = withRailings();
+  const refs = projectSnapReferences(p).filter((r) => r.entityId === "g2");
+  assert.deepEqual(
+    refs.filter((r) => r.feature.startsWith("vertex-")).map((r) => r.point),
+    corner,
+  );
+  assert.ok(refs.some((r) => r.feature.startsWith("segment-0-midpoint") && near(r.point.x, 1)));
+  assert.equal(snapPointLabel(p, "g2", "vertex-1"), "Geländer · Punkt 2");
+});
+
+test("pipette hands every railing setting to the tool except its line", () => {
+  const p = withRailings();
+  const picked = pickupToolDefaults(p, createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE), {
+    kind: "railing",
+    id: "g2",
+  });
+  assert.equal(picked?.tool, "railing");
+  if (picked?.tool !== "railing") throw new Error("Expected railing");
+  assert.deepEqual(picked.values, railingSettings(storeyOf(p).railings![1]!));
+  assert.equal(picked.values.infill, "panel");
+});
+
+test("section: a railing crossing the line is cut, one beyond it is seen", () => {
+  let p = withRailings();
+  // Line along x = 1 looking to +x: cuts g1 (0…2,40 m along y = 0), sees g2 (x = 2).
+  p = addSection(p, {
+    id: "s",
+    start: { x: 1, y: -1 },
+    end: { x: 1, y: 2 },
+    look: "right",
+  });
+  const drawing = sectionDrawing(
+    p,
+    p.sections!.find((s) => s.id === "s")!,
+  );
+  const shown = sectionShownIds(drawing);
+  assert.ok(
+    drawing.cuts.some((c) => c.id === "g1"),
+    "g1 cut",
+  );
+  assert.ok(shown.has("g2"), "g2 shown");
 });

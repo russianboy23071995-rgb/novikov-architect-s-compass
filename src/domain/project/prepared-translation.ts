@@ -3,6 +3,7 @@ import { placedDrawingSchema } from "../elements/drawing/model.ts";
 import { dimensionSchema } from "../elements/dimension/model.ts";
 import { columnSchema } from "../elements/column/model.ts";
 import { stairSchema } from "../elements/stair/model.ts";
+import { railingSchema } from "../elements/railing/model.ts";
 import { translatePoint } from "../../geometry/primitives/point.ts";
 import { wallDependencyClosure } from "../elements/wall/dependency-closure.ts";
 import { prepareProjectSnapshot } from "./prepared-snapshot.ts";
@@ -48,6 +49,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(s.rooms ?? []),
       ...(s.columns ?? []),
       ...(s.stairs ?? []),
+      ...(s.railings ?? []),
       ...(s.dimensions ?? []),
       ...(s.texts ?? []),
       ...(s.drawings ?? []),
@@ -90,6 +92,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(s.rooms ? { rooms: s.rooms.filter((room) => ids.has(room.id)) } : {}),
       ...(s.columns ? { columns: s.columns.filter((column) => ids.has(column.id)) } : {}),
       ...(s.stairs ? { stairs: s.stairs.filter((stair) => ids.has(stair.id)) } : {}),
+      ...(s.railings ? { railings: s.railings.filter((r) => ids.has(r.id)) } : {}),
       ...(s.dimensions ? { dimensions: s.dimensions.filter((d) => ids.has(d.id)) } : {}),
       ...(s.texts ? { texts: s.texts.filter((t) => ids.has(t.id)) } : {}),
       ...(s.drawings ? { drawings: s.drawings.filter((d) => ids.has(d.id)) } : {}),
@@ -132,6 +135,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(storeyOf(affected).rooms ?? []),
       ...(storeyOf(affected).columns ?? []),
       ...(storeyOf(affected).stairs ?? []),
+      ...(storeyOf(affected).railings ?? []),
       ...(storeyOf(affected).dimensions ?? []),
       ...(storeyOf(affected).texts ?? []),
       ...(storeyOf(affected).drawings ?? []),
@@ -265,6 +269,15 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
               })),
             }
           : {}),
+        // A railing moves with all its points (docs/GELAENDER.md, G3).
+        ...(storeyOf(affected).railings
+          ? {
+              railings: storeyOf(affected).railings!.map((railing) => ({
+                ...railing,
+                points: railing.points.map(translate),
+              })),
+            }
+          : {}),
         // A stair moves with its start point (docs/TREPPE.md, TR2).
         ...(storeyOf(affected).stairs
           ? {
@@ -338,6 +351,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
     for (const room of storeyOf(geometry).rooms ?? []) roomSchema.parse(room);
     for (const column of storeyOf(geometry).columns ?? []) columnSchema.parse(column);
     for (const stair of storeyOf(geometry).stairs ?? []) stairSchema.parse(stair);
+    for (const railing of storeyOf(geometry).railings ?? []) railingSchema.parse(railing);
     for (const d of storeyOf(geometry).dimensions ?? []) dimensionSchema.parse(d);
     for (const t of storeyOf(geometry).texts ?? []) textSchema.parse(t);
     for (const d of storeyOf(geometry).drawings ?? []) placedDrawingSchema.parse(d);
@@ -377,6 +391,9 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(s.rooms ? { rooms: replace(s.rooms, storeyOf(patch.geometry).rooms ?? []) } : {}),
       ...(s.columns ? { columns: replace(s.columns, storeyOf(patch.geometry).columns ?? []) } : {}),
       ...(s.stairs ? { stairs: replace(s.stairs, storeyOf(patch.geometry).stairs ?? []) } : {}),
+      ...(s.railings
+        ? { railings: replace(s.railings, storeyOf(patch.geometry).railings ?? []) }
+        : {}),
       ...(s.texts ? { texts: replace(s.texts, storeyOf(patch.geometry).texts ?? []) } : {}),
       ...(s.drawings
         ? { drawings: replace(s.drawings, storeyOf(patch.geometry).drawings ?? []) }
@@ -408,6 +425,7 @@ export function prepareStoreysTranslation(source: Project, selectedIds: readonly
       ...(s.rooms ?? []),
       ...(s.columns ?? []),
       ...(s.stairs ?? []),
+      ...(s.railings ?? []),
       ...(s.dimensions ?? []),
       ...(s.texts ?? []),
       ...(s.drawings ?? []),
@@ -479,6 +497,7 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
       ...(s.rooms ?? []),
       ...(s.columns ?? []),
       ...(s.stairs ?? []),
+      ...(s.railings ?? []),
       ...(s.dimensions ?? []),
       ...(s.texts ?? []),
       ...(s.drawings ?? []),
