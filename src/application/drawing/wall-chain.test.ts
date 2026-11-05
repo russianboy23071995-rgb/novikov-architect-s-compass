@@ -480,3 +480,27 @@ test("a door elsewhere does not stop a free wall at any angle", () => {
   const second = appendWallChain(chain, p, "w", { x: 3, y: 4 });
   assert.equal(storeyOf(previewWallChain(second, p, { x: 3.7, y: 6 })).doors?.length, 1);
 });
+
+test("a wall ending along the axis of a parallel wall stays a free wall, without a message", () => {
+  let p = createStandardProject("p", "eg", "og");
+  p = addWall(p, {
+    id: "host",
+    start: { x: 0, y: 0 },
+    end: { x: 5, y: 0 },
+    thickness: 0.24,
+    height: 2.5,
+  });
+  const end = { x: 2, y: 0 };
+  const candidate = {
+    kind: "endpoint" as const,
+    worldPoint: end,
+    distanceOnScreen: 0,
+    sourceEntityId: "host",
+    sourceFeature: "t-axis",
+    priority: 0,
+  };
+  const chain = beginWallChain(p, { x: -3, y: 0 });
+  const preview = previewWallChain(chain, p, end, candidate);
+  assert.equal(storeyOf(preview).walls.length, storeyOf(p).walls.length + 1);
+  assert.equal(storeyOf(preview).wallTJunctions.length, 0);
+});
