@@ -105,7 +105,7 @@ const PLAN_SHAPES: {
   // The object's box in plan (docs/OBJEKTBIBLIOTHEK.md).
   object: (o) => ({ points: objectOutline(o), closed: true, pick: objectPickRings(o) }),
   // Outline only: the terrain lies under everything else (docs/GELAENDE.md).
-  terrain: (t) => ({ points: t.outline, closed: true }),
+  terrain: (t) => ({ points: [...t.outline, t.outline[0]!], closed: false }),
   // Its opening on the roof top, seen from above (docs/DACHFLAECHENFENSTER.md).
   roofWindow: (w, { project }) => {
     const roof = storeyOf(project).roofs?.find((r) => r.id === w.roofId);

@@ -1,9 +1,34 @@
 import { standardLayerId } from "../../domain/layers/model.ts";
 import { validateLike } from "../../domain/project/owned-snapshot.ts";
 import type { Project } from "../../domain/project/schema.ts";
-import { TERRAIN_DEFAULTS, type Terrain } from "../../domain/elements/terrain/model.ts";
+import {
+  TERRAIN_DEFAULTS,
+  type Terrain,
+  type TerrainPoint,
+} from "../../domain/elements/terrain/model.ts";
 
 type TerrainCreation = Pick<Terrain, "id" | "outline"> & Partial<Omit<Terrain, "id" | "outline">>;
+
+/** Values of the tool and the element window; `height` is that of the next points. */
+export type TerrainDefaults = {
+  height: number;
+  depth: number;
+  color: string;
+  contourStep: number;
+  layerId: string;
+};
+export function terrainToolDefaults(layerId: string): TerrainDefaults {
+  return { height: 0, ...TERRAIN_DEFAULTS, layerId };
+}
+export function terrainSettings(terrain: Terrain): TerrainDefaults {
+  return {
+    height: 0,
+    depth: terrain.depth,
+    color: terrain.color ?? TERRAIN_DEFAULTS.color,
+    contourStep: terrain.contourStep ?? TERRAIN_DEFAULTS.contourStep,
+    layerId: terrain.layerId,
+  };
+}
 
 /** The standard Gelände layer (docs/GELAENDE.md). */
 export function defaultTerrainLayerId(project: Project): string {
@@ -42,6 +67,13 @@ export function addTerrain(project: Project, terrain: TerrainCreation): Project 
       layerId: terrain.layerId ?? defaultTerrainLayerId(project),
     },
   ]);
+}
+
+/** The tool adds a height point; outside the outline the model refuses it. */
+export function addTerrainPoint(project: Project, point: TerrainPoint): Project {
+  const terrain = projectTerrain(project);
+  if (!terrain) throw new Error("Das Projekt hat kein Gelände.");
+  return updateTerrain(project, { points: [...terrain.points, point] });
 }
 
 /** One checked change of the terrain. */

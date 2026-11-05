@@ -50,6 +50,7 @@ const BAND_KINDS: ReadonlySet<string> = new Set([
   "roof",
   "hatch",
   "object",
+  "terrain",
   "wall",
   "column",
   "stair",

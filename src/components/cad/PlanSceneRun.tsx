@@ -499,6 +499,7 @@ export function PlanSceneContent({
     railings: kind === "railing" ? ids.map((id) => scene.railings.get(id)!) : [],
     roofWindows: kind === "roofWindow" ? ids.map((id) => scene.roofWindows.get(id)!) : [],
     objects: kind === "object" ? ids.map((id) => scene.objects.get(id)!) : [],
+    terrains: kind === "terrain" ? ids.map((id) => scene.terrains.get(id)!) : [],
     dimensions: kind === "dimension" ? ids.map((id) => scene.dimensions.get(id)!) : [],
     texts: kind === "text" ? ids.map((id) => scene.texts.get(id)!) : [],
     lines: kind === "line" ? ids.map((id) => scene.lines.get(id)!) : [],
@@ -952,6 +953,54 @@ export function PlanSceneContent({
               color={selectedIds.has(stair.id) ? "#0284c7" : "var(--primary)"}
               width={wallOutlineWidth}
             />
+          </g>
+        );
+      })}
+      {plan.terrains.map((terrain) => {
+        // Terrain (docs/GELAENDE.md, G2): outline, contour lines, height points with their level.
+        // Only the outline picks, so a click inside stays free for what lies on the terrain.
+        const selected = selectedIds.has(terrain.id);
+        const color = selected ? "#0284c7" : "#6f8a55";
+        const label = 11 / pixelsPerMetre;
+        return (
+          <g key={terrain.id} aria-label={`Gelände ${terrain.id}`}>
+            {scene.terrainViews.get(terrain.id)!.map(({ a, b }, i) => (
+              <line
+                key={i}
+                x1={a.x}
+                y1={-a.y}
+                x2={b.x}
+                y2={-b.y}
+                stroke={color}
+                strokeOpacity={0.55}
+                strokeWidth={1}
+                vectorEffect="non-scaling-stroke"
+                pointerEvents="none"
+              />
+            ))}
+            <polygon
+              {...selectProps("terrain", terrain.id)}
+              points={terrain.outline.map((p) => `${p.x},${-p.y}`).join(" ")}
+              fill="none"
+              stroke={color}
+              strokeWidth={selected ? 2 : 1.2}
+              vectorEffect="non-scaling-stroke"
+              pointerEvents={placement ? "none" : "stroke"}
+              className="cursor-pointer outline-none"
+            />
+            {[...terrain.outline, ...terrain.points].map((p, i) => (
+              <g key={i} pointerEvents="none">
+                <circle cx={p.x} cy={-p.y} r={2.5 / pixelsPerMetre} fill={color} />
+                <text
+                  x={p.x + 5 / pixelsPerMetre}
+                  y={-p.y - 4 / pixelsPerMetre}
+                  fontSize={label}
+                  fill={color}
+                >
+                  {(p.z >= 0 ? "+" : "") + p.z.toFixed(2).replace(".", ",")}
+                </text>
+              </g>
+            ))}
           </g>
         );
       })}

@@ -1,5 +1,6 @@
 import type { PlanText } from "../../domain/elements/text/model.ts";
 import { columnSettings, type ColumnDefaults } from "../columns/defaults.ts";
+import { terrainSettings, type TerrainDefaults } from "../terrain/actions.ts";
 import { objectSettings, type ObjectToolDefaults } from "../objects/defaults.ts";
 import { railingSettings, type RailingDefaults } from "../railings/defaults.ts";
 import { roofWindowSettings, type RoofWindowDefaults } from "../roof-windows/defaults.ts";
@@ -38,6 +39,7 @@ export type ToolDefaults =
   | { tool: "door"; values: DoorSettingsDraft }
   | { tool: "slab"; values: Pick<Slab, "thickness" | "topOffset" | "layerId"> }
   | { tool: "slabOpening"; values: Record<string, never> }
+  | { tool: "terrain"; values: TerrainDefaults }
   | {
       tool: "room";
       values: {
@@ -178,6 +180,10 @@ export function pickupToolDefaults(
     return { tool: "slab", values: { thickness, topOffset, layerId } };
   }
   if (target.kind === "slabOpening") return { tool: "slabOpening", values: {} };
+  if (target.kind === "terrain") {
+    const source = storeyOf(project).terrains?.find((item) => item.id === target.id);
+    return source ? { tool: "terrain", values: terrainSettings(source) } : null;
+  }
   if (target.kind === "roof") {
     const source = storeyOf(project).roofs?.find((item) => item.id === target.id);
     if (!source) return null;

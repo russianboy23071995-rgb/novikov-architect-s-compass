@@ -5,7 +5,7 @@ Nutzerwunsch 02.11.2026, Änderungskarte am 05.11.2026 mit „Go“ freigegeben.
 | Teil | Inhalt                                                | Stand    |
 | ---- | ----------------------------------------------------- | -------- |
 | G1   | Modell, Dreiecksnetz, 3D-Körper, Dateiformat 64       | erledigt |
-| G2   | Werkzeug, Grundriss, Höhenlinien, Einstellungen, Fang | offen    |
+| G2   | Werkzeug, Grundriss, Höhenlinien, Einstellungen, Fang | erledigt |
 | G3   | Schnitt, Ansicht, IFC                                 | offen    |
 
 Entscheidungen aus der Karte:
@@ -22,4 +22,22 @@ Entscheidungen aus der Karte:
 - **3D:** Oberfläche, Seiten entlang des Umrisses, flache Unterseite in der Tiefe unter dem niedrigsten Punkt. Das Gelände gehört zum Gebäudekörper und lässt sich in 3D anklicken.
 - **Schema 64:** Liste `terrains` am Geschoss. Eine 63er Datei lädt unverändert, mit Gelände wird sie abgelehnt.
 
-**Grenzen G1:** Noch kein Werkzeug, das Gelände entsteht bisher nur über das Modell. Eine Browserabnahme folgt mit G2.
+## Teil G2: Werkzeug und Grundriss
+
+- **Werkzeug:** Ohne Gelände zeichnet es den Umriss, der Klick auf den ersten Punkt schließt. Danach setzt jeder Klick einen Höhenpunkt mit der eingestellten Höhe. Das geht nur im Erdgeschoss.
+- **Felder:** Höhe neuer Punkte, Körpertiefe, Abstand der Höhenlinien, Farbe, Ebene. In der Werkzeugleiste und im Einstellungsfenster gleich.
+- **Elementfenster:** Doppelklick auf den Umriss. Liste aller Ecken und Höhenpunkte mit Lage und Höhe, die Höhe ist änderbar, Höhenpunkte lassen sich löschen. Jede Änderung ist ein Rückgängig-Schritt.
+- **Grundriss:** Umriss, Höhenlinien, Punkte mit Höhenangabe. Das Gelände liegt ganz unten. Nur der Umriss ist anklickbar, Klicks im Inneren bleiben frei für alles, was darauf liegt.
+- **Fang:** Ecken, Kantenmitten und Höhenpunkte.
+- **Pipette:** Übernimmt Tiefe, Farbe, Linienabstand und Ebene.
+
+**Abnahme im Browser (05.11.2026):**
+
+| Schritt                         | Ergebnis                                              |
+| ------------------------------- | ----------------------------------------------------- |
+| Vier Ecken, Klick auf die erste | Gelände mit vier Ecken auf +0,00                      |
+| Höhe 2, zwei Klicks             | Zwei Punkte, Höhenlinien alle 50 cm                   |
+| Doppelklick auf den Umriss      | Fenster mit vier Ecken, zwei Punkten, zweimal Löschen |
+| 3D-Ansicht                      | Geschlossener Körper mit Hügel, Gebäude steckt darin  |
+
+**Grenzen G2:** Punkte lassen sich nur in der Höhe ändern und löschen, nicht in der Lage verschieben, und Ecken nur in der Höhe. Das weicht von der Karte ab, dort stand „verschieben“. Das Gelände als Ganzes wird nicht bewegt. Im Browser sind Löschen und Ändern im Fenster nur angezeigt, nicht bedient.

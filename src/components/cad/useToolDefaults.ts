@@ -9,6 +9,11 @@ import { defaultColumnLayerId } from "@/application/columns/actions";
 import { defaultObjectLayerId } from "@/application/objects/actions";
 import { objectToolDefaults, type ObjectToolDefaults } from "@/application/objects/defaults";
 import { defaultRailingLayerId } from "@/application/railings/actions";
+import {
+  defaultTerrainLayerId,
+  terrainToolDefaults,
+  type TerrainDefaults,
+} from "@/application/terrain/actions";
 import { defaultRoofWindowLayerId } from "@/application/roof-windows/actions";
 import {
   roofWindowToolDefaults,
@@ -208,6 +213,20 @@ export function useToolDefaults(project: Project) {
       : defaultColumnLayerId(project),
   };
   // Railing tool (docs/GELAENDER.md, G2); a vanished layer falls back to the Geländer layer.
+  const [terrainState, setTerrainState] = useState<{
+    projectId: string;
+    values: TerrainDefaults;
+  } | null>(null);
+  const terrainValues =
+    terrainState?.projectId === project.id
+      ? terrainState.values
+      : terrainToolDefaults(defaultTerrainLayerId(project));
+  const terrainDefaults = {
+    ...terrainValues,
+    layerId: project.layers.some((l) => l.id === terrainValues.layerId)
+      ? terrainValues.layerId
+      : defaultTerrainLayerId(project),
+  };
   const [railingState, setRailingState] = useState<{
     projectId: string;
     values: RailingDefaults;
@@ -381,6 +400,7 @@ export function useToolDefaults(project: Project) {
       setRoofWindowState({ projectId: project.id, values });
     },
     railing: railingDefaults,
+    terrain: terrainDefaults,
     setRailing(values: RailingDefaults) {
       setRailingState({ projectId: project.id, values });
     },
@@ -395,6 +415,9 @@ export function useToolDefaults(project: Project) {
     roof: roofDefaults,
     setRoof(values: RoofDefaults) {
       setRoofState({ projectId: project.id, values });
+    },
+    setTerrain(values: TerrainDefaults) {
+      setTerrainState({ projectId: project.id, values });
     },
     setDoor(values: DoorSettingsDraft) {
       setDoorState({ projectId: project.id, values });
@@ -419,6 +442,8 @@ export function useToolDefaults(project: Project) {
         setDimensionState({ projectId: project.id, values: defaults.values });
       else if (defaults.tool === "room")
         setRoomState({ projectId: project.id, values: defaults.values });
+      else if (defaults.tool === "terrain")
+        setTerrainState({ projectId: project.id, values: defaults.values });
       else if (defaults.tool === "slabOpening") return;
       else if (defaults.tool === "line")
         setLineState({ projectId: project.id, values: defaults.values });

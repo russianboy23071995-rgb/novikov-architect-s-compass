@@ -100,6 +100,8 @@ import {
 import { offsetAtThickness } from "@/domain/elements/wall/axis-position";
 import { ColumnFields } from "./ColumnFields";
 import { RailingFields } from "./RailingFields";
+import { TerrainFields } from "./TerrainFields";
+import { addTerrain, addTerrainPoint, projectTerrain } from "@/application/terrain/actions";
 import { RoofWindowFields } from "./RoofWindowFields";
 import { contains as polygonContains } from "@/geometry/polygons/contains";
 import { DimensionToolFields } from "./DimensionToolFields";
@@ -853,9 +855,12 @@ export function CadWorkspace({
   const [roomConstruction, setRoomConstruction] = useState<HatchConstruction | "walls">("walls");
   const roomByWalls = tool === "room" && roomConstruction === "walls";
   // Hatch, slab, roof and room share the outline construction (polygon, rectangle, contour).
+  // Gelände (docs/GELAENDE.md, G2): first its outline, then height points by click.
+  const terrainNow = projectTerrain(realProject);
   const areaTool =
     tool === "hatch" ||
     tool === "slab" ||
+    (tool === "terrain" && !terrainNow) ||
     tool === "slabOpening" ||
     roofPhase === "outline" ||
     (tool === "room" && !roomByWalls);
@@ -865,11 +870,13 @@ export function CadWorkspace({
   const [openingCircle, setOpeningCircle] = useState(false);
   const circleTool = tool === "slabOpening" && openingCircle;
   const construction: HatchConstruction =
-    tool === "room" && roomConstruction !== "walls"
-      ? roomConstruction
-      : circleTool
-        ? "diagonal"
-        : hatchConstruction;
+    tool === "terrain"
+      ? "polygon"
+      : tool === "room" && roomConstruction !== "walls"
+        ? roomConstruction
+        : circleTool
+          ? "diagonal"
+          : hatchConstruction;
   const findHatchBoundary = useMemo(
     () =>
       areaTool && construction === "boundary" ? prepareHatchBoundaries(project, visibility) : null,
@@ -1164,6 +1171,7 @@ export function CadWorkspace({
       next === "column" ||
       next === "library" ||
       next === "railing" ||
+      next === "terrain" ||
       next === "roofWindow" ||
       next === "stair" ||
       next === "section" ||
@@ -1187,6 +1195,7 @@ export function CadWorkspace({
       next === "column" ||
       next === "library" ||
       next === "railing" ||
+      next === "terrain" ||
       next === "roofWindow" ||
       next === "stair" ||
       next === "section" ||
@@ -1687,6 +1696,21 @@ export function CadWorkspace({
         layers={project.layers}
         storeyHeight={storeyOf(project).height ?? null}
       />
+    ) : owner === "terrain" ? (
+      <div className="flex flex-wrap items-end gap-3">
+        <TerrainFields
+          value={toolDefaults.terrain}
+          onChange={toolDefaults.setTerrain}
+          layers={project.layers}
+        />
+        {place === "bar" && (
+          <span role="status" className="text-xs text-muted-foreground">
+            {terrainNow
+              ? "Klick setzt einen Höhenpunkt mit der eingestellten Höhe · Esc: Ende"
+              : "Umriss zeichnen · Klick auf den ersten Punkt schließt · Esc: Abbruch"}
+          </span>
+        )}
+      </div>
     ) : owner === "railing" ? (
       <div className="flex flex-wrap items-end gap-3">
         <RailingFields
@@ -2284,6 +2308,28 @@ export function CadWorkspace({
   };
 
   const finishPath = (points = pathPoints, base = drawingBase) => {
+    if (tool === "terrain") {
+      try {
+        if (base !== project)
+          throw new Error("Das Modell wurde geändert. Zeichnen erneut beginnen.");
+        const { height, ...values } = toolDefaults.terrain;
+        dispatchEditing({
+          type: "project",
+          project: addTerrain(project, {
+            id: `terrain-${crypto.randomUUID()}`,
+            outline: points.map((p) => ({ x: p.x, y: p.y, z: height })),
+            ...values,
+          }),
+        });
+        setModelError("");
+        showNotice("Gelände gesetzt · jetzt Höhenpunkte klicken");
+      } catch (error) {
+        setModelError(readableError(error, "Geländeumriss prüfen: ohne Kreuzungen."));
+      }
+      setPathPoints([]);
+      setDrawingBase(null);
+      return;
+    }
     // Railing (docs/GELAENDER.md, G2): a model element along the drawn line, one undo step.
     if (tool === "railing") {
       try {
@@ -2618,6 +2664,29 @@ export function CadWorkspace({
           : { line: { ...point }, points: [], lastAt: 0 },
       );
       return;
+    }
+    if (tool === "terrain") {
+      if (project.groundStoreyId !== storeyOf(project).id) {
+        setModelError("Das Gelände im Erdgeschoss zeichnen.");
+        return;
+      }
+      if (terrainNow) {
+        try {
+          dispatchEditing({
+            type: "project",
+            project: addTerrainPoint(project, {
+              x: point.x,
+              y: point.y,
+              z: toolDefaults.terrain.height,
+            }),
+          });
+          setModelError("");
+          showNotice("Höhenpunkt gesetzt");
+        } catch (error) {
+          setModelError(readableError(error, "Höhenpunkt nicht möglich."));
+        }
+        return;
+      }
     }
     // Section tool (docs/SCHNITT.md, SC2): click 1 start, click 2 end, click 3 the viewing side;
     // in any storey, the section belongs to the building.
@@ -4525,6 +4594,7 @@ export function CadWorkspace({
                         }
                         drawing={
                           (tool === "wall" ||
+                            tool === "terrain" ||
                             tool === "column" ||
                             tool === "library" ||
                             tool === "roofWindow" ||
@@ -4541,6 +4611,7 @@ export function CadWorkspace({
                         }
                         endpointSnap={
                           pathDrawing ||
+                          tool === "terrain" ||
                           tool === "roof" ||
                           tool === "measure" ||
                           tool === "select" ||
@@ -5144,6 +5215,7 @@ export function CadWorkspace({
                   tool === "column" ||
                   tool === "library" ||
                   tool === "railing" ||
+                  tool === "terrain" ||
                   tool === "roofWindow" ||
                   tool === "stair" ||
                   tool === "section" ||
