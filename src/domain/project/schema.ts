@@ -23,7 +23,12 @@ import { dimensionSchema } from "../elements/dimension/model.ts";
 import { textSchema } from "../elements/text/model.ts";
 import { stairGeometry, stairSchema } from "../elements/stair/model.ts";
 import { railingSchema } from "../elements/railing/model.ts";
-import { objectSchema, objectV58Schema, objectV59Schema } from "../elements/object/model.ts";
+import {
+  objectSchema,
+  objectV58Schema,
+  objectV59Schema,
+  objectV60Schema,
+} from "../elements/object/model.ts";
 import { hotkeyConflicts, hotkeysSchema, resolvedHotkeys } from "../hotkeys/model.ts";
 import {
   roofWindowProblem,
@@ -822,15 +827,30 @@ export const projectV59Schema = projectV45Schema.extend({
   hotkeys: hotkeysSchema.optional(),
 });
 /** Schema 60: car and television (docs/OBJEKTBIBLIOTHEK.md, M3). */
+const storeyV60Schema = storeyV56Schema.extend({
+  objects: z.array(objectV60Schema).max(20000).optional(),
+});
+const layoutDrawingV60Schema = z.object({ layoutId: id, storey: storeyV60Schema }).strict();
+export const projectV60Schema = projectV45Schema.extend({
+  schemaVersion: z.literal(60),
+  storeys: z.array(storeyV60Schema).min(1),
+  modelViews: z.array(anyModelViewSchema).optional(),
+  layoutDrawings: z.array(layoutDrawingV60Schema).max(5000).optional(),
+  masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
+  layouts: z.array(layoutV49Schema).max(5000).optional(),
+  projectInfo: projectInfoSchema.optional(),
+  hotkeys: hotkeysSchema.optional(),
+});
+/** Schema 61: five more furniture entries, doors and boards (docs/OBJEKTBIBLIOTHEK.md, M4). */
 const storeySchema = storeyV56Schema.extend({
   objects: z.array(objectSchema).max(20000).optional(),
 });
-const layoutDrawingV60Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
+const layoutDrawingV61Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
 const projectSchema = projectV45Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z.array(storeySchema).min(1),
   modelViews: z.array(anyModelViewSchema).optional(),
-  layoutDrawings: z.array(layoutDrawingV60Schema).max(5000).optional(),
+  layoutDrawings: z.array(layoutDrawingV61Schema).max(5000).optional(),
   masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
   layouts: z.array(layoutV49Schema).max(5000).optional(),
   projectInfo: projectInfoSchema.optional(),

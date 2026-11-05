@@ -45,8 +45,16 @@ export const objectOptionsV59Schema = z
   })
   .strict();
 /** Schema 60: how a television stands (docs/OBJEKTBIBLIOTHEK.md, M3); absent = on its foot. */
-export const objectOptionsSchema = objectOptionsV59Schema.extend({
+export const objectOptionsV60Schema = objectOptionsV59Schema.extend({
   tvMount: z.enum(TV_MOUNTS).optional(),
+});
+/** Most doors or shelves of one piece. */
+export const MAX_OBJECT_DIVISIONS = 20;
+const divisions = z.union([z.literal("auto"), z.number().int().min(1).max(MAX_OBJECT_DIVISIONS)]);
+/** Schema 61 (M4): doors of a cabinet and boards of a shelf; `auto` follows the size. */
+export const objectOptionsSchema = objectOptionsV60Schema.extend({
+  fronts: divisions.optional(),
+  boards: divisions.optional(),
 });
 export type ObjectOptions = z.infer<typeof objectOptionsSchema>;
 
@@ -441,7 +449,238 @@ function televisionShape(o: Sized): ObjectShape {
   };
 }
 
+/** A bed with its head towards +y: rails, headboard, mattress, duvet and pillows. */
+function bedShape({ width: w, depth: d, height: h }: Sized): ObjectShape {
+  const leg = Math.min(0.12, h * 0.25);
+  const railTop = Math.min(0.3, h * 0.66);
+  const head = Math.min(0.06, d / 10);
+  const inset = Math.min(0.03, w / 10);
+  const rails = box(w, d - head, 0, -head / 2);
+  const headboard = box(w, head, 0, d / 2 - head / 2);
+  const mattress = rounded(w - 2 * inset, d - head - 2 * inset, 0.05, 0, -head / 2);
+  const span = d - head - 2 * inset;
+  const duvetDepth = span * 0.68;
+  const duvet = rounded(w - 2 * inset, duvetDepth, 0.04, 0, -d / 2 + inset + duvetDepth / 2);
+  const count = w >= 1.3 ? 2 : 1;
+  const pillowWidth = Math.min(0.7, (w - 2 * inset) / count - 0.06);
+  const pillowDepth = Math.min(0.42, span * 0.2);
+  const pillowY = d / 2 - head - inset - pillowDepth / 2 - 0.02;
+  const pillows = Array.from({ length: count }, (_, i) =>
+    rounded(pillowWidth, pillowDepth, pillowDepth / 3, (w * (i + 0.5)) / count - w / 2, pillowY),
+  );
+  const r = Math.min(0.03, w / 8, d / 8);
+  const fx = w / 2 - 0.05,
+    fy = d / 2 - 0.05;
+  return {
+    parts: [
+      ...[
+        [-fx, -fy],
+        [fx, -fy],
+        [fx, fy],
+        [-fx, fy],
+      ].map(([x, y]) => ({
+        slot: "frame" as const,
+        ring: rounded(2 * r, 2 * r, r / 2, x, y, 2),
+        bottom: 0,
+        top: leg,
+      })),
+      { slot: "frame", ring: rails, bottom: leg, top: railTop },
+      { slot: "frame", ring: headboard, bottom: 0, top: h * 1.9 },
+      { slot: "seat", ring: mattress, bottom: railTop, top: h },
+      { slot: "top", ring: duvet, bottom: h, top: h + 0.04 },
+      ...pillows.map((ring) => ({ slot: "seat" as const, ring, bottom: h, top: h + 0.12 })),
+    ],
+    lines: [rails, headboard, duvet, ...pillows].map((points) => ({ points, closed: true })),
+  };
+}
+
+/** Doors a cabinet shows: `auto` one per 60 cm. */
+export function objectFronts(o: Pick<Sized, "width" | "options">) {
+  const wanted = o.options?.fronts ?? "auto";
+  return wanted === "auto" ? Math.max(1, Math.round(o.width / 0.6)) : wanted;
+}
+/** Boards a shelf shows, top and bottom included: `auto` one per 35 cm of height. */
+export function objectBoards(o: Pick<Sized, "height" | "options">) {
+  const wanted = o.options?.boards ?? "auto";
+  return wanted === "auto" ? Math.max(2, Math.round(o.height / 0.35) + 1) : Math.max(2, wanted);
+}
+
+/** A body with its fronts towards -y, on a plinth or on legs; doors or stacked drawers. */
+function cabinetShape(o: Sized, foot: "plinth" | "legs", layout: "doors" | "drawers"): ObjectShape {
+  const { width: w, depth: d, height: h } = o;
+  const base = foot === "plinth" ? Math.min(0.08, h * 0.1) : Math.min(0.15, h * 0.25);
+  const face = Math.min(0.02, d / 8);
+  const gap = Math.min(0.004, w / 100);
+  const carcass = box(w, d - face, 0, face / 2);
+  const y = -d / 2 + face / 2;
+  const count = layout === "doors" ? objectFronts(o) : 2;
+  const each = (layout === "doors" ? w : h - base) / count;
+  const fronts: ObjectPart[] = Array.from({ length: count }, (_, i) =>
+    layout === "doors"
+      ? {
+          slot: "top" as const,
+          ring: box(each - gap, face, -w / 2 + each * (i + 0.5), y),
+          bottom: base + gap,
+          top: h - gap,
+        }
+      : {
+          slot: "top" as const,
+          ring: box(w - gap, face, 0, y),
+          bottom: base + each * i + gap,
+          top: base + each * (i + 1) - gap,
+        },
+  );
+  const grip = Math.min(0.012, face / 2);
+  const handles: ObjectPart[] = fronts.map((front, i) => {
+    const x =
+      layout === "drawers"
+        ? 0
+        : -w / 2 + each * (i + 0.5) + (i % 2 === 0 ? 1 : -1) * (each / 2 - 0.04);
+    const z = layout === "drawers" ? (front.bottom + front.top) / 2 : Math.min(1.05, h / 2);
+    return {
+      slot: "frame",
+      ring: box(layout === "drawers" ? Math.min(0.12, w / 3) : grip, grip, x, -d / 2 - grip / 2),
+      bottom: z - (layout === "drawers" ? grip / 2 : Math.min(0.08, h / 8)),
+      top: z + (layout === "drawers" ? grip / 2 : Math.min(0.08, h / 8)),
+    };
+  });
+  const r = Math.min(0.02, w / 8, d / 8);
+  const fx = w / 2 - 0.04,
+    fy = d / 2 - 0.04;
+  const feet: ObjectPart[] =
+    foot === "plinth"
+      ? [{ slot: "body", ring: box(w - 0.04, d - face - 0.04, 0, face / 2), bottom: 0, top: base }]
+      : [
+          [-fx, -fy],
+          [fx, -fy],
+          [fx, fy],
+          [-fx, fy],
+        ].map(([x, fyy]) => ({
+          slot: "frame" as const,
+          ring: ellipse(r, r, x, fyy, 10),
+          bottom: 0,
+          top: base,
+        }));
+  return {
+    parts: [...feet, { slot: "body", ring: carcass, bottom: base, top: h }, ...fronts, ...handles],
+    lines: [
+      { points: box(w, d), closed: true },
+      {
+        points: [
+          { x: -w / 2, y: -d / 2 + face },
+          { x: w / 2, y: -d / 2 + face },
+        ],
+        closed: false,
+      },
+      ...(layout === "doors"
+        ? Array.from({ length: count - 1 }, (_, i) => {
+            const x = -w / 2 + each * (i + 1);
+            return {
+              points: [
+                { x, y: -d / 2 },
+                { x, y: -d / 2 + face },
+              ],
+              closed: false,
+            };
+          })
+        : []),
+    ],
+  };
+}
+
+/** An open shelf with its back towards +y: two sides, a thin back and its boards. */
+function shelfShape(o: Sized): ObjectShape {
+  const { width: w, depth: d, height: h } = o;
+  const side = Math.min(0.025, w / 10);
+  const back = Math.min(0.008, d / 10);
+  const board = Math.min(0.025, h / 40);
+  const count = objectBoards(o);
+  const ring = box(w - 2 * side, d - back, 0, -back / 2);
+  const step = (h - board) / (count - 1);
+  return {
+    parts: [
+      { slot: "body", ring: box(side, d, -w / 2 + side / 2), bottom: 0, top: h },
+      { slot: "body", ring: box(side, d, w / 2 - side / 2), bottom: 0, top: h },
+      { slot: "body", ring: box(w - 2 * side, back, 0, d / 2 - back / 2), bottom: 0, top: h },
+      ...Array.from({ length: count }, (_, i) => ({
+        slot: "top" as const,
+        ring,
+        bottom: step * i,
+        top: step * i + board,
+      })),
+    ],
+    lines: [
+      { points: box(w, d), closed: true },
+      { points: ring, closed: true },
+    ],
+  };
+}
+
+const CABINET_LABELS = { top: "Türen", frame: "Griffe" };
+const cabinetColors = { body: "#d9cfc0", top: "#e4dccf", frame: "#6b6f75" };
+const tableColors = { top: "#c9a77c", frame: "#7d6248" };
+
 const RULES: Partial<Record<ObjectCatalogId, Rule>> = {
+  "bed-single": {
+    slots: ["frame", "seat", "top"],
+    labels: { frame: "Rahmen", seat: "Matratze", top: "Bettdecke" },
+    colors: { frame: "#8a6d50", seat: "#eceae4", top: "#9fb0c0" },
+    options: {},
+    shape: bedShape,
+  },
+  "bed-double": {
+    slots: ["frame", "seat", "top"],
+    labels: { frame: "Rahmen", seat: "Matratze", top: "Bettdecke" },
+    colors: { frame: "#8a6d50", seat: "#eceae4", top: "#9fb0c0" },
+    options: {},
+    shape: bedShape,
+  },
+  wardrobe: {
+    slots: ["body", "top", "frame"],
+    labels: CABINET_LABELS,
+    colors: cabinetColors,
+    options: { fronts: "auto" },
+    shape: (o) => cabinetShape(o, "plinth", "doors"),
+  },
+  sideboard: {
+    slots: ["body", "top", "frame"],
+    labels: { ...CABINET_LABELS, frame: "Füße und Griffe" },
+    colors: cabinetColors,
+    options: { fronts: "auto" },
+    shape: (o) => cabinetShape(o, "legs", "doors"),
+  },
+  nightstand: {
+    slots: ["body", "top", "frame"],
+    labels: { top: "Schubladen", frame: "Füße und Griffe" },
+    colors: cabinetColors,
+    options: {},
+    shape: (o) => cabinetShape(o, "legs", "drawers"),
+  },
+  shelf: {
+    slots: ["body", "top"],
+    labels: { body: "Seiten", top: "Böden" },
+    colors: { body: "#c9a77c", top: "#d8bb94" },
+    options: { boards: "auto" },
+    shape: shelfShape,
+  },
+  "coffee-table": {
+    slots: ["top", "frame"],
+    colors: tableColors,
+    options: { tableTop: "rectangle" },
+    shape: tableShape,
+  },
+  desk: {
+    slots: ["top", "frame"],
+    colors: tableColors,
+    options: { tableTop: "rectangle" },
+    shape: tableShape,
+  },
+  armchair: {
+    slots: ["body", "seat", "frame"],
+    colors: { body: "#7f8a96", seat: "#98a3ae", frame: "#4a3b2e" },
+    options: { sofaArms: "both" },
+    shape: sofaShape,
+  },
   car: {
     slots: ["body", "glass", "frame"],
     labels: { body: "Karosserie", frame: "Räder" },

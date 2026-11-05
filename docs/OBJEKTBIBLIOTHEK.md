@@ -11,6 +11,7 @@ Nutzerentscheidung 05.11.2026: Die Bibliothek wird schrittweise aufgewertet. Zue
 | M2a | Bauregeln, Dateiformat 59, Esstisch mit Stühlen, Stuhl, Material und Farbe           | erledigt |
 | M2b | Sofa mit Armlehnen und Sitzkissen                                                    | erledigt |
 | M3  | Pkw, Fernseher, Suche im Katalog, Dateiformat 60                                     | erledigt |
+| M4  | Betten, Schrank, Regal nach Bauregel, fünf neue Möbel, Dateiformat 61                | erledigt |
 | O3  | Eigene Objekte aus Linien und Schraffuren, globale Bibliothek (nach M2 neu bewerten) | offen    |
 
 Vorgaben aus der Karte:
@@ -170,3 +171,25 @@ Vorgaben aus der Karte:
 - Der Pkw ist ein Modellauto: sichtbare Stufen, keine Radkästen, keine Lichter, ein Typ.
 - Beim Wechsel auf „Wand“ bleibt „Über Boden“ auf dem alten Wert.
 - Die Suche kennt keine Tippfehler.
+
+## Teil M4: Weitere Möbel
+
+- **Betten:** Rahmen, Kopfteil, Matratze, Bettdecke, Kissen und Füße. Rahmen und Kopfteil behalten ihre Stärke, ab 1,30 m Breite zwei Kissen. Material und Farbe für Rahmen, Matratze und Bettdecke.
+- **Schrank und Sideboard:** Korpus, Türen und Griffe, der Schrank auf Sockel, das Sideboard auf Füßen. Türen automatisch eine je 60 cm oder als feste Anzahl.
+- **Regal:** Seiten, Rückwand, Böden. Böden automatisch einer je 35 cm Höhe oder als feste Anzahl.
+- **Nachttisch:** Korpus mit zwei Schubladen auf Füßen.
+- **Couchtisch und Schreibtisch:** nutzen die Regel des Esstischs ohne Stühle, mit Plattenform.
+- **Sessel:** nutzt die Regel des Sofas, mit Armlehnen-Auswahl.
+- **Teilenamen:** Sie folgen dem Möbel, etwa Matratze, Türen, Griffe, Böden oder Schubladen.
+- **Schema 61:** fünf neue Einträge, Optionen `fronts` und `boards`. Eine 60er Datei lädt unverändert, eine 60er Datei mit diesen Werten wird abgelehnt. Vorhandene Betten, Schränke und Regale erscheinen in der neuen Form, ihre Maße bleiben.
+- **Untere Leiste:** Nach dem Öffnen eines zweiten Tabs erschienen zwei Zoomleisten übereinander und wurden abgeschnitten. Jetzt zeigt die Leiste nur die des sichtbaren Tabs.
+
+**Abnahme im Browser (05.11.2026):**
+
+| Schritt                                   | Ergebnis                                      |
+| ----------------------------------------- | --------------------------------------------- |
+| Neun Möbel über die Suche gesetzt         | Alle im Grundriss mit eigenem Symbol          |
+| 3D-Ansicht                                | Alle Möbel mit Teilen und Standardfarben      |
+| Doppelklick auf den Schrank, Türen fest 4 | Felder folgen, Material Korpus, Türen, Griffe |
+
+**Grenzen M4:** Küche und Sanitär haben noch keine Bauregeln. Kissen und Bettdecke sind flache Quader mit gerundeten Ecken. Schubladen sind fest auf zwei gestellt, Schreibtisch und Couchtisch haben keine Schubladen. Das Kopfteil ist fest an die Höhe gekoppelt. Material und Farbe sind nur am Esstisch im Browser bedient, sie nutzen denselben Code.

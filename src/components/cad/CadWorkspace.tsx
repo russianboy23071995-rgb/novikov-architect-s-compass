@@ -5379,6 +5379,7 @@ export function CadWorkspace({
             />
           }
           zoomSlot={setZoomSlot}
+          zoomKind={space ? "layout" : mode === "3D" ? "solid" : "plan"}
           gridSettings={gridSettings}
           onGridSettings={space ? setPaperGridSettings : setPlanGridSettings}
           grid={grid}

@@ -172,7 +172,7 @@ test("follows its roof: moved with it, deleted with it, copied with it", () => {
 });
 
 test("schema 55 round-trips; v54 files refuse smuggled roof windows", () => {
-  assert.equal(PROJECT_SCHEMA_VERSION, 60);
+  assert.equal(PROJECT_SCHEMA_VERSION, 61);
   const p = withWindow();
   assert.deepEqual(
     storeyOf(readProjectFile(serializeProject(p))).roofWindows,
@@ -181,7 +181,7 @@ test("schema 55 round-trips; v54 files refuse smuggled roof windows", () => {
   const smuggled = JSON.parse(serializeProject(p));
   assert.throws(() => loadProjectData({ ...smuggled, schemaVersion: 54 }));
   const plain = JSON.parse(serializeProject(addRoof(createStandardProject("p", "eg", "og"), roof)));
-  assert.equal(loadProjectData({ ...plain, schemaVersion: 54 }).schemaVersion, 60);
+  assert.equal(loadProjectData({ ...plain, schemaVersion: 54 }).schemaVersion, 61);
 });
 
 test("IFC: opening voids the roof slab, IfcWindow SKYLIGHT fills it", async () => {
@@ -378,6 +378,6 @@ test("schema 56 round-trips reveals; v55 files refuse them and load square", () 
   assert.throws(() => loadProjectData({ ...JSON.parse(serializeProject(p)), schemaVersion: 55 }));
   const plain = JSON.parse(serializeProject(withWindow()));
   const loaded = loadProjectData({ ...plain, schemaVersion: 55 });
-  assert.equal(loaded.schemaVersion, 60);
+  assert.equal(loaded.schemaVersion, 61);
   assert.equal(storeyOf(loaded).roofWindows![0]!.upperReveal, undefined);
 });
