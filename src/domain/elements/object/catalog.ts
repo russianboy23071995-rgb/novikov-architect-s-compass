@@ -20,6 +20,17 @@ export const OBJECT_CATEGORIES = {
 } as const;
 export type ObjectCategory = keyof typeof OBJECT_CATEGORIES;
 
+/** Genres of the library window, in display order (docs/OBJEKTBIBLIOTHEK.md, M1). */
+export const OBJECT_GENRES = {
+  seating: "Sitzmöbel",
+  tables: "Tische",
+  beds: "Betten",
+  storage: "Schränke und Regale",
+  kitchen: "Küche",
+  sanitary: "Sanitär",
+} as const;
+export type ObjectGenre = keyof typeof OBJECT_GENRES;
+
 /** How an object is handed to IFC: entity and predefined type (IFC4). */
 export type ObjectIfcClass =
   | { entity: "IFCFURNITURE"; type: "BED" | "TABLE" | "CHAIR" | "SOFA" | "SHELF" | "USERDEFINED" }
@@ -32,6 +43,7 @@ export type ObjectIfcClass =
 export type ObjectDefinition = {
   name: string;
   category: ObjectCategory;
+  genre: ObjectGenre;
   /** Start size in metres. */
   size: { width: number; depth: number; height: number };
   symbol: readonly ObjectSymbolPart[];
@@ -84,6 +96,7 @@ export const OBJECT_CATALOG = {
   "bed-single": {
     name: "Einzelbett",
     category: "furniture",
+    genre: "beds",
     size: { width: 0.9, depth: 2, height: 0.45 },
     symbol: [outline, rect(-0.4, 0.4, 0.33, 0.46), line(-0.5, 0.22, 0.5, 0.22)],
     boxes: [
@@ -95,6 +108,7 @@ export const OBJECT_CATALOG = {
   "bed-double": {
     name: "Doppelbett",
     category: "furniture",
+    genre: "beds",
     size: { width: 1.8, depth: 2, height: 0.45 },
     symbol: [
       outline,
@@ -112,6 +126,7 @@ export const OBJECT_CATALOG = {
   table: {
     name: "Tisch",
     category: "furniture",
+    genre: "tables",
     size: { width: 1.6, depth: 0.9, height: 0.75 },
     symbol: [outline],
     boxes: [[-0.5, 0.5, -0.5, 0.5, 0.95, 1], ...legs(0.95, 0.04, 0.07)],
@@ -120,6 +135,7 @@ export const OBJECT_CATALOG = {
   chair: {
     name: "Stuhl",
     category: "furniture",
+    genre: "seating",
     size: { width: 0.45, depth: 0.5, height: 0.9 },
     symbol: [outline, line(-0.5, 0.38, 0.5, 0.38)],
     boxes: [
@@ -132,6 +148,7 @@ export const OBJECT_CATALOG = {
   sofa: {
     name: "Sofa",
     category: "furniture",
+    genre: "seating",
     size: { width: 2, depth: 0.9, height: 0.8 },
     symbol: [
       outline,
@@ -151,6 +168,7 @@ export const OBJECT_CATALOG = {
   wardrobe: {
     name: "Schrank",
     category: "furniture",
+    genre: "storage",
     size: { width: 1.2, depth: 0.6, height: 2.1 },
     symbol: [outline, line(-0.5, -0.5, 0.5, 0.5), line(-0.5, -0.4, 0.5, -0.4)],
     boxes: [full],
@@ -159,6 +177,7 @@ export const OBJECT_CATALOG = {
   shelf: {
     name: "Regal",
     category: "furniture",
+    genre: "storage",
     size: { width: 1, depth: 0.35, height: 2 },
     symbol: [outline, line(-0.5, 0, 0.5, 0)],
     boxes: [
@@ -174,6 +193,7 @@ export const OBJECT_CATALOG = {
   "kitchen-counter": {
     name: "Küchenzeile",
     category: "kitchen",
+    genre: "kitchen",
     size: { width: 2.4, depth: 0.6, height: 0.9 },
     symbol: [outline, line(-0.5, -0.42, 0.5, -0.42)],
     boxes: [
@@ -185,6 +205,7 @@ export const OBJECT_CATALOG = {
   stove: {
     name: "Herd",
     category: "kitchen",
+    genre: "kitchen",
     size: { width: 0.6, depth: 0.6, height: 0.9 },
     symbol: [
       outline,
@@ -199,6 +220,7 @@ export const OBJECT_CATALOG = {
   sink: {
     name: "Spüle",
     category: "kitchen",
+    genre: "kitchen",
     size: { width: 0.8, depth: 0.6, height: 0.9 },
     symbol: [
       outline,
@@ -218,6 +240,7 @@ export const OBJECT_CATALOG = {
   fridge: {
     name: "Kühlschrank",
     category: "kitchen",
+    genre: "kitchen",
     size: { width: 0.6, depth: 0.65, height: 1.8 },
     symbol: [outline, line(-0.5, -0.5, 0.5, 0.5), line(-0.5, 0.5, 0.5, -0.5)],
     boxes: [full],
@@ -226,6 +249,7 @@ export const OBJECT_CATALOG = {
   wc: {
     name: "WC",
     category: "sanitary",
+    genre: "sanitary",
     size: { width: 0.4, depth: 0.65, height: 0.8 },
     symbol: [rect(-0.5, 0.5, 0.3, 0.5), circle(0, -0.08, 0.45, 0.4)],
     boxes: [
@@ -237,6 +261,7 @@ export const OBJECT_CATALOG = {
   washbasin: {
     name: "Waschtisch",
     category: "sanitary",
+    genre: "sanitary",
     size: { width: 0.6, depth: 0.45, height: 0.85 },
     symbol: [outline, circle(0, -0.06, 0.38, 0.34), circle(0, 0.38, 0.05)],
     boxes: [[-0.5, 0.5, -0.5, 0.5, 0.8, 1]],
@@ -245,6 +270,7 @@ export const OBJECT_CATALOG = {
   shower: {
     name: "Dusche",
     category: "sanitary",
+    genre: "sanitary",
     size: { width: 0.9, depth: 0.9, height: 0.05 },
     symbol: [outline, line(-0.5, -0.5, 0.5, 0.5), line(-0.5, 0.5, 0.5, -0.5), circle(0, 0, 0.05)],
     boxes: [full],
@@ -253,6 +279,7 @@ export const OBJECT_CATALOG = {
   bathtub: {
     name: "Badewanne",
     category: "sanitary",
+    genre: "sanitary",
     size: { width: 1.7, depth: 0.75, height: 0.6 },
     symbol: [
       outline,

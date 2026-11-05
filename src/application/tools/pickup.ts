@@ -1,5 +1,6 @@
 import type { PlanText } from "../../domain/elements/text/model.ts";
 import { columnSettings, type ColumnDefaults } from "../columns/defaults.ts";
+import { objectSettings, type ObjectToolDefaults } from "../objects/defaults.ts";
 import { railingSettings, type RailingDefaults } from "../railings/defaults.ts";
 import { roofWindowSettings, type RoofWindowDefaults } from "../roof-windows/defaults.ts";
 import { stairSettings, type StairDefaults } from "../stairs/defaults.ts";
@@ -34,6 +35,7 @@ export type ToolDefaults =
   | { tool: "line"; values: LineDefaults }
   | { tool: "wall"; values: WallDefaults }
   | { tool: "column"; values: ColumnDefaults }
+  | { tool: "library"; values: ObjectToolDefaults }
   | { tool: "railing"; values: RailingDefaults }
   | { tool: "roofWindow"; values: RoofWindowDefaults }
   | { tool: "stair"; values: StairDefaults }
@@ -94,6 +96,11 @@ export function pickupToolDefaults(
   if (target.kind === "column") {
     const source = storeyOf(project).columns?.find((item) => item.id === target.id);
     return source ? { tool: "column", values: columnSettings(source) } : null;
+  }
+  // Objects hand over catalogue entry, size, turn and status (docs/OBJEKTBIBLIOTHEK.md, M1).
+  if (target.kind === "object") {
+    const source = storeyOf(project).objects?.find((item) => item.id === target.id);
+    return source ? { tool: "library", values: objectSettings(source) } : null;
   }
   // Roof windows hand over size, frame, layer and status, not their place (D3).
   if (target.kind === "roofWindow") {

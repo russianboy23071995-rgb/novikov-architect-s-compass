@@ -19,6 +19,8 @@ export type ToolId =
   | "dimension"
   | "text"
   | "drawing"
+  // Library of furniture, kitchen and sanitary objects (docs/OBJEKTBIBLIOTHEK.md, M1).
+  | "library"
   // Planned tools, shown greyed in the rail until they exist (docs/WERKZEUGLEISTE.md, WL3):
   // Dachflächenfenster (L41), Geländer (L42), Gelände (L43).
   | "roofWindow"

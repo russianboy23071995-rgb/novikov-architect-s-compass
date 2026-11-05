@@ -2,6 +2,7 @@ import { RoofProperties } from "./RoofProperties";
 import { WINDOW_INSERT_DEFAULTS } from "@/domain/elements/window/insert";
 import { RoomProperties } from "./RoomProperties";
 import { ColumnProperties } from "./ColumnProperties";
+import { ObjectProperties } from "./ObjectProperties";
 import { RailingProperties } from "./RailingProperties";
 import { RoofWindowProperties } from "./RoofWindowProperties";
 import { StairProperties } from "./StairProperties";
@@ -132,6 +133,19 @@ export function BimInspector({
       <ColumnProperties
         project={project}
         column={column}
+        selection={selection}
+        onChange={onChange}
+      />
+    );
+  const placedObject =
+    selection?.kind === "object"
+      ? storeyOf(project).objects?.find((item) => item.id === selection.id)
+      : undefined;
+  if (placedObject)
+    return (
+      <ObjectProperties
+        project={project}
+        object={placedObject}
         selection={selection}
         onChange={onChange}
       />

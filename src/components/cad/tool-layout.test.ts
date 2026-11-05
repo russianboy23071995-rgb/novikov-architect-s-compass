@@ -18,6 +18,7 @@ test("default groups: 3D, 2D and documentation tools; select is not part of them
       // Planned tools, greyed until they exist (WL3).
       "roofWindow",
       "railing",
+      "library",
       "terrain",
     ],
     "2d": ["line", "hatch", "text", "drawing"],
@@ -70,8 +71,8 @@ test("stored layouts are made safe: unknown and repeated tools dropped, new tool
   // Every rail tool exactly once; missing ones return to their default group.
   const all = [...l["3d"], ...l["2d"], ...l.doc];
   assert.equal(all.length, new Set(all).size);
-  // 18 tools (railing since G2, roof window since D2) and the planned terrain (WL3).
-  assert.equal(all.length, 19);
+  // 19 tools (railing since G2, roof window since D2, library since M1), planned terrain (WL3).
+  assert.equal(all.length, 20);
   assert.ok(l["3d"].includes("door"));
   assert.ok(l.doc.includes("dimension"));
   assert.ok(!all.includes("select" as never));

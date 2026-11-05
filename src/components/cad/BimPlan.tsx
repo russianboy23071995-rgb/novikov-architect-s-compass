@@ -60,6 +60,8 @@ import { createDoubleSecondaryClick } from "@/application/input/double-secondary
 import { AngleMeasurementOverlay } from "./AngleMeasurementOverlay";
 import { RotationGuideOverlay, type RotationGuide } from "./RotationGuideOverlay";
 import { MirrorGuideOverlay, type MirrorGuide } from "./MirrorGuideOverlay";
+import { ObjectGhostOverlay } from "./ObjectGhostOverlay";
+import type { PlacedObject } from "@/domain/elements/object/model";
 import type { AngleMeasurement } from "@/application/measurement/angle";
 import { CAD_SHIMMER, CAD_TURQUOISE } from "@/rendering/viewport/highlight";
 import { AreaMeasurementOverlay } from "./AreaMeasurementOverlay";
@@ -258,6 +260,9 @@ export type BimPlanProps = {
   onElementSettings?: (target: NonNullable<Selection>) => void;
   onPickup?: (target: NonNullable<Selection>) => void;
   draftContour?: ((point: Point) => Point[]) | undefined;
+  /** Bibliothek (docs/OBJEKTBIBLIOTHEK.md, M1): the chosen object at the cursor. */
+  objectGhost?:
+    Pick<PlacedObject, "catalogId" | "rotation" | "mirrored" | "width" | "depth"> | undefined;
   placement?:
     | {
         measurement?: DistanceMeasurement | undefined;
@@ -414,6 +419,7 @@ export function BimPlan({
   backdrop,
   placedDrawings,
   pickupScope,
+  objectGhost,
   onPickup,
   onContextMenu,
   onElementSettings,
@@ -1928,6 +1934,9 @@ export function BimPlan({
               }}
             />
           ))}
+        {objectGhost && resolvedHover && (
+          <ObjectGhostOverlay object={{ ...objectGhost, position: resolvedHover.point }} />
+        )}
         {placement?.rotationGuide && (
           <RotationGuideOverlay
             guide={placement.rotationGuide}

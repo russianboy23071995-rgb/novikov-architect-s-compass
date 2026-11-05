@@ -101,6 +101,11 @@ import { addDimension, updateDimension } from "@/application/dimensions/actions"
 import { dimensionPointAt } from "@/domain/elements/dimension/model";
 import { addColumn, updateColumn } from "@/application/columns/actions";
 import { columnValues } from "@/application/columns/defaults";
+import { addObject, updateObject } from "@/application/objects/actions";
+import { objectValues } from "@/application/objects/defaults";
+import { objectDefinition } from "@/domain/elements/object/catalog";
+import { LibraryWindow } from "./LibraryWindow";
+import { ObjectFields } from "./ObjectFields";
 import { addRailing, updateRailing } from "@/application/railings/actions";
 import { railingValues } from "@/application/railings/defaults";
 import { addRoofWindowAt, updateRoofWindow } from "@/application/roof-windows/actions";
@@ -854,6 +859,7 @@ export function CadWorkspace({
     [areaTool, construction, project, visibility],
   );
   const toolDefaults = useToolDefaults(project);
+  const [libraryOpen, setLibraryOpen] = useState(false);
   const hatchFill = toolDefaults.hatch.fill;
   // Regel 3 (docs/POLYGON_REGELN.md): each click-by-click tool declares how it closes.
   const pathClosure: PathClosure = areaTool
@@ -1122,6 +1128,9 @@ export function CadWorkspace({
     if (next !== "select" && next !== "dimension") setActiveSectionId(null);
     setTool(next);
     if (next === "window" || next === "door" || next === "measure") setDemandOpen(false);
+    // The library opens its catalogue each time it is chosen (docs/OBJEKTBIBLIOTHEK.md, M1).
+    setLibraryOpen(next === "library");
+    if (next === "library") setDemandOpen(false);
     if (
       next === "window" ||
       next === "door" ||
@@ -1132,6 +1141,7 @@ export function CadWorkspace({
       next === "roof" ||
       next === "room" ||
       next === "column" ||
+      next === "library" ||
       next === "railing" ||
       next === "roofWindow" ||
       next === "stair" ||
@@ -1154,6 +1164,7 @@ export function CadWorkspace({
       next === "roof" ||
       next === "room" ||
       next === "column" ||
+      next === "library" ||
       next === "railing" ||
       next === "roofWindow" ||
       next === "stair" ||
@@ -1532,6 +1543,7 @@ export function CadWorkspace({
     if (!defaults) return setModelError("Für dieses Element gibt es keine übernehmbaren Werte.");
     toolDefaults.apply(defaults);
     selectTool(defaults.tool);
+    setLibraryOpen(false);
     setDemandOpen(false);
     showNotice("Parameter übernommen");
   };
@@ -1552,6 +1564,7 @@ export function CadWorkspace({
   const SETTINGS_TOOLS: Partial<Record<ToolId, string>> = {
     wall: "Wand",
     column: "Stütze",
+    library: "Bibliothek",
     railing: "Geländer",
     roofWindow: "Dachflächenfenster",
     stair: "Treppe",
@@ -1568,6 +1581,7 @@ export function CadWorkspace({
     drawing: "Zeichnung",
   };
   const openToolDefaults = (owner: ToolId) => {
+    setLibraryOpen(false);
     if (owner === "roof" || owner === "room" || SETTINGS_TOOLS[owner])
       return setSettingsWindow({ mode: "tool", tool: owner });
     propertiesRef.current?.focus();
@@ -1675,6 +1689,14 @@ export function CadWorkspace({
           </span>
         )}
       </div>
+    ) : owner === "library" ? (
+      <ObjectFields
+        key={toolDefaults.object.catalogId}
+        value={toolDefaults.object}
+        onChange={toolDefaults.setObject}
+        onCatalog={() => setLibraryOpen(true)}
+        layers={project.layers}
+      />
     ) : owner === "column" ? (
       <ColumnFields
         value={toolDefaults.column}
@@ -2652,6 +2674,23 @@ export function CadWorkspace({
       }
       return;
     }
+    // Library tool: each click sets the chosen object, centre on the point (M1).
+    if (tool === "library") {
+      try {
+        dispatchEditing({
+          type: "project",
+          project: addObject(project, {
+            id: `object-${crypto.randomUUID()}`,
+            position: { x: point.x, y: point.y },
+            ...objectValues(toolDefaults.object),
+          }),
+        });
+        showNotice(`${objectDefinition(toolDefaults.object.catalogId).name} gesetzt`);
+      } catch (error) {
+        setModelError(error instanceof Error ? error.message : "Objekt nicht möglich.");
+      }
+      return;
+    }
     // Column tool: each click sets a column, centre on the point (docs/STUETZEN.md, P2).
     if (tool === "column") {
       try {
@@ -3198,6 +3237,15 @@ export function CadWorkspace({
         onReset={() => dispatchEditing({ type: "project", project: resetHotkeys(project) })}
       />
       <CopyCursorBadge active={transformActive && copyMove} />
+      {libraryOpen && tool === "library" && (
+        <LibraryWindow
+          value={toolDefaults.object}
+          onChange={toolDefaults.setObject}
+          onPlace={() => setLibraryOpen(false)}
+          onClose={() => setLibraryOpen(false)}
+          layers={project.layers}
+        />
+      )}
       <CanvasDisplaySettings
         open={displaySettingsOpen}
         onOpenChange={setDisplaySettingsOpen}
@@ -3295,6 +3343,7 @@ export function CadWorkspace({
                       : []),
                   ...(settingsWindow.tool === "wall" ||
                   settingsWindow.tool === "column" ||
+                  settingsWindow.tool === "library" ||
                   settingsWindow.tool === "railing" ||
                   settingsWindow.tool === "roofWindow" ||
                   settingsWindow.tool === "stair"
@@ -3307,18 +3356,22 @@ export function CadWorkspace({
                               value={
                                 settingsWindow.tool === "column"
                                   ? toolDefaults.column.renovation
-                                  : settingsWindow.tool === "railing"
-                                    ? toolDefaults.railing.renovation
-                                    : settingsWindow.tool === "roofWindow"
-                                      ? toolDefaults.roofWindow.renovation
-                                      : settingsWindow.tool === "stair"
-                                        ? toolDefaults.stair.renovation
-                                        : (toolDefaults.wall.renovation ?? "existing")
+                                  : settingsWindow.tool === "library"
+                                    ? toolDefaults.object.renovation
+                                    : settingsWindow.tool === "railing"
+                                      ? toolDefaults.railing.renovation
+                                      : settingsWindow.tool === "roofWindow"
+                                        ? toolDefaults.roofWindow.renovation
+                                        : settingsWindow.tool === "stair"
+                                          ? toolDefaults.stair.renovation
+                                          : (toolDefaults.wall.renovation ?? "existing")
                               }
                               onChange={(renovation) => {
                                 cancelInteraction();
                                 if (settingsWindow.tool === "column")
                                   toolDefaults.setColumn({ ...toolDefaults.column, renovation });
+                                else if (settingsWindow.tool === "library")
+                                  toolDefaults.setObject({ ...toolDefaults.object, renovation });
                                 else if (settingsWindow.tool === "railing")
                                   toolDefaults.setRailing({ ...toolDefaults.railing, renovation });
                                 else if (settingsWindow.tool === "roofWindow")
@@ -3463,6 +3516,7 @@ export function CadWorkspace({
                   : []),
                 ...(target.kind === "wall" ||
                 target.kind === "column" ||
+                target.kind === "object" ||
                 target.kind === "railing" ||
                 target.kind === "roofWindow" ||
                 target.kind === "stair"
@@ -3475,13 +3529,15 @@ export function CadWorkspace({
                             value={wallRenovation(
                               (target.kind === "wall"
                                 ? project.storeys.flatMap((s) => s.walls)
-                                : target.kind === "stair"
-                                  ? project.storeys.flatMap((s) => s.stairs ?? [])
-                                  : target.kind === "railing"
-                                    ? project.storeys.flatMap((s) => s.railings ?? [])
-                                    : target.kind === "roofWindow"
-                                      ? project.storeys.flatMap((s) => s.roofWindows ?? [])
-                                      : project.storeys.flatMap((s) => s.columns ?? [])
+                                : target.kind === "object"
+                                  ? project.storeys.flatMap((s) => s.objects ?? [])
+                                  : target.kind === "stair"
+                                    ? project.storeys.flatMap((s) => s.stairs ?? [])
+                                    : target.kind === "railing"
+                                      ? project.storeys.flatMap((s) => s.railings ?? [])
+                                      : target.kind === "roofWindow"
+                                        ? project.storeys.flatMap((s) => s.roofWindows ?? [])
+                                        : project.storeys.flatMap((s) => s.columns ?? [])
                               ).find((e) => e.id === target.id) ?? {},
                             )}
                             onChange={(renovation) => {
@@ -3501,13 +3557,15 @@ export function CadWorkspace({
                                       ? setWallRenovation(project, [...ids], renovation)
                                       : [...ids].reduce(
                                           (p, id) =>
-                                            target.kind === "stair"
-                                              ? updateStair(p, id, { renovation })
-                                              : target.kind === "railing"
-                                                ? updateRailing(p, id, { renovation })
-                                                : target.kind === "roofWindow"
-                                                  ? updateRoofWindow(p, id, { renovation })
-                                                  : updateColumn(p, id, { renovation }),
+                                            target.kind === "object"
+                                              ? updateObject(p, id, { renovation })
+                                              : target.kind === "stair"
+                                                ? updateStair(p, id, { renovation })
+                                                : target.kind === "railing"
+                                                  ? updateRailing(p, id, { renovation })
+                                                  : target.kind === "roofWindow"
+                                                    ? updateRoofWindow(p, id, { renovation })
+                                                    : updateColumn(p, id, { renovation }),
                                           project,
                                         ),
                                 });
@@ -4353,6 +4411,9 @@ export function CadWorkspace({
                                   : undefined
                         }
                         project={project}
+                        objectGhost={
+                          tool === "library" && !libraryOpen ? toolDefaults.object : undefined
+                        }
                         drawingPreview={activeChain?.preview}
                         drawingProjectAt={
                           drawingOrigin ? interaction.adapter?.previewProject : undefined
@@ -4368,6 +4429,7 @@ export function CadWorkspace({
                         drawing={
                           (tool === "wall" ||
                             tool === "column" ||
+                            tool === "library" ||
                             tool === "roofWindow" ||
                             tool === "stair" ||
                             tool === "section" ||
@@ -4387,6 +4449,7 @@ export function CadWorkspace({
                           tool === "select" ||
                           tool === "wall" ||
                           tool === "column" ||
+                          tool === "library" ||
                           tool === "roofWindow" ||
                           tool === "stair" ||
                           tool === "section" ||
@@ -4972,6 +5035,7 @@ export function CadWorkspace({
                   toolFields("drawing")
                 ) : tool === "wall" ||
                   tool === "column" ||
+                  tool === "library" ||
                   tool === "railing" ||
                   tool === "roofWindow" ||
                   tool === "stair" ||
