@@ -2,8 +2,9 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { beginWallChain, appendWallChain, finishWallChain } from "./wall-chain.ts";
+import { closesAtStart, returnsToStart } from "./path-closure.ts";
 import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
-import { createProject } from "../projects/create.ts";
+import { createProject, createStandardProject } from "../projects/create.ts";
 import {
   createHistory,
   commitProject,
@@ -430,4 +431,32 @@ test("second-segment shared preview rejects stale basis and third segment keeps 
     previewWallChain(replacement, base, { x: 14, y: 13 }),
     appendWallChain(replacement, base, "@wall-preview", { x: 14, y: 13 }).preview,
   );
+});
+
+test("closing on the first corner joins the last wall to the first (ANPASSUNGSLISTE 5)", () => {
+  const p = createStandardProject("p", "eg", "og");
+  const corners = [
+    { x: 0, y: 0 },
+    { x: 4, y: 0 },
+    { x: 4, y: 3 },
+    { x: 0, y: 3 },
+  ];
+  let chain = beginWallChain(p, corners[0]!);
+  corners.slice(1).forEach((c, i) => (chain = appendWallChain(chain, p, `w${i}`, c)));
+  assert.ok(closesAtStart(chain.points, corners[0]!, "polygon"));
+  chain = appendWallChain(chain, p, "w3", corners[0]!);
+  const closed = finishWallChain(chain, p);
+  assert.equal(storeyOf(closed).walls.length, storeyOf(p).walls.length + 4);
+  const joins = storeyOf(closed).wallJoins;
+  assert.equal(joins.length, storeyOf(p).wallJoins.length + 4);
+  assert.ok(joins.some((j) => [j.first.wallId, j.second.wallId].sort().join() === "w0,w3"));
+});
+
+test("too few points: a click on the start is no closing, nor a corner", () => {
+  const a = { x: 0, y: 0 },
+    b = { x: 4, y: 0 };
+  assert.equal(returnsToStart([a, b], a), true);
+  assert.equal(closesAtStart([a, b], a, "polygon"), false);
+  assert.equal(returnsToStart([a], a), false);
+  assert.equal(returnsToStart([a, b, { x: 4, y: 3 }], a), false);
 });

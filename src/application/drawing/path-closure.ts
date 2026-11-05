@@ -32,6 +32,17 @@ export function closesAtStart(
   );
 }
 
+/** True when a click lands on the start although too few points exist to close there. */
+export function returnsToStart(points: readonly Point[], point: Point): boolean {
+  const start = points[0];
+  return (
+    start !== undefined &&
+    points.length > 1 &&
+    points.length < MIN_CLOSING_POINTS &&
+    Math.hypot(point.x - start.x, point.y - start.y) <= SAME_POINT
+  );
+}
+
 /** Next state of a click-by-click drawing: add the point, or close and finish the shape. */
 export function resolvePathClick(
   points: readonly Point[],

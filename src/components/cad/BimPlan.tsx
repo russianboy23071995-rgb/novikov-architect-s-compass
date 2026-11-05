@@ -374,6 +374,8 @@ export type BimPlanProps = {
     | undefined;
   /** The drawing tool closes by a click on its start point (docs/POLYGON_REGELN.md, Regel 3). */
   closeAtStart?: boolean;
+  /** Points a run closes on when they are not the draft, as in a wall run. */
+  closeFrom?: Point[] | undefined;
   /** Roof tool guide: reference line and rise side; null rise follows the cursor (ROOF D3). */
   roofGuide?: { start: Point; end: Point; rise: "left" | "right" | null } | null;
   draftFill?: Hatch["fill"] | undefined;
@@ -462,6 +464,7 @@ export function BimPlan({
   sectionDraft,
   textPreview,
   closeAtStart = false,
+  closeFrom,
   roofGuide = null,
   draftFill,
   draftShape,
@@ -736,9 +739,10 @@ export function BimPlan({
   };
   const pointerSnap = hover ? resolvePointer(hover) : null;
   // Regel 3: near its start a closable drawing aims exactly at the start (preview = click).
+  const closingPoints = closeFrom ?? draftPoints;
   const startTarget =
     drawing && closeAtStart && hover
-      ? capturedStart(draftPoints, hover, camera.pixelsPerMetre, "polygon")
+      ? capturedStart(closingPoints, hover, camera.pixelsPerMetre, "polygon")
       : null;
   const resolvedHover = startTarget
     ? { point: startTarget, candidate: null }
@@ -1422,7 +1426,7 @@ export function BimPlan({
         if (drawing && drawingPoint)
           onDrawingAim?.(
             (closeAtStart
-              ? capturedStart(draftPoints, drawingPoint, camera.pixelsPerMetre, "polygon")
+              ? capturedStart(closingPoints, drawingPoint, camera.pixelsPerMetre, "polygon")
               : null) ?? resolvePointer(drawingPoint, event.shiftKey).point,
           );
         if (editSession) {
@@ -1464,7 +1468,7 @@ export function BimPlan({
           const snap = pointFromEvent(event);
           const raw = closeAtStart ? rawPoint(event) : null;
           const start = raw
-            ? capturedStart(draftPoints, raw, camera.pixelsPerMetre, "polygon")
+            ? capturedStart(closingPoints, raw, camera.pixelsPerMetre, "polygon")
             : null;
           const point = start ?? (drawingTarget !== undefined ? drawingTarget : snap?.point);
           if (point) onPoint(point, start || drawingTarget !== undefined ? null : snap?.candidate);
@@ -2441,15 +2445,15 @@ export function BimPlan({
               </g>
             );
           })()}
-        {drawing && closeAtStart && draftPoints.length >= MIN_CLOSING_POINTS && (
+        {drawing && closeAtStart && closingPoints.length >= MIN_CLOSING_POINTS && (
           <circle
             role="img"
             aria-label="Startpunkt: Klick schließt den Umriss"
-            cx={draftPoints[0]!.x}
-            cy={-draftPoints[0]!.y}
+            cx={closingPoints[0]!.x}
+            cy={-closingPoints[0]!.y}
             r={6 / camera.pixelsPerMetre}
             fill={
-              resolvedHover && closesAtStart(draftPoints, resolvedHover.point, "polygon")
+              resolvedHover && closesAtStart(closingPoints, resolvedHover.point, "polygon")
                 ? "var(--primary)"
                 : "var(--background)"
             }
