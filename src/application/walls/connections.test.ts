@@ -134,10 +134,14 @@ test("near endpoints and T contacts do not silently become end joins; ambiguous/
     () => addWall(p, { id: "C", start: { x: 3, y: 0 }, end: { x: 3, y: -3 }, ...dimensions }),
     /Mehrere/,
   );
-  assert.throws(
-    () => addWall(a(), { id: "B", start: { x: 3, y: 0 }, end: { x: 6, y: 0 }, ...dimensions }),
-    /Gehrung/,
-  );
+  // Two walls in one line join in a straight butt (docs/ANPASSUNGSLISTE.md).
+  const straight = addWall(a(), {
+    id: "B",
+    start: { x: 3, y: 0 },
+    end: { x: 6, y: 0 },
+    ...dimensions,
+  });
+  assert.equal(storeyOf(straight).walls.length, 2);
   // A different height keeps the join as a butt corner (26.10.2026, docs/WALL_JUNCTIONS.md).
   assert.deepEqual(storeyOf(updateWall(p, "A", { height: 3 })).wallJoins, storeyOf(p).wallJoins);
   assert.equal(serializeProject(p), before);
