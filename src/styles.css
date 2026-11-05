@@ -457,3 +457,33 @@ input {
     transparent
   );
 }
+
+/*
+ * Size of input fields (docs/ANPASSUNGSLISTE.md, 8), in one place: the app has some 190 own
+ * fields, most with their own classes. Outside any layer, so it wins over the utilities.
+ * The command line at the bottom keeps its size.
+ */
+:root {
+  --field-height: 1.5rem;
+  --field-font: 0.6875rem;
+}
+input:not(
+  [type="checkbox"],
+  [type="radio"],
+  [type="color"],
+  [type="range"],
+  [type="file"],
+  [aria-label="Modellbefehl"]
+),
+select {
+  height: var(--field-height);
+  min-height: 0;
+  padding-block: 0;
+  padding-inline: 0.375rem;
+  font-size: var(--field-font);
+  line-height: 1.2;
+}
+textarea,
+label {
+  font-size: var(--field-font);
+}

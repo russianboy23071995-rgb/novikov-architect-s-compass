@@ -155,7 +155,7 @@ export const TopToolbar = withStableHandlers(function TopToolbar(props: TopToolb
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
+                    className="h-6 px-2 text-[11px] font-normal text-muted-foreground"
                   >
                     File
                   </Button>
@@ -177,7 +177,7 @@ export const TopToolbar = withStableHandlers(function TopToolbar(props: TopToolb
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
+                    className="h-6 px-2 text-[11px] font-normal text-muted-foreground"
                   >
                     Edit
                   </Button>
@@ -192,7 +192,7 @@ export const TopToolbar = withStableHandlers(function TopToolbar(props: TopToolb
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
+                    className="h-6 px-2 text-[11px] font-normal text-muted-foreground"
                   >
                     Tools
                   </Button>
@@ -213,7 +213,7 @@ export const TopToolbar = withStableHandlers(function TopToolbar(props: TopToolb
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
+                    className="h-6 px-2 text-[11px] font-normal text-muted-foreground"
                   >
                     Modify
                   </Button>
@@ -254,7 +254,7 @@ export const TopToolbar = withStableHandlers(function TopToolbar(props: TopToolb
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
+                    className="h-6 px-2 text-[11px] font-normal text-muted-foreground"
                   >
                     View
                   </Button>
@@ -268,7 +268,7 @@ export const TopToolbar = withStableHandlers(function TopToolbar(props: TopToolb
                 key={item}
                 variant="ghost"
                 size="sm"
-                className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
+                className="h-6 px-2 text-[11px] font-normal text-muted-foreground"
                 onClick={() => props.onAction(`${item} menu`)}
               >
                 {item}
@@ -278,7 +278,7 @@ export const TopToolbar = withStableHandlers(function TopToolbar(props: TopToolb
         </nav>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="shrink-0 text-xs">
+            <Button variant="ghost" size="sm" className="h-6 shrink-0 px-2 text-[11px] font-normal">
               Organisation
             </Button>
           </DropdownMenuTrigger>

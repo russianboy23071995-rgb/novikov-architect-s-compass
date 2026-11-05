@@ -10,7 +10,7 @@ Nutzerauftrag 05.11.2026: 15 Punkte zur Bedienung, vor den weiteren Möbeln. Än
 | D     | 2, 5          | Achslage beim Zeichnen, Abschluss am ersten Punkt      | erledigt |
 | E     | 4, 7          | Parameter übernehmen, Tür                              | erledigt |
 | F     | 9a–c          | Rechtsklickmenü, erst Befehl, dann Element             | erledigt |
-| G     | 8             | Größe von Feldern und Menüs                            | offen    |
+| G     | 8             | Größe von Feldern und Menüs                            | erledigt |
 
 ## Paket A: Oberfläche
 
@@ -105,3 +105,13 @@ Nutzerauftrag 05.11.2026: 15 Punkte zur Bedienung, vor den weiteren Möbeln. Än
 | Rechtsklick, Darstellungsreihenfolge          | Pfeil, Klick öffnet rechts die vier Einträge  |
 
 **Grenzen F:** Die Reihenfolge zwischen Elementarten ist nicht gebaut, sie braucht einen Umbau der festen Zeichenfolge im Grundriss und eine eigene Karte. Der Hinweis nach dem Befehl verschwindet nach kurzer Zeit, der Befehl wartet trotzdem weiter.
+
+## Paket G: Größen
+
+- **Felder (8):** Eingabefelder und Auswahllisten sind einheitlich 24 Pixel hoch mit 11 Pixel Schrift, ihre Beschriftungen ebenfalls 11 Pixel. Die Werte stehen an einer Stelle in `styles.css` (`--field-height`, `--field-font`) und gelten für alle rund 190 Felder, auch künftige.
+- **Menüs (8):** File, Edit, View, Insert, Modify, Tools und Organisation sind 24 Pixel hoch mit 11 Pixel Schrift. Die Einträge aller Klappmenüs und das Rechtsklickmenü sind entsprechend kleiner.
+- **Unverändert:** die Kategorietitel links in den Einstellungsfenstern, Kontrollkästchen, Farbfelder und die Befehlszeile unten.
+
+**Abnahme im Browser (05.11.2026):** Werkzeugleiste, File-Menü und Wandeinstellungen sehen stimmig aus, die Kategorien links sind unverändert.
+
+**Grenzen G:** Nicht jedes der rund 40 Fenster ist einzeln angesehen. Knöpfe in Fenstern sind nicht verkleinert.
