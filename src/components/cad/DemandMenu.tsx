@@ -275,7 +275,7 @@ export function DemandMenu({
                   )}
                 </>
               )}
-              {!opening && (
+              {!opening && selection.kind !== "terrain" && (
                 <button
                   type="button"
                   className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
@@ -294,6 +294,7 @@ export function DemandMenu({
                 selection.kind !== "railing" &&
                 selection.kind !== "roofWindow" &&
                 selection.kind !== "object" &&
+                selection.kind !== "terrain" &&
                 selection.kind !== "stair" &&
                 selection.kind !== "text" && (
                   <button
@@ -309,7 +310,7 @@ export function DemandMenu({
                         : "Element entlang Achse"}
                   </button>
                 )}
-              {!opening && (
+              {!opening && selection.kind !== "terrain" && (
                 <>
                   <button
                     type="button"

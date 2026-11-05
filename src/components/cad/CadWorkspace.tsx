@@ -101,7 +101,12 @@ import { offsetAtThickness } from "@/domain/elements/wall/axis-position";
 import { ColumnFields } from "./ColumnFields";
 import { RailingFields } from "./RailingFields";
 import { TerrainFields } from "./TerrainFields";
-import { addTerrain, addTerrainPoint, projectTerrain } from "@/application/terrain/actions";
+import {
+  addTerrain,
+  addTerrainPoint,
+  moveTerrainPoint,
+  projectTerrain,
+} from "@/application/terrain/actions";
 import { RoofWindowFields } from "./RoofWindowFields";
 import { contains as polygonContains } from "@/geometry/polygons/contains";
 import { DimensionToolFields } from "./DimensionToolFields";
@@ -2183,6 +2188,8 @@ export function CadWorkspace({
       setModelError("");
       return showNotice(ARMED_HINTS[command]);
     }
+    if (selections.some((s) => s.kind === "terrain"))
+      return setModelError("Das Gelände wird über seine Griffe geändert.");
     setCopyMove(false);
     if (command === "move" && selection) return startEdit("move");
     try {
@@ -4866,6 +4873,15 @@ export function CadWorkspace({
                         selectedSectionId={tool === "select" ? selectedSectionId : null}
                         onSectionSelect={tool === "select" ? selectSection : undefined}
                         onSectionLine={moveSectionLine}
+                        onTerrainPoint={(list, index, to) => {
+                          try {
+                            // The terrain stays selected, so the next grip is at hand.
+                            changeProject(moveTerrainPoint(project, list, index, to), selection);
+                            setModelError("");
+                          } catch (error) {
+                            setModelError(readableError(error, "Punkt nicht verschiebbar."));
+                          }
+                        }}
                         selectionAnchor={pickedPoint.anchor}
                         tracing={tracingView}
                         placedSnap={placedSnap}
