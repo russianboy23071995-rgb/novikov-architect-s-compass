@@ -253,8 +253,8 @@ export type BimPlanProps = {
   /** Drawing documents placed on a layout, each cropped by its mask (docs/ZEICHNUNG.md). */
   placedDrawings?: readonly PlacedDrawingView[] | undefined;
   pickupScope?: object;
-  /** Right-click menu (docs/KONTEXTMENUE.md): on an element or on empty canvas (null). When
-   * set it replaces the former double right-click pickup, which moves into the menu. */
+  /** Right-click menu (docs/KONTEXTMENUE.md): on an element or on empty canvas (null). A double
+   * right click on an element takes its parameters (docs/ANPASSUNGSLISTE.md, 4). */
   onContextMenu?: (target: NonNullable<Selection> | null, x: number, y: number) => void;
   /** Double click on an element while selecting: its settings window (docs/EINSTELLUNGSFENSTER.md). */
   onElementSettings?: (target: NonNullable<Selection>) => void;
@@ -1057,6 +1057,18 @@ export function BimPlan({
       if (contextMenuReady()) {
         event.preventDefault();
         event.stopPropagation();
+        // The second of two quick right clicks takes the parameters instead of the menu.
+        if (
+          onPickup &&
+          secondary.current.click({
+            key: `${kind}:${id}`,
+            context: pickupContext,
+            x: event.clientX,
+            y: event.clientY,
+            time: event.timeStamp,
+          })
+        )
+          return onPickup({ kind, id });
         onContextMenu!({ kind, id }, event.clientX, event.clientY);
         return;
       }

@@ -3737,6 +3737,11 @@ export function CadWorkspace({
       {contextMenu && (
         <CanvasContextMenu
           position={contextMenu}
+          onRepeat={() => {
+            const target = contextMenu.target;
+            setContextMenu(null);
+            if (target) pickupFrom(target);
+          }}
           title={
             contextMenu.target
               ? selections.length > 1

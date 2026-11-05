@@ -151,6 +151,11 @@ test("second click: the pointer side of the wall gives the outside of a window, 
     await import("../drawing/window-placement.ts");
   const w = { start: { x: 0, y: 0 }, end: { x: 4, y: 0 } };
   assert.equal(wallSideOf(w, { x: 1, y: 0 }, { x: 3, y: 2 }), "left");
+  // Along the wall the pointer picks the end; right beside the anchor neither (ANPASSUNGSLISTE 7).
+  const { wallEndOf } = await import("../drawing/window-placement.ts");
+  assert.equal(wallEndOf(w, { x: 1, y: 0 }, { x: 3, y: 2 }), "end");
+  assert.equal(wallEndOf(w, { x: 1, y: 0 }, { x: 0.5, y: 2 }), "start");
+  assert.equal(wallEndOf(w, { x: 1, y: 0 }, { x: 1.05, y: 2 }), null);
   assert.equal(wallSideOf(w, { x: 1, y: 0 }, { x: -5, y: -0.1 }), "right");
   const base = wall();
   const visibility = createLayerVisibilityPolicy(base, {

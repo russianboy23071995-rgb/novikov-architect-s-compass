@@ -409,6 +409,17 @@ export function useToolDefaults(project: Project) {
       if (defaults.tool === "hatch") setState({ projectId: project.id, hatch: defaults.values });
       else if (defaults.tool === "wall")
         setWallState({ projectId: project.id, values: defaults.values });
+      else if (defaults.tool === "door")
+        setDoorState({ projectId: project.id, values: defaults.values });
+      else if (defaults.tool === "slab")
+        setSlabState({ projectId: project.id, values: defaults.values });
+      else if (defaults.tool === "roof")
+        setRoofState({ projectId: project.id, values: defaults.values });
+      else if (defaults.tool === "dimension")
+        setDimensionState({ projectId: project.id, values: defaults.values });
+      else if (defaults.tool === "room")
+        setRoomState({ projectId: project.id, values: defaults.values });
+      else if (defaults.tool === "slabOpening") return;
       else if (defaults.tool === "line")
         setLineState({ projectId: project.id, values: defaults.values });
       else if (defaults.tool === "library")

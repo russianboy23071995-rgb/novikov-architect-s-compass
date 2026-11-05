@@ -232,6 +232,21 @@ export function openingPlacementInteraction(
 }
 
 /** Side of a wall a point lies on, seen along the wall from its start to its end. */
+/** Within this distance of the anchor along the wall the pointer leaves the hinge as set. */
+const ALONG_DEAD_ZONE = 0.1;
+
+/** Which wall end the pointer lies towards, seen from the anchor; null right beside it. */
+export function wallEndOf(
+  wall: { start: Point; end: Point },
+  anchor: Point,
+  point: Point,
+): "start" | "end" | null {
+  const dx = wall.end.x - wall.start.x,
+    dy = wall.end.y - wall.start.y;
+  const along = ((point.x - anchor.x) * dx + (point.y - anchor.y) * dy) / (Math.hypot(dx, dy) || 1);
+  return Math.abs(along) <= ALONG_DEAD_ZONE ? null : along > 0 ? "end" : "start";
+}
+
 export function wallSideOf(
   wall: { start: Point; end: Point },
   anchor: Point,
@@ -253,11 +268,12 @@ export function openingSideInteraction(
   id: string,
   wall: { start: Point; end: Point },
   anchor: Point,
-  place: (side: "left" | "right") => Project,
+  place: (side: "left" | "right", end: "start" | "end" | null) => Project,
   commit: (next: Project, id: string) => void,
   cancel: () => void,
 ): ToolInteraction {
-  const preview = (point: Point) => place(wallSideOf(wall, anchor, point));
+  const preview = (point: Point) =>
+    place(wallSideOf(wall, anchor, point), wallEndOf(wall, anchor, point));
   return {
     identity: {},
     origin: anchor,

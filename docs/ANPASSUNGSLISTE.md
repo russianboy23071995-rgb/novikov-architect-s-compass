@@ -8,7 +8,7 @@ Nutzerauftrag 05.11.2026: 15 Punkte zur Bedienung, vor den weiteren Möbeln. Än
 | B     | 3, 3a, 11     | Rasterengine                                           | erledigt |
 | C     | 1, 6          | Klickfläche, Wahl bei Überlappung                      | erledigt |
 | D     | 2, 5          | Achslage beim Zeichnen, Abschluss am ersten Punkt      | erledigt |
-| E     | 4, 7          | Parameter übernehmen, Tür                              | offen    |
+| E     | 4, 7          | Parameter übernehmen, Tür                              | erledigt |
 | F     | 9a–c          | Rechtsklickmenü, erst Befehl, dann Element             | offen    |
 | G     | 8             | Größe von Feldern und Menüs                            | offen    |
 
@@ -72,3 +72,19 @@ Nutzerauftrag 05.11.2026: 15 Punkte zur Bedienung, vor den weiteren Möbeln. Än
 | Neue Serie, zwei Wände, Achslage ändern | Serie weg, Modell unverändert             |
 
 **Grenzen D:** Das Geländer ist im Browser nicht geschlossen worden. Einzelne Linie und Dachbezugslinie haben keinen Abschluss, sie haben nur zwei Punkte.
+
+## Paket E: Parameter und Tür
+
+- **Doppelter Rechtsklick (4):** Zwei schnelle Rechtsklicks auf ein Element starten sein Werkzeug mit allen Parametern, auch wenn der erste Klick schon das Menü geöffnet hat. Das Menü erscheint ohne Verzögerung. Neu übernehmbar sind Tür, Decke, Dach, Raum und Maßkette. Der Deckendurchbruch startet nur sein Werkzeug, er hat keine Vorgaben. Weiter ohne Werte bleiben Bilder, Schnitte und Ähnliches, dort kommt die bekannte Meldung.
+- **Tür (7):** Nach dem Setzen wählt die Maus beides. Quer zur Wand die Seite, zu der die Tür aufgeht, längs zur Wand den Anschlag: Das offene Türblatt steht auf der Seite des Mauszeigers. Innerhalb von 10 cm um die Türmitte gilt der Anschlag aus dem Feld. Die Vorschau zeigt das Ergebnis, das Modell bleibt unverändert.
+
+**Abnahme im Browser (05.11.2026):**
+
+| Schritt                                 | Ergebnis                                 |
+| --------------------------------------- | ---------------------------------------- |
+| Tür gesetzt, Maus unten links           | Aufschlag unten, Türblatt links          |
+| Maus unten rechts                       | Aufschlag unten, Türblatt rechts         |
+| Maus oben rechts, Klick                 | Tür oben, Türblatt rechts, Tür im Modell |
+| Zwei schnelle Rechtsklicks auf die Wand | Wandwerkzeug mit den Werten der Wand     |
+
+**Grenzen E:** Im Browser ist nur die Wand übernommen worden, Tür, Decke, Dach, Raum und Maßkette nur teils über Tests. Im 3D-Fenster gibt es den doppelten Rechtsklick nicht.

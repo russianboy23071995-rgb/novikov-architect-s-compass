@@ -8,6 +8,9 @@ import { pickupToolDefaults } from "./pickup.ts";
 import { createLayerVisibilityPolicy, ALL_LAYERS_VISIBLE } from "../layers/visibility.ts";
 import { rectangleContour, prepareHatchBoundaries } from "../hatches/construction.ts";
 import { createDoubleSecondaryClick } from "../input/double-secondary.ts";
+import { createStandardProject } from "../projects/create.ts";
+import { addDoor } from "../doors/actions.ts";
+import { DOOR_DEFAULTS } from "../../domain/elements/door/model.ts";
 const points = [
   { x: 0, y: 0 },
   { x: 3, y: 0 },
@@ -331,4 +334,22 @@ test("wall pickup pins owned defaults through prepared preview and whole-chain h
     hiddenLayerIds: [p.defaultLayerIds.line],
   });
   assert.equal(pickupToolDefaults(p, hidden, { kind: "wall", id: storeyOf(p).walls[0]!.id }), null);
+});
+
+test("pickup: door, slab, opening, roof, room and dimension hand over their values", () => {
+  let p = createStandardProject("p", "eg", "og");
+  p = addWall(p, {
+    id: "w",
+    start: { x: 0, y: 0 },
+    end: { x: 5, y: 0 },
+    thickness: 0.24,
+    height: 2.5,
+  });
+  p = addDoor(p, { id: "d", wallId: "w", ...DOOR_DEFAULTS, position: 0.5, hinge: "end" });
+  const policy = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE);
+  const door = pickupToolDefaults(p, policy, { kind: "door", id: "d" });
+  assert.equal(door?.tool, "door");
+  assert.equal(door?.tool === "door" && door.values.hinge, "end");
+  assert.equal(door?.tool === "door" && door.values.width, String(DOOR_DEFAULTS.width));
+  assert.equal(pickupToolDefaults(p, policy, { kind: "door", id: "fehlt" }), null);
 });

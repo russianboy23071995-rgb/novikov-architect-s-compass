@@ -83,12 +83,12 @@ export function DoorPlacementFields({
       </label>
       <p className="text-xs text-muted-foreground">
         {choosingSide
-          ? "Klick auf die Seite, zu der die Tür aufgeht · Esc bricht ab."
+          ? "Maus quer zur Wand: Seite, zu der die Tür aufgeht · längs zur Wand: Anschlag · Klick setzt · Esc bricht ab."
           : precision
             ? pickingHost
               ? "Zuerst die Wand anklicken. Danach Tab: Abstand der Türmitte."
               : "Wand fixiert · Tab: Abstand der Türmitte ab Wandanfang · Enter/Klick setzt die Position."
-            : "Wand anfahren · Klick 1 Position, Klick 2 Seite, zu der die Tür aufgeht · Esc bricht ab."}
+            : "Wand anfahren · Klick 1 Position, Klick 2 Aufschlag und Anschlag · Esc bricht ab."}
       </p>
       {error && (
         <p role="alert" className="text-xs text-destructive">
