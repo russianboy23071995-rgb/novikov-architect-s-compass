@@ -6,7 +6,7 @@ Nutzerwunsch 02.11.2026, Änderungskarte am 05.11.2026 mit „Go“ freigegeben.
 | ---- | ----------------------------------------------------- | -------- |
 | G1   | Modell, Dreiecksnetz, 3D-Körper, Dateiformat 64       | erledigt |
 | G2   | Werkzeug, Grundriss, Höhenlinien, Einstellungen, Fang | erledigt |
-| G3   | Schnitt, Ansicht, IFC                                 | offen    |
+| G3   | Schnitt, Ansicht, IFC                                 | erledigt |
 
 Entscheidungen aus der Karte:
 
@@ -41,3 +41,12 @@ Entscheidungen aus der Karte:
 | 3D-Ansicht                      | Geschlossener Körper mit Hügel, Gebäude steckt darin  |
 
 **Grenzen G2:** Punkte lassen sich nur in der Höhe ändern und löschen, nicht in der Lage verschieben, und Ecken nur in der Höhe. Das weicht von der Karte ab, dort stand „verschieben“. Das Gelände als Ganzes wird nicht bewegt. Im Browser sind Löschen und Ändern im Fenster nur angezeigt, nicht bedient.
+
+## Teil G3: Schnitt, Ansicht, IFC
+
+- **Schnitt und Ansicht:** Das Gelände gehört zum Gebäudekörper und erscheint dort wie jedes Bauteil, im Schnitt als geschnittene Fläche von der Oberfläche bis zur Unterkante. Ein Schnitt, der genau durch Höhenpunkte läuft, wird um einen Mikrometer versetzt berechnet, sonst zerfiele die Fläche.
+- **IFC:** `IFCGEOGRAPHICELEMENT` (TERRAIN) mit dem geschlossenen Dreiecksnetz als `IFCTRIANGULATEDFACESET`.
+
+**Abnahme im Browser (05.11.2026):** Gelände mit Höhenpunkt +2,00, Schnitt genau durch den Punkt: geschlossene Fläche von der Spitze bis zur Unterkante.
+
+**Grenzen G3:** Der Geländekörper schneidet sich mit Bauteilen nicht, Wände und Keller stecken im Schnitt im Gelände. In Archicad ist das IFC nicht geprüft. Die Oberfläche hat keine eigene Schraffur, der Schnitt nutzt die Schnittfüllung.

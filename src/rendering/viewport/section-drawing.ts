@@ -157,7 +157,12 @@ function partSection(part: Solid, section: Section, frozen: boolean): PartSectio
     );
   for (const [index, face] of (part.faces as readonly Face[]).entries()) {
     const faceKeys = edges.keys[index]!;
-    const tagged: Tagged[] = face.vertices.map((v, i) => ({ p: local(v), edge: faceKeys[i]! }));
+    // A cut line often runs exactly through terrain points; a micrometre keeps it off the mesh.
+    const shift = face.terrain ? 1e-6 : 0;
+    const tagged: Tagged[] = face.vertices.map((v, i) => {
+      const p = local(v);
+      return { p: { ...p, w: p.w + shift }, edge: faceKeys[i]! };
+    });
     // Cut: where the face crosses the plane w = 0, within the line.
     const crossings: Local[] = [];
     tagged.forEach((a, i) => {
