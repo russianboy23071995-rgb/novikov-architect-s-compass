@@ -2,13 +2,16 @@ import { z } from "zod";
 import { WALL_RENOVATIONS } from "../wall/renovation.ts";
 import {
   OBJECT_CATALOG_IDS,
+  OBJECT_CATALOG_IDS_V59,
   objectDefinition,
   type ObjectBox,
   type ObjectCatalogId,
 } from "./catalog.ts";
 import {
   objectFinishesSchema,
+  objectFinishesV59Schema,
   objectOptionsSchema,
+  objectOptionsV59Schema,
   objectRule,
   type ObjectShape,
   type ObjectSlot,
@@ -32,7 +35,7 @@ export const objectV58Schema = z
   .object({
     id: z.string().trim().min(1),
     layerId: z.string().trim().min(1),
-    catalogId: z.enum(OBJECT_CATALOG_IDS),
+    catalogId: z.enum(OBJECT_CATALOG_IDS_V59),
     position: point,
     rotation: finite,
     mirrored: z.boolean().optional(),
@@ -44,7 +47,13 @@ export const objectV58Schema = z
   })
   .strict();
 /** Schema 59: options and finishes of objects with a build rule (docs/OBJEKTBIBLIOTHEK.md, M2). */
-export const objectSchema = objectV58Schema.extend({
+export const objectV59Schema = objectV58Schema.extend({
+  options: objectOptionsV59Schema.optional(),
+  finishes: objectFinishesV59Schema.optional(),
+});
+/** Schema 60: car and television with their options and parts (docs/OBJEKTBIBLIOTHEK.md, M3). */
+export const objectSchema = objectV59Schema.extend({
+  catalogId: z.enum(OBJECT_CATALOG_IDS),
   options: objectOptionsSchema.optional(),
   finishes: objectFinishesSchema.optional(),
 });

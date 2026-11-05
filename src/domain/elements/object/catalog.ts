@@ -17,6 +17,7 @@ export const OBJECT_CATEGORIES = {
   furniture: "Möbel",
   kitchen: "Küche",
   sanitary: "Sanitär",
+  other: "Sonstiges",
 } as const;
 export type ObjectCategory = keyof typeof OBJECT_CATEGORIES;
 
@@ -28,6 +29,8 @@ export const OBJECT_GENRES = {
   storage: "Schränke und Regale",
   kitchen: "Küche",
   sanitary: "Sanitär",
+  media: "Technik",
+  vehicles: "Fahrzeuge",
 } as const;
 export type ObjectGenre = keyof typeof OBJECT_GENRES;
 
@@ -38,12 +41,16 @@ export type ObjectIfcClass =
       entity: "IFCSANITARYTERMINAL";
       type: "TOILETPAN" | "WASHHANDBASIN" | "SHOWER" | "BATH" | "SINK";
     }
-  | { entity: "IFCELECTRICAPPLIANCE"; type: "ELECTRICCOOKER" | "FRIDGE_FREEZER" };
+  | { entity: "IFCELECTRICAPPLIANCE"; type: "ELECTRICCOOKER" | "FRIDGE_FREEZER" }
+  | { entity: "IFCAUDIOVISUALAPPLIANCE"; type: "DISPLAY" }
+  | { entity: "IFCBUILDINGELEMENTPROXY"; type: "USERDEFINED" };
 
 export type ObjectDefinition = {
   name: string;
   category: ObjectCategory;
   genre: ObjectGenre;
+  /** Other words the library search finds this entry by. */
+  terms: readonly string[];
   /** Start size in metres. */
   size: { width: number; depth: number; height: number };
   symbol: readonly ObjectSymbolPart[];
@@ -95,6 +102,7 @@ const legs = (z: number, wu: number, wv: number, back = 0.5): ObjectBox[] => [
 export const OBJECT_CATALOG = {
   "bed-single": {
     name: "Einzelbett",
+    terms: ["Bett", "Liege", "Schlafen", "Schlafzimmer"],
     category: "furniture",
     genre: "beds",
     size: { width: 0.9, depth: 2, height: 0.45 },
@@ -107,6 +115,7 @@ export const OBJECT_CATALOG = {
   },
   "bed-double": {
     name: "Doppelbett",
+    terms: ["Bett", "Ehebett", "Schlafen", "Schlafzimmer"],
     category: "furniture",
     genre: "beds",
     size: { width: 1.8, depth: 2, height: 0.45 },
@@ -125,6 +134,7 @@ export const OBJECT_CATALOG = {
   },
   table: {
     name: "Esstisch",
+    terms: ["Tisch", "Essen", "Esszimmer", "Küchentisch"],
     category: "furniture",
     genre: "tables",
     size: { width: 1.6, depth: 0.9, height: 0.75 },
@@ -134,6 +144,7 @@ export const OBJECT_CATALOG = {
   },
   chair: {
     name: "Stuhl",
+    terms: ["Sitz", "Esszimmer", "Küchenstuhl"],
     category: "furniture",
     genre: "seating",
     size: { width: 0.45, depth: 0.5, height: 0.9 },
@@ -147,6 +158,7 @@ export const OBJECT_CATALOG = {
   },
   sofa: {
     name: "Sofa",
+    terms: ["Couch", "Polster", "Sitzgruppe", "Wohnzimmer"],
     category: "furniture",
     genre: "seating",
     size: { width: 2, depth: 0.9, height: 0.8 },
@@ -167,6 +179,7 @@ export const OBJECT_CATALOG = {
   },
   wardrobe: {
     name: "Schrank",
+    terms: ["Kleiderschrank", "Garderobe", "Schlafzimmer"],
     category: "furniture",
     genre: "storage",
     size: { width: 1.2, depth: 0.6, height: 2.1 },
@@ -176,6 +189,7 @@ export const OBJECT_CATALOG = {
   },
   shelf: {
     name: "Regal",
+    terms: ["Bücherregal", "Ablage"],
     category: "furniture",
     genre: "storage",
     size: { width: 1, depth: 0.35, height: 2 },
@@ -192,6 +206,7 @@ export const OBJECT_CATALOG = {
   },
   "kitchen-counter": {
     name: "Küchenzeile",
+    terms: ["Arbeitsplatte", "Unterschrank", "Einbauküche"],
     category: "kitchen",
     genre: "kitchen",
     size: { width: 2.4, depth: 0.6, height: 0.9 },
@@ -204,6 +219,7 @@ export const OBJECT_CATALOG = {
   },
   stove: {
     name: "Herd",
+    terms: ["Kochfeld", "Backofen", "Ofen", "Kochen"],
     category: "kitchen",
     genre: "kitchen",
     size: { width: 0.6, depth: 0.6, height: 0.9 },
@@ -219,6 +235,7 @@ export const OBJECT_CATALOG = {
   },
   sink: {
     name: "Spüle",
+    terms: ["Spülbecken", "Becken", "Abwasch"],
     category: "kitchen",
     genre: "kitchen",
     size: { width: 0.8, depth: 0.6, height: 0.9 },
@@ -239,6 +256,7 @@ export const OBJECT_CATALOG = {
   },
   fridge: {
     name: "Kühlschrank",
+    terms: ["Gefrierschrank", "Kühlen"],
     category: "kitchen",
     genre: "kitchen",
     size: { width: 0.6, depth: 0.65, height: 1.8 },
@@ -248,6 +266,7 @@ export const OBJECT_CATALOG = {
   },
   wc: {
     name: "WC",
+    terms: ["Toilette", "Klo", "Klosett", "Bad"],
     category: "sanitary",
     genre: "sanitary",
     size: { width: 0.4, depth: 0.65, height: 0.8 },
@@ -260,6 +279,7 @@ export const OBJECT_CATALOG = {
   },
   washbasin: {
     name: "Waschtisch",
+    terms: ["Waschbecken", "Handwaschbecken", "Lavabo", "Bad"],
     category: "sanitary",
     genre: "sanitary",
     size: { width: 0.6, depth: 0.45, height: 0.85 },
@@ -269,6 +289,7 @@ export const OBJECT_CATALOG = {
   },
   shower: {
     name: "Dusche",
+    terms: ["Duschtasse", "Brause", "Bad"],
     category: "sanitary",
     genre: "sanitary",
     size: { width: 0.9, depth: 0.9, height: 0.05 },
@@ -278,6 +299,7 @@ export const OBJECT_CATALOG = {
   },
   bathtub: {
     name: "Badewanne",
+    terms: ["Wanne", "Bad"],
     category: "sanitary",
     genre: "sanitary",
     size: { width: 1.7, depth: 0.75, height: 0.6 },
@@ -307,6 +329,26 @@ export const OBJECT_CATALOG = {
     ],
     ifc: { entity: "IFCSANITARYTERMINAL", type: "BATH" },
   },
+  television: {
+    name: "Fernseher",
+    category: "other",
+    genre: "media",
+    terms: ["TV", "Bildschirm", "Monitor", "Flachbild", "Wohnzimmer"],
+    size: { width: 1.45, depth: 0.1, height: 0.9 },
+    symbol: [outline],
+    boxes: [full],
+    ifc: { entity: "IFCAUDIOVISUALAPPLIANCE", type: "DISPLAY" },
+  },
+  car: {
+    name: "Pkw",
+    category: "other",
+    genre: "vehicles",
+    terms: ["Auto", "Fahrzeug", "Wagen", "Kfz", "Garage", "Stellplatz", "Parkplatz"],
+    size: { width: 4.7, depth: 1.85, height: 1.5 },
+    symbol: [outline],
+    boxes: [full],
+    ifc: { entity: "IFCBUILDINGELEMENTPROXY", type: "USERDEFINED" },
+  },
 } as const satisfies Record<string, ObjectDefinition>;
 
 export type ObjectCatalogId = keyof typeof OBJECT_CATALOG;
@@ -314,6 +356,41 @@ export const OBJECT_CATALOG_IDS = Object.keys(OBJECT_CATALOG) as [
   ObjectCatalogId,
   ...ObjectCatalogId[],
 ];
+
+/** Entries a file of format 59 or older can hold; the others came with format 60. */
+export const OBJECT_CATALOG_IDS_V59 = OBJECT_CATALOG_IDS.filter(
+  (id) => id !== "television" && id !== "car",
+) as [Exclude<ObjectCatalogId, "television" | "car">, ...ObjectCatalogId[]];
+
+/** Search form of a text: case and the spellings of umlauts do not matter. */
+const searchForm = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/ß/g, "ss")
+    .replace(/ä|ae/g, "a")
+    .replace(/ö|oe/g, "o")
+    .replace(/ü|ue/g, "u");
+
+/**
+ * Entries the library search finds (docs/OBJEKTBIBLIOTHEK.md, M3): every word of the query has
+ * to appear in the name, the genre, the category or the search words. Names that start with the
+ * query come first, then names holding it, then the rest, each in catalogue order.
+ */
+export function searchObjects(query: string): ObjectCatalogId[] {
+  const words = searchForm(query).split(/\s+/).filter(Boolean);
+  if (!words.length) return [];
+  const rank = (id: ObjectCatalogId) => {
+    const name = searchForm(OBJECT_CATALOG[id].name);
+    return name.startsWith(words[0]!) ? 0 : name.includes(words[0]!) ? 1 : 2;
+  };
+  return OBJECT_CATALOG_IDS.filter((id) => {
+    const d: ObjectDefinition = OBJECT_CATALOG[id];
+    const text = searchForm(
+      [d.name, OBJECT_GENRES[d.genre], OBJECT_CATEGORIES[d.category], ...d.terms].join(" "),
+    );
+    return words.every((word) => text.includes(word));
+  }).sort((a, b) => rank(a) - rank(b));
+}
 
 /** The definition of a catalogue object. */
 export function objectDefinition(id: ObjectCatalogId): ObjectDefinition {

@@ -4,6 +4,7 @@ import {
   OBJECT_CATALOG,
   OBJECT_CATALOG_IDS,
   OBJECT_GENRES,
+  searchObjects,
   type ObjectCatalogId,
   type ObjectGenre,
 } from "@/domain/elements/object/catalog";
@@ -28,7 +29,8 @@ const startSize = (catalogId: ObjectCatalogId) => ({
 /**
  * Library window (docs/OBJEKTBIBLIOTHEK.md, M1): genres on the left, the entries with previews
  * in the middle, 2D and 3D preview and the values on the right. "Platzieren" or a double click
- * on an entry closes it; the object then hangs at the cursor.
+ * on an entry closes it; the object then hangs at the cursor. The search field looks through
+ * all genres (M3); Enter takes the first hit, a click on a genre leaves the search.
  */
 export function LibraryWindow({
   value,
@@ -46,20 +48,42 @@ export function LibraryWindow({
   materials: readonly Material[];
 }) {
   const [genre, setGenre] = useState<ObjectGenre>(OBJECT_CATALOG[value.catalogId].genre);
+  const [query, setQuery] = useState("");
   const entry = OBJECT_CATALOG[value.catalogId];
+  const searching = query.trim() !== "";
+  const entries = searching ? searchObjects(query) : inGenre(genre);
+  const choose = (id: ObjectCatalogId) => {
+    onChange(chooseObject(value, id));
+    setGenre(OBJECT_CATALOG[id].genre);
+  };
   return (
     <FloatingPanel open centered title="Bibliothek" onClose={onClose} width={900} height={600}>
       <div className="grid h-full min-h-0 grid-cols-[170px_minmax(0,1fr)_280px]">
         <nav aria-label="Gattungen" className="space-y-0.5 overflow-auto border-r p-2">
+          <input
+            type="search"
+            autoFocus
+            aria-label="Katalog durchsuchen"
+            placeholder="Suchen …"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && entries[0]) choose(entries[0]);
+            }}
+            className="mb-1.5 w-full rounded border bg-background px-2 py-1 text-sm"
+          />
           {GENRES.map((id) => (
             <button
               key={id}
               type="button"
-              aria-current={id === genre ? "true" : undefined}
-              onClick={() => setGenre(id)}
+              aria-current={!searching && id === genre ? "true" : undefined}
+              onClick={() => {
+                setGenre(id);
+                setQuery("");
+              }}
               className={cn(
                 "flex w-full items-center justify-between rounded px-2 py-1.5 text-left text-sm",
-                id === genre ? "bg-accent font-medium" : "hover:bg-accent/50",
+                !searching && id === genre ? "bg-accent font-medium" : "hover:bg-accent/50",
               )}
             >
               {OBJECT_GENRES[id]}
@@ -68,17 +92,22 @@ export function LibraryWindow({
           ))}
         </nav>
         <ul
-          aria-label={OBJECT_GENRES[genre]}
+          aria-label={searching ? "Suchergebnis" : OBJECT_GENRES[genre]}
           className="grid auto-rows-min grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-2 overflow-auto p-3"
         >
-          {inGenre(genre).map((id) => (
+          {searching && !entries.length && (
+            <li role="status" className="col-span-full text-sm text-muted-foreground">
+              Nichts gefunden für „{query.trim()}“.
+            </li>
+          )}
+          {entries.map((id) => (
             <li key={id}>
               <button
                 type="button"
                 aria-pressed={id === value.catalogId}
-                onClick={() => onChange(chooseObject(value, id))}
+                onClick={() => choose(id)}
                 onDoubleClick={() => {
-                  onChange(chooseObject(value, id));
+                  choose(id);
                   onPlace();
                 }}
                 className={cn(
