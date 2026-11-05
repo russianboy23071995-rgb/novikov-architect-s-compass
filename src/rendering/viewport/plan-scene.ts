@@ -37,6 +37,7 @@ export function derivePlanScene(
   library: AssemblyLibrary = assemblyLibraryOf("storeys" in geometry ? geometry : {}),
 ) {
   const plan = visiblePlanGeometry(geometry, allows);
+  const displayBands = storeyOf(geometry).displayBands;
   const openings = new Map<string, typeof plan.openings>();
   for (const opening of plan.openings) {
     if (!openings.has(opening.wallId)) openings.set(opening.wallId, []);
@@ -156,6 +157,7 @@ export function derivePlanScene(
     roofWindows: new Map(plan.roofWindows.map((w) => [w.id, w])),
     // Objects: outline and catalogue symbol in thin lines, seen from above
     // (docs/OBJEKTBIBLIOTHEK.md, O1).
+    displayBands,
     objects: new Map(plan.objects.map((o) => [o.id, o])),
     objectViews: new Map(
       plan.objects.map(
@@ -197,6 +199,8 @@ export type PlanRun = {
     | "text";
   ids: string[];
   affected: boolean;
+  /** Drawn below or above all kinds (docs/DARSTELLUNGSREIHENFOLGE.md, K3). */
+  band?: "front" | "back";
 };
 /** The T joints a wall run draws (L09 U2): each joint once, in the run that holds whichever of its
  * two walls paints later, so it lies above both walls (docs/TABS.md, Rest beim Auswählen). */
@@ -214,7 +218,20 @@ export function planRunJoints(scene: PlanScene, ids: readonly string[]) {
 export function planSceneRuns(scene: PlanScene, replacedIds: readonly string[]): PlanRun[] {
   const replaced = new Set(replacedIds),
     runs: PlanRun[] = [];
-  for (const [kind, elements] of [
+  const front = scene.displayBands?.front ?? [],
+    back = scene.displayBands?.back ?? [];
+  const lifted = new Set([...front, ...back]);
+  const kinds = new Map<string, PlanRun["kind"]>();
+  let run: PlanRun | undefined;
+  const add = (kind: PlanRun["kind"], id: string, band?: "front" | "back") => {
+    const affected = replaced.has(id);
+    if (!run || run.kind !== kind || run.affected !== affected || run.band !== band) {
+      run = { kind, ids: [], affected, ...(band ? { band } : {}) };
+      runs.push(run);
+    }
+    run.ids.push(id);
+  };
+  const order = [
     ["reference", scene.plan.references],
     // Rooms lie beneath every building element; clicks on walls keep reaching the wall.
     ["room", scene.plan.rooms],
@@ -235,16 +252,14 @@ export function planSceneRuns(scene: PlanScene, replacedIds: readonly string[]):
     // Dimension chains annotate everything below them (docs/MASSKETTE.md).
     ["dimension", scene.plan.dimensions],
     ["text", scene.plan.texts],
-  ] as const) {
-    let run: PlanRun | undefined;
-    for (const element of elements) {
-      const affected = replaced.has(element.id);
-      if (!run || run.affected !== affected) {
-        run = { kind, ids: [], affected };
-        runs.push(run);
-      }
-      run.ids.push(element.id);
-    }
+  ] as const;
+  for (const [kind, elements] of order) for (const e of elements) kinds.set(e.id, kind);
+  for (const id of back) if (kinds.has(id)) add(kinds.get(id)!, id, "back");
+  for (const [kind, elements] of order) {
+    run = undefined;
+    for (const element of elements) if (!lifted.has(element.id)) add(kind, element.id);
   }
+  run = undefined;
+  for (const id of front) if (kinds.has(id)) add(kinds.get(id)!, id, "front");
   return runs;
 }

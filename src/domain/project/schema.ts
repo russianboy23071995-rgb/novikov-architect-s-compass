@@ -858,15 +858,36 @@ export const projectV61Schema = projectV45Schema.extend({
   hotkeys: hotkeysSchema.optional(),
 });
 /** Schema 62: options of kitchen and bathroom pieces (docs/OBJEKTBIBLIOTHEK.md, M5). */
-const storeySchema = storeyV56Schema.extend({
+const storeyV62Schema = storeyV56Schema.extend({
   objects: z.array(objectSchema).max(20000).optional(),
 });
-const layoutDrawingV62Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
+const layoutDrawingV62Schema = z.object({ layoutId: id, storey: storeyV62Schema }).strict();
+export const projectV62Schema = projectV45Schema.extend({
+  schemaVersion: z.literal(62),
+  storeys: z.array(storeyV62Schema).min(1),
+  modelViews: z.array(anyModelViewSchema).optional(),
+  layoutDrawings: z.array(layoutDrawingV62Schema).max(5000).optional(),
+  masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
+  layouts: z.array(layoutV49Schema).max(5000).optional(),
+  projectInfo: projectInfoSchema.optional(),
+  hotkeys: hotkeysSchema.optional(),
+});
+/**
+ * Schema 63: elements drawn above or below all kinds (docs/DARSTELLUNGSREIHENFOLGE.md, K3), in
+ * drawing order. Ids of deleted elements are ignored and dropped at the next change.
+ */
+const storeySchema = storeyV62Schema.extend({
+  displayBands: z
+    .object({ front: z.array(id).max(20000), back: z.array(id).max(20000) })
+    .strict()
+    .optional(),
+});
+const layoutDrawingV63Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
 const projectSchema = projectV45Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z.array(storeySchema).min(1),
   modelViews: z.array(anyModelViewSchema).optional(),
-  layoutDrawings: z.array(layoutDrawingV62Schema).max(5000).optional(),
+  layoutDrawings: z.array(layoutDrawingV63Schema).max(5000).optional(),
   masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
   layouts: z.array(layoutV49Schema).max(5000).optional(),
   projectInfo: projectInfoSchema.optional(),

@@ -29,6 +29,8 @@ export type SelectionShape = {
   closed?: boolean;
   /** Pick areas where they differ from the footprint: the parts of an object. */
   pick?: readonly (readonly Point[])[];
+  /** Rank of a display band: 1 above all kinds, -1 below (K3); higher values pick first. */
+  band?: number;
 };
 
 type ShapeContext = { project: Project; contours: ReturnType<typeof connectedWallContours> };
@@ -183,6 +185,14 @@ const PICK_RANK: Record<ElementKind, number> = {
 export function planSelectionShapes(project: Project): SelectionShape[] {
   const context = { project, contours: connectedWallContours(project) };
   const storey = storeyOf(project);
+  const front = storey.displayBands?.front ?? [],
+    back = storey.displayBands?.back ?? [];
+  const bandOf = (id: string) => {
+    const above = front.indexOf(id);
+    if (above >= 0) return 1 + above / (front.length + 1);
+    const below = back.indexOf(id);
+    return below >= 0 ? -2 + below / (back.length + 1) : undefined;
+  };
   const kinds = [...SHAPE_ORDER, ...(Object.keys(ELEMENT_KINDS) as ElementKind[])].filter(
     (kind, i, all) => all.indexOf(kind) === i,
   );
@@ -194,7 +204,12 @@ export function planSelectionShapes(project: Project): SelectionShape[] {
           c: ShapeContext,
         ) => { points: readonly Point[]; closed: boolean }
       )(element, context);
-      return { target: { kind, id: element.id } as ElementTarget, ...shape };
+      const band = bandOf(element.id);
+      return {
+        target: { kind, id: element.id } as ElementTarget,
+        ...shape,
+        ...(band === undefined ? {} : { band }),
+      };
     }),
   );
 }
@@ -250,7 +265,9 @@ export function shapesAt(
     .filter(({ shape }) => hit(shape))
     .sort(
       (a, b) =>
-        PICK_RANK[a.shape.target.kind] - PICK_RANK[b.shape.target.kind] || b.order - a.order,
+        (b.shape.band ?? 0) - (a.shape.band ?? 0) ||
+        PICK_RANK[a.shape.target.kind] - PICK_RANK[b.shape.target.kind] ||
+        b.order - a.order,
     )
     .map(({ shape }) => shape);
 }
