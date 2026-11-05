@@ -34,6 +34,8 @@ export type OpeningPlacementKind<D> = {
   side?: {
     applies: (draft: D) => boolean;
     with: (draft: D, side: "left" | "right") => D;
+    /** The draft for the wall end the pointer lies towards (docs/ANPASSUNGSLISTE.md, 7). */
+    towards?: (draft: D, end: "start" | "end") => D;
   };
 };
 
@@ -119,8 +121,9 @@ export function useOpeningPlacement<D>(
           activeAnchor.id,
           wall,
           activeAnchor.point,
-          (chosen) => {
-            const draft = side.with(dimensions, chosen);
+          (chosen, end) => {
+            const sided = side.with(dimensions, chosen);
+            const draft = end && side.towards ? side.towards(sided, end) : sided;
             const placed = kind.interaction(
               project,
               visibility,

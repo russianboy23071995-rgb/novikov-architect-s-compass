@@ -8,6 +8,11 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import { patternSize } from "../hatches/pattern-size.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { Hatch } from "../../domain/elements/hatch/model.ts";
+import type { Slab } from "../../domain/elements/slab/model.ts";
+import type { Roof } from "../../domain/elements/roof/model.ts";
+import { defaultHeightLines, type HeightLine } from "../../domain/elements/room/height-line.ts";
+import type { Dimension } from "../../domain/elements/dimension/model.ts";
+import type { DoorSettingsDraft } from "../drawing/door-placement.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import type { LayerVisibilityPolicy } from "../layers/visibility.ts";
 
@@ -30,6 +35,30 @@ export type WallDefaults = Pick<
   "thickness" | "height" | "bodyOffset" | "layerId" | "renovation" | "assemblyId"
 >;
 export type ToolDefaults =
+  | { tool: "door"; values: DoorSettingsDraft }
+  | { tool: "slab"; values: Pick<Slab, "thickness" | "topOffset" | "layerId"> }
+  | { tool: "slabOpening"; values: Record<string, never> }
+  | {
+      tool: "room";
+      values: {
+        name: string;
+        floorBuildUpEnabled: boolean;
+        floorBuildUp: number;
+        heightLines: HeightLine[];
+        layerId: string;
+      };
+    }
+  | {
+      tool: "roof";
+      values: Pick<
+        Roof,
+        "pitch" | "thickness" | "referenceHeight" | "eaveCut" | "topCut" | "layerId"
+      >;
+    }
+  | {
+      tool: "dimension";
+      values: Pick<Dimension, "orientation" | "terminator" | "units" | "textSize" | "layerId">;
+    }
   | { tool: "hatch"; values: HatchDefaults }
   | { tool: "window"; values: WindowDefaults }
   | { tool: "line"; values: LineDefaults }
@@ -123,6 +152,69 @@ export function pickupToolDefaults(
     if (!source) return null;
     const { id: _id, position: _position, content: _content, ...values } = source;
     return { tool: "text", values: structuredClone(values) };
+  }
+  // Door, slab, opening, roof and dimension hand over everything but their place and outline
+  // (docs/ANPASSUNGSLISTE.md, 4).
+  if (target.kind === "door") {
+    const source = storeyOf(project).doors?.find((item) => item.id === target.id);
+    if (!source) return null;
+    return {
+      tool: "door",
+      values: {
+        width: String(source.width),
+        height: String(source.height),
+        zOffset: String(source.zOffset),
+        hinge: source.hinge,
+        opensTo: source.opensTo,
+        layerId: source.layerId,
+        insert: source.insert ? structuredClone(source.insert) : null,
+      },
+    };
+  }
+  if (target.kind === "slab") {
+    const source = storeyOf(project).slabs?.find((item) => item.id === target.id);
+    if (!source) return null;
+    const { thickness, topOffset, layerId } = source;
+    return { tool: "slab", values: { thickness, topOffset, layerId } };
+  }
+  if (target.kind === "slabOpening") return { tool: "slabOpening", values: {} };
+  if (target.kind === "roof") {
+    const source = storeyOf(project).roofs?.find((item) => item.id === target.id);
+    if (!source) return null;
+    const { pitch, thickness, referenceHeight, eaveCut, topCut, layerId } = source;
+    return {
+      tool: "roof",
+      values: { pitch, thickness, referenceHeight, eaveCut, topCut, layerId },
+    };
+  }
+  if (target.kind === "room") {
+    const source = storeyOf(project).rooms?.find((item) => item.id === target.id);
+    if (!source) return null;
+    return {
+      tool: "room",
+      values: {
+        name: source.name ?? "",
+        floorBuildUpEnabled: source.floorBuildUp !== undefined,
+        floorBuildUp: source.floorBuildUp ?? 0,
+        heightLines: structuredClone(source.heightLines ?? defaultHeightLines()),
+        layerId: source.layerId,
+      },
+    };
+  }
+  if (target.kind === "dimension") {
+    const source = storeyOf(project).dimensions?.find((item) => item.id === target.id);
+    if (!source) return null;
+    const { orientation, terminator, units, textSize, layerId } = source;
+    return {
+      tool: "dimension",
+      values: {
+        orientation,
+        layerId,
+        ...(terminator ? { terminator } : {}),
+        ...(units ? { units } : {}),
+        ...(textSize ? { textSize } : {}),
+      },
+    };
   }
   if (target.kind !== "hatch") return null;
   const source = storeyOf(project).hatches.find((item) => item.id === target.id);

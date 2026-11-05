@@ -24,13 +24,17 @@ export function CanvasContextMenu({
   title,
   entries,
   onClose,
+  onRepeat,
 }: {
   position: { x: number; y: number };
   title: string;
   entries: readonly ContextMenuEntry[];
   onClose: () => void;
+  /** A second right click right after opening, the pointer still at the menu's corner. */
+  onRepeat?: (() => void) | undefined;
 }) {
   const panel = useRef<HTMLDivElement>(null);
+  const openedAt = useRef(performance.now());
   const [place, setPlace] = useState(position);
   useLayoutEffect(() => {
     const rect = panel.current?.getBoundingClientRect();
@@ -69,7 +73,10 @@ export function CanvasContextMenu({
       aria-label="Kontextmenü"
       className="glass-panel-strong fixed z-[60] min-w-52 rounded-lg border p-1 text-xs shadow-lg"
       style={{ left: place.x, top: place.y }}
-      onContextMenu={(event) => event.preventDefault()}
+      onContextMenu={(event) => {
+        event.preventDefault();
+        if (performance.now() - openedAt.current <= 450) onRepeat?.();
+      }}
     >
       <p className="truncate px-2 py-1 font-semibold text-muted-foreground">{title}</p>
       {entries.map((entry, i) =>

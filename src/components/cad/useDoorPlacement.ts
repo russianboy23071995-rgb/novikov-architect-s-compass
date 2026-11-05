@@ -14,8 +14,13 @@ const doorKind: OpeningPlacementKind<DoorSettingsDraft> = {
   parse: parseDoorSettings,
   host: windowPlacementHost,
   interaction: doorPlacementInteraction,
-  // R1: the second click chooses the side the door opens to.
-  side: { applies: () => true, with: (draft, opensTo) => ({ ...draft, opensTo }) },
+  // R1: the second click chooses the side the door opens to; along the wall the hinge jamb, the
+  // open leaf stands on the side of the pointer (docs/ANPASSUNGSLISTE.md, 7).
+  side: {
+    applies: () => true,
+    with: (draft, opensTo) => ({ ...draft, opensTo }),
+    towards: (draft, hinge) => ({ ...draft, hinge }),
+  },
 };
 
 /** Same lifecycle as the window tool; only the door action and settings differ. */
