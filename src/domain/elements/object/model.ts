@@ -15,6 +15,7 @@ import {
   objectOptionsSchema,
   objectOptionsV59Schema,
   objectOptionsV60Schema,
+  objectOptionsV61Schema,
   objectRule,
   type ObjectShape,
   type ObjectSlot,
@@ -61,8 +62,12 @@ export const objectV60Schema = objectV59Schema.extend({
   finishes: objectFinishesSchema.optional(),
 });
 /** Schema 61: five more entries, doors and boards as options (docs/OBJEKTBIBLIOTHEK.md, M4). */
-export const objectSchema = objectV60Schema.extend({
+export const objectV61Schema = objectV60Schema.extend({
   catalogId: z.enum(OBJECT_CATALOG_IDS),
+  options: objectOptionsV61Schema.optional(),
+});
+/** Schema 62: options of kitchen and bathroom pieces (docs/OBJEKTBIBLIOTHEK.md, M5). */
+export const objectSchema = objectV61Schema.extend({
   options: objectOptionsSchema.optional(),
 });
 export type PlacedObject = z.infer<typeof objectSchema>;

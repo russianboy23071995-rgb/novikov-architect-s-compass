@@ -28,6 +28,7 @@ import {
   objectV58Schema,
   objectV59Schema,
   objectV60Schema,
+  objectV61Schema,
 } from "../elements/object/model.ts";
 import { hotkeyConflicts, hotkeysSchema, resolvedHotkeys } from "../hotkeys/model.ts";
 import {
@@ -842,15 +843,30 @@ export const projectV60Schema = projectV45Schema.extend({
   hotkeys: hotkeysSchema.optional(),
 });
 /** Schema 61: five more furniture entries, doors and boards (docs/OBJEKTBIBLIOTHEK.md, M4). */
+const storeyV61Schema = storeyV56Schema.extend({
+  objects: z.array(objectV61Schema).max(20000).optional(),
+});
+const layoutDrawingV61Schema = z.object({ layoutId: id, storey: storeyV61Schema }).strict();
+export const projectV61Schema = projectV45Schema.extend({
+  schemaVersion: z.literal(61),
+  storeys: z.array(storeyV61Schema).min(1),
+  modelViews: z.array(anyModelViewSchema).optional(),
+  layoutDrawings: z.array(layoutDrawingV61Schema).max(5000).optional(),
+  masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
+  layouts: z.array(layoutV49Schema).max(5000).optional(),
+  projectInfo: projectInfoSchema.optional(),
+  hotkeys: hotkeysSchema.optional(),
+});
+/** Schema 62: options of kitchen and bathroom pieces (docs/OBJEKTBIBLIOTHEK.md, M5). */
 const storeySchema = storeyV56Schema.extend({
   objects: z.array(objectSchema).max(20000).optional(),
 });
-const layoutDrawingV61Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
+const layoutDrawingV62Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
 const projectSchema = projectV45Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z.array(storeySchema).min(1),
   modelViews: z.array(anyModelViewSchema).optional(),
-  layoutDrawings: z.array(layoutDrawingV61Schema).max(5000).optional(),
+  layoutDrawings: z.array(layoutDrawingV62Schema).max(5000).optional(),
   masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
   layouts: z.array(layoutV49Schema).max(5000).optional(),
   projectInfo: projectInfoSchema.optional(),
