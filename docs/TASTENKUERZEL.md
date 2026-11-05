@@ -7,7 +7,7 @@ Nutzerauftrag 04.11.2026: Bewegen, Drehen und Spiegeln für alle Elemente über 
 | B1   | Kürzelliste, Fenster Edit → Tastenkürzel, Dateiformat 58, Strg+E, Kopie bewegen | erledigt |
 | B2   | Drehen Strg+D mit Kreis 0–360°, Tab-Eingabe, Umschalt 45°, Kopie                | erledigt |
 | B3   | Spiegeln Strg+M über Achse mit Vorschau, Umschalt 45°, Kopie                    | erledigt |
-| B4   | Abgleich mit den Objekten (Möblierung)                                          | offen    |
+| B4   | Abgleich mit den Objekten (Möblierung)                                          | erledigt |
 
 Entscheidungen aus der Karte:
 
@@ -217,3 +217,21 @@ Testprojekt mit zwei verbundenen Wänden, Fenster, Tür, WC, Text und Treppe, al
 | Fenster „Tastenkürzel“                           | Spiegeln mit Strg+M, kein „(folgt)“ mehr                                     |
 
 Nicht im Browser geprüft, nur durch Tests belegt: Dach, Maßketten, Bilder und freie schräge Achsen.
+
+## Teil B4: Abgleich mit den Objekten
+
+Bewegen, Drehen, Spiegeln und Kopieren sind gegen Esstisch, Stuhl, Sofa, Fernseher und Pkw geprüft (). Der Abgleich ergab keinen Fehler, der Code blieb unverändert.
+
+- **Körper:** Jede Ecke jedes Teils landet am rechnerisch erwarteten Punkt, auch die Stühle am Tisch und die einseitige Armlehne beim Spiegeln.
+- **Werte:** Optionen und Material bleiben erhalten, auch an der Kopie. Das Original bleibt stehen.
+- **Zweimal spiegeln** an derselben Achse ergibt wieder denselben Körper.
+
+**Abnahme im Browser (05.11.2026), am Pkw:**
+
+| Schritt                    | Ergebnis                                         |
+| -------------------------- | ------------------------------------------------ |
+| Strg+D, drei Klicks        | Drehung 90°, Pkw steht quer                      |
+| Strg+M, zwei Klicks        | Drehung 270°, Gespiegelt gesetzt                 |
+| Strg+E, Strg allein, Klick | Kopie am Ziel, Original bleibt, ein Element mehr |
+
+**Grenzen B4:** Im Browser ist nur der Pkw bedient, die anderen vier Objekte sind nur über Tests geprüft. Ein erster Versuch mit Strg+E bewegte nichts und hob die Auswahl auf. Der zweite Versuch gelang, die Ursache ist nicht geklärt.
