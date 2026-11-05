@@ -6,6 +6,8 @@ import { defaultRoofLayerId } from "@/application/roofs/actions";
 import { ROOF_DEFAULTS, type Roof } from "@/domain/elements/roof/model";
 import { defaultRoomLayerId } from "@/application/rooms/actions";
 import { defaultColumnLayerId } from "@/application/columns/actions";
+import { defaultObjectLayerId } from "@/application/objects/actions";
+import { objectToolDefaults, type ObjectToolDefaults } from "@/application/objects/defaults";
 import { defaultRailingLayerId } from "@/application/railings/actions";
 import { defaultRoofWindowLayerId } from "@/application/roof-windows/actions";
 import {
@@ -176,6 +178,20 @@ export function useToolDefaults(project: Project) {
     layerId: project.layers.some((l) => l.id === slabValues.layerId)
       ? slabValues.layerId
       : defaultSlabLayerId(project),
+  };
+  const [objectState, setObjectState] = useState<{
+    projectId: string;
+    values: ObjectToolDefaults;
+  } | null>(null);
+  const objectValues =
+    objectState?.projectId === project.id
+      ? objectState.values
+      : objectToolDefaults(defaultObjectLayerId(project));
+  const objectDefaults = {
+    ...objectValues,
+    layerId: project.layers.some((l) => l.id === objectValues.layerId)
+      ? objectValues.layerId
+      : defaultObjectLayerId(project),
   };
   const [columnState, setColumnState] = useState<{
     projectId: string;
@@ -352,6 +368,10 @@ export function useToolDefaults(project: Project) {
     setDimension(values: DimensionDefaults) {
       setDimensionState({ projectId: project.id, values });
     },
+    object: objectDefaults,
+    setObject(values: ObjectToolDefaults) {
+      setObjectState({ projectId: project.id, values });
+    },
     column: columnDefaults,
     setColumn(values: ColumnDefaults) {
       setColumnState({ projectId: project.id, values });
@@ -391,6 +411,8 @@ export function useToolDefaults(project: Project) {
         setWallState({ projectId: project.id, values: defaults.values });
       else if (defaults.tool === "line")
         setLineState({ projectId: project.id, values: defaults.values });
+      else if (defaults.tool === "library")
+        setObjectState({ projectId: project.id, values: defaults.values });
       else if (defaults.tool === "column")
         setColumnState({ projectId: project.id, values: defaults.values });
       else if (defaults.tool === "railing")

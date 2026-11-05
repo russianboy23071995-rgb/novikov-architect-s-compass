@@ -2,17 +2,20 @@
 
 Nutzerauftrag 04.11.2026: Objektbibliothek mit Möbeln, Sanitär und eigenen Objekten. Änderungskarte mit „Go“ freigegeben, Umsetzung in drei PRs.
 
+Nutzerentscheidung 05.11.2026: Die Bibliothek wird schrittweise aufgewertet. Zuerst das Werkzeug, dann ein bis zwei saubere Möbel mit Bauregeln, Modulen, Material und Farbe. Der Import fremder Dateien ist zurückgestellt. Die 3D-Darstellung bleibt vorerst vereinfacht und wird später erweitert.
+
 | PR  | Inhalt                                                                               | Stand    |
 | --- | ------------------------------------------------------------------------------------ | -------- |
 | O1  | Element Objekt, Katalog mit 15 Objekten, Dateiformat 57, 3D, Grundriss, IFC, Bewegen | erledigt |
-| O2  | Werkzeug, Bibliotheksfenster, Einstellungen, Eigenschaften, Pipette                  | offen    |
-| O3  | Eigene Objekte aus Linien und Schraffuren, globale Bibliothek                        | offen    |
+| M1  | Werkzeug Bibliothek, Katalogfenster, Einstellungen, Eigenschaften, Pipette (war O2)  | erledigt |
+| M2  | Bauregeln, Dateiformat 59, Esstisch mit Stühlen, Material und Farbe, danach Sofa     | offen    |
+| O3  | Eigene Objekte aus Linien und Schraffuren, globale Bibliothek (nach M2 neu bewerten) | offen    |
 
 Vorgaben aus der Karte:
 
 - Alle Katalogobjekte sind für dieses Projekt selbst gezeichnet, ohne fremde Modelle, Downloads oder Lizenzen.
-- 3D bleibt schlicht: wenige Quader je Objekt.
-- Fremde Formate (OBJ, SKP, IFC-Möbel) gehören nicht zu L44.
+- 3D bleibt vorerst schlicht. Mit M2 kommen Umrisse für Rundungen dazu.
+- Fremde Formate (OBJ, SKP, IFC-Möbel) sind zurückgestellt.
 
 ## Teil O1: Element und Katalog
 
@@ -53,3 +56,37 @@ Vorgaben aus der Karte:
 - Kein Werkzeug und kein Elementfenster; Objekte entstehen nur über Dateien oder Aktionen (bis O2).
 - Drehen nur über den Wert, nicht interaktiv.
 - Die Mengenliste kennt Objekte noch nicht.
+
+## Teil M1: Werkzeug und Katalogfenster
+
+- **Werkzeug:** „Bibliothek“ in der Gruppe der 3D-Werkzeuge, mit eigenem Piktogramm (`assets/piktogramme/*/werkzeuge/bibliothek.svg`). Jede Wahl des Werkzeugs öffnet das Katalogfenster.
+- **Katalogfenster** (`LibraryWindow.tsx`):
+  - Links die Gattungen aus `OBJECT_GENRES` mit Anzahl: Sitzmöbel, Tische, Betten, Schränke und Regale, Küche, Sanitär.
+  - In der Mitte die Einträge als Kacheln mit Grundriss-Vorschau.
+  - Rechts Vorschau in 2D und 3D, die Felder und „Platzieren“.
+  - Ein Klick wählt, Doppelklick oder „Platzieren“ schließt das Fenster.
+- **Vorschau** (`rendering/viewport/object-preview.ts`): gezeichnet aus Symbol und Quadern des Katalogs, ohne Bilddateien und ohne 3D-Anzeige. Sie folgt den eingegebenen Maßen.
+- **Setzen:** Das Objekt hängt als türkiser Umriss am Cursor, jeder Klick setzt eines mit der Mitte auf dem Punkt, Esc beendet.
+- **Vorgaben** (`application/objects/defaults.ts`): Beim Wechsel des Eintrags kommt dessen Startgröße, Drehung, Bauzustand und Ebene bleiben. Neue Objekte sind Neubau.
+- **Felder** (`ObjectFields.tsx`): Breite, Tiefe, Höhe, Drehung, Höhe über Boden, Gespiegelt, Ebene. Derselbe Satz in Leiste, Katalog, Einstellungen und Elementfenster.
+- **Regeln aus AGENTS.md:** Doppelklick auf das Werkzeug öffnet die Vorgaben, Doppelklick auf ein Objekt sein Fenster mit Bauzustand. Jede Änderung ist ein Rückgängig-Schritt.
+- **Pipette:** übernimmt Eintrag, Maße, Drehung und Bauzustand und schaltet auf das Werkzeug, ohne den Katalog zu öffnen.
+
+**Abnahme im Browser (05.11.2026):**
+
+| Schritt                                 | Ergebnis                                                |
+| --------------------------------------- | ------------------------------------------------------- |
+| Klick auf das Werkzeug                  | Katalog öffnet sich, Tisch mit 2D- und 3D-Vorschau      |
+| Gattung Sitzmöbel, Doppelklick auf Sofa | Fenster schließt, Sofa-Umriss hängt am Cursor           |
+| Zwei Klicks im Plan                     | Zwei Sofas gesetzt, 4 Elemente                          |
+| Doppelklick auf ein Sofa, Breite 3      | Fenster öffnet, Sofa wird 3 m breit                     |
+| Strg+Z                                  | Wieder 2 m                                              |
+| Rechtsklick, Pipette                    | Werkzeug aktiv, Umriss am Cursor, kein Katalog          |
+| Doppelklick auf das Werkzeug            | Fenster „Bibliothek – Einstellungen“, Katalog bleibt zu |
+
+**Grenzen M1:**
+
+- Drehen beim Setzen nur über das Feld „Drehung“, nicht per Taste.
+- Die 15 Objekte haben noch ihre Quaderform und dehnen sich mit der Box.
+- Der Eintrag eines gesetzten Objekts lässt sich nicht tauschen.
+- Die Mengenliste kennt Objekte weiterhin nicht.

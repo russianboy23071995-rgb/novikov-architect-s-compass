@@ -1,4 +1,5 @@
 import {
+  Armchair,
   DoorOpen,
   PaintBucket,
   MousePointer2,
@@ -99,6 +100,14 @@ export const RAIL_TOOLS: Partial<Record<ToolId, CadTool>> = {
     shortcut: "",
     icon: RoofWindowIcon,
     pictogram: "dachflaechenfenster",
+  },
+  // Places catalogue objects (docs/OBJEKTBIBLIOTHEK.md, M1).
+  library: {
+    id: "library",
+    label: "Bibliothek",
+    shortcut: "",
+    icon: Armchair,
+    pictogram: "bibliothek",
   },
   railing: {
     id: "railing",

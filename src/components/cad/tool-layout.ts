@@ -26,6 +26,7 @@ export const DEFAULT_TOOL_LAYOUT: ToolLayout = {
     "room",
     "roofWindow",
     "railing",
+    "library",
     "terrain",
   ],
   "2d": ["line", "hatch", "text", "drawing"],
