@@ -75,7 +75,7 @@ export function CanvasContextMenu({
       ref={panel}
       role="menu"
       aria-label="Kontextmenü"
-      className="glass-panel-strong fixed z-[60] min-w-52 rounded-lg border p-1 text-xs shadow-lg"
+      className="glass-panel-strong fixed z-[60] min-w-52 rounded-lg border p-1 text-[11px] shadow-lg"
       style={{ left: place.x, top: place.y }}
       onContextMenu={(event) => {
         event.preventDefault();
