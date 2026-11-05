@@ -258,7 +258,8 @@ test("Tab cycling: every element under a plan point, topmost first, captions, cy
   for (let i = 0; i < 3; i++) cycle = stepCycle(cycle);
   assert.equal(cycleTarget(cycle).id, "roof");
   assert.equal(cycleTarget(stepCycle(cycle, true)).id, "room");
-  assert.equal(hoverCycle(cycle, targets.slice(0, 1)), null);
+  // The chosen element alone under the cursor stays chosen (docs/ANPASSUNGSLISTE.md, 6).
+  assert.equal(cycleTarget(hoverCycle(cycle, targets.slice(0, 1))!).id, "roof");
   assert.equal(cycleTarget(hoverCycle(cycle, targets.slice(1))!).id, "slab-b");
   assert.equal(hoverCycle(cycle, targets.slice(1))!.expanded, false);
   // Every registered element kind supplies a footprint and a caption (new kinds included).
