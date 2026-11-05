@@ -65,7 +65,7 @@ export function useOverlapCycle(
     shapes.find((s) => s.target.kind === target.kind && s.target.id === target.id);
   return {
     /** Current pre-selection with the cursor point, or null (hint hidden). */
-    state: active,
+    state: active && (active.cycle.expanded || active.cycle.targets.length > 1) ? active : null,
     preselected: active?.cycle.expanded ? cycleTarget(active.cycle) : null,
     shapeOf,
     move(point: Point | null) {

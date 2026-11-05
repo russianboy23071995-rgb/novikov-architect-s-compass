@@ -678,6 +678,7 @@ export function PlanSceneContent({
               points={points}
               fill="none"
               stroke="none"
+              strokeWidth={0}
               pointerEvents={placement ? "none" : "all"}
               className="cursor-pointer outline-none"
             />
@@ -941,6 +942,7 @@ export function PlanSceneContent({
               fill="var(--background)"
               fillOpacity={0.01}
               stroke="none"
+              strokeWidth={0}
               pointerEvents={placement ? "none" : "all"}
               className="cursor-pointer outline-none"
             />
@@ -955,7 +957,8 @@ export function PlanSceneContent({
       })}
       {plan.objects.map((object) => {
         // Object (docs/OBJEKTBIBLIOTHEK.md, O1): its catalogue symbol seen from above in thin
-        // lines; the box outline is the pick area.
+        // lines; the outlines of its parts are the pick area. "all" also hits the invisible stroke
+        // of width 1 (one metre here), so pick areas without a line set it to 0.
         const view = scene.objectViews.get(object.id)!;
         const selected = selectedIds.has(object.id);
         const color = selected ? "#0284c7" : "var(--primary)";
@@ -974,15 +977,19 @@ export function PlanSceneContent({
                 pointerEvents="none"
               />
             )}
-            <polygon
-              {...selectProps("object", object.id)}
-              points={outline}
-              fill="var(--background)"
-              fillOpacity={0.01}
-              stroke="none"
-              pointerEvents={placement ? "none" : "all"}
-              className="cursor-pointer outline-none"
-            />
+            {view.pick.map((ring, i) => (
+              <polygon
+                key={i}
+                {...selectProps("object", object.id)}
+                points={ring.map((p) => `${p.x},${-p.y}`).join(" ")}
+                fill="var(--background)"
+                fillOpacity={0.01}
+                stroke="none"
+                strokeWidth={0}
+                pointerEvents={placement ? "none" : "all"}
+                className="cursor-pointer outline-none"
+              />
+            ))}
             {view.symbol.map((part, i) => {
               const d =
                 part.points.map((p, k) => `${k ? "L" : "M"}${p.x},${-p.y}`).join(" ") +

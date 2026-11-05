@@ -1338,10 +1338,10 @@ export function BimPlan({
         if ((event.target as Element).closest("[data-reference-panel]")) return;
         // Overlapping elements: the click selects the Tab pre-selection, not the topmost one.
         const chosen = overlap.preselected;
-        if (chosen && (event.target as Element).closest("[data-plan-pick]")) {
+        overlap.clear();
+        if (chosen) {
           event.preventDefault();
           event.stopPropagation();
-          overlap.clear();
           latestSelect.current(chosen.kind, chosen.id).onClick(event);
           return;
         }

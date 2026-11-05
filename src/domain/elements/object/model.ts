@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { contains } from "../../../geometry/polygons/contains.ts";
 import { WALL_RENOVATIONS } from "../wall/renovation.ts";
 import {
   OBJECT_CATALOG_IDS,
@@ -119,6 +120,31 @@ export function objectOutline(
     objectPoint(o, -0.5, 0.5),
   ];
   return o.mirrored ? ring.reverse() : ring;
+}
+
+/**
+ * Pick area of an object in plan (docs/ANPASSUNGSLISTE.md, 1): with a build rule the outlines of
+ * its parts, those lying inside a larger part left out, so the gaps between chairs select nothing
+ * and the seams between cushions do; otherwise its box.
+ */
+export function objectPickRings(
+  o: Placement &
+    Pick<PlacedObject, "catalogId"> &
+    Partial<Pick<PlacedObject, "height" | "options">>,
+): { x: number; y: number }[][] {
+  const shape = ruledShape({ ...o, height: o.height ?? 1 });
+  if (!shape) return [objectOutline(o)];
+  const area = (ring: readonly { x: number; y: number }[]) =>
+    Math.abs(
+      ring.reduce((sum, p, i) => {
+        const q = ring[(i + 1) % ring.length]!;
+        return sum + p.x * q.y - q.x * p.y;
+      }, 0),
+    );
+  const kept: { x: number; y: number }[][] = [];
+  for (const { ring } of [...shape.parts].sort((a, b) => area(b.ring) - area(a.ring)))
+    if (!kept.some((big) => ring.every((p) => contains(big, p)))) kept.push(ring);
+  return kept.map((ring) => ring.map((p) => localPoint(o, p)));
 }
 
 /** Segments of an ellipse in the plan symbol. */

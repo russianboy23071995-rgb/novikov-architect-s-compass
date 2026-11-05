@@ -3,7 +3,14 @@ import assert from "node:assert/strict";
 import { createStandardProject } from "../projects/create.ts";
 import { addObject, updateObject } from "./actions.ts";
 import { chooseObject, objectSettings, objectToolDefaults, objectValues } from "./defaults.ts";
-import { objectOutline, objectSolids, objectSymbol } from "../../domain/elements/object/model.ts";
+import {
+  objectOutline,
+  objectPickRings,
+  objectSolids,
+  objectSymbol,
+} from "../../domain/elements/object/model.ts";
+import { hoverCycle, stepCycle, cycleTarget } from "../selection/cycle.ts";
+import { shapesAt } from "../../rendering/viewport/selection-shapes.ts";
 import { searchObjects } from "../../domain/elements/object/catalog.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import {
@@ -215,6 +222,61 @@ test("IFC: television and car leave as their own classes", async () => {
   const ifc = await exportIfc(p, new Date("2026-11-05T12:00:00Z"));
   assert.match(ifc, /=IFCAUDIOVISUALAPPLIANCE\(.*\.DISPLAY\.\)/);
   assert.match(ifc, /=IFCBUILDINGELEMENTPROXY\(.*'Pkw'.*\.USERDEFINED\.\)/);
+});
+
+test("pick area: the parts, not the box; a free corner of a turned sofa selects nothing", () => {
+  const sofa = {
+    id: "s",
+    catalogId: "sofa" as const,
+    position: { x: 0, y: 0 },
+    rotation: 45,
+    width: 2,
+    depth: 0.9,
+    height: 0.8,
+    baseOffset: 0,
+    options: { sofaArms: "none" as const },
+  };
+  const shape = {
+    target: { kind: "object" as const, id: "s" },
+    points: objectOutline(sofa),
+    closed: true,
+    pick: objectPickRings(sofa),
+  };
+  assert.equal(shapesAt([shape], { x: 0, y: 0 }, 0).length, 1);
+  // In the box corner at the front, but outside the sofa: nothing without its arm.
+  const corner = objectOutline(sofa)[0]!;
+  assert.equal(shapesAt([shape], { x: corner.x * 0.99, y: corner.y * 0.99 }, 0).length, 0);
+  // Between table and chairs nothing either; objects without a rule keep their box.
+  const wc = { ...table(1), catalogId: "wc" as const };
+  assert.deepEqual(objectPickRings(wc), [objectOutline(wc)]);
+  assert.ok(objectPickRings(table(1.6, { chairs: "auto" })).length > 4);
+  // The seam between two cushions belongs to the sofa, few outlines hold it all.
+  assert.ok(objectPickRings(sofa).length <= 3);
+});
+
+test("overlap: a choice made with Tab stays until the click", () => {
+  const a = { kind: "wall", id: "a" } as const,
+    b = { kind: "hatch", id: "b" } as const,
+    c = { kind: "slab", id: "c" } as const;
+  let cycle = hoverCycle(null, [a, b])!;
+  assert.equal(cycle.expanded, false);
+  cycle = stepCycle(stepCycle(cycle));
+  assert.deepEqual(cycleTarget(cycle), b);
+  // Another element joins, the order changes: b stays chosen.
+  cycle = hoverCycle(cycle, [c, a, b])!;
+  assert.deepEqual([cycleTarget(cycle), cycle.expanded], [b, true]);
+  // b alone under the cursor stays chosen as well.
+  cycle = hoverCycle(cycle, [b])!;
+  assert.deepEqual([cycleTarget(cycle), cycle.expanded], [b, true]);
+  // Off b the choice waits, and comes back on the way in.
+  cycle = hoverCycle(cycle, [])!;
+  assert.deepEqual([cycle.expanded, cycle.pin], [false, b]);
+  cycle = hoverCycle(cycle, [a])!;
+  assert.equal(cycle.expanded, false);
+  cycle = hoverCycle(cycle, [a, b])!;
+  assert.deepEqual([cycleTarget(cycle), cycle.expanded], [b, true]);
+  // Without a choice everything stays as before.
+  assert.equal(hoverCycle(hoverCycle(null, [a, b]), [a]), null);
 });
 
 test("the click outline holds the chairs; a chair on its own follows its size", () => {
