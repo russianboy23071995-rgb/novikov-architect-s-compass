@@ -40,7 +40,7 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 | L40 | Werkzeug Deckendurchbruch (Öffnung in Decken, z. B. für Treppen und Schächte) |      | erledigt (PR605, Symbol nach Vorlage und runder Durchbruch PR606), docs/DECKENDURCHBRUCH.md; Luftraum im Geschoss darüber offen | N48 |
 | L41 | Werkzeug Dachflächenfenster (Fenster in Dachflächen) |      | erledigt: D1 Modell, Loch im Dach, 3D, IFC (PR631), D2 Werkzeug, Grundriss (PR632), D3 Verschieben, Fang, Pipette, Schnitt (PR633), Strichelung und Laibung nach Velux (PR634); offen: Drehen, Eindeckrahmen | docs/DACHFLAECHENFENSTER.md |
 | L42 | Werkzeug Geländer |      | erledigt: G1 Modell, 3D, IFC (PR628), G2 Werkzeug, Grundriss (PR629), G3 Verschieben, Fang, Pipette, Schnitt (PR630); offen: Punkte einzeln bearbeiten | docs/GELAENDER.md |
-| L43 | Werkzeug Gelände (Geländemodell) |      | erledigt: G1 Modell, 3D (PR657), G2 Werkzeug, Höhenlinien (PR658), G3 Schnitt, IFC (PR659); offen: Punkte in der Lage verschieben, Baugrube | docs/GELAENDE.md |
+| L43 | Werkzeug Gelände (Geländemodell) |      | erledigt: G1 Modell, 3D (PR657), G2 Werkzeug, Höhenlinien (PR658), G3 Schnitt, IFC (PR659), Griffe (PR660); offen: Baugrube | docs/GELAENDE.md |
 | L44 | Objektbibliothek (Möbel, Sanitär, eigene Objekte platzieren) |      | erledigt: O1 Element, Katalog, 3D, IFC (PR635), M1 Werkzeug und Katalogfenster (PR639), M2a Bauregeln, Esstisch, Material (PR640), M2b Sofa (PR641), M3 Pkw, Fernseher, Suche (PR642), M4 weitere Möbel (PR654), M5 Küche und Sanitär (PR655); zurückgestellt: O3 eigene Objekte | docs/OBJEKTBIBLIOTHEK.md |
 
 ## Pläne und Dokumentation
