@@ -33,7 +33,8 @@ export function parseCutFill(value: unknown): CutFill {
 }
 
 /** Cut paint of a wall: Neubau red and Abbruch yellow when the renovation display is on, Bestand
- * and everything else in the cut fill (docs/BAUZUSTAND.md). */
+ * and everything else in the cut fill (docs/BAUZUSTAND.md). The grey fill is opaque here: the
+ * same tone as `cutPaint`, but neither grid nor the wall below shine through. */
 export function wallCutPaint(
   fill: CutFill,
   showRenovation: boolean,
@@ -41,8 +42,11 @@ export function wallCutPaint(
 ): { fill: string; fillOpacity: number } {
   if (showRenovation && renovation && renovation !== "existing")
     return { fill: WALL_RENOVATION_COLORS[renovation], fillOpacity: 1 };
-  return cutPaint(fill);
+  const paint = cutPaint(fill);
+  return paint.fillOpacity < 1 ? { fill: OPAQUE_GREY, fillOpacity: 1 } : paint;
 }
+
+const OPAQUE_GREY = "color-mix(in oklab, var(--muted-foreground) 55%, var(--background))";
 
 /** SVG paint of a cut: grey keeps the earlier theme-aware look, white keeps the contour alone. */
 export function cutPaint(fill: CutFill): { fill: string; fillOpacity: number } {

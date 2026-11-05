@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { ACTIVE_CONTROL } from "./active-control";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   gridSpacing,
@@ -20,7 +22,10 @@ export function GridControls({
     <div className="flex items-center gap-1">
       <Button
         variant="ghost"
-        className="h-6 px-2 text-[11px]"
+        className={cn(
+          "h-6 rounded-sm px-2 text-[11px] font-normal text-muted-foreground hover:text-foreground",
+          value.enabled && ACTIVE_CONTROL,
+        )}
         aria-pressed={value.enabled}
         onClick={() => onChange({ ...value, enabled: !value.enabled })}
       >
