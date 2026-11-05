@@ -4,6 +4,7 @@ import { createStandardProject } from "../projects/create.ts";
 import {
   addTerrain,
   addTerrainPoint,
+  moveTerrainPoint,
   projectTerrain,
   terrainSettings,
   updateTerrain,
@@ -181,4 +182,17 @@ test("section and IFC: the terrain is cut, seen and handed over", async () => {
   const ifc = await exportIfc(p, new Date("2026-11-05T12:00:00Z"));
   assert.ok(/=IFCGEOGRAPHICELEMENT\(.*\.TERRAIN\.\)/.test(ifc));
   assert.ok(ifc.includes("=IFCTRIANGULATEDFACESET("));
+});
+
+test("moving: a point keeps its height, the rules still hold", () => {
+  let p = addTerrain(createStandardProject("p", "eg", "og"), { id: "g", outline: square(1) });
+  p = addTerrainPoint(p, { x: 5, y: 5, z: 3 });
+  p = moveTerrainPoint(p, "points", 0, { x: 6, y: 4 });
+  assert.deepEqual(projectTerrain(p)?.points[0], { x: 6, y: 4, z: 3 });
+  p = moveTerrainPoint(p, "outline", 2, { x: 12, y: 12 });
+  assert.deepEqual(projectTerrain(p)?.outline[2], { x: 12, y: 12, z: 1 });
+  assert.throws(() => moveTerrainPoint(p, "points", 0, { x: 50, y: 4 }));
+  // A corner that leaves a height point outside is refused too.
+  assert.throws(() => moveTerrainPoint(p, "outline", 2, { x: 1, y: 1 }));
+  assert.throws(() => moveTerrainPoint(p, "points", 9, { x: 1, y: 1 }));
 });

@@ -40,7 +40,11 @@ Entscheidungen aus der Karte:
 | Doppelklick auf den Umriss      | Fenster mit vier Ecken, zwei Punkten, zweimal Löschen |
 | 3D-Ansicht                      | Geschlossener Körper mit Hügel, Gebäude steckt darin  |
 
-**Grenzen G2:** Punkte lassen sich nur in der Höhe ändern und löschen, nicht in der Lage verschieben, und Ecken nur in der Höhe. Das weicht von der Karte ab, dort stand „verschieben“. Das Gelände als Ganzes wird nicht bewegt. Im Browser sind Löschen und Ändern im Fenster nur angezeigt, nicht bedient.
+**Verschieben (Nachtrag):** Ist das Gelände gewählt, tragen Ecken und Höhenpunkte Griffe. Ziehen verschiebt sie mit Fang, die Höhe bleibt, der Umriss zeigt sich dabei gestrichelt. Was gegen die Regeln verstößt, etwa ein Punkt außerhalb oder eine kreuzende Kante, wird mit Meldung abgelehnt.
+
+**Abnahme im Browser (05.11.2026):** Ecke 3 gezogen, Umriss und Höhenlinien folgen. Höhenpunkt gezogen, die Auswahl bleibt. Punkt nach außen gezogen: Meldung „Höhenpunkte müssen innerhalb des Geländeumrisses liegen.“, der Punkt bleibt stehen.
+
+**Grenzen G2:** Das Gelände als Ganzes wird nicht bewegt. Menü und Strg+E, Strg+D, Strg+M bieten das deshalb nicht an. Im Browser sind Löschen und Ändern im Fenster nur angezeigt, nicht bedient.
 
 ## Teil G3: Schnitt, Ansicht, IFC
 

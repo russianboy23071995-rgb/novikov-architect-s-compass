@@ -349,6 +349,8 @@ export type BimPlanProps = {
   onDrawingMask?: ((id: string, mask: DrawingMask) => void) | undefined;
   /** A grip was dragged: the new line of the section (one undo step). */
   onSectionLine?: ((id: string, line: { start: Point; end: Point }) => void) | undefined;
+  /** A corner or height point of the terrain dragged to a new place (docs/GELAENDE.md). */
+  onTerrainPoint?: ((list: "outline" | "points", index: number, to: Point) => void) | undefined;
   /** Section being drawn: start, then end; the pointer gives the end, then the viewing side. */
   sectionDraft?:
     | {
@@ -458,6 +460,7 @@ export function BimPlan({
   selectedSectionId,
   onSectionSelect,
   onSectionLine,
+  onTerrainPoint,
   onDrawingMask,
   selectionAnchor,
   onLineLength,
@@ -554,6 +557,12 @@ export function BimPlan({
     if (drag && svg.current?.hasPointerCapture(drag.pointerId))
       svg.current.releasePointerCapture(drag.pointerId);
   };
+  const terrainDrag = useRef<{
+    pointerId: number;
+    list: "outline" | "points";
+    index: number;
+  } | null>(null);
+  const [terrainPreview, setTerrainPreview] = useState<Point | null>(null);
   const [sectionPreview, setSectionPreview] = useState<{
     id: string;
     start: Point;
@@ -1274,6 +1283,17 @@ export function BimPlan({
             onDrawingMask?.(masked.id, next);
           return;
         }
+        const terrainGrip = terrainDrag.current;
+        if (terrainGrip?.pointerId === event.pointerId) {
+          terrainDrag.current = null;
+          gripClick.current = true;
+          if (event.currentTarget.hasPointerCapture(event.pointerId))
+            event.currentTarget.releasePointerCapture(event.pointerId);
+          const to = terrainPreview;
+          setTerrainPreview(null);
+          if (to) onTerrainPoint?.(terrainGrip.list, terrainGrip.index, to);
+          return;
+        }
         const dragged = sectionDrag.current;
         if (dragged?.pointerId === event.pointerId) {
           sectionDrag.current = null;
@@ -1321,6 +1341,10 @@ export function BimPlan({
           maskDrag.current = null;
           setMaskPreview(null);
         }
+        if (terrainDrag.current) {
+          terrainDrag.current = null;
+          setTerrainPreview(null);
+        }
         if (sectionDrag.current) {
           sectionDrag.current = null;
           setSectionPreview(null);
@@ -1334,6 +1358,10 @@ export function BimPlan({
       onPointerCancel={() => {
         marquee.cancel();
         if (maskDrag.current) endMaskDrag();
+        if (terrainDrag.current) {
+          terrainDrag.current = null;
+          setTerrainPreview(null);
+        }
         if (sectionDrag.current) {
           sectionDrag.current = null;
           setSectionPreview(null);
@@ -1432,6 +1460,11 @@ export function BimPlan({
             id: maskGrip.id,
             mask: dragMaskEdge(maskGrip.mask, maskGrip.edge, value, maskGrip.limit),
           });
+          return;
+        }
+        if (terrainDrag.current?.pointerId === event.pointerId) {
+          const raw = rawPoint(event);
+          if (raw) setTerrainPreview(resolvePointer(raw, false).point);
           return;
         }
         const sectionGrip = sectionDrag.current;
@@ -1858,6 +1891,68 @@ export function BimPlan({
             ))}
         {sceneRuns.filter((run) => !run.band && run.kind === "line").map(renderRun)}
         {sceneRuns.filter((run) => run.band === "front").map(renderRun)}
+        {selection?.kind === "terrain" &&
+          !drawing &&
+          (storeyOf(project).terrains ?? [])
+            .filter((terrain) => terrain.id === selection.id)
+            .map((terrain) => {
+              const grip = terrainDrag.current;
+              const moved = (list: "outline" | "points") =>
+                terrain[list].map((p, i) =>
+                  grip?.list === list && grip.index === i && terrainPreview
+                    ? { ...p, ...terrainPreview }
+                    : p,
+                );
+              return (
+                <g key={terrain.id} aria-label="Geländegriffe">
+                  {terrainPreview && (
+                    <polygon
+                      points={moved("outline")
+                        .map((p) => `${p.x},${-p.y}`)
+                        .join(" ")}
+                      fill="none"
+                      stroke="#0284c7"
+                      strokeWidth={1.5}
+                      strokeDasharray="6 4"
+                      vectorEffect="non-scaling-stroke"
+                      pointerEvents="none"
+                    />
+                  )}
+                  {(["outline", "points"] as const).flatMap((list) =>
+                    moved(list).map((p, index) => (
+                      <circle
+                        key={`${list}-${index}`}
+                        role="button"
+                        aria-label={`${list === "outline" ? "Ecke" : "Punkt"} ${index + 1} ziehen`}
+                        cx={p.x}
+                        cy={-p.y}
+                        r={6 / camera.pixelsPerMetre}
+                        fill="var(--background)"
+                        stroke="#0284c7"
+                        strokeWidth={2}
+                        vectorEffect="non-scaling-stroke"
+                        className="cursor-move"
+                        onPointerDown={(event) => {
+                          if (event.button !== 0 || pan || !interactive || !onTerrainPoint) return;
+                          if (!svg.current) return;
+                          event.preventDefault();
+                          event.stopPropagation();
+                          svg.current.focus();
+                          gripClick.current = false;
+                          navigationClick.current = false;
+                          terrainDrag.current = { pointerId: event.pointerId, list, index };
+                          svg.current.setPointerCapture(event.pointerId);
+                        }}
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                        }}
+                      />
+                    )),
+                  )}
+                </g>
+              );
+            })}
         {!drawing &&
           !editSession &&
           selection &&

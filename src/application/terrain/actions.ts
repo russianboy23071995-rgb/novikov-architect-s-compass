@@ -76,6 +76,20 @@ export function addTerrainPoint(project: Project, point: TerrainPoint): Project 
   return updateTerrain(project, { points: [...terrain.points, point] });
 }
 
+/** A corner or height point at a new plan position; its height stays. */
+export function moveTerrainPoint(
+  project: Project,
+  list: "outline" | "points",
+  index: number,
+  to: { x: number; y: number },
+): Project {
+  const terrain = projectTerrain(project);
+  if (!terrain?.[list][index]) throw new Error("Unbekannter Geländepunkt.");
+  return updateTerrain(project, {
+    [list]: terrain[list].map((p, i) => (i === index ? { ...p, x: to.x, y: to.y } : p)),
+  });
+}
+
 /** One checked change of the terrain. */
 export function updateTerrain(project: Project, changes: Partial<Omit<Terrain, "id">>): Project {
   const terrain = projectTerrain(project);
