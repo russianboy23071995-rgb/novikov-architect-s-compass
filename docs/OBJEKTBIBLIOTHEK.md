@@ -12,6 +12,7 @@ Nutzerentscheidung 05.11.2026: Die Bibliothek wird schrittweise aufgewertet. Zue
 | M2b | Sofa mit Armlehnen und Sitzkissen                                                    | erledigt |
 | M3  | Pkw, Fernseher, Suche im Katalog, Dateiformat 60                                     | erledigt |
 | M4  | Betten, Schrank, Regal nach Bauregel, fünf neue Möbel, Dateiformat 61                | erledigt |
+| M5  | Küche und Sanitär nach Bauregel, Dateiformat 62                                      | erledigt |
 | O3  | Eigene Objekte aus Linien und Schraffuren, globale Bibliothek (nach M2 neu bewerten) | offen    |
 
 Vorgaben aus der Karte:
@@ -193,3 +194,20 @@ Vorgaben aus der Karte:
 | Doppelklick auf den Schrank, Türen fest 4 | Felder folgen, Material Korpus, Türen, Griffe |
 
 **Grenzen M4:** Küche und Sanitär haben noch keine Bauregeln. Kissen und Bettdecke sind flache Quader mit gerundeten Ecken. Schubladen sind fest auf zwei gestellt, Schreibtisch und Couchtisch haben keine Schubladen. Das Kopfteil ist fest an die Höhe gekoppelt. Material und Farbe sind nur am Esstisch im Browser bedient, sie nutzen denselben Code.
+
+## Teil M5: Küche und Sanitär
+
+- **Küchenzeile:** Sockel, Unterschränke, Fronten mit Griffen, durchgehende Arbeitsplatte. Fronten automatisch eine je 60 cm oder als feste Anzahl.
+- **Herd:** Korpus, Backofentür mit Griff, Glasfeld mit vier Kochzonen.
+- **Spüle:** Unterschrank, Rand aus vier Teilen, tiefer liegender Beckenboden, Armatur.
+- **Kühlschrank:** Korpus, Griffe, zwei Türen oder eine.
+- **WC:** Spülkasten, nach oben breiter werdende Schüssel in Stufen, Deckel.
+- **Waschtisch:** Rand, Becken, Armatur, wandhängend oder auf Unterschrank.
+- **Dusche:** Duschtasse, Ablauf, Glaswand keine, an einer Seite oder als Ecke. Das Glas ist 2 m hoch, neue Duschen starten mit Ecke. Vorhandene Duschen bleiben ohne Glas.
+- **Badewanne:** Korpus, vier Ränder, tiefer liegender Boden, Armatur.
+- **Damit** haben alle 22 Objekte des Katalogs eine Bauregel. Die Einheitsquader im Katalog dienen nur noch als Rückfall.
+- **Schema 62:** Optionen `fridgeDoors`, `basinMount`, `showerGlass`. Eine 61er Datei lädt unverändert, mit diesen Werten wird sie abgelehnt.
+
+**Abnahme im Browser (05.11.2026):** Alle acht über die Suche gesetzt, im Grundriss mit eigenem Symbol, in 3D mit Teilen und Standardfarben. Die Felder Glaswand, Türen und Montage erscheinen im Katalogfenster.
+
+**Grenzen M5:** Becken und Wanne sind innen eckig, die Innenlinie im Grundriss ist gerundet. Das Glas ist in 3D undurchsichtig getönt, durchscheinende Flächen kennt die 3D-Ansicht nur bei Fenstern. Herd und Spüle sind nicht in die Küchenzeile eingebaut. Der Auslauf der Armatur ist gerade. Die Auswahlfelder sind über Tests belegt, im Browser nur ihre Anzeige.

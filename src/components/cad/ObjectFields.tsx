@@ -2,6 +2,12 @@ import { useState } from "react";
 import type { ObjectToolDefaults } from "@/application/objects/defaults";
 import { objectDefinition } from "@/domain/elements/object/catalog";
 import {
+  BASIN_MOUNT_LABELS,
+  BASIN_MOUNTS,
+  FRIDGE_DOOR_LABELS,
+  FRIDGE_DOORS,
+  SHOWER_GLASS,
+  SHOWER_GLASS_LABELS,
   MAX_OBJECT_DIVISIONS,
   MAX_TABLE_CHAIRS,
   objectBoards,
@@ -32,6 +38,42 @@ const LABELS: Record<NumberField, string> = {
   baseOffset: "Über Boden (m)",
 };
 const POSITIVE: ReadonlySet<NumberField> = new Set(["width", "depth", "height"]);
+
+/** One option of a piece as a list. */
+function Choice<T extends string>({
+  label,
+  value,
+  values,
+  labels,
+  onChange,
+}: {
+  label: string;
+  value: T;
+  values: readonly T[];
+  labels: Record<T, string>;
+  onChange: (value: T) => void;
+}) {
+  return (
+    <fieldset className="flex w-full flex-wrap items-end gap-3 border-t pt-2">
+      <legend className="sr-only">{label}</legend>
+      <label className="text-xs">
+        {label}
+        <select
+          aria-label={label}
+          value={value}
+          onChange={(e) => onChange(e.target.value as T)}
+          className="block rounded border bg-background p-1"
+        >
+          {values.map((option) => (
+            <option key={option} value={option}>
+              {labels[option]}
+            </option>
+          ))}
+        </select>
+      </label>
+    </fieldset>
+  );
+}
 
 /** Doors of a cabinet or boards of a shelf: by size or a fixed number. */
 function Divisions({
@@ -212,9 +254,37 @@ export function ObjectFields({
           ))}
         </select>
       </label>
+      {!compact && value.catalogId === "fridge" && (
+        <Choice
+          label="Türen"
+          value={options.fridgeDoors ?? "two"}
+          values={FRIDGE_DOORS}
+          labels={FRIDGE_DOOR_LABELS}
+          onChange={(fridgeDoors) => setOptions({ fridgeDoors })}
+        />
+      )}
+      {!compact && value.catalogId === "washbasin" && (
+        <Choice
+          label="Montage"
+          value={options.basinMount ?? "wall"}
+          values={BASIN_MOUNTS}
+          labels={BASIN_MOUNT_LABELS}
+          onChange={(basinMount) => setOptions({ basinMount })}
+        />
+      )}
+      {!compact && value.catalogId === "shower" && (
+        <Choice
+          label="Glaswand"
+          value={options.showerGlass ?? "none"}
+          values={SHOWER_GLASS}
+          labels={SHOWER_GLASS_LABELS}
+          onChange={(showerGlass) => setOptions({ showerGlass })}
+        />
+      )}
       {!compact &&
         (value.catalogId === "wardrobe" ||
           value.catalogId === "sideboard" ||
+          value.catalogId === "kitchen-counter" ||
           value.catalogId === "shelf") && (
           <Divisions
             label={value.catalogId === "shelf" ? "Böden" : "Türen"}

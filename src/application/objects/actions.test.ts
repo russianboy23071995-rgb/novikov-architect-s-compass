@@ -136,13 +136,13 @@ test("add: catalogue size on the Möblierung layer; checked values; delete and c
 });
 
 test("schema 57: files round-trip; v56 files refuse smuggled objects", () => {
-  assert.equal(PROJECT_SCHEMA_VERSION, 61);
+  assert.equal(PROJECT_SCHEMA_VERSION, 62);
   const p = furnished();
   assert.deepEqual(storeyOf(readProjectFile(serializeProject(p))).objects, storeyOf(p).objects);
   const smuggled = JSON.parse(serializeProject(p));
   assert.throws(() => loadProjectData({ ...smuggled, schemaVersion: 56 }));
   const plain = JSON.parse(serializeProject(createStandardProject("p", "eg", "og")));
-  assert.equal(loadProjectData({ ...plain, schemaVersion: 56 }).schemaVersion, 61);
+  assert.equal(loadProjectData({ ...plain, schemaVersion: 56 }).schemaVersion, 62);
 });
 
 test("3D: closed parts, tagged as object, on the storey floor", () => {

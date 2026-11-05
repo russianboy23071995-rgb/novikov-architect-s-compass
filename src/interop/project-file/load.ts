@@ -63,6 +63,7 @@ import {
   projectV58Schema,
   projectV59Schema,
   projectV60Schema,
+  projectV61Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
@@ -281,6 +282,14 @@ export function migrateProjectData(value: unknown): Project {
   if (value.schemaVersion === 36)
     return migrateProjectData(
       withColumnLayer(withoutBoundHeights({ ...projectV36Schema.parse(value), schemaVersion: 37 })),
+    );
+  // Schema 61 files carry no kitchen or bathroom options; the strict v61 schema rejects them.
+  if (value.schemaVersion === 61)
+    return validateProject(
+      withoutBoundHeights({
+        ...projectV61Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
     );
   // Schema 60 files know none of the M4 furniture; the strict v60 schema rejects it.
   if (value.schemaVersion === 60)

@@ -255,9 +255,7 @@ test("pick area: the parts, not the box; a free corner of a turned sofa selects 
   // In the box corner at the front, but outside the sofa: nothing without its arm.
   const corner = objectOutline(sofa)[0]!;
   assert.equal(shapesAt([shape], { x: corner.x * 0.99, y: corner.y * 0.99 }, 0).length, 0);
-  // Between table and chairs nothing either; objects without a rule keep their box.
-  const wc = { ...table(1), catalogId: "wc" as const };
-  assert.deepEqual(objectPickRings(wc), [objectOutline(wc)]);
+  // Between table and chairs nothing either.
   assert.ok(objectPickRings(table(1.6, { chairs: "auto" })).length > 4);
   // The seam between two cushions belongs to the sofa, few outlines hold it all.
   assert.ok(objectPickRings(sofa).length <= 3);
@@ -368,9 +366,6 @@ test("finishes colour the 3D body and the preview; standard colours stay without
   assert.deepEqual(faces[0]!.color, [1, 0, 0]);
   assert.ok(faces.every((f) => f.object && f.color));
   assert.ok(objectAxonometricPreview(painted).faces.some((f) => f.color === "#ff0000"));
-  // Entries without a rule keep their plain body.
-  const wc = { ...table(1), catalogId: "wc" as const, depth: 0.65 };
-  assert.ok(objectBody(wc, 0).faces.every((f) => !f.color));
 });
 
 test("tool values: a table starts with automatic chairs; values round-trip through the file", () => {
@@ -389,6 +384,48 @@ test("tool values: a table starts with automatic chairs; values round-trip throu
   assert.equal(back.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.throws(() => updateObject(p, "o", { options: { chairs: 41 } }));
   assert.throws(() => updateObject(p, "o", { finishes: { top: { color: "rot" } } }));
+});
+
+test("kitchen and bathroom: options change the parts", () => {
+  const parts = (o: ReturnType<typeof piece>) => objectRule(o.catalogId)!.shape(o).parts;
+  const fridgeDoors = (fridgeDoors: "one" | "two") =>
+    parts(piece("fridge", { fridgeDoors })).filter((p) => p.slot === "top").length;
+  assert.deepEqual([fridgeDoors("two"), fridgeDoors("one")], [2, 1]);
+  const panes = (showerGlass: "none" | "side" | "corner") =>
+    parts(piece("shower", { showerGlass })).filter((p) => p.slot === "glass").length;
+  assert.deepEqual([panes("none"), panes("side"), panes("corner")], [0, 1, 2]);
+  const lowest = (basinMount: "wall" | "cabinet") =>
+    Math.min(...parts(piece("washbasin", { basinMount })).map((p) => p.bottom));
+  assert.ok(lowest("wall") > 0.5);
+  assert.equal(lowest("cabinet"), 0);
+  // The worktop runs through, the fronts follow the width.
+  const counter = parts(piece("kitchen-counter", { fronts: "auto" }));
+  assert.equal(counter.filter((p) => p.slot === "top").length, 1);
+  assert.equal(counter.filter((p) => p.slot === "seat").length, 4);
+  // A basin leaves its middle open: the edge is four bars, the floor lies lower.
+  const sink = parts(piece("sink"));
+  assert.equal(sink.filter((p) => p.slot === "top").length, 4);
+  assert.ok(sink.find((p) => p.slot === "glass")!.top < 0.9);
+  const stove = parts(piece("stove"));
+  assert.equal(stove.filter((p) => p.slot === "screen").length, 4);
+});
+
+test("file 61: old entries load, the new options are refused", () => {
+  const p = addObject(createStandardProject("p", "eg", "og"), {
+    id: "o",
+    catalogId: "shower",
+    position: { x: 0, y: 0 },
+  });
+  const file = () => {
+    const old = JSON.parse(serializeProject(p));
+    old.schemaVersion = 61;
+    delete old.storeys[0].objects[0].options;
+    return old;
+  };
+  assert.equal(deserializeProject(JSON.stringify(file())).schemaVersion, PROJECT_SCHEMA_VERSION);
+  const glass = file();
+  glass.storeys[0].objects[0].options = { showerGlass: "side" };
+  assert.throws(() => deserializeProject(JSON.stringify(glass)));
 });
 
 test("file 60: old entries load, new furniture and options are refused", () => {

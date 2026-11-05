@@ -27,6 +27,22 @@ export const TV_MOUNT_LABELS: Record<(typeof TV_MOUNTS)[number], string> = {
   stand: "Standfuß",
   wall: "Wand",
 };
+export const FRIDGE_DOORS = ["two", "one"] as const;
+export const FRIDGE_DOOR_LABELS: Record<(typeof FRIDGE_DOORS)[number], string> = {
+  two: "Zwei Türen",
+  one: "Eine Tür",
+};
+export const BASIN_MOUNTS = ["wall", "cabinet"] as const;
+export const BASIN_MOUNT_LABELS: Record<(typeof BASIN_MOUNTS)[number], string> = {
+  wall: "Wandhängend",
+  cabinet: "Auf Unterschrank",
+};
+export const SHOWER_GLASS = ["none", "side", "corner"] as const;
+export const SHOWER_GLASS_LABELS: Record<(typeof SHOWER_GLASS)[number], string> = {
+  none: "Keine",
+  side: "Eine Seite",
+  corner: "Ecke",
+};
 /** Most chairs one table may carry. */
 export const MAX_TABLE_CHAIRS = 40;
 
@@ -52,9 +68,15 @@ export const objectOptionsV60Schema = objectOptionsV59Schema.extend({
 export const MAX_OBJECT_DIVISIONS = 20;
 const divisions = z.union([z.literal("auto"), z.number().int().min(1).max(MAX_OBJECT_DIVISIONS)]);
 /** Schema 61 (M4): doors of a cabinet and boards of a shelf; `auto` follows the size. */
-export const objectOptionsSchema = objectOptionsV60Schema.extend({
+export const objectOptionsV61Schema = objectOptionsV60Schema.extend({
   fronts: divisions.optional(),
   boards: divisions.optional(),
+});
+/** Schema 62 (M5): fridge doors, mounting of a washbasin, glass of a shower. */
+export const objectOptionsSchema = objectOptionsV61Schema.extend({
+  fridgeDoors: z.enum(FRIDGE_DOORS).optional(),
+  basinMount: z.enum(BASIN_MOUNTS).optional(),
+  showerGlass: z.enum(SHOWER_GLASS).optional(),
 });
 export type ObjectOptions = z.infer<typeof objectOptionsSchema>;
 
@@ -616,11 +638,315 @@ function shelfShape(o: Sized): ObjectShape {
   };
 }
 
+/** Four bars around an opening, each a convex part: the edge of a basin or a tub. */
+function rimRings(w: number, d: number, inner: number, cx = 0, cy = 0): P[][] {
+  const t = Math.min(inner, w / 5, d / 5);
+  return [
+    box(w, t, cx, cy - d / 2 + t / 2),
+    box(w, t, cx, cy + d / 2 - t / 2),
+    box(t, d - 2 * t, cx - w / 2 + t / 2, cy),
+    box(t, d - 2 * t, cx + w / 2 - t / 2, cy),
+  ];
+}
+
+/** A tap at (x, y) above `z`, its spout towards -y in short steps. */
+function tapParts(x: number, y: number, z: number, scale: number): ObjectPart[] {
+  const r = 0.012 * scale,
+    rise = 0.2 * scale,
+    reach = 0.14 * scale;
+  return [
+    { slot: "frame", ring: ellipse(r, r, x, y, 10), bottom: z, top: z + rise },
+    {
+      slot: "frame",
+      ring: box(r * 1.6, reach, x, y - reach / 2),
+      bottom: z + rise,
+      top: z + rise + r * 1.6,
+    },
+    {
+      slot: "frame",
+      ring: box(r * 1.6, r * 1.6, x, y - reach),
+      bottom: z + rise - r * 2,
+      top: z + rise,
+    },
+  ];
+}
+
+/** Worktop over base units; the fronts follow the width like a cabinet's. */
+function counterShape(o: Sized): ObjectShape {
+  const { width: w, depth: d, height: h } = o;
+  const worktop = Math.min(0.04, h / 10);
+  const cabinet = cabinetShape({ ...o, height: h - worktop }, "plinth", "doors");
+  const ring = box(w, d);
+  return {
+    parts: [
+      ...cabinet.parts.map((p) => (p.slot === "top" ? { ...p, slot: "seat" as const } : p)),
+      { slot: "top", ring, bottom: h - worktop, top: h },
+    ],
+    lines: cabinet.lines,
+  };
+}
+
+/** A cooker: body, oven door with handle, glass top with four zones. */
+function stoveShape({ width: w, depth: d, height: h }: Sized): ObjectShape {
+  const face = Math.min(0.02, d / 8);
+  const glass = Math.min(0.008, h / 20);
+  const zones = [
+    [-0.23, -0.22, 0.15],
+    [0.23, -0.22, 0.15],
+    [-0.23, 0.22, 0.12],
+    [0.23, 0.22, 0.12],
+  ].map(([u, v, r]) => ellipse(w * r!, w * r!, w * u!, d * v!, 20));
+  const grip = Math.min(0.012, face / 2);
+  const door = box(w - 0.02 * Math.min(1, w), face, 0, -d / 2 + face / 2);
+  return {
+    parts: [
+      { slot: "body", ring: box(w, d - face, 0, face / 2), bottom: 0, top: h - glass },
+      { slot: "glass", ring: door, bottom: h * 0.12, top: h * 0.72 },
+      { slot: "body", ring: box(w, face, 0, -d / 2 + face / 2), bottom: h * 0.72, top: h - glass },
+      { slot: "body", ring: box(w, face, 0, -d / 2 + face / 2), bottom: 0, top: h * 0.12 },
+      {
+        slot: "frame",
+        ring: box(w * 0.7, grip, 0, -d / 2 - grip / 2),
+        bottom: h * 0.66,
+        top: h * 0.68,
+      },
+      { slot: "top", ring: box(w, d), bottom: h - glass, top: h },
+      ...zones.map((ring) => ({ slot: "screen" as const, ring, bottom: h, top: h + 0.002 })),
+    ],
+    lines: [box(w, d), ...zones].map((points) => ({ points, closed: true })),
+  };
+}
+
+/** A fridge: body and one or two doors, the freezer below. */
+function fridgeShape(o: Sized): ObjectShape {
+  const { width: w, depth: d, height: h } = o;
+  const face = Math.min(0.05, d / 6);
+  const gap = Math.min(0.006, h / 40);
+  const split = (o.options?.fridgeDoors ?? "two") === "two" ? h * 0.32 : 0;
+  const door = box(w, face, 0, -d / 2 + face / 2);
+  const grip = Math.min(0.015, face / 3);
+  const handle = (z: number) => ({
+    slot: "frame" as const,
+    ring: box(grip, grip, w / 2 - 0.05 * Math.min(1, w), -d / 2 - grip / 2),
+    bottom: z - h * 0.08,
+    top: z + h * 0.08,
+  });
+  return {
+    parts: [
+      { slot: "body", ring: box(w, d - face, 0, face / 2), bottom: 0, top: h },
+      ...(split ? [{ slot: "top" as const, ring: door, bottom: 0, top: split - gap }] : []),
+      { slot: "top", ring: door, bottom: split, top: h },
+      ...(split ? [handle(split - h * 0.1)] : []),
+      handle(split + h * 0.12),
+    ],
+    lines: [
+      { points: box(w, d), closed: true },
+      {
+        points: [
+          { x: -w / 2, y: -d / 2 + face },
+          { x: w / 2, y: -d / 2 + face },
+        ],
+        closed: false,
+      },
+    ],
+  };
+}
+
+/** Base unit with a top around a basin, floor of the basin and a tap at the back. */
+function sinkShape(o: Sized): ObjectShape {
+  const { width: w, depth: d, height: h } = o;
+  const deep = Math.min(0.18, h / 4);
+  const cabinet = cabinetShape({ ...o, height: h - deep }, "plinth", "doors");
+  const rims = rimRings(w, d, Math.min(0.09, w / 6));
+  const t = Math.min(0.09, w / 6, w / 5, d / 5);
+  const scale = Math.min(1, h);
+  return {
+    parts: [
+      ...cabinet.parts.map((p) => (p.slot === "top" ? { ...p, slot: "seat" as const } : p)),
+      ...rims.map((ring) => ({ slot: "top" as const, ring, bottom: h - deep, top: h })),
+      { slot: "glass", ring: box(w - 2 * t, d - 2 * t), bottom: h - deep, top: h - deep + 0.002 },
+      ...tapParts(0, d / 2 - t / 2, h, scale),
+    ],
+    lines: [
+      { points: box(w, d), closed: true },
+      { points: rounded(w - 2 * t, d - 2 * t, 0.03), closed: true },
+    ],
+  };
+}
+
+/** A washbasin on the wall or on a base unit. */
+function washbasinShape(o: Sized): ObjectShape {
+  const { width: w, depth: d, height: h } = o;
+  const deep = Math.min(0.16, h / 4);
+  const t = Math.min(0.05, w / 5, d / 5);
+  const scale = Math.min(0.8, h);
+  const cabinet =
+    o.options?.basinMount === "cabinet"
+      ? cabinetShape({ ...o, height: h - deep }, "plinth", "doors")
+      : null;
+  return {
+    parts: [
+      ...(cabinet?.parts ?? []).map((p) =>
+        p.slot === "top" ? { ...p, slot: "body" as const } : p,
+      ),
+      ...rimRings(w, d, t).map((ring) => ({
+        slot: "top" as const,
+        ring,
+        bottom: h - deep,
+        top: h,
+      })),
+      { slot: "seat", ring: box(w - 2 * t, d - 2 * t), bottom: h - deep, top: h - deep + 0.004 },
+      ...tapParts(0, d / 2 - t / 2, h, scale),
+    ],
+    lines: [
+      { points: rounded(w, d, 0.03), closed: true },
+      { points: ellipse(w / 2 - t, d / 2 - t), closed: true },
+    ],
+  };
+}
+
+/** A toilet against the wall at +y: cistern, bowl widening upwards in steps, lid. */
+function wcShape({ width: w, depth: d, height: h }: Sized): ObjectShape {
+  const cistern = Math.min(0.18, d / 3);
+  const seat = Math.min(0.42, h * 0.52);
+  const rx = w / 2,
+    ry = (d - cistern) / 2,
+    cy = -cistern / 2;
+  const tank = rounded(w, cistern, 0.02, 0, d / 2 - cistern / 2);
+  const lid = ellipse(rx, ry, 0, cy, 24);
+  return {
+    parts: [
+      { slot: "body", ring: tank, bottom: seat * 0.5, top: h },
+      ...slices(
+        6,
+        0,
+        seat,
+        (t) => ellipse(rx * (0.62 + 0.38 * t), ry * (0.62 + 0.38 * t), 0, cy, 24),
+        "body",
+      ),
+      { slot: "seat", ring: lid, bottom: seat, top: seat + Math.min(0.035, h / 20) },
+    ],
+    lines: [tank, lid].map((points) => ({ points, closed: true })),
+  };
+}
+
+/** A shower tray with its drain and, by choice, panes of glass on one or two sides. */
+function showerShape(o: Sized): ObjectShape {
+  const { width: w, depth: d, height: h } = o;
+  const glass = o.options?.showerGlass ?? "none";
+  const pane = Math.min(0.008, w / 20, d / 20);
+  const top = Math.max(2, h + 0.5);
+  const side = box(pane, d, w / 2 - pane / 2);
+  const front = box(w - pane, pane, -pane / 2, -d / 2 + pane / 2);
+  const panes = glass === "none" ? [] : glass === "side" ? [side] : [side, front];
+  const r = Math.min(0.05, w / 6, d / 6);
+  const drain = ellipse(r, r, 0, 0, 16);
+  return {
+    parts: [
+      { slot: "body", ring: rounded(w, d, Math.min(0.03, w / 6)), bottom: 0, top: h },
+      { slot: "frame", ring: drain, bottom: h, top: h + 0.002 },
+      ...panes.map((ring) => ({ slot: "glass" as const, ring, bottom: h, top })),
+    ],
+    lines: [
+      { points: box(w, d), closed: true },
+      { points: drain, closed: true },
+      ...panes.map((points) => ({ points, closed: true })),
+    ],
+  };
+}
+
+/** A bath: body, four edges around the inside, a tap at the foot end. */
+function bathtubShape({ width: w, depth: d, height: h }: Sized): ObjectShape {
+  const t = Math.min(0.07, w / 5, d / 5);
+  const floor = h * 0.3;
+  const scale = Math.min(1, h * 1.5);
+  return {
+    parts: [
+      { slot: "body", ring: box(w, d), bottom: 0, top: floor },
+      ...rimRings(w, d, t).map((ring) => ({ slot: "body" as const, ring, bottom: floor, top: h })),
+      { slot: "seat", ring: box(w - 2 * t, d - 2 * t), bottom: floor, top: floor + 0.004 },
+      ...tapParts(-w / 2 + t / 2, 0, h, scale),
+    ],
+    lines: [
+      { points: box(w, d), closed: true },
+      { points: rounded(w - 2 * t, d - 2 * t, Math.min(0.2, (d - 2 * t) / 3)), closed: true },
+    ],
+  };
+}
+
 const CABINET_LABELS = { top: "Türen", frame: "Griffe" };
 const cabinetColors = { body: "#d9cfc0", top: "#e4dccf", frame: "#6b6f75" };
 const tableColors = { top: "#c9a77c", frame: "#7d6248" };
 
 const RULES: Partial<Record<ObjectCatalogId, Rule>> = {
+  "kitchen-counter": {
+    slots: ["top", "seat", "body", "frame"],
+    labels: { top: "Arbeitsplatte", seat: "Fronten", frame: "Griffe" },
+    colors: { top: "#b8b2a7", seat: "#e4dccf", body: "#d9cfc0", frame: "#6b6f75" },
+    options: { fronts: "auto" },
+    shape: counterShape,
+  },
+  stove: {
+    slots: ["body", "top", "screen", "glass", "frame"],
+    labels: { top: "Kochfeld", screen: "Kochzonen", glass: "Backofentür", frame: "Griff" },
+    colors: {
+      body: "#c9ccd0",
+      top: "#1c1f23",
+      screen: "#3a3e44",
+      glass: "#23272c",
+      frame: "#8d9197",
+    },
+    options: {},
+    shape: stoveShape,
+  },
+  sink: {
+    slots: ["top", "seat", "body", "glass", "frame"],
+    labels: { top: "Platte", seat: "Fronten", glass: "Becken", frame: "Armatur und Griffe" },
+    colors: {
+      top: "#c4c8cc",
+      seat: "#e4dccf",
+      body: "#d9cfc0",
+      glass: "#9aa0a6",
+      frame: "#8d9197",
+    },
+    options: {},
+    shape: sinkShape,
+  },
+  fridge: {
+    slots: ["body", "top", "frame"],
+    labels: { top: "Türen", frame: "Griffe" },
+    colors: { body: "#c9ccd0", top: "#dfe2e5", frame: "#8d9197" },
+    options: { fridgeDoors: "two" },
+    shape: fridgeShape,
+  },
+  wc: {
+    slots: ["body", "seat"],
+    labels: { body: "Keramik", seat: "Deckel" },
+    colors: { body: "#f1f1ee", seat: "#e6e6e2" },
+    options: {},
+    shape: wcShape,
+  },
+  washbasin: {
+    slots: ["top", "seat", "frame", "body"],
+    labels: { top: "Waschtisch", seat: "Becken", frame: "Armatur", body: "Unterschrank" },
+    colors: { top: "#f1f1ee", seat: "#dcdcd8", frame: "#8d9197", body: "#d9cfc0" },
+    options: { basinMount: "wall" },
+    shape: washbasinShape,
+  },
+  shower: {
+    slots: ["body", "glass", "frame"],
+    labels: { body: "Duschtasse", glass: "Glaswand", frame: "Ablauf" },
+    colors: { body: "#f1f1ee", glass: "#cfe3ea", frame: "#8d9197" },
+    options: { showerGlass: "corner" },
+    shape: showerShape,
+  },
+  bathtub: {
+    slots: ["body", "seat", "frame"],
+    labels: { body: "Wanne", seat: "Innenfläche", frame: "Armatur" },
+    colors: { body: "#f1f1ee", seat: "#dcdcd8", frame: "#8d9197" },
+    options: {},
+    shape: bathtubShape,
+  },
   "bed-single": {
     slots: ["frame", "seat", "top"],
     labels: { frame: "Rahmen", seat: "Matratze", top: "Bettdecke" },
