@@ -4,22 +4,23 @@ Nutzerauftrag 04.11.2026: Objektbibliothek mit Möbeln, Sanitär und eigenen Obj
 
 Nutzerentscheidung 05.11.2026: Die Bibliothek wird schrittweise aufgewertet. Zuerst das Werkzeug, dann ein bis zwei saubere Möbel mit Bauregeln, Modulen, Material und Farbe. Der Import fremder Dateien ist zurückgestellt. Die 3D-Darstellung bleibt vorerst vereinfacht und wird später erweitert.
 
-| PR  | Inhalt                                                                               | Stand    |
-| --- | ------------------------------------------------------------------------------------ | -------- |
-| O1  | Element Objekt, Katalog mit 15 Objekten, Dateiformat 57, 3D, Grundriss, IFC, Bewegen | erledigt |
-| M1  | Werkzeug Bibliothek, Katalogfenster, Einstellungen, Eigenschaften, Pipette (war O2)  | erledigt |
-| M2a | Bauregeln, Dateiformat 59, Esstisch mit Stühlen, Stuhl, Material und Farbe           | erledigt |
-| M2b | Sofa mit Armlehnen und Sitzkissen                                                    | erledigt |
-| M3  | Pkw, Fernseher, Suche im Katalog, Dateiformat 60                                     | erledigt |
-| M4  | Betten, Schrank, Regal nach Bauregel, fünf neue Möbel, Dateiformat 61                | erledigt |
-| M5  | Küche und Sanitär nach Bauregel, Dateiformat 62                                      | erledigt |
-| O3  | Eigene Objekte aus Linien und Schraffuren, globale Bibliothek (nach M2 neu bewerten) | offen    |
+| PR  | Inhalt                                                                               | Stand          |
+| --- | ------------------------------------------------------------------------------------ | -------------- |
+| O1  | Element Objekt, Katalog mit 15 Objekten, Dateiformat 57, 3D, Grundriss, IFC, Bewegen | erledigt       |
+| M1  | Werkzeug Bibliothek, Katalogfenster, Einstellungen, Eigenschaften, Pipette (war O2)  | erledigt       |
+| M2a | Bauregeln, Dateiformat 59, Esstisch mit Stühlen, Stuhl, Material und Farbe           | erledigt       |
+| M2b | Sofa mit Armlehnen und Sitzkissen                                                    | erledigt       |
+| M3  | Pkw, Fernseher, Suche im Katalog, Dateiformat 60                                     | erledigt       |
+| M4  | Betten, Schrank, Regal nach Bauregel, fünf neue Möbel, Dateiformat 61                | erledigt       |
+| M5  | Küche und Sanitär nach Bauregel, Dateiformat 62                                      | erledigt       |
+| O3  | Eigene Objekte aus Linien und Schraffuren, globale Bibliothek                        | zurückgestellt |
 
 Vorgaben aus der Karte:
 
 - Alle Katalogobjekte sind für dieses Projekt selbst gezeichnet, ohne fremde Modelle, Downloads oder Lizenzen.
 - 3D bleibt vorerst schlicht. Mit M2 kommen Umrisse für Rundungen dazu.
 - Fremde Formate (OBJ, SKP, IFC-Möbel) sind zurückgestellt.
+- O3 ist auf Nutzerentscheidung vom 05.11.2026 zurückgestellt. Die Karte dazu wurde nicht freigegeben.
 
 ## Teil O1: Element und Katalog
 
