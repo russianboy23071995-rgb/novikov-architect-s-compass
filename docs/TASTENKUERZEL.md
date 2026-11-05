@@ -220,7 +220,7 @@ Nicht im Browser geprüft, nur durch Tests belegt: Dach, Maßketten, Bilder und 
 
 ## Teil B4: Abgleich mit den Objekten
 
-Bewegen, Drehen, Spiegeln und Kopieren sind gegen Esstisch, Stuhl, Sofa, Fernseher und Pkw geprüft (). Der Abgleich ergab keinen Fehler, der Code blieb unverändert.
+Bewegen, Drehen, Spiegeln und Kopieren sind gegen Esstisch, Stuhl, Sofa, Fernseher und Pkw geprüft (`src/application/objects/movement.test.ts`). Der Abgleich ergab keinen Fehler, der Code blieb unverändert.
 
 - **Körper:** Jede Ecke jedes Teils landet am rechnerisch erwarteten Punkt, auch die Stühle am Tisch und die einseitige Armlehne beim Spiegeln.
 - **Werte:** Optionen und Material bleiben erhalten, auch an der Kopie. Das Original bleibt stehen.
