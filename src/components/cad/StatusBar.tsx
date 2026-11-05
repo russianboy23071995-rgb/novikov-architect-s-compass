@@ -4,6 +4,7 @@ import type { GridSettings } from "@/application/snapping/grid-settings";
 import { CircleDot, Grid3X3, Magnet, MoveHorizontal, MousePointer2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ACTIVE_CONTROL } from "./active-control";
 
 export function StatusBar({
   storeyName,
@@ -35,15 +36,14 @@ export function StatusBar({
   const toggleClass = (active: boolean) =>
     cn(
       "h-6 rounded-sm px-2 text-[11px] font-normal text-muted-foreground hover:text-foreground",
-      active && "bg-primary/12 text-primary",
+      active && ACTIVE_CONTROL,
     );
   return (
     <footer className="glass-panel z-40 flex h-7 shrink-0 items-center gap-1 overflow-hidden rounded-md px-2">
       {recoveryStatus}
       <div className="h-3 w-px bg-border" />
-      <span className="px-1 text-[11px] text-muted-foreground">m</span>
-      <div className="h-3 w-px bg-border" />
       <div ref={zoomSlot} className="shrink-0" />
+      <div className="h-3 w-px bg-border" />
       <Button variant="ghost" className={toggleClass(grid)} onClick={onGrid}>
         <Grid3X3 /> Grid
       </Button>

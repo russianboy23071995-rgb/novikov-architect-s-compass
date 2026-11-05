@@ -283,8 +283,6 @@ function NavigatorContent({
               onRename={(id) => {
                 if (project.sections?.some((s) => s.id === id)) return onSectionSettings(id);
                 if (id === project.id) setSettings(true);
-                if (project.storeys.some((s) => s.id === id) && id !== project.groundStoreyId)
-                  setSettings(true);
                 if (id === storeyOf(project).id)
                   setRename({ base: project, name: storeyOf(project).name });
               }}

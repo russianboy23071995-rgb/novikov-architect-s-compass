@@ -46,3 +46,15 @@ test("renovation colours only when the display is on; Bestand keeps the cut fill
   assert.deepEqual(wallCutPaint(black, true, undefined), cutPaint(black));
   assert.deepEqual(wallCutPaint(black, false, "new"), cutPaint(black));
 });
+
+test("Bestand in the grey fill is opaque; a plain cut keeps its look", () => {
+  const grey = wallCutPaint(defaultCutFill, true, "existing");
+  assert.equal(grey.fillOpacity, 1);
+  assert.match(grey.fill, /color-mix/);
+  assert.deepEqual(wallCutPaint(defaultCutFill, false, undefined), grey);
+  assert.equal(cutPaint(defaultCutFill).fillOpacity, 0.55);
+  assert.deepEqual(wallCutPaint({ mode: "black", color: "#000000" }, false, undefined), {
+    fill: "#000000",
+    fillOpacity: 1,
+  });
+});

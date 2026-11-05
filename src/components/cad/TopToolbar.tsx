@@ -7,13 +7,9 @@ import {
   Focus,
   Layers2,
   Contrast,
-  Bot,
   Menu,
-  Mic,
   PanelRightOpen,
-  PanelTop,
   Redo2,
-  Rotate3D,
   Save,
   Download,
   FolderOpen,
@@ -31,6 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { ACTIVE_CONTROL } from "./active-control";
 
 type TopToolbarProps = {
   storeyName: string;
@@ -49,9 +46,7 @@ type TopToolbarProps = {
   /** Edit → Tastenkürzel (docs/TASTENKUERZEL.md). */
   onHotkeys: () => void;
   navigatorOpen: boolean;
-  demandOpen: boolean;
   onNavigator: () => void;
-  onDemand: () => void;
   onAction: (text: string) => void;
   onExportIfc: () => void;
   exportingIfc: boolean;
@@ -113,7 +108,7 @@ function IconControl({
           disabled={disabled}
           className={cn(
             "size-8 rounded text-muted-foreground hover:bg-accent hover:text-foreground",
-            active && "bg-primary/15 text-primary",
+            active && ACTIVE_CONTROL,
           )}
         >
           {children}
@@ -399,35 +394,12 @@ export const TopToolbar = withStableHandlers(function TopToolbar(props: TopToolb
           </IconControl>
         </div>
         <div className="ml-auto flex shrink-0 items-center gap-0.5">
-          <IconControl label="Orbit view" onClick={() => props.onAction("Orbit mode")}>
-            <Rotate3D />
-          </IconControl>
-          <div className="mx-1 h-5 w-px bg-border" />
-          <IconControl
-            label="NOVIKOV AI"
-            onClick={() => props.onAction("Lokale Modellbefehle: unten eingeben und prüfen")}
-          >
-            <Bot />
-          </IconControl>
-          <IconControl
-            label="Voice command"
-            onClick={() =>
-              props.onAction(
-                "Bauteil auswählen und Mikrofon in der Befehlsleiste starten, sofern vom Browser unterstützt",
-              )
-            }
-          >
-            <Mic />
-          </IconControl>
           <IconControl
             label="Project navigator"
             active={props.navigatorOpen}
             onClick={props.onNavigator}
           >
             <PanelRightOpen />
-          </IconControl>
-          <IconControl label="Demand menu" active={props.demandOpen} onClick={props.onDemand}>
-            <PanelTop />
           </IconControl>
           <IconControl label="Settings" onClick={props.onCanvasDisplay}>
             <Settings />

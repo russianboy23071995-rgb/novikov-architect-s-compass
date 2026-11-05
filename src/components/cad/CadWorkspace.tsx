@@ -3920,9 +3920,7 @@ export function CadWorkspace({
             }
           }}
           navigatorOpen={navigatorOpen}
-          demandOpen={demandOpen}
           onNavigator={() => setNavigatorOpen((value) => !value)}
-          onDemand={() => setDemandOpen((value) => !value)}
           onAction={showNotice}
           onExportIfc={downloadIfc}
           exportingIfc={exportingIfc}
@@ -4872,7 +4870,6 @@ export function CadWorkspace({
               {!referenceSelection.selecting && (
                 <AiCommandBar
                   calibration={calibration.commandContext}
-                  onFocus={() => setDemandOpen(false)}
                   targets={selections}
                   visibility={visibility}
                   project={project}
