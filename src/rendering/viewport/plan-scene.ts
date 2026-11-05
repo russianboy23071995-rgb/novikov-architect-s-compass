@@ -4,7 +4,11 @@ import { stairGeometry, stairPlan } from "../../domain/elements/stair/model.ts";
 import { railingMembers } from "../../domain/elements/railing/model.ts";
 import { railingMemberCorners } from "./railing-solid.ts";
 import { roofWindowRings } from "../../domain/elements/roof/window.ts";
-import { objectOutline, objectSymbol } from "../../domain/elements/object/model.ts";
+import {
+  objectOutline,
+  objectPickRings,
+  objectSymbol,
+} from "../../domain/elements/object/model.ts";
 import { slabOpeningSymbol } from "../../domain/elements/slab/opening.ts";
 import type { HatchPatternDefinition } from "../../domain/elements/hatch/pattern.ts";
 import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
@@ -155,7 +159,11 @@ export function derivePlanScene(
     objects: new Map(plan.objects.map((o) => [o.id, o])),
     objectViews: new Map(
       plan.objects.map(
-        (o) => [o.id, { outline: objectOutline(o), symbol: objectSymbol(o) }] as const,
+        (o) =>
+          [
+            o.id,
+            { outline: objectOutline(o), symbol: objectSymbol(o), pick: objectPickRings(o) },
+          ] as const,
       ),
     ),
     roofWindowViews: new Map(

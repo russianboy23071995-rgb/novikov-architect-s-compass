@@ -6,7 +6,7 @@ Nutzerauftrag 05.11.2026: 15 Punkte zur Bedienung, vor den weiteren Möbeln. Än
 | ----- | ------------- | ------------------------------------------------------ | -------- |
 | A     | 10, 12, 13–15 | Bestand-Grau, Navigator, Knöpfe, untere Leiste, Farben | erledigt |
 | B     | 3, 3a, 11     | Rasterengine                                           | erledigt |
-| C     | 1, 6          | Klickfläche, Wahl bei Überlappung                      | offen    |
+| C     | 1, 6          | Klickfläche, Wahl bei Überlappung                      | erledigt |
 | D     | 2, 5          | Achslage beim Zeichnen, Abschluss am ersten Punkt      | offen    |
 | E     | 4, 7          | Parameter übernehmen, Tür                              | offen    |
 | F     | 9a–c          | Rechtsklickmenü, erst Befehl, dann Element             | offen    |
@@ -39,3 +39,20 @@ Nutzerauftrag 05.11.2026: 15 Punkte zur Bedienung, vor den weiteren Möbeln. Än
 **Abnahme im Browser (05.11.2026):** Wandanfang unter dem Beginn der Bestandswand, Shift, Mauszeiger an die Endecke: Die neue Wand rastet auf 3 m ein, parallel und gleich lang.
 
 **Grenzen B:** Ansicht und Schnitt sind nur über Tests geprüft, das Testprojekt hatte keine. Dort gibt es keine Referenzpunkte per Verweilen und keinen Rasterfang.
+
+## Paket C: Auswählen
+
+- **Klickfläche (1):** Die Ursache lag nicht beim Rechteck. Die Klickflächen hatten eine unsichtbare Linie der Standardbreite 1, und im Grundriss ist das 1 Meter. `pointer-events="all"` zählt diese Linie mit, jede Fläche war ringsum 50 cm zu groß. Das betraf Objekte, Treppen und Dächer. Die Linienbreite steht dort jetzt auf 0.
+- **Teile statt Rechteck (1):** Objekte mit Bauregel sind nur noch auf ihren Teilen wählbar (`objectPickRings`). Teile innerhalb eines größeren Teils entfallen, sodass auch Fugen zwischen Polstern treffen. Lücken zwischen Tisch und Stühlen wählen nichts. Einträge ohne Regel behalten ihr Rechteck.
+- **Überlappung (6):** Die Wahl mit Tab bleibt bestehen (`cycle.ts`, `pin`). Sie gilt, wo immer der Mauszeiger im gewählten Element steht, auch wenn dort andere Elemente dazukommen oder es allein liegt. Außerhalb wartet sie und gilt beim Zurückkehren wieder. Der nächste Klick ins Element wählt genau dieses, jeder Klick und Escape beenden die Wahl.
+
+**Abnahme im Browser (05.11.2026):**
+
+| Schritt                                                    | Ergebnis          |
+| ---------------------------------------------------------- | ----------------- |
+| Sofa 45° gedreht, Klick 60 Pixel daneben (vorher: Treffer) | Keine Auswahl     |
+| Klick knapp neben die Kante                                | Keine Auswahl     |
+| Klick auf das Sofa                                         | Sofa gewählt      |
+| Zweites Sofa darüber, Tab, Tab, Maus weiter, Klick         | Das gedrehte Sofa |
+
+**Grenzen C:** Treppen und Dächer sind nur im Code angepasst, nicht im Browser nachgeklickt. Die Liste folgt weiter dem Mauszeiger und wird mit Tab bedient, ihre Zeilen sind nicht anklickbar.

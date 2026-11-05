@@ -12,7 +12,7 @@ import type { Project, Point } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../../application/selection/target.ts";
 import { connectedWallContours } from "../../domain/elements/wall/connections.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
-import { objectOutline } from "../../domain/elements/object/model.ts";
+import { objectOutline, objectPickRings } from "../../domain/elements/object/model.ts";
 import { objectDefinition } from "../../domain/elements/object/catalog.ts";
 import { contains } from "../../geometry/polygons/contains.ts";
 import {
@@ -27,6 +27,8 @@ export type SelectionShape = {
   target: ElementTarget;
   points: readonly Point[];
   closed?: boolean;
+  /** Pick areas where they differ from the footprint: the parts of an object. */
+  pick?: readonly (readonly Point[])[];
 };
 
 type ShapeContext = { project: Project; contours: ReturnType<typeof connectedWallContours> };
@@ -99,7 +101,7 @@ const PLAN_SHAPES: {
   // Picked along its line like a polyline (docs/GELAENDER.md).
   railing: (r) => ({ points: r.points, closed: false }),
   // The object's box in plan (docs/OBJEKTBIBLIOTHEK.md).
-  object: (o) => ({ points: objectOutline(o), closed: true }),
+  object: (o) => ({ points: objectOutline(o), closed: true, pick: objectPickRings(o) }),
   // Its opening on the roof top, seen from above (docs/DACHFLAECHENFENSTER.md).
   roofWindow: (w, { project }) => {
     const roof = storeyOf(project).roofs?.find((r) => r.id === w.roofId);
@@ -229,21 +231,23 @@ export function shapesAt(
   tolerance: number,
 ): SelectionShape[] {
   if (![point.x, point.y, tolerance].every(Number.isFinite)) return [];
-  const near = (s: SelectionShape) => {
-    const pts = s.points;
-    const edges = s.closed === false ? pts.length - 1 : pts.length;
+  const near = (pts: readonly Point[], closed: boolean) => {
+    const edges = closed ? pts.length : pts.length - 1;
     for (let i = 0; i < edges; i++)
       if (segmentDistance(point, pts[i]!, pts[(i + 1) % pts.length]!) <= tolerance) return true;
     return false;
   };
+  const hit = (shape: SelectionShape) => {
+    const closed = shape.closed !== false;
+    return (shape.pick ?? [shape.points]).some(
+      (pts) =>
+        pts.length > 0 &&
+        ((closed && pts.length >= 3 && contains(pts, point)) || near(pts, closed)),
+    );
+  };
   return shapes
     .map((shape, order) => ({ shape, order }))
-    .filter(
-      ({ shape }) =>
-        shape.points.length > 0 &&
-        ((shape.closed !== false && shape.points.length >= 3 && contains(shape.points, point)) ||
-          near(shape)),
-    )
+    .filter(({ shape }) => hit(shape))
     .sort(
       (a, b) =>
         PICK_RANK[a.shape.target.kind] - PICK_RANK[b.shape.target.kind] || b.order - a.order,
