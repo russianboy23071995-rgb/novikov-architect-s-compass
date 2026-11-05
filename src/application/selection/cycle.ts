@@ -25,6 +25,7 @@ export function hoverCycle(
   previous: OverlapCycle | null,
   targets: readonly ElementTarget[],
 ): OverlapCycle | null {
+  if (previous && key(previous.targets) === key(targets)) return previous;
   const pin = previous?.expanded ? previous.targets[previous.index] : previous?.pin;
   if (pin) {
     const index = targets.findIndex((t) => same(t, pin));
@@ -33,7 +34,6 @@ export function hoverCycle(
       : { targets, index: 0, expanded: false, pin };
   }
   if (targets.length < 2) return null;
-  if (previous && key(previous.targets) === key(targets)) return previous;
   return { targets, index: 0, expanded: false };
 }
 
