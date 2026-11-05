@@ -168,6 +168,7 @@ import { selectedLayerElement } from "@/application/layers/selection";
 import { visibleLayerTarget } from "@/application/layers/visibility";
 import type { LayerVisibilityContext } from "@/application/layers/visibility";
 import { useReferenceSelection } from "./useReferenceSelection";
+import { drawingSnapPolicy } from "@/application/tools/snapping";
 import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
 import {
   cloneElement,
@@ -4514,7 +4515,14 @@ export function CadWorkspace({
                         onSelectMany={selectMany}
                         snapping={
                           interaction.adapter?.snapping ??
-                          (tool === "wall" ? wallStartSnapPolicy : null)
+                          (tool === "wall"
+                            ? wallStartSnapPolicy
+                            : (tool === "section" || tool === "elevation") &&
+                                sectionStart &&
+                                !sectionEnd
+                              ? // Shift holds the line level or plumb, like any drawing.
+                                drawingSnapPolicy(sectionStart)
+                              : null)
                         }
                         drawing={
                           (tool === "wall" ||

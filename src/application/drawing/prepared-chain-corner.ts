@@ -33,7 +33,8 @@ export function prepareChainCorner(source: WallChain, id: string) {
     pointsCompatible(first.end, chain.points[1]!) &&
     !s.wallJoins.some((j) => j.first.wallId === first.id || j.second.wallId === first.id) &&
     !s.wallTJunctions.some((j) => j.hostWallId === first.id || j.incoming.wallId === first.id) &&
-    !s.windows.some((w) => w.wallId === first.id);
+    !s.windows.some((w) => w.wallId === first.id) &&
+    !s.doors?.some((d) => d.wallId === first.id);
   const foreign = s.walls.filter((w) => w !== first).flatMap((w) => [w.start, w.end]);
   const ids = new Set(
     [
@@ -43,6 +44,7 @@ export function prepareChainCorner(source: WallChain, id: string) {
       ...p.assets,
       ...s.walls,
       ...s.windows,
+      ...(s.doors ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,
@@ -53,6 +55,7 @@ export function prepareChainCorner(source: WallChain, id: string) {
       ...s,
       walls: first ? [first] : [],
       windows: [],
+      doors: [],
       lines: [],
       hatches: [],
       references: [],

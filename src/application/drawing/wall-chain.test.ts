@@ -2,6 +2,8 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { beginWallChain, appendWallChain, finishWallChain } from "./wall-chain.ts";
+import { addDoor } from "../doors/actions.ts";
+import { DOOR_DEFAULTS } from "../../domain/elements/door/model.ts";
 import { closesAtStart, returnsToStart } from "./path-closure.ts";
 import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
 import { createProject, createStandardProject } from "../projects/create.ts";
@@ -459,4 +461,22 @@ test("too few points: a click on the start is no closing, nor a corner", () => {
   assert.equal(closesAtStart([a, b], a, "polygon"), false);
   assert.equal(returnsToStart([a], a), false);
   assert.equal(returnsToStart([a, b, { x: 4, y: 3 }], a), false);
+});
+
+test("a door elsewhere does not stop a free wall at any angle", () => {
+  let p = createStandardProject("p", "eg", "og");
+  p = addWall(p, {
+    id: "host",
+    start: { x: 0, y: 0 },
+    end: { x: 5, y: 0 },
+    thickness: 0.24,
+    height: 2.8,
+  });
+  p = addDoor(p, { id: "d", wallId: "host", ...DOOR_DEFAULTS, position: 0.5 });
+  const chain = beginWallChain(p, { x: 0, y: 4 });
+  const preview = previewWallChain(chain, p, { x: 3, y: 5.3 }, null);
+  assert.equal(storeyOf(preview).doors?.length, 1);
+  assert.equal(storeyOf(preview).walls.length, storeyOf(p).walls.length + 1);
+  const second = appendWallChain(chain, p, "w", { x: 3, y: 4 });
+  assert.equal(storeyOf(previewWallChain(second, p, { x: 3.7, y: 6 })).doors?.length, 1);
 });

@@ -84,6 +84,7 @@ export function prepareLinePreview(session: EditSession): PreparedDirectEditPrev
           ...level,
           walls: [],
           windows: [],
+          doors: [],
           wallJoins: [],
           wallTJunctions: [],
           references: [],

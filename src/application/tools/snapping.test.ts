@@ -898,3 +898,29 @@ test("held idle origin survives changed references and camera scale; explicit to
     0,
   );
 });
+
+test("Shift pressed at a corner runs parallel to its edge and ends level with it", () => {
+  const policy = drawingSnapPolicy({ x: 0, y: 0 });
+  // Wand 1 runs horizontally 1,3 m above; from the origin its end corner lies at 24°, nearest
+  // 45° axis would be the diagonal.
+  const corner = {
+    entityId: "wand1",
+    feature: "end",
+    point: { x: 3, y: 1.35 },
+    directions: [{ x: -3, y: 0 }],
+  };
+  const context = {
+    references: [corner],
+    pixelsPerMetre: 100,
+    enabled: true,
+    endpointRadiusPx: 10,
+    gridSpacing: null,
+  };
+  const options = { ortho: false, shift: true, featureSnap: true };
+  const lock = createShiftSnapLock();
+  const held = lock.resolve(policy, { x: 3.02, y: 1.34 }, context, options);
+  assert.deepEqual(held.point, { x: 3, y: 0 });
+  assert.equal(held.candidate?.kind, "axis-intersection");
+  // Away from it the direction stays held.
+  assert.equal(lock.resolve(policy, { x: 1, y: 5 }, context, options).point.y, 0);
+});

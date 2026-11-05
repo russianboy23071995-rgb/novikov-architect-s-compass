@@ -1,8 +1,25 @@
 import { resolveToolSnap } from "./snapping.ts";
 import { angle45Direction } from "../../geometry/projections/direction.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
+import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 
 type Args = Parameters<typeof resolveToolSnap>;
+
+/** The edge at a corner that lies closest to the direction `aim`, turned towards it. */
+function closestEdge(candidate: SnapCandidate, aim: Point2): Point2 | null {
+  let best: Point2 | null = null;
+  let bestCos = -1;
+  for (const d of candidate.sourceDirections ?? []) {
+    const length = Math.hypot(d.x, d.y) * Math.hypot(aim.x, aim.y);
+    if (!length) continue;
+    const dot = (d.x * aim.x + d.y * aim.y) / length;
+    if (Math.abs(dot) > bestCos) {
+      bestCos = Math.abs(dot);
+      best = dot < 0 ? { x: -d.x, y: -d.y } : d;
+    }
+  }
+  return best;
+}
 /** One transient latch per interaction/viewport, shared by all tool adapters. */
 export function createShiftSnapLock() {
   let held: { origin: Point2; direction: Point2 } | null = null;
@@ -30,9 +47,11 @@ export function createShiftSnapLock() {
           "intersection",
           "axis-intersection",
         ].includes(free.candidate.kind);
-      const direction = guided
-        ? { x: free.point.x - origin.x, y: free.point.y - origin.y }
-        : angle45Direction(cursor, origin).direction;
+      // Pressed at a corner of something else: parallel to its edge, whatever the angle from the
+      // origin to that corner is (docs/ANPASSUNGSLISTE.md, 3a). Without one the nearest 45° axis.
+      const aim = { x: free.point.x - origin.x, y: free.point.y - origin.y };
+      const edge = free.candidate?.kind === "endpoint" ? closestEdge(free.candidate, aim) : null;
+      const direction = guided ? aim : (edge ?? angle45Direction(cursor, origin).direction);
       if (Math.hypot(direction.x, direction.y) > 0) held = { origin: { ...origin }, direction };
     }
     return resolveToolSnap(

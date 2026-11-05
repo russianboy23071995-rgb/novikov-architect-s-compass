@@ -115,3 +115,19 @@ Nutzerauftrag 05.11.2026: 15 Punkte zur Bedienung, vor den weiteren Möbeln. Än
 **Abnahme im Browser (05.11.2026):** Werkzeugleiste, File-Menü und Wandeinstellungen sehen stimmig aus, die Kategorien links sind unverändert.
 
 **Grenzen G:** Nicht jedes der rund 40 Fenster ist einzeln angesehen. Knöpfe in Fenstern sind nicht verkleinert.
+
+## Nachbesserung nach der Prüfung durch den Nutzer
+
+- **Shift an der Ecke (3a):** Die erste Fassung griff nur, wenn Shift gedrückt wurde, bevor die Maus an der Ecke stand. Stand die Maus schon dort, rastete die Richtung auf die nächste 45°-Achse ein, bei 24° also auf die Diagonale. Jetzt läuft die Wand parallel zur Kante dieser Ecke und endet auf ihrer Höhe. Die erste Abnahme hatte genau diesen Ablauf nicht geprüft.
+- **Fehler „Tür door-… unbekannte Wand“:** Beim Zeichnen freier Wände prüft das Programm eine verkleinerte Kopie des Geschosses ohne Wände. Die Türen blieben darin stehen und zeigten auf fehlende Wände. Jede Richtung außerhalb der Fangachsen endete deshalb im Fehler, sobald das Projekt eine Tür hatte. Das galt auch für den zweiten Wandabschnitt, für Linien und für Griffe an Schraffuren. Die Türen sind jetzt aus dieser Kopie entfernt.
+- **Schnitt- und Ansichtslinie (11):** Beim Zeichnen im Grundriss fehlte der Linie ein Ursprung, Shift hatte deshalb keine Wirkung. Der Anfangspunkt ist jetzt Ursprung, Shift hält die Linie waagerecht, senkrecht oder im 45°-Raster. Die Fangregeln und Hilfslinien gelten wie beim Zeichnen von Wänden.
+
+**Abnahme im Browser (05.11.2026):**
+
+| Schritt                                               | Ergebnis                                |
+| ----------------------------------------------------- | --------------------------------------- |
+| Wandanfang, Maus an die Endecke, dann Shift, Klick    | Wand waagerecht, gleich lang wie Wand 1 |
+| Projekt mit Tür, Wand in freier Richtung, zweite Ecke | Vorschau läuft, keine rote Meldung      |
+| Ansichtslinie, Shift, Maus schräg nach unten          | Linie bleibt bei 0°                     |
+
+**Grenzen:** Steht die Maus beim Shift-Druck nicht an einer Ecke, gilt weiter die nächste 45°-Achse. Wird Shift schon vor dem ersten Klick gehalten, entscheidet die erste Mausbewegung über die Richtung.
