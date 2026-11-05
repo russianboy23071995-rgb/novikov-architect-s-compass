@@ -9,7 +9,7 @@ Nutzerauftrag 05.11.2026: 15 Punkte zur Bedienung, vor den weiteren Möbeln. Än
 | C     | 1, 6          | Klickfläche, Wahl bei Überlappung                      | erledigt |
 | D     | 2, 5          | Achslage beim Zeichnen, Abschluss am ersten Punkt      | erledigt |
 | E     | 4, 7          | Parameter übernehmen, Tür                              | erledigt |
-| F     | 9a–c          | Rechtsklickmenü, erst Befehl, dann Element             | offen    |
+| F     | 9a–c          | Rechtsklickmenü, erst Befehl, dann Element             | erledigt |
 | G     | 8             | Größe von Feldern und Menüs                            | offen    |
 
 ## Paket A: Oberfläche
@@ -88,3 +88,20 @@ Nutzerauftrag 05.11.2026: 15 Punkte zur Bedienung, vor den weiteren Möbeln. Än
 | Zwei schnelle Rechtsklicks auf die Wand | Wandwerkzeug mit den Werten der Wand     |
 
 **Grenzen E:** Im Browser ist nur die Wand übernommen worden, Tür, Decke, Dach, Raum und Maßkette nur teils über Tests. Im 3D-Fenster gibt es den doppelten Rechtsklick nicht.
+
+## Paket F: Menü und Bewegen
+
+- **Darstellungsreihenfolge (9a):** Ein Eintrag mit Pfeil, der Klick öffnet rechts ein eigenes Fenster mit den vier Varianten. Am rechten Fensterrand öffnet es nach links. Warum es „nicht ging“: Die Reihenfolge wirkt nur innerhalb einer Elementart, Linie gegen Linie oder Schraffur gegen Schraffur. Zwischen den Arten steht sie fest, und liegt ein Element allein in seiner Art, bleiben alle vier Einträge grau. Der Hinweis am Eintrag sagt das jetzt.
+- **Tastenanzeige (9b):** „Bewegen Strg+E | + Kopie: Strg+E+Strg“, ebenso für Drehen und Spiegeln, immer aus den Kürzeln des Projekts. Spiegeln bleibt Strg+M, denn Strg+T öffnet im Browser einen neuen Tab, und die Seite erhält die Taste nie.
+- **Erst Befehl, dann Element (9c):** Ohne Auswahl wartet Strg+E, Strg+D oder Strg+M auf den nächsten Klick auf ein Element. Dieser Klick wählt das Element und ist zugleich der Bezugspunkt, der Drehpunkt oder der erste Achspunkt. Ein Klick ins Leere ändert nichts, Escape bricht ab. Die Einträge im Rechtsklickmenü funktionieren genauso. Mit bestehender Auswahl läuft alles wie bisher, sonst wäre eine Mehrfachauswahl nicht bewegbar.
+
+**Abnahme im Browser (05.11.2026):**
+
+| Schritt                                       | Ergebnis                                      |
+| --------------------------------------------- | --------------------------------------------- |
+| Keine Auswahl, Strg+E                         | Hinweis „Bewegen: Punkt am Element anklicken“ |
+| Klick auf die Wand, Maus runter, Klick        | Wand mit Fenster versetzt                     |
+| Keine Auswahl, Strg+D, Klick, zwei Richtungen | Wand um 90° um den Klickpunkt gedreht         |
+| Rechtsklick, Darstellungsreihenfolge          | Pfeil, Klick öffnet rechts die vier Einträge  |
+
+**Grenzen F:** Die Reihenfolge zwischen Elementarten ist nicht gebaut, sie braucht einen Umbau der festen Zeichenfolge im Grundriss und eine eigene Karte. Der Hinweis nach dem Befehl verschwindet nach kurzer Zeit, der Befehl wartet trotzdem weiter.
