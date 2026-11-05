@@ -134,6 +134,11 @@ Nutzerauftrag 05.11.2026: 15 Punkte zur Bedienung, vor den weiteren Möbeln. Än
 
 **Meldung „Parallele Wände können keinen T-Anschluss bilden“ (Nachtrag):** Sie und die verwandte Meldung „Kontaktbreite berührt oder überschreitet das Hauptwandende“ erscheinen beim Zeichnen und Bearbeiten nicht mehr, und die Wand verschwindet nicht mehr aus der Vorschau. Kann kein T entstehen, bleibt die Wand frei. Ein T über den Befehl im Menü lehnt das Programm weiter mit der Meldung ab.
 
-## Offene Fehlermeldungen
+## Gerade Wandkette
 
-- **Gerade Wandkette (Meldung des Nutzers, 05.11.2026):** Eine gerade Wandserie mit einem Zwischenpunkt lässt sich nicht zeichnen. Nach dem ersten Punkt bei 0° erwartet das Programm einen Richtungswechsel, im seltenen Fall läuft die Wand aber in derselben Richtung weiter. Noch nicht behoben.
+- **Fehler:** Eine gerade Wandserie mit einem Zwischenpunkt brach mit „Keine gültige Gehrung“ ab, denn zwei Wände in einer Flucht haben keinen Gehrungsschnitt. Das Programm verlangte deshalb einen Richtungswechsel.
+- **Behebung:** Der Eckanschluss kennt jetzt den geraden Stoß. Beide Wände enden rechtwinklig am Zwischenpunkt und bleiben verbunden, in jeder Richtung. Bei unterschiedlicher Stärke endet jede Wand mit ihrem eigenen Querschnitt. Eine Wand, die auf sich selbst zurückläuft, bleibt verboten.
+
+**Abnahme im Browser (05.11.2026):** Drei Punkte auf einer Linie, Enter: zwei Wände, keine Meldung, die Fuge ist nicht sichtbar.
+
+**Grenzen:** Stärkenwechsel im geraden Stoß und schräge Fluchten sind nur teils über Tests belegt, im Browser lief nur die waagerechte Wand gleicher Stärke.

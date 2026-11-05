@@ -1,3 +1,4 @@
+import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -76,7 +77,7 @@ test("invalid continuation preserves valid draft and allows correction; abandone
   const snapshot = serializeProject(first.preview);
   for (const point of [
     { x: 3, y: 0 },
-    { x: 4, y: 0 },
+    { x: 2, y: 0 },
     { x: NaN, y: 0 },
   ])
     assert.throws(() => appendWallChain(first, base, "b", point));
@@ -503,4 +504,22 @@ test("a wall ending along the axis of a parallel wall stays a free wall, without
   const preview = previewWallChain(chain, p, end, candidate);
   assert.equal(storeyOf(preview).walls.length, storeyOf(p).walls.length + 1);
   assert.equal(storeyOf(preview).wallTJunctions.length, 0);
+});
+
+test("a straight run with a point in between is allowed, folding back is not", () => {
+  const p = createStandardProject("p", "eg", "og");
+  const first = appendWallChain(beginWallChain(p, { x: 0, y: 0 }), p, "a", { x: 3, y: 0 });
+  assert.equal(storeyOf(previewWallChain(first, p, { x: 6, y: 0 })).wallJoins.length, 1);
+  const closed = finishWallChain(appendWallChain(first, p, "b", { x: 6, y: 0 }), p);
+  assert.equal(storeyOf(closed).wallJoins.length, 1);
+  const solids = connectedWallSolids(closed);
+  assert.ok(solids.every((s) => s.volume > 0));
+  // Oblique too, with a third wall after it.
+  const slant = appendWallChain(beginWallChain(p, { x: 0, y: 0 }), p, "c", { x: 3, y: 4 });
+  const straight = appendWallChain(slant, p, "d", { x: 6, y: 8 });
+  assert.equal(
+    storeyOf(appendWallChain(straight, p, "e", { x: 9, y: 8 }).preview).walls.length,
+    3 + storeyOf(p).walls.length,
+  );
+  assert.throws(() => appendWallChain(first, p, "f", { x: 1, y: 0 }));
 });

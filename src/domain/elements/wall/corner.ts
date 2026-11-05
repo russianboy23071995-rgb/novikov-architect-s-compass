@@ -83,6 +83,20 @@ function deriveCorner(first: CornerEnd, second: CornerEnd, rightAngleOnly: boole
   )
     throw new Error("Dieser Eckanschluss benötigt einen rechten Winkel.");
   if (rule !== "mitre") return buttCorner(u, v, origin, rule === "first-through");
+  // A straight run through the node has no mitre: both walls end square at the node.
+  const cross = u.direction.x * v.direction.y - u.direction.y * v.direction.x;
+  const dot = u.direction.x * v.direction.x + u.direction.y * v.direction.y;
+  if (Math.abs(cross) <= 1e-9 && dot < 0) {
+    const right = u.body.corner(0, -1),
+      left = u.body.corner(0, 1);
+    return {
+      walls: [
+        cornerContour(u, right, left, origin),
+        cornerContour(v, v.body.corner(0, -1), v.body.corner(0, 1), origin),
+      ],
+      seam: [right, left].map((p) => ({ x: p.x + origin.x, y: p.y + origin.y })),
+    };
+  }
   // Both axes point away from the node. Left of one meets right of the other.
   const left = intersectLines(u.body.corner(0, 1), u.direction, v.body.corner(0, -1), v.direction);
   const right = intersectLines(u.body.corner(0, -1), u.direction, v.body.corner(0, 1), v.direction);

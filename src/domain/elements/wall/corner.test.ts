@@ -68,9 +68,16 @@ test("oblique miters share a seam without overlap for either turn, offsets and e
       }
 });
 
-test("oblique corner rejects collinear, near-parallel and too-short walls", () => {
+test("a straight run ends both walls square at the node", () => {
+  const ends = pair(0.18, 0.18);
+  ends[1].wall.end = { x: 6, y: 0 };
+  const { walls, seam } = deriveWallCorner(...ends);
+  assert.equal(walls.length, 2);
+  assert.ok(seam.every((p) => Math.abs(p.x - 3) < 1e-9));
+});
+
+test("oblique corner rejects folding back, near-parallel and too-short walls", () => {
   for (const end of [
-    { x: 6, y: 0 },
     { x: 0, y: 0 },
     { x: 0, y: 1e-13 },
     { x: 2.99, y: 0.01 },
