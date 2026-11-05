@@ -7,7 +7,8 @@ import {
 import { stairBody } from "../../domain/elements/stair/body.ts";
 import { columnLevels } from "../../domain/elements/column/model.ts";
 import { railingLength, railingMembers } from "../../domain/elements/railing/model.ts";
-import { objectBoxes } from "../../domain/elements/object/model.ts";
+import { objectBoxes, objectSolids } from "../../domain/elements/object/model.ts";
+import { objectRule } from "../../domain/elements/object/rules.ts";
 import { objectDefinition } from "../../domain/elements/object/catalog.ts";
 import { IFC_RENOVATION_STATUS, wallRenovation } from "../../domain/elements/wall/renovation.ts";
 import { wallBase } from "../../domain/elements/wall/heights.ts";
@@ -938,23 +939,35 @@ export async function writeIfc(
     for (const object of floor.objects ?? []) {
       const definition = objectDefinition(object.catalogId);
       const items: string[] = [];
-      for (const box of objectBoxes(object)) {
-        const [p0, p1, , p3] = box.corners;
-        const a = Math.hypot(p1!.x - p0!.x, p1!.y - p0!.y),
-          b = Math.hypot(p3!.x - p0!.x, p3!.y - p0!.y);
-        const depth = box.top - box.bottom;
-        if (a <= 1e-9 || b <= 1e-9 || depth <= 1e-9) continue;
-        const centre = add("IFCAXIS2PLACEMENT2D", `${point([0, 0])},$`);
-        const profile = add("IFCRECTANGLEPROFILEDEF", `.AREA.,$,${centre},${real(a)},${real(b)}`);
-        const position = axis(
-          (p1!.x + p3!.x) / 2,
-          (p1!.y + p3!.y) / 2,
-          box.bottom,
-          (p1!.x - p0!.x) / a,
-          (p1!.y - p0!.y) / a,
-        );
-        items.push(add("IFCEXTRUDEDAREASOLID", `${profile},${position},${up},${real(depth)}`));
-      }
+      // Objects with a build rule (M2): one swept outline per part, in storey coordinates.
+      if (objectRule(object.catalogId))
+        for (const solid of objectSolids(object)) {
+          const depth = solid.top - solid.bottom;
+          if (depth <= 1e-9) continue;
+          const refs = solid.ring.map((p) => point([p.x, p.y]));
+          const curve = add("IFCPOLYLINE", `(${[...refs, refs[0]].join(",")})`);
+          const profile = add("IFCARBITRARYCLOSEDPROFILEDEF", `.AREA.,$,${curve}`);
+          const position = axis(0, 0, solid.bottom, 1, 0);
+          items.push(add("IFCEXTRUDEDAREASOLID", `${profile},${position},${up},${real(depth)}`));
+        }
+      else
+        for (const box of objectBoxes(object)) {
+          const [p0, p1, , p3] = box.corners;
+          const a = Math.hypot(p1!.x - p0!.x, p1!.y - p0!.y),
+            b = Math.hypot(p3!.x - p0!.x, p3!.y - p0!.y);
+          const depth = box.top - box.bottom;
+          if (a <= 1e-9 || b <= 1e-9 || depth <= 1e-9) continue;
+          const centre = add("IFCAXIS2PLACEMENT2D", `${point([0, 0])},$`);
+          const profile = add("IFCRECTANGLEPROFILEDEF", `.AREA.,$,${centre},${real(a)},${real(b)}`);
+          const position = axis(
+            (p1!.x + p3!.x) / 2,
+            (p1!.y + p3!.y) / 2,
+            box.bottom,
+            (p1!.x - p0!.x) / a,
+            (p1!.y - p0!.y) / a,
+          );
+          items.push(add("IFCEXTRUDEDAREASOLID", `${profile},${position},${up},${real(depth)}`));
+        }
       if (!items.length) continue;
       const shape = add(
         "IFCSHAPEREPRESENTATION",

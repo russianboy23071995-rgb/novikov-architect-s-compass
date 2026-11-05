@@ -86,7 +86,11 @@ import {
   saveAssemblyLibrary,
   setWallAssembly,
 } from "@/application/walls/assembly";
-import { assemblyThickness, projectWallAssemblies } from "@/domain/elements/wall/assembly";
+import {
+  assemblyThickness,
+  projectMaterials,
+  projectWallAssemblies,
+} from "@/domain/elements/wall/assembly";
 import { offsetAtThickness } from "@/domain/elements/wall/axis-position";
 import { ColumnFields } from "./ColumnFields";
 import { RailingFields } from "./RailingFields";
@@ -1696,6 +1700,8 @@ export function CadWorkspace({
         onChange={toolDefaults.setObject}
         onCatalog={() => setLibraryOpen(true)}
         layers={project.layers}
+        materials={projectMaterials(project)}
+        compact={place === "bar"}
       />
     ) : owner === "column" ? (
       <ColumnFields
@@ -3244,6 +3250,7 @@ export function CadWorkspace({
           onPlace={() => setLibraryOpen(false)}
           onClose={() => setLibraryOpen(false)}
           layers={project.layers}
+          materials={projectMaterials(project)}
         />
       )}
       <CanvasDisplaySettings

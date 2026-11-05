@@ -84,5 +84,5 @@ test("layout fields keep, change and clear; a shown document cannot go; files ro
   assert.deepEqual(loadProjectData(stored).layouts, project().layouts);
   assert.throws(() => loadProjectData({ ...stored, schemaVersion: 48 }));
   const plain = JSON.parse(serializeProject(createStandardProject("p", "eg", "og")));
-  assert.equal(loadProjectData({ ...plain, schemaVersion: 48 }).schemaVersion, 58);
+  assert.equal(loadProjectData({ ...plain, schemaVersion: 48 }).schemaVersion, 59);
 });

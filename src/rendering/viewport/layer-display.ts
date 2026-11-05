@@ -29,6 +29,8 @@ export type DisplaySurfaces = Pick<Solid, "min" | "max"> & {
     roofWindow?: true;
     /** Placed object face (docs/OBJEKTBIBLIOTHEK.md). */
     object?: true;
+    /** Own colour, red green blue 0–1 (docs/OBJEKTBIBLIOTHEK.md, M2). */
+    color?: [number, number, number];
     /** Window or door element face (docs/FENSTER_TUEREN.md, FT2); glass marks the pane. */
     opening?: "window" | "door";
     glass?: true;

@@ -1,5 +1,10 @@
 import { objectDefaults, type PlacedObject } from "../../domain/elements/object/model.ts";
 import { objectDefinition, type ObjectCatalogId } from "../../domain/elements/object/catalog.ts";
+import {
+  objectRule,
+  type ObjectFinishes,
+  type ObjectOptions,
+} from "../../domain/elements/object/rules.ts";
 import type { WallRenovation } from "../../domain/elements/wall/renovation.ts";
 
 /**
@@ -16,6 +21,9 @@ export type ObjectToolDefaults = {
   baseOffset: number;
   renovation: WallRenovation;
   layerId: string;
+  /** Options and finishes of a build rule (M2); empty for entries without one. */
+  options: ObjectOptions;
+  finishes: ObjectFinishes;
 };
 
 /** Tool defaults: a table at its catalogue size, Neubau like new walls. */
@@ -34,23 +42,37 @@ export function objectToolDefaults(
     baseOffset,
     renovation: "new",
     layerId,
+    options: objectRule(catalogId)?.options ?? {},
+    finishes: {},
   };
 }
 
-/** Another catalogue entry: its own size; turn, height above floor, status and layer stay. */
+/** Another catalogue entry: its own size and options; turn, height above floor, status and
+ * layer stay. */
 export function chooseObject(
   value: ObjectToolDefaults,
   catalogId: ObjectCatalogId,
 ): ObjectToolDefaults {
   return value.catalogId === catalogId
     ? value
-    : { ...value, catalogId, ...objectDefinition(catalogId).size };
+    : {
+        ...value,
+        catalogId,
+        ...objectDefinition(catalogId).size,
+        options: objectRule(catalogId)?.options ?? {},
+        finishes: {},
+      };
 }
 
 /** The stored object values of the settings. */
 export function objectValues(d: ObjectToolDefaults): Omit<PlacedObject, "id" | "position"> {
-  const { mirrored, ...values } = d;
-  return { ...values, ...(mirrored ? { mirrored: true } : {}) };
+  const { mirrored, options, finishes, ...values } = d;
+  return {
+    ...values,
+    ...(mirrored ? { mirrored: true } : {}),
+    ...(Object.keys(options).length ? { options } : {}),
+    ...(Object.keys(finishes).length ? { finishes } : {}),
+  };
 }
 
 /** Settings view of an existing object. */
@@ -65,5 +87,7 @@ export function objectSettings(o: PlacedObject): ObjectToolDefaults {
     baseOffset: o.baseOffset,
     renovation: o.renovation ?? "existing",
     layerId: o.layerId,
+    options: o.options ?? {},
+    finishes: o.finishes ?? {},
   };
 }

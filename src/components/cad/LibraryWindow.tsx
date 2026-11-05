@@ -7,7 +7,9 @@ import {
   type ObjectCatalogId,
   type ObjectGenre,
 } from "@/domain/elements/object/catalog";
+import { objectRule } from "@/domain/elements/object/rules";
 import type { Layer } from "@/domain/layers/model";
+import type { Material } from "@/domain/elements/wall/assembly";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FloatingPanel } from "./FloatingPanel";
@@ -20,6 +22,7 @@ const inGenre = (genre: ObjectGenre) =>
 const startSize = (catalogId: ObjectCatalogId) => ({
   catalogId,
   ...OBJECT_CATALOG[catalogId].size,
+  options: objectRule(catalogId)?.options ?? {},
 });
 
 /**
@@ -33,12 +36,14 @@ export function LibraryWindow({
   onPlace,
   onClose,
   layers,
+  materials,
 }: {
   value: ObjectToolDefaults;
   onChange: (value: ObjectToolDefaults) => void;
   onPlace: () => void;
   onClose: () => void;
   layers: readonly Layer[];
+  materials: readonly Material[];
 }) {
   const [genre, setGenre] = useState<ObjectGenre>(OBJECT_CATALOG[value.catalogId].genre);
   const entry = OBJECT_CATALOG[value.catalogId];
@@ -87,29 +92,29 @@ export function LibraryWindow({
             </li>
           ))}
         </ul>
-        <aside
-          aria-label="Auswahl"
-          className="flex min-h-0 flex-col gap-2 overflow-auto border-l p-3"
-        >
-          <h3 className="text-sm font-semibold">{entry.name}</h3>
-          <div className="grid grid-cols-2 gap-2">
-            <figure className="rounded border p-1">
-              <ObjectPlanPreview object={value} className="h-28 w-full" />
-              <figcaption className="text-center text-xs text-muted-foreground">2D</figcaption>
-            </figure>
-            <figure className="rounded border p-1">
-              <ObjectAxonometricPreview object={value} className="h-28 w-full" />
-              <figcaption className="text-center text-xs text-muted-foreground">3D</figcaption>
-            </figure>
+        <aside aria-label="Auswahl" className="flex min-h-0 flex-col gap-2 border-l p-3">
+          <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto">
+            <h3 className="text-sm font-semibold">{entry.name}</h3>
+            <div className="grid grid-cols-2 gap-2">
+              <figure className="rounded border p-1">
+                <ObjectPlanPreview object={value} className="h-28 w-full" />
+                <figcaption className="text-center text-xs text-muted-foreground">2D</figcaption>
+              </figure>
+              <figure className="rounded border p-1">
+                <ObjectAxonometricPreview object={value} className="h-28 w-full" />
+                <figcaption className="text-center text-xs text-muted-foreground">3D</figcaption>
+              </figure>
+            </div>
+            <ObjectFields
+              key={value.catalogId}
+              label="Objekt im Katalog"
+              value={value}
+              onChange={onChange}
+              layers={layers}
+              materials={materials}
+            />
           </div>
-          <ObjectFields
-            key={value.catalogId}
-            label="Objekt im Katalog"
-            value={value}
-            onChange={onChange}
-            layers={layers}
-          />
-          <Button size="sm" className="mt-auto" onClick={onPlace}>
+          <Button size="sm" className="shrink-0" onClick={onPlace}>
             Platzieren
           </Button>
         </aside>

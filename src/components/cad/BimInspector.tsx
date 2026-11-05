@@ -146,6 +146,7 @@ export function BimInspector({
       <ObjectProperties
         project={project}
         object={placedObject}
+        compact={renovationField}
         selection={selection}
         onChange={onChange}
       />

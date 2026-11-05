@@ -11,6 +11,7 @@ const sameFaces = (a: Face[], b: Face[]) =>
     return (
       face === other ||
       (face.normal.every((v, k) => v === other.normal[k]) &&
+        face.color?.join() === other.color?.join() &&
         face.vertices.length === other.vertices.length &&
         face.vertices.every((p, j) => p.every((v, k) => v === other.vertices[j]![k])))
     );
@@ -42,17 +43,19 @@ export function packSolidFaces(faces: readonly Face[], origin: Vector3, selected
     const [r, g, b] = (
       selected
         ? [0.38, 0.65, 0.78]
-        : face.glass
-          ? [0.6, 0.76, 0.88]
-          : face.opening === "window"
-            ? [0.95, 0.95, 0.95]
-            : face.opening === "door"
-              ? [0.88, 0.82, 0.72]
-              : face.slab
-                ? [0.84, 0.85, 0.87]
-                : face.roof
-                  ? [0.8, 0.72, 0.68]
-                  : [0.72, 0.75, 0.79]
+        : face.color
+          ? face.color
+          : face.glass
+            ? [0.6, 0.76, 0.88]
+            : face.opening === "window"
+              ? [0.95, 0.95, 0.95]
+              : face.opening === "door"
+                ? [0.88, 0.82, 0.72]
+                : face.slab
+                  ? [0.84, 0.85, 0.87]
+                  : face.roof
+                    ? [0.8, 0.72, 0.68]
+                    : [0.72, 0.75, 0.79]
     ).map((c) => c * light) as [number, number, number];
     const priority = face.slab || face.roof ? SLAB_DISPLAY_PRIORITY : 0;
     const opacity = face.glass && !selected ? GLASS_OPACITY : 1;

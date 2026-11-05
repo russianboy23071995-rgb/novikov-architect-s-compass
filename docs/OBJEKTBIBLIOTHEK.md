@@ -8,7 +8,8 @@ Nutzerentscheidung 05.11.2026: Die Bibliothek wird schrittweise aufgewertet. Zue
 | --- | ------------------------------------------------------------------------------------ | -------- |
 | O1  | Element Objekt, Katalog mit 15 Objekten, Dateiformat 57, 3D, Grundriss, IFC, Bewegen | erledigt |
 | M1  | Werkzeug Bibliothek, Katalogfenster, Einstellungen, Eigenschaften, Pipette (war O2)  | erledigt |
-| M2  | Bauregeln, Dateiformat 59, Esstisch mit Stühlen, Material und Farbe, danach Sofa     | offen    |
+| M2a | Bauregeln, Dateiformat 59, Esstisch mit Stühlen, Stuhl, Material und Farbe           | erledigt |
+| M2b | Sofa mit Armlehnen und Sitzkissen                                                    | offen    |
 | O3  | Eigene Objekte aus Linien und Schraffuren, globale Bibliothek (nach M2 neu bewerten) | offen    |
 
 Vorgaben aus der Karte:
@@ -90,3 +91,38 @@ Vorgaben aus der Karte:
 - Die 15 Objekte haben noch ihre Quaderform und dehnen sich mit der Box.
 - Der Eintrag eines gesetzten Objekts lässt sich nicht tauschen.
 - Die Mengenliste kennt Objekte weiterhin nicht.
+
+## Teil M2a: Bauregeln, Esstisch und Stuhl
+
+- **Bauregel** (`domain/elements/object/rules.ts`): Eine Regel erzeugt aus Maßen und Optionen benannte Teile in Metern. Jedes Teil ist ein konvexer Umriss mit Unter- und Oberkante. 3D-Körper, Grundriss-Symbol, Vorschau und IFC kommen aus denselben Teilen. Einträge ohne Regel behalten ihre Quader.
+- **Esstisch** (Eintrag `table`, bisher „Tisch“):
+  - Beine und Plattenstärke behalten ihr Maß, nur die Platte folgt der Länge.
+  - Platte eckig, abgerundet mit Eckradius oder oval.
+  - Stühle automatisch einer je 60 cm je Längsseite, als feste Anzahl oder keine. Wahlweise auch an den Kopfenden. Mehr Stühle, als die Länge fasst, werden begrenzt (mindestens 47 cm je Stuhl).
+  - Neue Tische starten mit automatischen Stühlen. Tische aus alten Dateien haben keine Option und bleiben ohne Stühle.
+- **Stuhl** (Eintrag `chair`): Sitz, vier runde Beine, Lehne mit gerundeten Enden. Derselbe Stuhl steht in 45 × 50 × 85 cm am Tisch.
+- **Material und Farbe:** Jedes Teil hat einen Platz (Platte, Gestell, Polster) mit „Standard“, „Eigene Farbe“ oder einem Material der Projektliste. Gespeichert wird die Farbe mit der Materialkennung. Ändert sich das Material später in der Bibliothek, behält das Möbel seine Farbe.
+- **Sichtbar:** Farben in 3D und in der Vorschau, der Grundriss bleibt in dünnen Linien. Die 3D-Fläche trägt dafür `color`, der Zwischenspeicher vergleicht sie mit.
+- **Klickfläche:** das Rechteck um alle Teile, die Stühle eingeschlossen. Die Maßfelder gelten nur für den Tisch.
+- **Felder:** Die obere Leiste zeigt nur die Maße. Optionen und Material stehen im Katalog, in den Vorgaben und im Elementfenster.
+- **Schema 59:** `options` und `finishes` am Objekt. Eine 58er Datei lädt unverändert, eine 58er Datei mit diesen Feldern wird abgelehnt.
+- **IFC:** ein extrudierter Umriss je Teil. Optionen und Material gehen nicht als eigene Werte hinaus.
+- **Katalogfenster:** „Platzieren“ bleibt immer sichtbar, die Kachel zeigt den Eintrag mit seinen Startoptionen.
+
+**Abnahme im Browser (05.11.2026):**
+
+| Schritt                               | Ergebnis                                                       |
+| ------------------------------------- | -------------------------------------------------------------- |
+| Katalog, Tische                       | Esstisch mit 4 Stühlen in 2D und 3D                            |
+| Breite 3, Platte oval                 | Vorschau zeigt ovalen Tisch mit 10 Stühlen                     |
+| Platte Mauerziegel, Polster Rot       | Vorschau und Felder folgen                                     |
+| Platzieren, Klick                     | Tisch mit 10 Stühlen im Grundriss, die Stühle folgen dem Oval  |
+| 3D-Ansicht                            | Platte in Ziegelfarbe, Polster und Lehnen sichtbar, Stühle rot |
+| Doppelklick auf den Tisch, Breite 1,8 | 6 Stühle, Klickfläche folgt                                    |
+
+**Grenzen M2a:**
+
+- Kein Auflösen in einzelne Stühle.
+- Stühle haben eine feste Größe.
+- Lehnen stehen senkrecht, Rundungen sind Facetten im Grundriss-Umriss, keine Kanten in der Höhe.
+- Ein Eigenfarben-Wähler und die Materialwahl des Elementfensters sind im Browser nur über Formularwerte geprüft, nicht über den Farbdialog.

@@ -262,7 +262,11 @@ export type BimPlanProps = {
   draftContour?: ((point: Point) => Point[]) | undefined;
   /** Bibliothek (docs/OBJEKTBIBLIOTHEK.md, M1): the chosen object at the cursor. */
   objectGhost?:
-    Pick<PlacedObject, "catalogId" | "rotation" | "mirrored" | "width" | "depth"> | undefined;
+    | Pick<
+        PlacedObject,
+        "catalogId" | "rotation" | "mirrored" | "width" | "depth" | "height" | "options"
+      >
+    | undefined;
   placement?:
     | {
         measurement?: DistanceMeasurement | undefined;

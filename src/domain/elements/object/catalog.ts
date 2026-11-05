@@ -124,7 +124,7 @@ export const OBJECT_CATALOG = {
     ifc: { entity: "IFCFURNITURE", type: "BED" },
   },
   table: {
-    name: "Tisch",
+    name: "Esstisch",
     category: "furniture",
     genre: "tables",
     size: { width: 1.6, depth: 0.9, height: 0.75 },

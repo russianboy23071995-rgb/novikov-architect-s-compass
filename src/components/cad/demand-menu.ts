@@ -2,6 +2,7 @@ import { dimensionValues, formatDimension } from "../../domain/elements/dimensio
 import { stairGeometry } from "../../domain/elements/stair/model.ts";
 import { RAILING_INFILL_LABELS, railingLength } from "../../domain/elements/railing/model.ts";
 import { objectDefinition } from "../../domain/elements/object/catalog.ts";
+import { tableChairTotal } from "../../domain/elements/object/rules.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { wallLength } from "../../domain/project/schema.ts";
 import type { Point, Project } from "../../domain/project/schema.ts";
@@ -190,7 +191,7 @@ export function selectionSummary(project: Project, selection: Selection) {
     const cm = (m: number) => String(Math.round(m * 100));
     return {
       title: objectDefinition(o.catalogId).name,
-      details: `${cm(o.width)} × ${cm(o.depth)} × ${cm(o.height)} cm${o.rotation ? ` · ${Math.round(o.rotation * 10) / 10}°` : ""}`,
+      details: `${cm(o.width)} × ${cm(o.depth)} × ${cm(o.height)} cm${o.rotation ? ` · ${Math.round(o.rotation * 10) / 10}°` : ""}${o.catalogId === "table" && tableChairTotal(o) ? ` · ${tableChairTotal(o)} Stühle` : ""}`,
     };
   }
   if (selection.kind === "roofWindow") {

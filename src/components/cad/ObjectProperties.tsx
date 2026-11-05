@@ -7,6 +7,7 @@ import {
 } from "@/application/objects/defaults";
 import { objectDefinition } from "@/domain/elements/object/catalog";
 import type { PlacedObject } from "@/domain/elements/object/model";
+import { projectMaterials } from "@/domain/elements/wall/assembly";
 import type { Project } from "@/domain/project/schema";
 import type { Selection } from "./bim-view";
 import { ObjectFields } from "./ObjectFields";
@@ -17,23 +18,28 @@ export function ObjectProperties({
   object,
   selection,
   onChange,
+  compact = false,
 }: {
   project: Project;
   object: PlacedObject;
   selection: Selection;
   onChange: (project: Project, selection: Selection) => void;
+  /** The bar shows sizes only; options and finishes live in the element window. */
+  compact?: boolean;
 }) {
   const [value, setValue] = useState(() => objectSettings(object));
   const [error, setError] = useState("");
   const commit = (next: ObjectToolDefaults) => {
     const stored = objectSettings(object);
     if (JSON.stringify(stored) === JSON.stringify(next)) return;
-    const { mirrored, ...values } = objectValues(next);
+    const { mirrored, options, finishes, ...values } = objectValues(next);
     try {
-      // `mirrored` is set explicitly: an absent key would keep the old value in the merge.
+      // Optional keys are set explicitly: an absent key would keep the old value in the merge.
       const changed = updateObject(project, object.id, {
         ...values,
         mirrored: mirrored ?? false,
+        options,
+        finishes,
       });
       onChange(changed, selection);
       setError("");
@@ -50,6 +56,8 @@ export function ObjectProperties({
         onChange={setValue}
         onCommit={commit}
         layers={project.layers}
+        materials={projectMaterials(project)}
+        compact={compact}
       />
       {error && (
         <p role="alert" className="text-xs text-destructive">
