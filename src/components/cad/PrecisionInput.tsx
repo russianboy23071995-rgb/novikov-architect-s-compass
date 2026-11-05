@@ -15,6 +15,7 @@ export function PrecisionInput({
   axisLabel,
   scalar = false,
   angleOnly = false,
+  angleLabel = "Drehwinkel",
   mouseHint = "Mausrichtung · Tab: Länge ↔ Winkel",
   onChange,
   onCaptureDirection,
@@ -36,6 +37,8 @@ export function PrecisionInput({
   scalar?: boolean;
   /** Only the angle field (B2: the turn); Tab always goes there. */
   angleOnly?: boolean;
+  /** Name of the lone angle field (B3: "Achswinkel"). */
+  angleLabel?: string;
   mouseHint?: string;
   onChange: (angle: string, length: string) => void;
   onCaptureDirection: () => void;
@@ -198,10 +201,10 @@ export function PrecisionInput({
       <div className={scalar || angleOnly ? "grid gap-1" : "grid grid-cols-2 gap-1"}>
         {!scalar && (
           <label>
-            {angleOnly ? "Drehwinkel °" : "Winkel °"}
+            {angleOnly ? `${angleLabel} °` : "Winkel °"}
             <input
               ref={angleField}
-              aria-label={angleOnly ? "Drehwinkel (Grad)" : "Bewegungswinkel (Grad)"}
+              aria-label={angleOnly ? `${angleLabel} (Grad)` : "Bewegungswinkel (Grad)"}
               className={field}
               inputMode="decimal"
               value={angle}

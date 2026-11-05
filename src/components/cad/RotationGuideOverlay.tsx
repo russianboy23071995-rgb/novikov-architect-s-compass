@@ -110,7 +110,7 @@ export function RotationGuideOverlay({
           stroke={CAD_TURQUOISE}
           strokeWidth={1}
           vectorEffect="non-scaling-stroke"
-          strokeDasharray={`${6 / pixelsPerMetre} ${3 / pixelsPerMetre}`}
+          strokeDasharray="6 3"
         />
       )}
       {aim && aimDegrees !== null && (

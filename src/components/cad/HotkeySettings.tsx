@@ -16,7 +16,7 @@ import { comboFromKey } from "@/application/hotkeys/keys";
  * (one undo step each) and travel with it.
  */
 /** Commands listed already, implemented with B3 (mirror). */
-const SOON = new Set<HotkeyCommand>(["mirror"]);
+const SOON = new Set<HotkeyCommand>([]);
 
 export function HotkeySettings({
   open,

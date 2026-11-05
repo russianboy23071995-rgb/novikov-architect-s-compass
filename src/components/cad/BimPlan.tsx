@@ -59,6 +59,7 @@ import type { HatchPatternDefinition } from "@/domain/elements/hatch/pattern";
 import { createDoubleSecondaryClick } from "@/application/input/double-secondary";
 import { AngleMeasurementOverlay } from "./AngleMeasurementOverlay";
 import { RotationGuideOverlay, type RotationGuide } from "./RotationGuideOverlay";
+import { MirrorGuideOverlay, type MirrorGuide } from "./MirrorGuideOverlay";
 import type { AngleMeasurement } from "@/application/measurement/angle";
 import { CAD_SHIMMER, CAD_TURQUOISE } from "@/rendering/viewport/highlight";
 import { AreaMeasurementOverlay } from "./AreaMeasurementOverlay";
@@ -263,6 +264,8 @@ export type BimPlanProps = {
         angleMeasurement?: AngleMeasurement | undefined;
         /** Drehen (docs/TASTENKUERZEL.md, B2): circle and rays around the pivot. */
         rotationGuide?: RotationGuide | undefined;
+        /** Spiegeln (docs/TASTENKUERZEL.md, B3): the axis through its first point. */
+        mirrorGuide?: MirrorGuide | undefined;
         areaMeasurement?: AreaMeasurement | undefined;
         finish?: (() => void) | undefined;
         target: Point | null | undefined;
@@ -1928,6 +1931,13 @@ export function BimPlan({
         {placement?.rotationGuide && (
           <RotationGuideOverlay
             guide={placement.rotationGuide}
+            aim={resolvedHover?.point ?? null}
+            pixelsPerMetre={camera.pixelsPerMetre}
+          />
+        )}
+        {placement?.mirrorGuide && (
+          <MirrorGuideOverlay
+            guide={placement.mirrorGuide}
             aim={resolvedHover?.point ?? null}
             pixelsPerMetre={camera.pixelsPerMetre}
           />

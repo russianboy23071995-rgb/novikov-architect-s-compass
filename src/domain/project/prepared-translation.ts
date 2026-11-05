@@ -47,6 +47,8 @@ export type PlanTransform = Readonly<{
   point: (p: Point) => Point;
   degrees: number;
   delta?: Point;
+  /** B3: a reflection across an axis at this angle (degrees); `degrees` is then 0. */
+  mirror?: number;
 }>;
 export function translationTransform(delta: Point): PlanTransform {
   return { point: (p) => translatePoint(p, delta), degrees: 0, delta };
@@ -68,8 +70,37 @@ export function rotationTransform(pivot: Point, degrees: number): PlanTransform 
     },
   };
 }
+/**
+ * Spiegeln (docs/TASTENKUERZEL.md, B3): reflection across the line through `origin` at
+ * `axisDegrees`. Exact for axes in 45° steps: no rounding residue, a second reflection
+ * restores every point.
+ */
+export function reflectionTransform(origin: Point, axisDegrees: number): PlanTransform {
+  if (![origin.x, origin.y, axisDegrees].every(Number.isFinite))
+    throw new Error("Ungültige Spiegelachse.");
+  const eighth = axisDegrees / 45;
+  const exact = Number.isInteger(eighth) ? ((eighth % 4) + 4) % 4 : null;
+  const a = (2 * axisDegrees * Math.PI) / 180;
+  const cos = exact === null ? Math.cos(a) : [1, 0, -1, 0][exact]!;
+  const sin = exact === null ? Math.sin(a) : [0, 1, 0, -1][exact]!;
+  return {
+    degrees: 0,
+    mirror: axisDegrees,
+    point: (p) => {
+      const dx = p.x - origin.x,
+        dy = p.y - origin.y;
+      return { x: origin.x + dx * cos + dy * sin, y: origin.y + dx * sin - dy * cos };
+    },
+  };
+}
 const identityTransform = (t: PlanTransform) =>
-  t.delta ? t.delta.x === 0 && t.delta.y === 0 : t.degrees % 360 === 0;
+  t.mirror !== undefined
+    ? false
+    : t.delta
+      ? t.delta.x === 0 && t.delta.y === 0
+      : t.degrees % 360 === 0;
+const other = <T extends string>(value: T, a: T, b: T): T =>
+  value === a ? b : value === b ? a : value;
 /** Degrees in [0, 360), never -0. */
 const turnedDegrees = (value: number, by: number) => {
   const next = (((value + by) % 360) + 360) % 360;
@@ -84,6 +115,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
     [
       ...s.walls,
       ...s.windows,
+      ...(s.doors ?? []),
       ...(s.slabs ?? []),
       ...(s.slabOpenings ?? []),
       ...(s.roofs ?? []),
@@ -105,6 +137,8 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
     throw new Error("Ungültige Bewegungsauswahl.");
   if (s.windows.some((w) => ids.has(w.id) && !ids.has(w.wallId)))
     throw new Error("Fenster zusammen mit ihrer Wand auswählen.");
+  if ((s.doors ?? []).some((d) => ids.has(d.id) && !ids.has(d.wallId)))
+    throw new Error("Türen zusammen mit ihrer Wand auswählen.");
   const byWall = new Map(s.walls.map((w) => [w.id, w]));
   const walls = wallDependencyClosure(
     base,
@@ -156,6 +190,20 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
   );
   const localJoins = retainedJoins.filter((j) => walls.has(j.first.wallId));
   const localTees = retainedTees.filter((j) => walls.has(j.hostWallId));
+  // B3: a mirrored wall swaps start and end, so its join ends swap their index too.
+  type End = (typeof s.wallJoins)[number]["first"];
+  const flipEnd = (e: End): End =>
+    ids.has(e.wallId) ? { ...e, endpoint: e.endpoint === 0 ? 1 : 0 } : e;
+  const mirrored = {
+    joins: freeze(
+      retainedJoins.map((j) => ({ first: flipEnd(j.first), second: flipEnd(j.second) })),
+    ),
+    tees: freeze(retainedTees.map((j) => ({ ...j, incoming: flipEnd(j.incoming) }))),
+  };
+  const mirroredLocal = {
+    joins: freeze(mirrored.joins.filter((j) => walls.has(j.first.wallId))),
+    tees: freeze(mirrored.tees.filter((j) => walls.has(j.hostWallId))),
+  };
   const counts = new Map<string, number>();
   for (const wall of s.walls)
     for (const p of [wall.start, wall.end]) {
@@ -231,8 +279,16 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
     if (t.delta && (!Number.isFinite(t.delta.x) || !Number.isFinite(t.delta.y)))
       throw new Error("Ungültige Bewegung.");
     if (!Number.isFinite(t.degrees)) throw new Error("Ungültige Drehung.");
+    if (t.mirror !== undefined && !Number.isFinite(t.mirror))
+      throw new Error("Ungültige Spiegelachse.");
     if (identityTransform(t)) return freeze({ geometry: affected, replacedIds });
-    const turn = t.degrees % 360 !== 0;
+    const mirror = t.mirror;
+    const turn = mirror !== undefined || t.degrees % 360 !== 0;
+    /** A direction field: turned by the angle, or reflected at the axis (2α − θ). */
+    const orient = (value: number) =>
+      mirror === undefined ? turnedDegrees(value, t.degrees) : turnedDegrees(2 * mirror - value, 0);
+    const joins = mirror === undefined ? localJoins : mirroredLocal.joins;
+    const tees = mirror === undefined ? localTees : mirroredLocal.tees;
     const translate = (p: Point) => {
       const next = t.point(p);
       if (!Number.isFinite(next.x) || !Number.isFinite(next.y))
@@ -259,20 +315,79 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       assets: affected.assets,
       storey: {
         ...storeyOf(affected),
+        // A mirrored wall swaps start and end: its left face, axis offset and build-up side
+        // stay where the mirror image puts them (B3).
         walls: storeyOf(affected).walls.map((w) =>
-          ids.has(w.id) ? { ...w, start: translate(w.start), end: translate(w.end) } : w,
+          !ids.has(w.id)
+            ? w
+            : mirror === undefined
+              ? { ...w, start: translate(w.start), end: translate(w.end) }
+              : { ...w, start: translate(w.end), end: translate(w.start) },
         ),
+        // On a mirrored wall openings sit at 1 − position; a door hinges on the other jamb and
+        // window sashes run in mirror order with swapped hinges. Otherwise the lists stay the
+        // prepared ones, identical across pointer targets.
+        windows:
+          mirror === undefined
+            ? storeyOf(affected).windows
+            : storeyOf(affected).windows.map((w) =>
+                !ids.has(w.wallId)
+                  ? w
+                  : {
+                      ...w,
+                      position: 1 - w.position,
+                      ...(w.insert?.sashes
+                        ? {
+                            insert: {
+                              ...w.insert,
+                              sashes: [...w.insert.sashes].reverse().map((sash) => ({
+                                ...sash,
+                                hinge: other(sash.hinge, "left", "right"),
+                              })),
+                            },
+                          }
+                        : {}),
+                    },
+              ),
+        ...(mirror !== undefined && storeyOf(affected).doors
+          ? {
+              doors: storeyOf(affected).doors!.map((d) =>
+                !ids.has(d.wallId)
+                  ? d
+                  : { ...d, position: 1 - d.position, hinge: other(d.hinge, "start", "end") },
+              ),
+            }
+          : {}),
         lines: storeyOf(affected).lines!.map((l) => ({ ...l, points: l.points.map(translate) })),
         hatches: storeyOf(affected).hatches.map((h) => ({
           ...h,
           points: h.points.map(translate),
           ...(h.pattern ? { pattern: { ...h.pattern, origin: translate(h.pattern.origin) } } : {}),
         })),
-        references: storeyOf(affected).references.map((r) => ({
-          ...r,
-          origin: translate(r.origin),
-          ...(turn ? { rotation: r.rotation + (t.degrees * Math.PI) / 180 } : {}),
-        })),
+        references: storeyOf(affected).references.map((r) => {
+          if (mirror === undefined)
+            return {
+              ...r,
+              origin: translate(r.origin),
+              ...(turn ? { rotation: r.rotation + (t.degrees * Math.PI) / 180 } : {}),
+            };
+          // An image is never mirrored (B3): its centre moves to the mirror side, it keeps
+          // its angle and content.
+          const asset = assets.get(r.assetId)!;
+          const w = asset.pixelWidth * r.metresPerPixel,
+            h = asset.pixelHeight * r.metresPerPixel;
+          const c = Math.cos(r.rotation),
+            sn = Math.sin(r.rotation);
+          const centre = {
+            x: r.origin.x + (c * w) / 2 + (sn * h) / 2,
+            y: r.origin.y + (sn * w) / 2 - (c * h) / 2,
+          };
+          const moved = translate(centre);
+          return {
+            ...r,
+            origin: { x: r.origin.x + moved.x - centre.x, y: r.origin.y + moved.y - centre.y },
+          };
+        }),
         ...(storeyOf(affected).slabs
           ? {
               slabs: storeyOf(affected).slabs!.map((slab) => ({
@@ -302,6 +417,8 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
                   start: translate(roof.referenceLine.start),
                   end: translate(roof.referenceLine.end),
                 },
+                // Mirrored, the uphill side swaps; along and slope of its windows then hold.
+                ...(mirror !== undefined ? { rise: other(roof.rise, "left", "right") } : {}),
               })),
             }
           : {}),
@@ -319,7 +436,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
               columns: storeyOf(affected).columns!.map((column) => ({
                 ...column,
                 position: translate(column.position),
-                ...(turn ? { rotation: turnedDegrees(column.rotation, t.degrees) } : {}),
+                ...(turn ? { rotation: orient(column.rotation) } : {}),
               })),
             }
           : {}),
@@ -338,6 +455,8 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
           ? {
               roofWindows: storeyOf(affected).roofWindows!.map((w) => {
                 // Turned only with its roof (B2): then it follows the roof by itself.
+                if (mirror !== undefined)
+                  throw new Error("Dachflächenfenster spiegeln nur mit ihrem Dach.");
                 if (!t.delta) throw new Error("Dachflächenfenster drehen nur mit ihrem Dach.");
                 const delta = t.delta;
                 const roof = storeyOf(base).roofs!.find((r) => r.id === w.roofId)!;
@@ -353,11 +472,23 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
         // An object moves with its centre (docs/OBJEKTBIBLIOTHEK.md, O1).
         ...(storeyOf(affected).objects
           ? {
-              objects: storeyOf(affected).objects!.map((o) => ({
-                ...o,
-                position: translate(o.position),
-                ...(turn ? { rotation: turnedDegrees(o.rotation, t.degrees) } : {}),
-              })),
+              objects: storeyOf(affected).objects!.map((o) => {
+                if (mirror === undefined)
+                  return {
+                    ...o,
+                    position: translate(o.position),
+                    ...(turn ? { rotation: orient(o.rotation) } : {}),
+                  };
+                // Mirrored (B3): the flip across the depth axis toggles, the angle follows
+                // as 2α − θ + 180°; a second mirror restores the object exactly.
+                const { mirrored: wasMirrored, ...rest } = o;
+                return {
+                  ...rest,
+                  position: translate(o.position),
+                  rotation: turnedDegrees(2 * mirror - o.rotation, 180),
+                  ...(wasMirrored ? {} : { mirrored: true }),
+                };
+              }),
             }
           : {}),
         // A stair moves with its start point (docs/TREPPE.md, TR2).
@@ -366,17 +497,41 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
               stairs: storeyOf(affected).stairs!.map((stair) => ({
                 ...stair,
                 start: translate(stair.start),
-                ...(turn ? { direction: turnedDegrees(stair.direction, t.degrees) } : {}),
+                ...(turn ? { direction: orient(stair.direction) } : {}),
+                // Mirrored (B3): drawing axis and the turn of L and U swap sides.
+                ...(mirror !== undefined && stair.axis
+                  ? { axis: other(stair.axis, "left", "right") }
+                  : {}),
+                ...(mirror !== undefined &&
+                (stair.turn || (stair.shape && stair.shape !== "straight"))
+                  ? { turn: stair.turn === "right" ? ("left" as const) : ("right" as const) }
+                  : {}),
               })),
             }
           : {}),
         ...(storeyOf(affected).texts
           ? {
-              texts: storeyOf(affected).texts!.map((text) => ({
-                ...text,
-                position: translate(text.position),
-                ...(turn ? { rotation: turnedDegrees(text.rotation, t.degrees) } : {}),
-              })),
+              texts: storeyOf(affected).texts!.map((text) => {
+                if (mirror === undefined)
+                  return {
+                    ...text,
+                    position: translate(text.position),
+                    ...(turn ? { rotation: orient(text.rotation) } : {}),
+                  };
+                // Mirrored (B3), the text stays readable: its block lands on the mirror side of
+                // the point. A reading direction that would point left turns by 180° and swaps
+                // left/right alignment; otherwise top/bottom anchoring swaps.
+                const raw = orient(text.rotation);
+                const flip = raw > 90 && raw <= 270;
+                return {
+                  ...text,
+                  position: translate(text.position),
+                  rotation: flip ? turnedDegrees(raw, 180) : raw,
+                  ...(flip
+                    ? { align: other(text.align, "left", "right") }
+                    : { anchor: other(text.anchor, "top", "bottom") }),
+                };
+              }),
             }
           : {}),
         // Placed drawings move with their position; mask and size stay (docs/ZEICHNUNG.md).
@@ -391,10 +546,15 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
         ...(storeyOf(affected).dimensions
           ? {
               dimensions: storeyOf(affected).dimensions!.map((d) => {
-                // Turned only in quarter turns (B2): an odd one swaps the orientation.
-                const quarter = t.degrees / 90;
+                // Turned only in quarter turns (B2): an odd one swaps the orientation. Mirrored
+                // only at axes in 45° steps (B3): a diagonal axis swaps it.
+                const quarter = mirror === undefined ? t.degrees / 90 : mirror / 45;
                 if (!Number.isInteger(quarter))
-                  throw new Error("Maßketten drehen nur in 90°-Schritten.");
+                  throw new Error(
+                    mirror === undefined
+                      ? "Maßketten drehen nur in 90°-Schritten."
+                      : "Maßketten spiegeln nur an Achsen in 45°-Schritten.",
+                  );
                 const swap = Math.abs(quarter) % 2 === 1;
                 const orientation = swap
                   ? d.orientation === "horizontal"
@@ -413,12 +573,12 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
               }),
             }
           : {}),
-        wallJoins: localJoins,
-        wallTJunctions: localTees,
+        wallJoins: joins,
+        wallTJunctions: tees,
       },
     };
     const localWalls = new Map(storeyOf(geometry).walls.map((w) => [w.id, w]));
-    for (const join of localJoins)
+    for (const join of joins)
       if (nodeCount(joinNodeKeys(join, (id) => localWalls.get(id)!)) !== 2)
         throw new Error("Mehrfachanschluss noch nicht unterstützt.");
     for (const wall of storeyOf(geometry).walls)
@@ -477,6 +637,13 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
     return {
       ...s,
       walls: replace(s.walls, storeyOf(patch.geometry).walls),
+      // Openings change only on mirrored walls (B3); a move or turn keeps the stored lists.
+      ...(t.mirror !== undefined
+        ? {
+            windows: replace(s.windows, storeyOf(patch.geometry).windows),
+            ...(s.doors ? { doors: replace(s.doors, storeyOf(patch.geometry).doors ?? []) } : {}),
+          }
+        : {}),
       ...(s.lines ? { lines: replace(s.lines, storeyOf(patch.geometry).lines!) } : {}),
       hatches: replace(s.hatches, storeyOf(patch.geometry).hatches),
       references: replace(s.references, storeyOf(patch.geometry).references),
@@ -502,8 +669,8 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(s.dimensions
         ? { dimensions: replace(s.dimensions, storeyOf(patch.geometry).dimensions ?? []) }
         : {}),
-      wallJoins: retainedJoins,
-      wallTJunctions: retainedTees,
+      wallJoins: t.mirror === undefined ? retainedJoins : mirrored.joins,
+      wallTJunctions: t.mirror === undefined ? retainedTees : mirrored.tees,
     };
   }
   return Object.freeze({ evaluate, materialize, replacedIds });
@@ -520,6 +687,7 @@ export function prepareStoreysTranslation(source: Project, selectedIds: readonly
     const ids = [
       ...s.walls,
       ...s.windows,
+      ...(s.doors ?? []),
       ...(s.slabs ?? []),
       ...(s.slabOpenings ?? []),
       ...(s.roofs ?? []),
@@ -600,6 +768,7 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
     [
       ...s.walls,
       ...s.windows,
+      ...(s.doors ?? []),
       ...(s.slabs ?? []),
       ...(s.slabOpenings ?? []),
       ...(s.roofs ?? []),
