@@ -4216,6 +4216,7 @@ export function CadWorkspace({
                         }
                         onSaveDocument={() => setSectionDocumentWindow(section.id)}
                         selectedIds={selectedIdSet}
+                        snap={snap}
                         onSettings={() => openSectionWindow(section.id)}
                         heightTool={
                           sectionActive &&

@@ -191,6 +191,42 @@ function axisIntersectionCandidates(
   return result;
 }
 
+/**
+ * Shift held and the cursor at a corner: the line ends level with that corner, at its
+ * perpendicular foot on the held axis (docs/ANPASSUNGSLISTE.md, 3a). Two parallel walls come out
+ * the same length without leaving Shift. Only the Shift axis; an editing axis stays exact.
+ */
+function axisProjectionCandidates(cursor: Point2, context: SnapContext): RankedSnap[] {
+  const axis = context.fixedAxis;
+  if (!axis || !context.angleOrigin) return [];
+  const result: RankedSnap[] = [];
+  for (const source of context.references) {
+    if (!finite(source) || source.kind) continue;
+    const d = distance(source.point, cursor, context);
+    if (!Number.isFinite(d) || d < 0 || d > context.endpointRadiusPx) continue;
+    const foot = projectDirection(source.point, axis.origin, axis.direction);
+    if (!foot || pointsCompatible(foot, source.point) || pointsCompatible(foot, axis.origin))
+      continue;
+    result.push(
+      ranked(
+        {
+          kind: "axis-intersection",
+          worldPoint: foot,
+          distanceOnScreen: d,
+          guideOrigin: source.point,
+          secondaryGuideOrigin: axis.origin,
+          sourceReferences: [source],
+          sourceEntityId: source.entityId,
+          sourceFeature: source.feature,
+          priority: 0.5,
+        },
+        [],
+      ),
+    );
+  }
+  return result;
+}
+
 /** Generate all existing non-grid candidates; never recursively query the engine. */
 export function collectSnapCandidates(
   cursor: Point2,
@@ -208,6 +244,7 @@ export function collectSnapCandidates(
   return [
     ...pointCandidates(cursor, context, constrain, active),
     ...axisIntersectionCandidates(cursor, context, active),
+    ...axisProjectionCandidates(cursor, context),
     ...guideCandidates(cursor, context, constrain, active),
     ...intersectionCandidates(cursor, context, constrain, active),
   ];

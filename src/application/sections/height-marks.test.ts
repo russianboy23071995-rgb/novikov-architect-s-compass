@@ -58,4 +58,19 @@ test("section snap: a corner wins, else a storey level, else the cursor", () => 
     kind: "level",
   });
   assert.deepEqual(snapSectionPoint(corners, [0, 3], { x: 4, y: 1.5 }, 0.1).kind, "free");
+  // The Rasterengine switch turns corners and levels off.
+  const off = { enabled: false };
+  assert.deepEqual(snapSectionPoint(corners, [0, 3], { x: 4, y: 2.95 }, 0.1, off), {
+    point: { x: 4, y: 2.95 },
+    kind: "free",
+  });
+  // Shift holds the direction; a corner near the cursor ends the axis level with it.
+  const shiftFrom = { x: 4, y: 0 };
+  const up = snapSectionPoint(corners, [0, 3], { x: 4.2, y: 2 }, 0.1, { shiftFrom });
+  assert.deepEqual(up, { point: { x: 4, y: 2 }, kind: "free" });
+  const level = snapSectionPoint(corners, [0, 3], { x: 1.28, y: 2.79 }, 0.1, {
+    shiftFrom: { x: 0.2, y: 0 },
+  });
+  assert.equal(level.kind, "corner");
+  assert.ok(Math.abs(level.point.x - 0.2) < 1e-9);
 });

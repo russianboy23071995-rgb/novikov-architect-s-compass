@@ -1,7 +1,7 @@
 import type { SnapReference, SnapSourceQuery, SnapCandidate } from "../snapping/engine.ts";
 import type { ScreenMetric } from "../../geometry/projections/screen-metric.ts";
 
-export const DEFAULT_HOVER_DWELL_MS = 600;
+export const DEFAULT_HOVER_DWELL_MS = 1000;
 export const HOVER_REFERENCE_CAPACITY = 4;
 const retainNewest = (refs: SnapReference[]) => refs.slice(-HOVER_REFERENCE_CAPACITY);
 
