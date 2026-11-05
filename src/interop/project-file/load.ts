@@ -60,6 +60,7 @@ import {
   projectV55Schema,
   projectV56Schema,
   projectV57Schema,
+  projectV58Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
@@ -278,6 +279,14 @@ export function migrateProjectData(value: unknown): Project {
   if (value.schemaVersion === 36)
     return migrateProjectData(
       withColumnLayer(withoutBoundHeights({ ...projectV36Schema.parse(value), schemaVersion: 37 })),
+    );
+  // Schema 58 files carry no object options or finishes; the strict v58 schema rejects them.
+  if (value.schemaVersion === 58)
+    return validateProject(
+      withoutBoundHeights({
+        ...projectV58Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
     );
   // Schema 57 files carry no shortcuts (all defaults); the strict v57 schema rejects them.
   if (value.schemaVersion === 57)

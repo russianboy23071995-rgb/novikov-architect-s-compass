@@ -80,9 +80,9 @@ test("move, delete, pipette; schema 38 files load and refuse smuggled texts", ()
     id: "t1",
   });
   assert.equal(picked?.tool, "text");
-  assert.equal(PROJECT_SCHEMA_VERSION, 58);
+  assert.equal(PROJECT_SCHEMA_VERSION, 59);
   const plain = JSON.parse(serializeProject(createStandardProject("p", "eg", "og")));
-  assert.equal(loadProjectData({ ...plain, schemaVersion: 38 }).schemaVersion, 58);
+  assert.equal(loadProjectData({ ...plain, schemaVersion: 38 }).schemaVersion, 59);
   assert.throws(() => loadProjectData({ ...JSON.parse(serializeProject(p)), schemaVersion: 38 }));
 });
 

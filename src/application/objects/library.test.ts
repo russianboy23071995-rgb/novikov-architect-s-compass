@@ -10,6 +10,7 @@ import {
   OBJECT_CATALOG_IDS,
   OBJECT_GENRES,
 } from "../../domain/elements/object/catalog.ts";
+import { objectRule } from "../../domain/elements/object/rules.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import {
   objectAxonometricPreview,
@@ -72,7 +73,8 @@ test("previews: the plan stays in the box, the 3D view has three faces per box",
     assert.ok(plan.bounds.width <= object.width + 1e-9, id);
     assert.ok(plan.bounds.height <= object.depth + 1e-9, id);
     const view = objectAxonometricPreview(object);
-    assert.equal(view.faces.length, OBJECT_CATALOG[id].boxes.length * 3, id);
+    // Build rules (M2) have their own parts; plain boxes show three faces each.
+    if (!objectRule(id)) assert.equal(view.faces.length, OBJECT_CATALOG[id].boxes.length * 3, id);
     assert.ok(
       view.faces.flatMap((f) => f.points).every((q) => Number.isFinite(q.x + q.y)),
       id,

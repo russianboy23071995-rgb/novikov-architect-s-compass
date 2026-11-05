@@ -41,6 +41,8 @@ export type Face = {
   roofWindow?: true;
   /** Placed object face (docs/OBJEKTBIBLIOTHEK.md). */
   object?: true;
+  /** Own colour, red green blue 0–1 (docs/OBJEKTBIBLIOTHEK.md, M2). */
+  color?: Vec3;
   /** Facet of a curved surface (round slab opening): no drawn edge to a smooth neighbour. */
   smooth?: true;
   /** Face of a window or door element in an opening (docs/FENSTER_TUEREN.md, FT2). */

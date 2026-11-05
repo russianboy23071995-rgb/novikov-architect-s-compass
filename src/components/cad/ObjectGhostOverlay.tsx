@@ -7,7 +7,7 @@ export function ObjectGhostOverlay({
 }: {
   object: Pick<
     PlacedObject,
-    "catalogId" | "position" | "rotation" | "mirrored" | "width" | "depth"
+    "catalogId" | "position" | "rotation" | "mirrored" | "width" | "depth" | "height" | "options"
   >;
 }) {
   return (

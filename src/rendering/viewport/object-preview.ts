@@ -1,13 +1,14 @@
 import {
-  objectBoxes,
+  objectSolids,
   objectSymbol,
   type PlacedObject,
 } from "../../domain/elements/object/model.ts";
 
-type Size = Pick<PlacedObject, "catalogId" | "width" | "depth" | "height" | "mirrored">;
+type Size = Pick<PlacedObject, "catalogId" | "width" | "depth" | "height"> &
+  Partial<Pick<PlacedObject, "mirrored" | "options" | "finishes">>;
 type P = { x: number; y: number };
 /** One filled face in unit-free preview coordinates, y down; `shade` 0 dark … 1 light. */
-export type PreviewFace = { points: P[]; shade: number };
+export type PreviewFace = { points: P[]; shade: number; color?: string };
 export type PreviewBounds = { minX: number; minY: number; width: number; height: number };
 
 const place = (o: Size) => ({
@@ -44,53 +45,37 @@ const COS = Math.cos(Math.PI / 6),
 const project = (p: P, z: number): P => ({ x: (p.x + p.y) * COS, y: (p.x - p.y) * SIN - z });
 
 /**
- * The object's boxes as a small view from front right above: per box the top and the two faces
- * towards the viewer, far boxes first. A drawing of the same boxes as the 3D body, no renderer.
+ * The object's solids as a small view from front right above: per solid its top and the sides
+ * towards the viewer, far solids first. A drawing of the same solids as the 3D body, no renderer.
  */
 export function objectAxonometricPreview(o: Size) {
-  const boxes = objectBoxes(place(o)).map(({ corners, bottom, top }) => {
+  const solids = objectSolids(place(o)).map((solid) => {
+    const n = solid.ring.length;
     const mid = {
-      x: corners.reduce((n, c) => n + c.x, 0) / corners.length,
-      y: corners.reduce((n, c) => n + c.y, 0) / corners.length,
+      x: solid.ring.reduce((sum, c) => sum + c.x, 0) / n,
+      y: solid.ring.reduce((sum, c) => sum + c.y, 0) / n,
     };
-    return { corners, bottom, top, depth: mid.x - mid.y + (top + bottom) / 2 };
+    return { ...solid, depth: mid.x - mid.y + (solid.top + solid.bottom) / 2 };
   });
-  boxes.sort((a, b) => a.depth - b.depth);
+  solids.sort((a, b) => a.depth - b.depth);
   const faces: PreviewFace[] = [];
-  for (const { corners, bottom, top } of boxes) {
-    const xs = corners.map((c) => c.x),
-      ys = corners.map((c) => c.y);
-    const x0 = Math.min(...xs),
-      x1 = Math.max(...xs),
-      y0 = Math.min(...ys),
-      y1 = Math.max(...ys);
-    faces.push({
-      shade: 0.62,
-      points: [
-        project({ x: x0, y: y0 }, bottom),
-        project({ x: x1, y: y0 }, bottom),
-        project({ x: x1, y: y0 }, top),
-        project({ x: x0, y: y0 }, top),
-      ],
-    });
-    faces.push({
-      shade: 0.42,
-      points: [
-        project({ x: x1, y: y0 }, bottom),
-        project({ x: x1, y: y1 }, bottom),
-        project({ x: x1, y: y1 }, top),
-        project({ x: x1, y: y0 }, top),
-      ],
-    });
-    faces.push({
-      shade: 0.9,
-      points: [
-        project({ x: x0, y: y0 }, top),
-        project({ x: x1, y: y0 }, top),
-        project({ x: x1, y: y1 }, top),
-        project({ x: x0, y: y1 }, top),
-      ],
-    });
+  for (const { ring, bottom, top, color } of solids) {
+    const own = color ? { color } : {};
+    for (let i = 0; i < ring.length; i++) {
+      const a = ring[i]!,
+        c = ring[(i + 1) % ring.length]!;
+      const length = Math.hypot(c.x - a.x, c.y - a.y) || 1;
+      const nx = (c.y - a.y) / length,
+        ny = -(c.x - a.x) / length;
+      // Rings run counterclockwise; the viewer stands towards +x, −y.
+      if (nx - ny <= 1e-9) continue;
+      faces.push({
+        ...own,
+        shade: 0.42 * nx * nx + 0.62 * ny * ny,
+        points: [project(a, bottom), project(c, bottom), project(c, top), project(a, top)],
+      });
+    }
+    faces.push({ ...own, shade: 0.9, points: ring.map((p) => project(p, top)) });
   }
   return { faces, bounds: bounds(faces.flatMap((f) => f.points)) };
 }

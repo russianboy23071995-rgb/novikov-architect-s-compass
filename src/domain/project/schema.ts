@@ -23,7 +23,7 @@ import { dimensionSchema } from "../elements/dimension/model.ts";
 import { textSchema } from "../elements/text/model.ts";
 import { stairGeometry, stairSchema } from "../elements/stair/model.ts";
 import { railingSchema } from "../elements/railing/model.ts";
-import { objectSchema } from "../elements/object/model.ts";
+import { objectSchema, objectV58Schema } from "../elements/object/model.ts";
 import { hotkeyConflicts, hotkeysSchema, resolvedHotkeys } from "../hotkeys/model.ts";
 import {
   roofWindowProblem,
@@ -782,13 +782,13 @@ export const projectV56Schema = projectV45Schema.extend({
   projectInfo: projectInfoSchema.optional(),
 });
 /** Schema 57: placed objects (Objektbibliothek, docs/OBJEKTBIBLIOTHEK.md, L44). */
-const storeySchema = storeyV56Schema.extend({
-  objects: z.array(objectSchema).max(20000).optional(),
+const storeyV57Schema = storeyV56Schema.extend({
+  objects: z.array(objectV58Schema).max(20000).optional(),
 });
-const layoutDrawingV57Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
+const layoutDrawingV57Schema = z.object({ layoutId: id, storey: storeyV57Schema }).strict();
 export const projectV57Schema = projectV45Schema.extend({
   schemaVersion: z.literal(57),
-  storeys: z.array(storeySchema).min(1),
+  storeys: z.array(storeyV57Schema).min(1),
   modelViews: z.array(anyModelViewSchema).optional(),
   layoutDrawings: z.array(layoutDrawingV57Schema).max(5000).optional(),
   masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
@@ -796,11 +796,26 @@ export const projectV57Schema = projectV45Schema.extend({
   projectInfo: projectInfoSchema.optional(),
 });
 /** Schema 58: the user's keyboard shortcuts travel with the project (docs/TASTENKUERZEL.md). */
+export const projectV58Schema = projectV45Schema.extend({
+  schemaVersion: z.literal(58),
+  storeys: z.array(storeyV57Schema).min(1),
+  modelViews: z.array(anyModelViewSchema).optional(),
+  layoutDrawings: z.array(layoutDrawingV57Schema).max(5000).optional(),
+  masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
+  layouts: z.array(layoutV49Schema).max(5000).optional(),
+  projectInfo: projectInfoSchema.optional(),
+  hotkeys: hotkeysSchema.optional(),
+});
+/** Schema 59: objects carry options and finishes (docs/OBJEKTBIBLIOTHEK.md, M2). */
+const storeySchema = storeyV56Schema.extend({
+  objects: z.array(objectSchema).max(20000).optional(),
+});
+const layoutDrawingV59Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
 const projectSchema = projectV45Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z.array(storeySchema).min(1),
   modelViews: z.array(anyModelViewSchema).optional(),
-  layoutDrawings: z.array(layoutDrawingV57Schema).max(5000).optional(),
+  layoutDrawings: z.array(layoutDrawingV59Schema).max(5000).optional(),
   masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
   layouts: z.array(layoutV49Schema).max(5000).optional(),
   projectInfo: projectInfoSchema.optional(),

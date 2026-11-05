@@ -5,7 +5,8 @@ import {
   type PreviewBounds,
 } from "@/rendering/viewport/object-preview";
 
-type Size = Pick<PlacedObject, "catalogId" | "width" | "depth" | "height" | "mirrored">;
+type Size = Pick<PlacedObject, "catalogId" | "width" | "depth" | "height"> &
+  Partial<Pick<PlacedObject, "mirrored" | "options" | "finishes">>;
 
 const viewBox = (b: PreviewBounds) => {
   const pad = Math.max(b.width, b.height) * 0.06;
@@ -47,7 +48,11 @@ export function ObjectAxonometricPreview({
         <polygon
           key={i}
           points={face.points.map((p) => `${p.x},${p.y}`).join(" ")}
-          fill={`color-mix(in srgb, var(--background) ${Math.round(face.shade * 100)}%, var(--foreground))`}
+          fill={
+            face.color
+              ? `color-mix(in srgb, ${face.color} ${Math.round(face.shade * 100 + 10)}%, black)`
+              : `color-mix(in srgb, var(--background) ${Math.round(face.shade * 100)}%, var(--foreground))`
+          }
           stroke="currentColor"
           strokeWidth={0.75}
           vectorEffect="non-scaling-stroke"
