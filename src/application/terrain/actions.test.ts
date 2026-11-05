@@ -9,6 +9,10 @@ import {
   updateTerrain,
 } from "./actions.ts";
 import { pickupToolDefaults } from "../tools/pickup.ts";
+import { addSection } from "../sections/actions.ts";
+import { sectionDrawing } from "../../rendering/viewport/section-drawing.ts";
+import { exportIfc } from "../../lib/bim/ifc.ts";
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { createLayerVisibilityPolicy, ALL_LAYERS_VISIBLE } from "../layers/visibility.ts";
 import { derivePlanScene, planSceneRuns } from "../../rendering/viewport/plan-scene.ts";
 import { projectSnapReferences } from "../snapping/project-references.ts";
@@ -149,4 +153,32 @@ test("tool path: points inside only, drawn first, snap targets, pickup", () => {
     id: "g",
   });
   assert.deepEqual(picked, { tool: "terrain", values: terrainSettings(projectTerrain(p)!) });
+});
+
+test("section and IFC: the terrain is cut, seen and handed over", async () => {
+  let p = addTerrain(createStandardProject("p", "eg", "og"), {
+    id: "g",
+    outline: square(),
+    points: [{ x: 5, y: 5, z: 2 }],
+  });
+  p = addSection(p, {
+    id: "s",
+    start: { x: -1, y: 5 },
+    end: { x: 11, y: 5 },
+    look: "left",
+  });
+  const drawing = sectionDrawing(
+    p,
+    p.sections!.find((s) => s.id === "s")!,
+  );
+  const cut = drawing.cuts.find((c) => c.id === "g");
+  assert.ok(cut, JSON.stringify(drawing.cuts.map((c) => c.id)));
+  const heights = cut.loops.flat().map((q) => q.y);
+  assert.equal(cut.loops.length, 1);
+  assert.ok(Math.abs(Math.max(...heights) - 2) < 1e-4);
+  assert.ok(Math.abs(Math.min(...heights) + 1) < 1e-4);
+  assert.equal(storeyOf(p).terrains?.length, 1);
+  const ifc = await exportIfc(p, new Date("2026-11-05T12:00:00Z"));
+  assert.ok(/=IFCGEOGRAPHICELEMENT\(.*\.TERRAIN\.\)/.test(ifc));
+  assert.ok(ifc.includes("=IFCTRIANGULATEDFACESET("));
 });

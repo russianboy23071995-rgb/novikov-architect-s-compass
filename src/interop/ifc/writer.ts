@@ -1,3 +1,4 @@
+import { terrainShell } from "../../domain/elements/terrain/model.ts";
 import { stairGeometry } from "../../domain/elements/stair/model.ts";
 import {
   assemblyThickness,
@@ -932,6 +933,38 @@ export async function writeIfc(
         ["Infill", `IFCLABEL(${text(railing.infill)})`],
         ["Renovation", `IFCLABEL(${text(wallRenovation(railing))})`],
       ]);
+    }
+    // Terrain (docs/GELAENDE.md, G3): IfcGeographicElement TERRAIN with its closed triangle mesh.
+    // Its heights count from ±0,00, so the placement takes the storey elevation back.
+    for (const terrain of floor.terrains ?? []) {
+      const indices = new Map<string, number>();
+      const coordinates: string[] = [];
+      const corner = (v: readonly number[]) => {
+        const k = v.join(",");
+        let index = indices.get(k);
+        if (index === undefined) {
+          coordinates.push(`(${v.map(real).join(",")})`);
+          indices.set(k, (index = coordinates.length));
+        }
+        return index;
+      };
+      const triangles = terrainShell(terrain).faces.flatMap((face) =>
+        face.vertices.slice(1, -1).map((v, i) => {
+          const list = [face.vertices[0]!, v, face.vertices[i + 2]!].map(corner);
+          return `(${list.join(",")})`;
+        }),
+      );
+      const mesh = add(
+        "IFCTRIANGULATEDFACESET",
+        `${add("IFCCARTESIANPOINTLIST3D", `(${coordinates.join(",")})`)},$,.T.,(${triangles.join(",")}),$`,
+      );
+      const shape = add("IFCSHAPEREPRESENTATION", `${context},'Body','Tessellation',(${mesh})`);
+      elements.push(
+        add(
+          "IFCGEOGRAPHICELEMENT",
+          `${await guid("terrain", terrain.id)},$,${label("Gelände")},$,$,${placement(storeyPlacement, 0, 0, -elevation)},${add("IFCPRODUCTDEFINITIONSHAPE", `$,$,(${shape})`)},${label(terrain.id)},.TERRAIN.`,
+        ),
+      );
     }
     // Objects (docs/OBJEKTBIBLIOTHEK.md, O1): furniture as IfcFurniture, WC, basins, shower and
     // bath as IfcSanitaryTerminal, cooker and fridge as IfcElectricAppliance, each with its
