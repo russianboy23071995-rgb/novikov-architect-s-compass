@@ -7,7 +7,7 @@ Nutzerauftrag 05.11.2026: 15 Punkte zur Bedienung, vor den weiteren Möbeln. Än
 | A     | 10, 12, 13–15 | Bestand-Grau, Navigator, Knöpfe, untere Leiste, Farben | erledigt |
 | B     | 3, 3a, 11     | Rasterengine                                           | erledigt |
 | C     | 1, 6          | Klickfläche, Wahl bei Überlappung                      | erledigt |
-| D     | 2, 5          | Achslage beim Zeichnen, Abschluss am ersten Punkt      | offen    |
+| D     | 2, 5          | Achslage beim Zeichnen, Abschluss am ersten Punkt      | erledigt |
 | E     | 4, 7          | Parameter übernehmen, Tür                              | offen    |
 | F     | 9a–c          | Rechtsklickmenü, erst Befehl, dann Element             | offen    |
 | G     | 8             | Größe von Feldern und Menüs                            | offen    |
@@ -56,3 +56,19 @@ Nutzerauftrag 05.11.2026: 15 Punkte zur Bedienung, vor den weiteren Möbeln. Än
 | Zweites Sofa darüber, Tab, Tab, Maus weiter, Klick         | Das gedrehte Sofa |
 
 **Grenzen C:** Treppen und Dächer sind nur im Code angepasst, nicht im Browser nachgeklickt. Die Liste folgt weiter dem Mauszeiger und wird mit Tab bedient, ihre Zeilen sind nicht anklickbar.
+
+## Paket D: Zeichnen
+
+- **Achslage (2):** Gilt je Ansatz des Wandwerkzeugs. Ist nur der Startpunkt gesetzt, übernimmt die Serie die neuen Werte und läuft weiter. Ist schon eine Wand gesetzt, bricht die Serie ab, und alle noch nicht bestätigten Wände dieses Ansatzes verschwinden. Bestätigte Wände bleiben. Dasselbe gilt für Stärke, Höhe, Versatz und Ebene.
+- **Abschluss am ersten Punkt (5):** Ein Klick auf den ersten Punkt schließt ab, sobald drei Punkte stehen. Die Regel bleibt zentral in `path-closure.ts`. Neu dabei sind Wandserie und Geländer, bisher schon Polygon, Schraffur, Decke, Durchbruch, Dach, Raum und Polylinie. Der Startpunkt fängt im Umkreis von 10 Pixeln vor allen anderen Fangpunkten, der Ring am Startpunkt zeigt das an.
+- **Meldungen (5):** Zu wenige Punkte am Start ergeben einen kurzen Hinweis statt einer Eckpunkt-Dublette. Ein zweiter Klick auf denselben Punkt wird still übergangen. Decke und Schraffur nennen den echten Grund, der Zusatz „Nach Modelländerung erneut beginnen“ entfällt.
+
+**Abnahme im Browser (05.11.2026):**
+
+| Schritt                                 | Ergebnis                                  |
+| --------------------------------------- | ----------------------------------------- |
+| Wandanfang, Achslage auf Innen          | Serie läuft weiter, Wände innen           |
+| Drei Ecken, Klick auf die erste Ecke    | Vier verbundene Wände, keine rote Meldung |
+| Neue Serie, zwei Wände, Achslage ändern | Serie weg, Modell unverändert             |
+
+**Grenzen D:** Das Geländer ist im Browser nicht geschlossen worden. Einzelne Linie und Dachbezugslinie haben keinen Abschluss, sie haben nur zwei Punkte.

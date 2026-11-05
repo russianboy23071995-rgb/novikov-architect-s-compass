@@ -58,7 +58,13 @@ import {
 import { RoofSettingsPanel, RoofToolFields } from "./RoofToolFields";
 import type { RoofPhase } from "./roof-labels";
 import { isVertexTarget } from "@/application/direct-edit/transforms";
-import { resolvePathClick, type PathClosure } from "@/application/drawing/path-closure";
+import {
+  resolvePathClick,
+  type PathClosure,
+  closesAtStart,
+  MIN_CLOSING_POINTS,
+  returnsToStart,
+} from "@/application/drawing/path-closure";
 import { previewDeleteSelection } from "@/application/elements/delete";
 import { RasterBudgetNotice } from "./RasterBudgetNotice";
 import { MovementAxisControls } from "./MovementAxisControls";
@@ -870,7 +876,7 @@ export function CadWorkspace({
     ? construction === "polygon" && !circleTool
       ? "polygon"
       : "none"
-    : tool === "line" && lineKind === "polyline"
+    : (tool === "line" && lineKind === "polyline") || tool === "railing"
       ? "polyline"
       : "none";
   const pathOrigin = pathDrawing ? (pathPoints.at(-1) ?? null) : null;
@@ -1609,7 +1615,10 @@ export function CadWorkspace({
         project={project}
         value={toolDefaults.wall}
         onChange={(values) => {
-          cancelInteraction();
+          // Per run of the tool (docs/ANPASSUNGSLISTE.md, 2): a start point alone takes the new
+          // values; with walls set the run ends, and its unconfirmed walls go with it.
+          if (activeChain?.wallIds.length) cancelInteraction();
+          else if (activeChain) setWallChain({ ...activeChain, defaults: values });
           toolDefaults.setWall(values);
         }}
       />
@@ -2325,20 +2334,26 @@ export function CadWorkspace({
           : tool === "slabOpening"
             ? error instanceof Error && !error.message.startsWith("[")
               ? error.message
-              : "Deckendurchbruch prüfen: mindestens drei Eckpunkte ohne Kreuzungen, ganz innerhalb einer Decke. Nach Modelländerung erneut beginnen."
+              : "Deckendurchbruch prüfen: mindestens drei Eckpunkte ohne Kreuzungen, ganz innerhalb einer Decke."
             : tool === "slab"
-              ? "Decke prüfen: mindestens drei verschiedene Eckpunkte ohne Kreuzungen oder Überlappung; Stärke größer als null. Nach Modelländerung erneut beginnen."
+              ? readableError(
+                  error,
+                  "Decke prüfen: mindestens drei verschiedene Eckpunkte ohne Kreuzungen.",
+                )
               : tool === "hatch"
-                ? "Schraffur prüfen: mindestens drei verschiedene Eckpunkte ohne Kreuzungen oder Überlappung; Deckkraft 0–100 %. Nach Modelländerung erneut beginnen."
+                ? readableError(
+                    error,
+                    "Schraffur prüfen: mindestens drei verschiedene Eckpunkte ohne Kreuzungen.",
+                  )
                 : "Linie benötigt unterschiedliche Punkte und eine Strichstärke von 0,05 bis 2 mm.",
       );
     }
   };
 
   /** The readable German message of a refused roof, also from a schema (Zod) issue list. */
-  const roofErrorMessage = (error: unknown) => {
-    const fallback =
-      "Dach prüfen: Umriss ohne Kreuzungen, passende Abschlüsse. Nach Modelländerung erneut beginnen.";
+  const roofErrorMessage = (error: unknown) =>
+    readableError(error, "Dach prüfen: Umriss ohne Kreuzungen, passende Abschlüsse.");
+  const readableError = (error: unknown, fallback: string) => {
     if (!(error instanceof Error)) return fallback;
     if (!error.message.startsWith("[")) return error.message;
     try {
@@ -2750,9 +2765,11 @@ export function CadWorkspace({
         setModelError("Das Modell wurde geändert. Zeichnen erneut beginnen.");
         return;
       }
+      // A second click on the same point adds nothing; no message needed.
       const previous = pathPoints.at(-1);
-      if (previous && Math.hypot(point.x - previous.x, point.y - previous.y) === 0) {
-        setModelError("Nächsten Punkt an einer anderen Position wählen.");
+      if (previous && Math.hypot(point.x - previous.x, point.y - previous.y) === 0) return;
+      if (pathClosure !== "none" && returnsToStart(pathPoints, point)) {
+        showNotice(`Zum Abschließen mindestens ${MIN_CLOSING_POINTS} Punkte setzen.`);
         return;
       }
       const click = resolvePathClick(pathPoints, point, pathClosure);
@@ -2785,20 +2802,32 @@ export function CadWorkspace({
         setDemandPosition({ x: lastPointer.current.x + 16, y: lastPointer.current.y + 16 });
         setWallChain(beginWallChain(project, point, candidate, toolDefaults.wall));
       } else {
-        setWallChain(
-          appendWallChain(activeChain, project, `wall-${crypto.randomUUID()}`, point, candidate),
+        // A click on the first corner closes the run, like a polygon (docs/ANPASSUNGSLISTE.md, 5).
+        const closes = closesAtStart(activeChain.points, point, "polygon");
+        if (!closes && returnsToStart(activeChain.points, point)) {
+          showNotice(`Zum Abschließen mindestens ${MIN_CLOSING_POINTS} Ecken setzen.`);
+          return;
+        }
+        const next = appendWallChain(
+          activeChain,
+          project,
+          `wall-${crypto.randomUUID()}`,
+          point,
+          candidate,
         );
+        if (closes) finishChain(next);
+        else setWallChain(next);
       }
     } catch (error) {
       setModelError(error instanceof Error ? error.message : "Ungültige Wand.");
     }
   };
 
-  const finishChain = () => {
-    if (!activeChain) return;
+  const finishChain = (chain = activeChain) => {
+    if (!chain) return;
     try {
-      const next = finishWallChain(activeChain, project);
-      changeProject(next, { kind: "wall", id: activeChain.wallIds.at(-1)! });
+      const next = finishWallChain(chain, project);
+      changeProject(next, { kind: "wall", id: chain.wallIds.at(-1)! });
     } catch (error) {
       setModelError(error instanceof Error ? error.message : "Ungültige Wandkette.");
     }
@@ -4489,7 +4518,8 @@ export function CadWorkspace({
                               ? (activeChain?.wallIds.length ?? 0) > 0
                               : pathPoints.length >= 2
                         }
-                        closeAtStart={pathClosure !== "none"}
+                        closeAtStart={pathClosure !== "none" || !!activeChain}
+                        closeFrom={activeChain?.points}
                         roofGuide={roofLine ? { ...roofLine, rise: roofRise } : null}
                         draftFill={
                           tool === "hatch"
