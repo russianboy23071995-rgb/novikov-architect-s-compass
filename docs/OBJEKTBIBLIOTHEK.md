@@ -9,7 +9,7 @@ Nutzerentscheidung 05.11.2026: Die Bibliothek wird schrittweise aufgewertet. Zue
 | O1  | Element Objekt, Katalog mit 15 Objekten, Dateiformat 57, 3D, Grundriss, IFC, Bewegen | erledigt |
 | M1  | Werkzeug Bibliothek, Katalogfenster, Einstellungen, Eigenschaften, Pipette (war O2)  | erledigt |
 | M2a | Bauregeln, Dateiformat 59, Esstisch mit Stühlen, Stuhl, Material und Farbe           | erledigt |
-| M2b | Sofa mit Armlehnen und Sitzkissen                                                    | offen    |
+| M2b | Sofa mit Armlehnen und Sitzkissen                                                    | erledigt |
 | O3  | Eigene Objekte aus Linien und Schraffuren, globale Bibliothek (nach M2 neu bewerten) | offen    |
 
 Vorgaben aus der Karte:
@@ -126,3 +126,16 @@ Vorgaben aus der Karte:
 - Stühle haben eine feste Größe.
 - Lehnen stehen senkrecht, Rundungen sind Facetten im Grundriss-Umriss, keine Kanten in der Höhe.
 - Ein Eigenfarben-Wähler und die Materialwahl des Elementfensters sind im Browser nur über Formularwerte geprüft, nicht über den Farbdialog.
+
+## Teil M2b: Sofa
+
+- **Aufbau** (Eintrag `sofa`): Korpus mit Sockel, Rückenteil und Armlehnen, Sitz- und Rückenkissen, vier Füße. Abgerundete Ecken.
+- **Maße:** Armlehnen bleiben 20 cm, das Rückenteil 20 cm. Nur die Sitzfläche wächst.
+- **Sitze:** Die Kissen teilen den Raum zwischen den Armlehnen, ein Sitz je etwa 70 cm.
+- **Armlehnen:** beidseitig, links, rechts oder keine, von vorn gesehen. Ohne Armlehne reichen die Kissen bis zur Kante.
+- **Material und Farbe:** Korpus, Polster und Gestell (die Füße).
+- **Alte Dateien:** Das Sofa erscheint in der neuen Form mit beidseitigen Armlehnen, seine Maße bleiben. Das Dateiformat bleibt 59.
+
+**Abnahme im Browser (05.11.2026):** Im Katalog Sofa gewählt, 2 Sitze. Breite 3 und Armlehne links: 4 Sitze, nur links eine Armlehne, in der 2D- und 3D-Vorschau. Gesetzt im Startmodell mit seiner Wand, im Grundriss Rückenteil, Armlehne und vier Kissen. In 3D Korpus, Sitz- und Rückenkissen sichtbar. Das Testprojekt wurde dabei nicht geladen, das Sofa stand auf der Wand des Startmodells. Material und Farbe des Sofas laufen über denselben Code wie beim Esstisch und sind hier nicht einzeln geprüft.
+
+**Grenzen M2b:** Kein Eckteil und keine Ottomane. Die Sitzanzahl lässt sich nicht von Hand festlegen.
