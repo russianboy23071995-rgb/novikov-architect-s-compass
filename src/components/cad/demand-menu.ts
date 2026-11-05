@@ -203,6 +203,14 @@ export function selectionSummary(project: Project, selection: Selection) {
       details: `${cm(w.width)} × ${cm(w.length)} cm · Rahmen ${cm(w.frame)} cm`,
     };
   }
+  if (selection.kind === "terrain") {
+    const terrain = storeyOf(project).terrains?.find((item) => item.id === selection.id);
+    if (!terrain) return null;
+    return {
+      title: "Gelände",
+      details: `${terrain.outline.length} Ecken · ${terrain.points.length} Höhenpunkte`,
+    };
+  }
   if (selection.kind === "railing") {
     const railing = storeyOf(project).railings?.find((item) => item.id === selection.id);
     if (!railing) return null;

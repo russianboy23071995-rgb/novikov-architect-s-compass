@@ -158,6 +158,32 @@ export function terrainHeightAt(
   return null;
 }
 
+/** Contour lines as straight pieces: where each height level crosses a triangle. */
+export function terrainContours(
+  terrain: Pick<Terrain, "outline" | "points">,
+  step: number,
+): { level: number; a: { x: number; y: number }; b: { x: number; y: number } }[] {
+  const pieces: ReturnType<typeof terrainContours> = [];
+  for (const triangle of terrainMesh(terrain)) {
+    const heights = triangle.map((p) => p.z);
+    const low = Math.ceil(Math.min(...heights) / step),
+      high = Math.floor(Math.max(...heights) / step);
+    for (let i = low; i <= high; i++) {
+      const level = i * step;
+      const crossings: { x: number; y: number }[] = [];
+      triangle.forEach((p, k) => {
+        const q = triangle[(k + 1) % 3]!;
+        if (p.z === q.z || (p.z - level) * (q.z - level) > 0) return;
+        const t = (level - p.z) / (q.z - p.z);
+        crossings.push({ x: p.x + (q.x - p.x) * t, y: p.y + (q.y - p.y) * t });
+      });
+      const [a, b] = crossings;
+      if (a && b && (a.x !== b.x || a.y !== b.y)) pieces.push({ level, a, b });
+    }
+  }
+  return pieces;
+}
+
 /** The body ends `depth` below the lowest corner or height point. */
 export function terrainFloor(terrain: Pick<Terrain, "outline" | "points" | "depth">) {
   return Math.min(...[...terrain.outline, ...terrain.points].map((p) => p.z)) - terrain.depth;

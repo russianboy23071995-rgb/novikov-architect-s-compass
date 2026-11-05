@@ -3,6 +3,7 @@ import { WINDOW_INSERT_DEFAULTS } from "@/domain/elements/window/insert";
 import { RoomProperties } from "./RoomProperties";
 import { ColumnProperties } from "./ColumnProperties";
 import { ObjectProperties } from "./ObjectProperties";
+import { TerrainProperties } from "./TerrainProperties";
 import { RailingProperties } from "./RailingProperties";
 import { RoofWindowProperties } from "./RoofWindowProperties";
 import { StairProperties } from "./StairProperties";
@@ -146,6 +147,21 @@ export function BimInspector({
       <ObjectProperties
         project={project}
         object={placedObject}
+        compact={renovationField}
+        selection={selection}
+        onChange={onChange}
+      />
+    );
+  const terrain =
+    selection?.kind === "terrain"
+      ? storeyOf(project).terrains?.find((item) => item.id === selection.id)
+      : undefined;
+  if (terrain)
+    return (
+      <TerrainProperties
+        key={terrain.id}
+        project={project}
+        terrain={terrain}
         compact={renovationField}
         selection={selection}
         onChange={onChange}

@@ -122,6 +122,19 @@ export function projectSnapParts(project: Project): readonly (readonly SnapPart[
     // Railing points and segment midpoints like a polyline (docs/GELAENDER.md, G3), after all
     // earlier kinds so their order stays.
     (storey.railings ?? []).map((railing) => remembered(owned, railing, linePart)),
+    // Terrain: corners and edge midpoints of its outline, and its height points.
+    (storey.terrains ?? []).map((terrain) =>
+      remembered(owned, terrain, (t) => {
+        const outline = hatchPart({ id: t.id, points: t.outline.map(({ x, y }) => ({ x, y })) });
+        const heights = t.points.map((p, i): SnapReference => ({
+          point: { x: p.x, y: p.y },
+          entityId: t.id,
+          feature: `point-${i}`,
+          directions: [],
+        }));
+        return { references: [...heights, ...outline.references], segments: outline.segments };
+      }),
+    ),
     // Object: corners and edge midpoints of its box and its centre (docs/OBJEKTBIBLIOTHEK.md).
     (storey.objects ?? []).map((object) =>
       remembered(owned, object, (o) => {

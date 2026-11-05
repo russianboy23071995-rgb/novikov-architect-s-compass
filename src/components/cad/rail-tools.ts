@@ -122,6 +122,5 @@ export const RAIL_TOOLS: Partial<Record<ToolId, CadTool>> = {
     shortcut: "",
     icon: TerrainIcon,
     pictogram: "gelaende",
-    planned: true,
   },
 };

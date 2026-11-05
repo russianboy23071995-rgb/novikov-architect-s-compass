@@ -55,6 +55,7 @@ export function visiblePlanGeometry(project: ModelGeometry, allows: (id: string)
     railings: (storeyOf(project).railings ?? []).filter((r) => allows(r.id)),
     roofWindows: (storeyOf(project).roofWindows ?? []).filter((w) => allows(w.id)),
     objects: (storeyOf(project).objects ?? []).filter((o) => allows(o.id)),
+    terrains: (storeyOf(project).terrains ?? []).filter((t) => allows(t.id)),
     dimensions: (storeyOf(project).dimensions ?? []).filter((d) => allows(d.id)),
     texts: (storeyOf(project).texts ?? []).filter((t) => allows(t.id)),
     hatches: storeyOf(project).hatches.filter((h) => allows(h.id)),

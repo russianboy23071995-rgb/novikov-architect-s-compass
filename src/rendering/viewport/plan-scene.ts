@@ -10,6 +10,7 @@ import {
   objectSymbol,
 } from "../../domain/elements/object/model.ts";
 import { slabOpeningSymbol } from "../../domain/elements/slab/opening.ts";
+import { TERRAIN_DEFAULTS, terrainContours } from "../../domain/elements/terrain/model.ts";
 import type { HatchPatternDefinition } from "../../domain/elements/hatch/pattern.ts";
 import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
 import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
@@ -158,6 +159,12 @@ export function derivePlanScene(
     // Objects: outline and catalogue symbol in thin lines, seen from above
     // (docs/OBJEKTBIBLIOTHEK.md, O1).
     displayBands,
+    terrains: new Map(plan.terrains.map((t) => [t.id, t])),
+    terrainViews: new Map(
+      plan.terrains.map(
+        (t) => [t.id, terrainContours(t, t.contourStep ?? TERRAIN_DEFAULTS.contourStep)] as const,
+      ),
+    ),
     objects: new Map(plan.objects.map((o) => [o.id, o])),
     objectViews: new Map(
       plan.objects.map(
@@ -194,6 +201,7 @@ export type PlanRun = {
     | "railing"
     | "roofWindow"
     | "object"
+    | "terrain"
     | "line"
     | "dimension"
     | "text";
@@ -232,6 +240,8 @@ export function planSceneRuns(scene: PlanScene, replacedIds: readonly string[]):
     run.ids.push(id);
   };
   const order = [
+    // The terrain lies under everything (docs/GELAENDE.md).
+    ["terrain", scene.plan.terrains],
     ["reference", scene.plan.references],
     // Rooms lie beneath every building element; clicks on walls keep reaching the wall.
     ["room", scene.plan.rooms],

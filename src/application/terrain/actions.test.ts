@@ -1,9 +1,20 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createStandardProject } from "../projects/create.ts";
-import { addTerrain, projectTerrain, updateTerrain } from "./actions.ts";
+import {
+  addTerrain,
+  addTerrainPoint,
+  projectTerrain,
+  terrainSettings,
+  updateTerrain,
+} from "./actions.ts";
+import { pickupToolDefaults } from "../tools/pickup.ts";
+import { createLayerVisibilityPolicy, ALL_LAYERS_VISIBLE } from "../layers/visibility.ts";
+import { derivePlanScene, planSceneRuns } from "../../rendering/viewport/plan-scene.ts";
+import { projectSnapReferences } from "../snapping/project-references.ts";
 import {
   terrainFloor,
+  terrainContours,
   terrainHeightAt,
   terrainMesh,
   terrainSchema,
@@ -111,4 +122,31 @@ test("file 63: loads without terrain, a terrain is refused", () => {
   assert.throws(() => deserializeProject(JSON.stringify(old)));
   for (const storey of old.storeys) delete storey.terrains;
   assert.equal(deserializeProject(JSON.stringify(old)).schemaVersion, PROJECT_SCHEMA_VERSION);
+});
+
+test("contours: every level between the heights, none on a flat surface", () => {
+  const hill = { ...base, outline: square(), points: [{ x: 5, y: 5, z: 2 }] };
+  const levels = new Set(terrainContours(hill, 0.5).map((c) => c.level));
+  for (const level of [0.5, 1, 1.5]) assert.ok(levels.has(level));
+  assert.equal(terrainContours({ ...base, outline: square(1.2) }, 0.5).length, 0);
+});
+
+test("tool path: points inside only, drawn first, snap targets, pickup", () => {
+  let p = addTerrain(createStandardProject("p", "eg", "og"), { id: "g", outline: square() });
+  p = addTerrainPoint(p, { x: 5, y: 5, z: 1 });
+  assert.throws(() => addTerrainPoint(p, { x: 15, y: 5, z: 1 }));
+  const runs = planSceneRuns(
+    derivePlanScene(p, () => true),
+    [],
+  );
+  assert.equal(runs[0]!.kind, "terrain");
+  const features = projectSnapReferences(p)
+    .filter((r) => r.entityId === "g")
+    .map((r) => r.feature);
+  assert.ok(features.includes("point-0") && features.includes("vertex-0"));
+  const picked = pickupToolDefaults(p, createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE), {
+    kind: "terrain",
+    id: "g",
+  });
+  assert.deepEqual(picked, { tool: "terrain", values: terrainSettings(projectTerrain(p)!) });
 });
