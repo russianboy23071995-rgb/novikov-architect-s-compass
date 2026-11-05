@@ -22,10 +22,15 @@ export const SOFA_ARM_LABELS: Record<(typeof SOFA_ARMS)[number], string> = {
   right: "Rechts",
   none: "Keine",
 };
+export const TV_MOUNTS = ["stand", "wall"] as const;
+export const TV_MOUNT_LABELS: Record<(typeof TV_MOUNTS)[number], string> = {
+  stand: "Standfuß",
+  wall: "Wand",
+};
 /** Most chairs one table may carry. */
 export const MAX_TABLE_CHAIRS = 40;
 
-export const objectOptionsSchema = z
+export const objectOptionsV59Schema = z
   .object({
     /** Plan shape of a table top; absent = rectangle. */
     tableTop: z.enum(TABLE_TOPS).optional(),
@@ -39,6 +44,10 @@ export const objectOptionsSchema = z
     sofaArms: z.enum(SOFA_ARMS).optional(),
   })
   .strict();
+/** Schema 60: how a television stands (docs/OBJEKTBIBLIOTHEK.md, M3); absent = on its foot. */
+export const objectOptionsSchema = objectOptionsV59Schema.extend({
+  tvMount: z.enum(TV_MOUNTS).optional(),
+});
 export type ObjectOptions = z.infer<typeof objectOptionsSchema>;
 
 /** Colour or material of the named parts of an object. */
@@ -47,6 +56,8 @@ export const OBJECT_SLOT_LABELS = {
   body: "Korpus",
   frame: "Gestell",
   seat: "Polster",
+  screen: "Bildschirm",
+  glass: "Scheiben",
 } as const;
 export type ObjectSlot = keyof typeof OBJECT_SLOT_LABELS;
 const finishSchema = z
@@ -57,7 +68,7 @@ const finishSchema = z
   })
   .strict();
 export type ObjectFinish = z.infer<typeof finishSchema>;
-export const objectFinishesSchema = z
+export const objectFinishesV59Schema = z
   .object({
     top: finishSchema.optional(),
     body: finishSchema.optional(),
@@ -65,6 +76,10 @@ export const objectFinishesSchema = z
     seat: finishSchema.optional(),
   })
   .strict();
+export const objectFinishesSchema = objectFinishesV59Schema.extend({
+  screen: finishSchema.optional(),
+  glass: finishSchema.optional(),
+});
 export type ObjectFinishes = z.infer<typeof objectFinishesSchema>;
 
 type P = { x: number; y: number };
@@ -75,6 +90,8 @@ type Sized = { width: number; depth: number; height: number; options?: ObjectOpt
 type Rule = {
   /** Named parts of this object in display order. */
   slots: readonly ObjectSlot[];
+  /** Names of the parts where this object calls them differently. */
+  labels?: Partial<Record<ObjectSlot, string>>;
   /** Colours while no finish is chosen. */
   colors: Partial<Record<ObjectSlot, string>>;
   /** Options a newly placed object starts with. */
@@ -326,7 +343,119 @@ function sofaShape(o: Sized): ObjectShape {
   };
 }
 
+/** Parts stacked between two heights: the only way to narrow upwards with upright outlines. */
+function slices(
+  count: number,
+  bottom: number,
+  top: number,
+  ring: (t: number) => P[],
+  slot: ObjectSlot,
+): ObjectPart[] {
+  const step = (top - bottom) / count;
+  return Array.from({ length: count }, (_, i) => ({
+    slot,
+    ring: ring((i + 0.5) / count),
+    bottom: bottom + step * i,
+    top: bottom + step * (i + 1),
+  }));
+}
+
+/**
+ * A car driving towards +x, its length across the width: lower body, glass cabin that narrows
+ * in steps, roof, and four wheels whose stacked slices show a circle from the side.
+ */
+function carShape({ width: w, depth: d, height: h }: Sized): ObjectShape {
+  const radius = Math.min(0.33, h * 0.22, w * 0.07);
+  const tyre = Math.min(0.22, d * 0.12);
+  const wx = w / 2 - w * 0.18,
+    wy = d / 2 - tyre / 2;
+  const wheel = (x: number, y: number) =>
+    slices(
+      12,
+      0,
+      2 * radius,
+      (t) => box(2 * radius * Math.sqrt(1 - (2 * t - 1) ** 2), tyre, x, y),
+      "frame",
+    );
+  const sill = h * 0.14,
+    belt = h * 0.6,
+    eaves = h * 0.96;
+  const side = d - 2 * Math.min(0.03, d * 0.02);
+  const corner = Math.min(0.35, d * 0.2);
+  const lower = (t: number) => rounded(w * (0.97 + 0.03 * Math.sin(Math.PI * t)), side, corner);
+  const cabin = (t: number) => {
+    const front = w * (0.24 - 0.22 * t),
+      rear = -w * (0.42 - 0.14 * t);
+    return rounded(
+      front - rear,
+      side * (0.94 - 0.16 * t),
+      Math.min(0.15, d * 0.08),
+      (front + rear) / 2,
+    );
+  };
+  return {
+    parts: [
+      ...wheel(wx, wy),
+      ...wheel(wx, -wy),
+      ...wheel(-wx, wy),
+      ...wheel(-wx, -wy),
+      ...slices(4, sill, belt, lower, "body"),
+      ...slices(12, belt, eaves, cabin, "glass"),
+      { slot: "body", ring: cabin(1), bottom: eaves, top: h },
+    ],
+    lines: [lower(0.5), cabin(0), cabin(1)].map((points) => ({ points, closed: true })),
+  };
+}
+
+/** A television with its screen towards -y and its back towards +y, on a foot or flat. */
+function televisionShape(o: Sized): ObjectShape {
+  const { width: w, depth: d, height: h } = o;
+  const stand = (o.options?.tvMount ?? "stand") === "stand";
+  const foot = stand ? Math.min(0.08, h * 0.1) : 0;
+  const film = Math.min(0.004, d / 4);
+  const bezel = Math.min(0.012, w / 10, (h - foot) / 10);
+  const housing = rounded(w, d - film, Math.min(0.01, d / 4), 0, film / 2, 2);
+  const screen = box(w - 2 * bezel, film, 0, -d / 2 + film / 2);
+  const plate = rounded(Math.min(0.6, w * 0.4), Math.max(d, Math.min(0.24, w * 0.2)), 0.02);
+  const plateTop = foot / 4;
+  return {
+    parts: [
+      { slot: "body", ring: housing, bottom: foot, top: h },
+      { slot: "screen", ring: screen, bottom: foot + bezel, top: h - bezel },
+      ...(stand
+        ? [
+            { slot: "frame" as const, ring: plate, bottom: 0, top: plateTop },
+            {
+              slot: "frame" as const,
+              ring: box(w * 0.1, d * 0.6),
+              bottom: plateTop,
+              top: foot,
+            },
+          ]
+        : []),
+    ],
+    lines: [...(stand ? [plate] : []), housing, screen].map((points) => ({
+      points,
+      closed: true,
+    })),
+  };
+}
+
 const RULES: Partial<Record<ObjectCatalogId, Rule>> = {
+  car: {
+    slots: ["body", "glass", "frame"],
+    labels: { body: "Karosserie", frame: "Räder" },
+    colors: { body: "#5d7186", glass: "#2b3945", frame: "#23272b" },
+    options: {},
+    shape: carShape,
+  },
+  television: {
+    slots: ["body", "screen", "frame"],
+    labels: { body: "Gehäuse", frame: "Fuß" },
+    colors: { body: "#2c2f33", screen: "#10161d", frame: "#3b3f44" },
+    options: { tvMount: "stand" },
+    shape: televisionShape,
+  },
   sofa: {
     slots: ["body", "seat", "frame"],
     colors: { body: "#7f8a96", seat: "#98a3ae", frame: "#4a3b2e" },

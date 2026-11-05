@@ -48,8 +48,8 @@ function furnished(): Project {
   return p;
 }
 
-test("catalogue: 15 own objects in three categories, every box and symbol inside the unit box", () => {
-  assert.equal(OBJECT_CATALOG_IDS.length, 15);
+test("catalogue: 17 own objects in four categories, every box and symbol inside the unit box", () => {
+  assert.equal(OBJECT_CATALOG_IDS.length, 17);
   const inUnit = (u: number) => u >= -0.5 - 1e-9 && u <= 0.5 + 1e-9;
   for (const id of OBJECT_CATALOG_IDS) {
     const d = OBJECT_CATALOG[id];
@@ -73,7 +73,7 @@ test("catalogue: 15 own objects in three categories, every box and symbol inside
   const counts = Object.keys(OBJECT_CATEGORIES).map(
     (c) => OBJECT_CATALOG_IDS.filter((id) => OBJECT_CATALOG[id].category === c).length,
   );
-  assert.deepEqual(counts, [7, 4, 4]);
+  assert.deepEqual(counts, [7, 4, 4, 2]);
 });
 
 test("place: centre, rotation and mirror turn the unit box into plan", () => {
@@ -136,13 +136,13 @@ test("add: catalogue size on the Möblierung layer; checked values; delete and c
 });
 
 test("schema 57: files round-trip; v56 files refuse smuggled objects", () => {
-  assert.equal(PROJECT_SCHEMA_VERSION, 59);
+  assert.equal(PROJECT_SCHEMA_VERSION, 60);
   const p = furnished();
   assert.deepEqual(storeyOf(readProjectFile(serializeProject(p))).objects, storeyOf(p).objects);
   const smuggled = JSON.parse(serializeProject(p));
   assert.throws(() => loadProjectData({ ...smuggled, schemaVersion: 56 }));
   const plain = JSON.parse(serializeProject(createStandardProject("p", "eg", "og")));
-  assert.equal(loadProjectData({ ...plain, schemaVersion: 56 }).schemaVersion, 59);
+  assert.equal(loadProjectData({ ...plain, schemaVersion: 56 }).schemaVersion, 60);
 });
 
 test("3D: closed boxes per catalogue box, tagged as object, on the storey floor", () => {

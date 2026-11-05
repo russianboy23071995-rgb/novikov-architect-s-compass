@@ -4,6 +4,8 @@ import { createStandardProject } from "../projects/create.ts";
 import { addObject, updateObject } from "./actions.ts";
 import { chooseObject, objectSettings, objectToolDefaults, objectValues } from "./defaults.ts";
 import { objectOutline, objectSolids, objectSymbol } from "../../domain/elements/object/model.ts";
+import { searchObjects } from "../../domain/elements/object/catalog.ts";
+import { exportIfc } from "../../lib/bim/ifc.ts";
 import {
   objectRule,
   tableChairCounts,
@@ -124,6 +126,97 @@ test("sofa: armrests and back keep their size, cushions follow the length", () =
   assert.ok(objectBody({ ...tiny, id: "s" }, 0).volume > 0);
 });
 
+const placedAt = (catalogId: "car" | "television", size: object, options: ObjectOptions = {}) => ({
+  id: catalogId,
+  catalogId,
+  position: { x: 0, y: 0 },
+  rotation: 0,
+  baseOffset: 0,
+  options,
+  ...(size as { width: number; depth: number; height: number }),
+});
+const convex = (ring: readonly { x: number; y: number }[]) =>
+  ring.every((a, i) => {
+    const b = ring[(i + 1) % ring.length]!,
+      c = ring[(i + 2) % ring.length]!;
+    return (b.x - a.x) * (c.y - b.y) - (b.y - a.y) * (c.x - b.x) > -1e-9;
+  });
+
+test("car: wheels show a circle, the cabin narrows upwards, every size stays closed", () => {
+  const car = placedAt("car", { width: 4.7, depth: 1.85, height: 1.5 });
+  const shape = objectRule("car")!.shape(car);
+  const wheels = shape.parts.filter((p) => p.slot === "frame");
+  assert.equal(wheels.length, 4 * 12);
+  // One wheel: narrow at the ground, widest at the axle.
+  const wheel = wheels.slice(0, 12).map((p) => extent(p.ring));
+  assert.ok(wheel[0]! < wheel[5]! && wheel[11]! < wheel[6]!);
+  const glass = shape.parts.filter((p) => p.slot === "glass").map((p) => extent(p.ring));
+  assert.ok(glass.every((w, i) => i === 0 || w < glass[i - 1]!));
+  assert.ok(Math.max(...shape.parts.map((p) => p.top)) === 1.5);
+  // Length and height stay inside the box the fields show.
+  assert.ok(Math.abs(extent(objectOutline(car)) - 4.7) < 1e-9);
+  for (const o of [car, placedAt("car", { width: 0.1, depth: 0.1, height: 0.02 })]) {
+    assert.ok(objectBody(o, 0).volume > 0);
+    for (const { ring, bottom, top } of objectSolids(o)) {
+      assert.ok(top > bottom);
+      assert.ok(convex(ring));
+    }
+  }
+});
+
+test("television: foot or wall, the screen sits in front and takes its own colour", () => {
+  const size = { width: 1.45, depth: 0.1, height: 0.9 };
+  const stand = placedAt("television", size, { tvMount: "stand" });
+  const wall = placedAt("television", size, { tvMount: "wall" });
+  const parts = (o: typeof stand) => objectRule("television")!.shape(o).parts;
+  assert.equal(parts(stand).filter((p) => p.slot === "frame").length, 2);
+  assert.equal(parts(wall).filter((p) => p.slot === "frame").length, 0);
+  assert.equal(parts(wall).find((p) => p.slot === "body")!.bottom, 0);
+  assert.ok(parts(stand).find((p) => p.slot === "body")!.bottom > 0);
+  const screen = parts(stand).find((p) => p.slot === "screen")!;
+  assert.ok(Math.min(...screen.ring.map((p) => p.y)) === -0.05);
+  // The foot is deeper than the set; the click outline holds it.
+  const ys = objectOutline(stand).map((p) => p.y);
+  assert.ok(Math.max(...ys) - Math.min(...ys) > 0.2);
+  const red = { ...wall, finishes: { screen: { color: "#ff0000" } } };
+  assert.ok(objectBody(red, 0).faces.some((f) => f.color?.[0] === 1));
+  for (const o of [stand, wall, placedAt("television", { width: 0.1, depth: 0.1, height: 0.02 })]) {
+    assert.ok(objectBody(o, 0).volume > 0);
+    assert.ok(objectSolids(o).every(({ ring, bottom, top }) => top > bottom && convex(ring)));
+  }
+});
+
+test("search: names, other words, genres, umlauts, several words", () => {
+  assert.deepEqual(searchObjects("sofa"), ["sofa"]);
+  assert.deepEqual(searchObjects("COUCH"), ["sofa"]);
+  assert.deepEqual(searchObjects("wc"), ["wc"]);
+  assert.deepEqual(searchObjects("klo"), ["wc"]);
+  assert.deepEqual(searchObjects("tv"), ["television"]);
+  assert.deepEqual(searchObjects("auto"), ["car"]);
+  assert.deepEqual(searchObjects("  "), []);
+  assert.deepEqual(searchObjects("xyz"), []);
+  // A name that starts with the word comes first.
+  const bath = searchObjects("bad");
+  assert.equal(bath[0], "bathtub");
+  assert.deepEqual([...bath].sort(), ["bathtub", "shower", "washbasin", "wc"]);
+  assert.deepEqual(searchObjects("tisch").slice(0, 2), ["table", "washbasin"]);
+  assert.deepEqual(searchObjects("kuehlschrank"), ["fridge"]);
+  assert.deepEqual(searchObjects("kühlschrank"), ["fridge"]);
+  assert.deepEqual(searchObjects("kuhlschrank"), ["fridge"]);
+  assert.deepEqual(searchObjects("bett schlaf").length, 2);
+  assert.deepEqual(searchObjects("bett doppel"), ["bed-double"]);
+  assert.equal(searchObjects("küche").length, 4 + 2);
+});
+
+test("IFC: television and car leave as their own classes", async () => {
+  let p = createStandardProject("p", "eg", "og");
+  p = addObject(p, { id: "tv", catalogId: "television", position: { x: 0, y: 0 } });
+  p = addObject(p, { id: "car", catalogId: "car", position: { x: 5, y: 0 } });
+  const ifc = await exportIfc(p, new Date("2026-11-05T12:00:00Z"));
+  assert.match(ifc, /=IFCAUDIOVISUALAPPLIANCE\(.*\.DISPLAY\.\)/);
+  assert.match(ifc, /=IFCBUILDINGELEMENTPROXY\(.*'Pkw'.*\.USERDEFINED\.\)/);
+});
+
 test("the click outline holds the chairs; a chair on its own follows its size", () => {
   const plain = objectOutline(table(1.6));
   const seated = objectOutline(table(1.6, { chairs: "auto" }));
@@ -167,6 +260,33 @@ test("tool values: a table starts with automatic chairs; values round-trip throu
   assert.equal(back.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.throws(() => updateObject(p, "o", { options: { chairs: 41 } }));
   assert.throws(() => updateObject(p, "o", { finishes: { top: { color: "rot" } } }));
+});
+
+test("file 59: old entries load, car, television and their parts are refused", () => {
+  const p = addObject(createStandardProject("p", "eg", "og"), {
+    id: "o",
+    catalogId: "table",
+    position: { x: 0, y: 0 },
+  });
+  const file = () => {
+    const old = JSON.parse(serializeProject(p));
+    old.schemaVersion = 59;
+    return old;
+  };
+  assert.deepEqual(
+    storeyOf(deserializeProject(JSON.stringify(file()))).objects,
+    storeyOf(p).objects,
+  );
+  const car = file();
+  car.storeys[0].objects[0].catalogId = "car";
+  car.storeys[0].objects[0].options = {};
+  assert.throws(() => deserializeProject(JSON.stringify(car)));
+  const mount = file();
+  mount.storeys[0].objects[0].options = { tvMount: "wall" };
+  assert.throws(() => deserializeProject(JSON.stringify(mount)));
+  const glass = file();
+  glass.storeys[0].objects[0].finishes = { glass: { color: "#000000" } };
+  assert.throws(() => deserializeProject(JSON.stringify(glass)));
 });
 
 test("file 58: plain objects load, options or finishes are refused", () => {

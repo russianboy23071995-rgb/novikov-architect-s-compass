@@ -11,6 +11,8 @@ import {
   TABLE_TOP_LABELS,
   TABLE_TOPS,
   tableChairTotal,
+  TV_MOUNT_LABELS,
+  TV_MOUNTS,
   type ObjectFinish,
   type ObjectSlot,
 } from "@/domain/elements/object/rules";
@@ -253,16 +255,39 @@ export function ObjectFields({
           </span>
         </fieldset>
       )}
+      {!compact && value.catalogId === "television" && (
+        <fieldset className="flex w-full flex-wrap items-end gap-3 border-t pt-2">
+          <legend className="sr-only">Fernseher</legend>
+          <label className="text-xs">
+            Aufstellung
+            <select
+              aria-label="Aufstellung"
+              value={options.tvMount ?? "stand"}
+              onChange={(e) =>
+                setOptions({ tvMount: e.target.value as (typeof TV_MOUNTS)[number] })
+              }
+              className="block rounded border bg-background p-1"
+            >
+              {TV_MOUNTS.map((mount) => (
+                <option key={mount} value={mount}>
+                  {TV_MOUNT_LABELS[mount]}
+                </option>
+              ))}
+            </select>
+          </label>
+        </fieldset>
+      )}
       {!compact && rule && (
         <fieldset className="grid w-full gap-1 border-t pt-2">
           <legend className="sr-only">Material und Farbe</legend>
           {rule.slots.map((slot) => {
             const finish = value.finishes[slot];
+            const name = rule.labels?.[slot] ?? OBJECT_SLOT_LABELS[slot];
             return (
               <div key={slot} className="flex items-center gap-2 text-xs">
-                <span className="w-14">{OBJECT_SLOT_LABELS[slot]}</span>
+                <span className="w-16">{name}</span>
                 <select
-                  aria-label={`Material ${OBJECT_SLOT_LABELS[slot]}`}
+                  aria-label={`Material ${name}`}
                   value={finish ? (finish.materialId ?? "own") : ""}
                   onChange={(e) => {
                     const id = e.target.value;
@@ -290,7 +315,7 @@ export function ObjectFields({
                 </select>
                 <input
                   type="color"
-                  aria-label={`Farbe ${OBJECT_SLOT_LABELS[slot]}`}
+                  aria-label={`Farbe ${name}`}
                   value={objectSlotColor(value, slot)}
                   onChange={(e) => onChange(setFinish(slot, { color: e.target.value }))}
                   onBlur={() => onCommit?.(value)}

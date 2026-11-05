@@ -10,6 +10,7 @@ Nutzerentscheidung 05.11.2026: Die Bibliothek wird schrittweise aufgewertet. Zue
 | M1  | Werkzeug Bibliothek, Katalogfenster, Einstellungen, Eigenschaften, Pipette (war O2)  | erledigt |
 | M2a | Bauregeln, Dateiformat 59, Esstisch mit Stühlen, Stuhl, Material und Farbe           | erledigt |
 | M2b | Sofa mit Armlehnen und Sitzkissen                                                    | erledigt |
+| M3  | Pkw, Fernseher, Suche im Katalog, Dateiformat 60                                     | erledigt |
 | O3  | Eigene Objekte aus Linien und Schraffuren, globale Bibliothek (nach M2 neu bewerten) | offen    |
 
 Vorgaben aus der Karte:
@@ -139,3 +140,33 @@ Vorgaben aus der Karte:
 **Abnahme im Browser (05.11.2026):** Im Katalog Sofa gewählt, 2 Sitze. Breite 3 und Armlehne links: 4 Sitze, nur links eine Armlehne, in der 2D- und 3D-Vorschau. Gesetzt im Startmodell mit seiner Wand, im Grundriss Rückenteil, Armlehne und vier Kissen. In 3D Korpus, Sitz- und Rückenkissen sichtbar. Das Testprojekt wurde dabei nicht geladen, das Sofa stand auf der Wand des Startmodells. Material und Farbe des Sofas laufen über denselben Code wie beim Esstisch und sind hier nicht einzeln geprüft.
 
 **Grenzen M2b:** Kein Eckteil und keine Ottomane. Die Sitzanzahl lässt sich nicht von Hand festlegen.
+
+## Teil M3: Pkw, Fernseher und Suche
+
+- **Pkw** (Eintrag `car`, Gattung „Fahrzeuge“, Start 4,70 × 1,85 × 1,50 m): Karosserie, gläserner Aufbau, Dach, vier Räder. Die Länge läuft über die Breite, die Front zeigt nach +x.
+- **Gestufte Teile:** Alle Teile sind senkrecht hochgezogene Umrisse. Räder und schräge Scheiben entstehen deshalb aus übereinanderliegenden Scheiben (je 12). Die Räder wirken von der Seite rund, die Stufen bleiben sichtbar.
+- **Fernseher** (Eintrag `television`, Gattung „Technik“, Start 1,45 × 0,10 × 0,90 m): Gehäuse, Bildschirm nach vorn, Standfuß. Mit „Wand“ entfällt der Fuß, die Höhe über Boden steht im vorhandenen Feld. Die Tiefe beträgt 10 cm, weil das die Mindesttiefe aller Objekte ist. Der Fuß ragt wie die Stühle am Tisch über die Maßfelder hinaus, die Klickfläche schließt ihn ein.
+- **Teilenamen:** Eine Regel kann Plätze umbenennen, beim Pkw Karosserie und Räder, beim Fernseher Gehäuse und Fuß. Neu sind die Plätze Bildschirm und Scheiben.
+- **Suche:** Das Feld oben im Katalogfenster sucht durch alle Gattungen. Gefunden wird über Name, Gattung, Kategorie und Suchwörter des Eintrags (`terms`), zum Beispiel Couch, Klo, TV, Auto, Bad. Groß- und Kleinschreibung und die Schreibweise von Umlauten zählen nicht. Mehrere Wörter müssen alle passen. Namen, die mit dem Wort beginnen, stehen vorn. Enter wählt den ersten Treffer, ein Klick auf eine Gattung beendet die Suche.
+- **Schema 60:** `car`, `television`, die Option `tvMount` und die Plätze `screen` und `glass`. Eine 59er Datei lädt unverändert, eine 59er Datei mit diesen Werten wird abgelehnt.
+- **IFC:** Fernseher als `IFCAUDIOVISUALAPPLIANCE` (DISPLAY). Der Pkw hat in IFC4 keine eigene Klasse und geht als `IFCBUILDINGELEMENTPROXY` hinaus.
+
+**Abnahme im Browser (05.11.2026):**
+
+| Schritt                           | Ergebnis                                             |
+| --------------------------------- | ---------------------------------------------------- |
+| Fenster öffnen                    | Suchfeld hat den Fokus                               |
+| „bad“ tippen                      | Badewanne, WC, Waschtisch, Dusche                    |
+| „wc“ tippen                       | WC, Fenster bleibt offen, kein Werkzeug springt an   |
+| „xyz“ tippen                      | „Nichts gefunden für „xyz“.“                         |
+| „auto“ und Enter                  | Pkw gewählt, Vorschau und Felder folgen              |
+| Platzieren, Klick                 | Pkw im Grundriss                                     |
+| „fernseher“ und Enter, Platzieren | Fernseher im Grundriss mit Fuß                       |
+| 3D-Ansicht                        | Pkw mit Rädern, Scheiben und Dach, Fernseher mit Fuß |
+| Doppelklick, Aufstellung Wand     | Fuß verschwindet, Klickfläche wird schmal            |
+
+**Grenzen M3:**
+
+- Der Pkw ist ein Modellauto: sichtbare Stufen, keine Radkästen, keine Lichter, ein Typ.
+- Beim Wechsel auf „Wand“ bleibt „Über Boden“ auf dem alten Wert.
+- Die Suche kennt keine Tippfehler.
