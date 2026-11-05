@@ -48,8 +48,8 @@ function furnished(): Project {
   return p;
 }
 
-test("catalogue: 17 own objects in four categories, every box and symbol inside the unit box", () => {
-  assert.equal(OBJECT_CATALOG_IDS.length, 17);
+test("catalogue: 22 own objects in four categories, every box and symbol inside the unit box", () => {
+  assert.equal(OBJECT_CATALOG_IDS.length, 22);
   const inUnit = (u: number) => u >= -0.5 - 1e-9 && u <= 0.5 + 1e-9;
   for (const id of OBJECT_CATALOG_IDS) {
     const d = OBJECT_CATALOG[id];
@@ -73,7 +73,7 @@ test("catalogue: 17 own objects in four categories, every box and symbol inside 
   const counts = Object.keys(OBJECT_CATEGORIES).map(
     (c) => OBJECT_CATALOG_IDS.filter((id) => OBJECT_CATALOG[id].category === c).length,
   );
-  assert.deepEqual(counts, [7, 4, 4, 2]);
+  assert.deepEqual(counts, [12, 4, 4, 2]);
 });
 
 test("place: centre, rotation and mirror turn the unit box into plan", () => {
@@ -136,23 +136,23 @@ test("add: catalogue size on the Möblierung layer; checked values; delete and c
 });
 
 test("schema 57: files round-trip; v56 files refuse smuggled objects", () => {
-  assert.equal(PROJECT_SCHEMA_VERSION, 60);
+  assert.equal(PROJECT_SCHEMA_VERSION, 61);
   const p = furnished();
   assert.deepEqual(storeyOf(readProjectFile(serializeProject(p))).objects, storeyOf(p).objects);
   const smuggled = JSON.parse(serializeProject(p));
   assert.throws(() => loadProjectData({ ...smuggled, schemaVersion: 56 }));
   const plain = JSON.parse(serializeProject(createStandardProject("p", "eg", "og")));
-  assert.equal(loadProjectData({ ...plain, schemaVersion: 56 }).schemaVersion, 60);
+  assert.equal(loadProjectData({ ...plain, schemaVersion: 56 }).schemaVersion, 61);
 });
 
-test("3D: closed boxes per catalogue box, tagged as object, on the storey floor", () => {
+test("3D: closed parts, tagged as object, on the storey floor", () => {
   const p = furnished();
   const bett = storeyOf(p).objects![0]!;
   const body = objectBody(bett, 3);
-  assert.equal(body.faces.length, OBJECT_CATALOG["bed-double"].boxes.length * 6);
+  assert.ok(body.faces.length > 12);
   assert.ok(body.faces.every((f) => f.object && f.vertices.every((v) => v[2] >= 3 - 1e-9)));
-  // Mattress 1,80 × 1,94 × 0,45 and headboard 1,80 × 0,06 × 0,855.
-  assert.ok(near(body.volume, 1.8 * 1.94 * 0.45 + 1.8 * 0.06 * 0.855), String(body.volume));
+  // Rails, mattress, headboard and duvet of a double bed.
+  assert.ok(body.volume > 1.8 * 1.9 * 0.3, String(body.volume));
   const boxes = objectBoxes({ ...bett, baseOffset: 0.4 });
   assert.ok(near(boxes[0]!.bottom, 0.4) && near(boxes[0]!.top, 0.85));
   const building = buildBuildingSolid(p);

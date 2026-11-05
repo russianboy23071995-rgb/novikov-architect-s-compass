@@ -177,6 +177,56 @@ export const OBJECT_CATALOG = {
     ],
     ifc: { entity: "IFCFURNITURE", type: "SOFA" },
   },
+  "coffee-table": {
+    name: "Couchtisch",
+    category: "furniture",
+    genre: "tables",
+    terms: ["Tisch", "Beistelltisch", "Wohnzimmer"],
+    size: { width: 1.1, depth: 0.6, height: 0.45 },
+    symbol: [outline],
+    boxes: [full],
+    ifc: { entity: "IFCFURNITURE", type: "TABLE" },
+  },
+  desk: {
+    name: "Schreibtisch",
+    category: "furniture",
+    genre: "tables",
+    terms: ["Tisch", "Büro", "Arbeitsplatz", "Arbeitstisch"],
+    size: { width: 1.6, depth: 0.8, height: 0.75 },
+    symbol: [outline],
+    boxes: [full],
+    ifc: { entity: "IFCFURNITURE", type: "TABLE" },
+  },
+  armchair: {
+    name: "Sessel",
+    category: "furniture",
+    genre: "seating",
+    terms: ["Polster", "Fauteuil", "Wohnzimmer", "Lehnstuhl"],
+    size: { width: 0.9, depth: 0.9, height: 0.8 },
+    symbol: [outline],
+    boxes: [full],
+    ifc: { entity: "IFCFURNITURE", type: "CHAIR" },
+  },
+  nightstand: {
+    name: "Nachttisch",
+    category: "furniture",
+    genre: "storage",
+    terms: ["Nachtkonsole", "Nachtschrank", "Schlafzimmer", "Bett"],
+    size: { width: 0.5, depth: 0.4, height: 0.55 },
+    symbol: [outline],
+    boxes: [full],
+    ifc: { entity: "IFCFURNITURE", type: "USERDEFINED" },
+  },
+  sideboard: {
+    name: "Sideboard",
+    category: "furniture",
+    genre: "storage",
+    terms: ["Kommode", "Anrichte", "Lowboard", "Wohnzimmer"],
+    size: { width: 1.8, depth: 0.45, height: 0.8 },
+    symbol: [outline],
+    boxes: [full],
+    ifc: { entity: "IFCFURNITURE", type: "USERDEFINED" },
+  },
   wardrobe: {
     name: "Schrank",
     terms: ["Kleiderschrank", "Garderobe", "Schlafzimmer"],
@@ -357,10 +407,25 @@ export const OBJECT_CATALOG_IDS = Object.keys(OBJECT_CATALOG) as [
   ...ObjectCatalogId[],
 ];
 
-/** Entries a file of format 59 or older can hold; the others came with format 60. */
-export const OBJECT_CATALOG_IDS_V59 = OBJECT_CATALOG_IDS.filter(
+type NewInV61 = "coffee-table" | "desk" | "armchair" | "nightstand" | "sideboard";
+const NEW_IN_V61: readonly string[] = [
+  "coffee-table",
+  "desk",
+  "armchair",
+  "nightstand",
+  "sideboard",
+] satisfies NewInV61[];
+/** Entries a file of format 60 can hold; five more came with format 61. */
+export const OBJECT_CATALOG_IDS_V60 = OBJECT_CATALOG_IDS.filter(
+  (id) => !NEW_IN_V61.includes(id),
+) as [Exclude<ObjectCatalogId, NewInV61>, ...Exclude<ObjectCatalogId, NewInV61>[]];
+/** Entries a file of format 59 or older can hold; car and television came with format 60. */
+export const OBJECT_CATALOG_IDS_V59 = OBJECT_CATALOG_IDS_V60.filter(
   (id) => id !== "television" && id !== "car",
-) as [Exclude<ObjectCatalogId, "television" | "car">, ...ObjectCatalogId[]];
+) as [
+  Exclude<ObjectCatalogId, NewInV61 | "television" | "car">,
+  ...Exclude<ObjectCatalogId, NewInV61 | "television" | "car">[],
+];
 
 /** Search form of a text: case and the spellings of umlauts do not matter. */
 const searchForm = (text: string) =>

@@ -403,7 +403,10 @@ export function CadViewport({
         {active &&
           zoomSlot &&
           createPortal(
-            <div className="flex items-center gap-2">
+            <div
+              className="flex items-center gap-2"
+              data-zoom-kind={paper ? "layout" : is3D ? "solid" : "plan"}
+            >
               {zoomControl}
               <MiniControl label="Alles anzeigen" onClick={fit}>
                 <Focus size={14} />

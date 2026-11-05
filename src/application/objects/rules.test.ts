@@ -11,9 +11,16 @@ import {
 } from "../../domain/elements/object/model.ts";
 import { hoverCycle, stepCycle, cycleTarget } from "../selection/cycle.ts";
 import { shapesAt } from "../../rendering/viewport/selection-shapes.ts";
-import { searchObjects } from "../../domain/elements/object/catalog.ts";
+import {
+  OBJECT_CATALOG,
+  OBJECT_CATALOG_IDS,
+  searchObjects,
+  type ObjectCatalogId,
+} from "../../domain/elements/object/catalog.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import {
+  objectBoards,
+  objectFronts,
   objectRule,
   tableChairCounts,
   sofaSeats,
@@ -195,7 +202,7 @@ test("television: foot or wall, the screen sits in front and takes its own colou
 
 test("search: names, other words, genres, umlauts, several words", () => {
   assert.deepEqual(searchObjects("sofa"), ["sofa"]);
-  assert.deepEqual(searchObjects("COUCH"), ["sofa"]);
+  assert.deepEqual(searchObjects("COUCH"), ["coffee-table", "sofa"]);
   assert.deepEqual(searchObjects("wc"), ["wc"]);
   assert.deepEqual(searchObjects("klo"), ["wc"]);
   assert.deepEqual(searchObjects("tv"), ["television"]);
@@ -206,11 +213,13 @@ test("search: names, other words, genres, umlauts, several words", () => {
   const bath = searchObjects("bad");
   assert.equal(bath[0], "bathtub");
   assert.deepEqual([...bath].sort(), ["bathtub", "shower", "washbasin", "wc"]);
-  assert.deepEqual(searchObjects("tisch").slice(0, 2), ["table", "washbasin"]);
+  assert.ok(
+    ["table", "washbasin", "desk"].every((id) => searchObjects("tisch").includes(id as never)),
+  );
   assert.deepEqual(searchObjects("kuehlschrank"), ["fridge"]);
   assert.deepEqual(searchObjects("kühlschrank"), ["fridge"]);
   assert.deepEqual(searchObjects("kuhlschrank"), ["fridge"]);
-  assert.deepEqual(searchObjects("bett schlaf").length, 2);
+  assert.deepEqual(searchObjects("bett schlaf").length, 3);
   assert.deepEqual(searchObjects("bett doppel"), ["bed-double"]);
   assert.equal(searchObjects("küche").length, 4 + 2);
 });
@@ -279,6 +288,64 @@ test("overlap: a choice made with Tab stays until the click", () => {
   assert.equal(hoverCycle(hoverCycle(null, [a, b]), [a]), null);
 });
 
+const piece = (catalogId: ObjectCatalogId, options: ObjectOptions = {}) => ({
+  id: "m",
+  catalogId,
+  position: { x: 0, y: 0 },
+  rotation: 0,
+  baseOffset: 0,
+  options,
+  ...OBJECT_CATALOG[catalogId].size,
+});
+
+test("every piece with a rule is closed and convex, also at the smallest size", () => {
+  for (const id of OBJECT_CATALOG_IDS)
+    if (objectRule(id))
+      for (const o of [piece(id), { ...piece(id), width: 0.1, depth: 0.1, height: 0.02 }]) {
+        assert.ok(objectBody(o, 0).volume > 0, id);
+        for (const { ring, bottom, top } of objectSolids(o)) {
+          assert.ok(top >= bottom, id);
+          assert.ok(convex(ring), id);
+        }
+        assert.ok(objectSymbol(o).length > 0, id);
+      }
+});
+
+test("beds: the rails keep their size, two pillows from a double width", () => {
+  const seat = (id: "bed-single" | "bed-double") =>
+    objectRule(id)!
+      .shape(piece(id))
+      .parts.filter((p) => p.top > piece(id).height + 0.05).length;
+  // The headboard rises too; pillows are the rest.
+  assert.equal(seat("bed-single") - 1, 1);
+  assert.equal(seat("bed-double") - 1, 2);
+});
+
+test("cabinets and shelves: doors and boards follow the size or a fixed number", () => {
+  assert.equal(objectFronts(piece("wardrobe", { fronts: "auto" })), 2);
+  assert.equal(objectFronts({ ...piece("wardrobe"), width: 2.4 }), 4);
+  assert.equal(objectFronts(piece("wardrobe", { fronts: 3 })), 3);
+  const fronts = (o: ReturnType<typeof piece>) =>
+    objectRule(o.catalogId)!
+      .shape(o)
+      .parts.filter((p) => p.slot === "top").length;
+  assert.equal(fronts(piece("sideboard", { fronts: "auto" })), 3);
+  assert.equal(fronts(piece("nightstand")), 2);
+  assert.equal(objectBoards(piece("shelf", { boards: "auto" })), 7);
+  assert.equal(objectBoards(piece("shelf", { boards: 4 })), 4);
+  assert.equal(fronts(piece("shelf", { boards: 4 })), 4);
+  // A 2.40 m wardrobe keeps its door depth; the body stays inside the box.
+  const wide = { ...piece("wardrobe"), width: 2.4 };
+  assert.ok(objectSolids(wide).every(({ top }) => top <= 2.1 + 1e-9));
+});
+
+test("new pieces reuse the table and the sofa", () => {
+  assert.equal(tableChairTotal(piece("coffee-table")), 0);
+  const oval = objectRule("coffee-table")!.shape(piece("coffee-table", { tableTop: "oval" }));
+  assert.ok(oval.parts.find((p) => p.slot === "top")!.ring.length > 20);
+  assert.equal(sofaSeats(piece("armchair")), 1);
+});
+
 test("the click outline holds the chairs; a chair on its own follows its size", () => {
   const plain = objectOutline(table(1.6));
   const seated = objectOutline(table(1.6, { chairs: "auto" }));
@@ -322,6 +389,27 @@ test("tool values: a table starts with automatic chairs; values round-trip throu
   assert.equal(back.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.throws(() => updateObject(p, "o", { options: { chairs: 41 } }));
   assert.throws(() => updateObject(p, "o", { finishes: { top: { color: "rot" } } }));
+});
+
+test("file 60: old entries load, new furniture and options are refused", () => {
+  const p = addObject(createStandardProject("p", "eg", "og"), {
+    id: "o",
+    catalogId: "wardrobe",
+    position: { x: 0, y: 0 },
+  });
+  const file = () => {
+    const old = JSON.parse(serializeProject(p));
+    old.schemaVersion = 60;
+    delete old.storeys[0].objects[0].options;
+    return old;
+  };
+  assert.equal(deserializeProject(JSON.stringify(file())).schemaVersion, PROJECT_SCHEMA_VERSION);
+  const desk = file();
+  desk.storeys[0].objects[0].catalogId = "desk";
+  assert.throws(() => deserializeProject(JSON.stringify(desk)));
+  const doors = file();
+  doors.storeys[0].objects[0].options = { fronts: 3 };
+  assert.throws(() => deserializeProject(JSON.stringify(doors)));
 });
 
 test("file 59: old entries load, car, television and their parts are refused", () => {

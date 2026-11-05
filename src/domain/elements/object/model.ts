@@ -4,6 +4,7 @@ import { WALL_RENOVATIONS } from "../wall/renovation.ts";
 import {
   OBJECT_CATALOG_IDS,
   OBJECT_CATALOG_IDS_V59,
+  OBJECT_CATALOG_IDS_V60,
   objectDefinition,
   type ObjectBox,
   type ObjectCatalogId,
@@ -13,6 +14,7 @@ import {
   objectFinishesV59Schema,
   objectOptionsSchema,
   objectOptionsV59Schema,
+  objectOptionsV60Schema,
   objectRule,
   type ObjectShape,
   type ObjectSlot,
@@ -53,10 +55,15 @@ export const objectV59Schema = objectV58Schema.extend({
   finishes: objectFinishesV59Schema.optional(),
 });
 /** Schema 60: car and television with their options and parts (docs/OBJEKTBIBLIOTHEK.md, M3). */
-export const objectSchema = objectV59Schema.extend({
+export const objectV60Schema = objectV59Schema.extend({
+  catalogId: z.enum(OBJECT_CATALOG_IDS_V60),
+  options: objectOptionsV60Schema.optional(),
+  finishes: objectFinishesSchema.optional(),
+});
+/** Schema 61: five more entries, doors and boards as options (docs/OBJEKTBIBLIOTHEK.md, M4). */
+export const objectSchema = objectV60Schema.extend({
   catalogId: z.enum(OBJECT_CATALOG_IDS),
   options: objectOptionsSchema.optional(),
-  finishes: objectFinishesSchema.optional(),
 });
 export type PlacedObject = z.infer<typeof objectSchema>;
 

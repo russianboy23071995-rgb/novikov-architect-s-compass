@@ -2,7 +2,10 @@ import { useState } from "react";
 import type { ObjectToolDefaults } from "@/application/objects/defaults";
 import { objectDefinition } from "@/domain/elements/object/catalog";
 import {
+  MAX_OBJECT_DIVISIONS,
   MAX_TABLE_CHAIRS,
+  objectBoards,
+  objectFronts,
   OBJECT_SLOT_LABELS,
   objectRule,
   SOFA_ARM_LABELS,
@@ -29,6 +32,60 @@ const LABELS: Record<NumberField, string> = {
   baseOffset: "Über Boden (m)",
 };
 const POSITIVE: ReadonlySet<NumberField> = new Set(["width", "depth", "height"]);
+
+/** Doors of a cabinet or boards of a shelf: by size or a fixed number. */
+function Divisions({
+  label,
+  value,
+  shown,
+  onChange,
+}: {
+  label: string;
+  value: number | "auto" | undefined;
+  shown: number;
+  onChange: (count: number | "auto") => void;
+}) {
+  const fixed = typeof value === "number";
+  return (
+    <fieldset className="flex w-full flex-wrap items-end gap-3 border-t pt-2">
+      <legend className="sr-only">{label}</legend>
+      <label className="text-xs">
+        {label}
+        <select
+          aria-label={label}
+          value={fixed ? "fixed" : "auto"}
+          onChange={(e) => onChange(e.target.value === "auto" ? "auto" : shown)}
+          className="block rounded border bg-background p-1"
+        >
+          <option value="auto">Automatisch nach Größe</option>
+          <option value="fixed">Feste Anzahl</option>
+        </select>
+      </label>
+      {fixed ? (
+        <label className="text-xs">
+          Anzahl
+          <input
+            aria-label={`Anzahl ${label}`}
+            type="number"
+            min={1}
+            max={MAX_OBJECT_DIVISIONS}
+            value={value}
+            onChange={(e) => {
+              const count = Number(e.target.value);
+              if (Number.isInteger(count) && count >= 1 && count <= MAX_OBJECT_DIVISIONS)
+                onChange(count);
+            }}
+            className="block w-16 rounded border bg-background p-1"
+          />
+        </label>
+      ) : (
+        <span role="status" className="py-1 text-xs text-muted-foreground">
+          {shown} {label}
+        </span>
+      )}
+    </fieldset>
+  );
+}
 
 /**
  * Object fields (docs/OBJEKTBIBLIOTHEK.md, M1): the same set in the tool bar, the library
@@ -95,6 +152,26 @@ export function ObjectFields({
     return { ...value, finishes: finish ? { ...rest, [slot]: finish } : rest };
   };
   const chairs = options.chairs;
+  const tableTopField = () => (
+    <fieldset className="flex w-full flex-wrap items-end gap-3 border-t pt-2">
+      <legend className="sr-only">Platte</legend>
+      <label className="text-xs">
+        Platte
+        <select
+          aria-label="Plattenform"
+          value={options.tableTop ?? "rectangle"}
+          onChange={(e) => setOptions({ tableTop: e.target.value as (typeof TABLE_TOPS)[number] })}
+          className="block rounded border bg-background p-1"
+        >
+          {TABLE_TOPS.map((top) => (
+            <option key={top} value={top}>
+              {TABLE_TOP_LABELS[top]}
+            </option>
+          ))}
+        </select>
+      </label>
+    </fieldset>
+  );
   return (
     <section aria-label={label} className="flex flex-wrap items-end gap-3">
       {onCatalog && (
@@ -135,6 +212,22 @@ export function ObjectFields({
           ))}
         </select>
       </label>
+      {!compact &&
+        (value.catalogId === "wardrobe" ||
+          value.catalogId === "sideboard" ||
+          value.catalogId === "shelf") && (
+          <Divisions
+            label={value.catalogId === "shelf" ? "Böden" : "Türen"}
+            value={value.catalogId === "shelf" ? options.boards : options.fronts}
+            shown={value.catalogId === "shelf" ? objectBoards(value) : objectFronts(value)}
+            onChange={(count) =>
+              setOptions(value.catalogId === "shelf" ? { boards: count } : { fronts: count })
+            }
+          />
+        )}
+      {!compact &&
+        (value.catalogId === "coffee-table" || value.catalogId === "desk") &&
+        tableTopField()}
       {!compact && value.catalogId === "table" && (
         <fieldset className="flex w-full flex-wrap items-end gap-3 border-t pt-2">
           <legend className="sr-only">Tisch</legend>
@@ -230,9 +323,9 @@ export function ObjectFields({
           </span>
         </fieldset>
       )}
-      {!compact && value.catalogId === "sofa" && (
+      {!compact && (value.catalogId === "sofa" || value.catalogId === "armchair") && (
         <fieldset className="flex w-full flex-wrap items-end gap-3 border-t pt-2">
-          <legend className="sr-only">Sofa</legend>
+          <legend className="sr-only">Polstermöbel</legend>
           <label className="text-xs">
             Armlehnen
             <select
@@ -251,7 +344,7 @@ export function ObjectFields({
             </select>
           </label>
           <span role="status" className="py-1 text-xs text-muted-foreground">
-            {sofaSeats(value)} Sitze
+            {sofaSeats(value)} {sofaSeats(value) === 1 ? "Sitz" : "Sitze"}
           </span>
         </fieldset>
       )}
