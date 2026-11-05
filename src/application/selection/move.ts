@@ -64,6 +64,16 @@ export function assertMovableSelection(
     throw new Error(
       "Fenster für die freie Gruppenbewegung zusammen mit ihrer Wand auswählen. Einzelfenster lassen sich entlang ihrer Wand bewegen.",
     );
+  if (
+    targets.some(
+      (t) =>
+        t.kind === "door" &&
+        !walls.has(
+          project.storeys.flatMap((s) => s.doors ?? []).find((d) => d.id === t.id)!.wallId,
+        ),
+    )
+  )
+    throw new Error("Türen für die freie Gruppenbewegung zusammen mit ihrer Wand auswählen.");
 }
 export function beginSelectionMove(
   base: Project,

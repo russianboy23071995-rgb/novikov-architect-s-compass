@@ -39,9 +39,10 @@ export function InteractionInput({
       axisLabel={preview.value?.notice ?? adapter.input.axisLabel}
       scalar={!!adapter.axisConstraint}
       angleOnly={!!adapter.input.angleOnly}
+      {...(adapter.input.angleLabel ? { angleLabel: adapter.input.angleLabel } : {})}
       mouseHint={
         adapter.input.angleOnly
-          ? "Mausrichtung · Tab: Drehwinkel"
+          ? `Mausrichtung · Tab: ${adapter.input.angleLabel ?? "Drehwinkel"}`
           : adapter.click === "direction"
             ? "Mausrichtung · Tab: Länge ↔ Winkel"
             : "Mausziel · Tab: Länge ↔ Winkel"

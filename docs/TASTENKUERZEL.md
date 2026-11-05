@@ -6,7 +6,7 @@ Nutzerauftrag 04.11.2026: Bewegen, Drehen und Spiegeln für alle Elemente über 
 | ---- | ------------------------------------------------------------------------------- | -------- |
 | B1   | Kürzelliste, Fenster Edit → Tastenkürzel, Dateiformat 58, Strg+E, Kopie bewegen | erledigt |
 | B2   | Drehen Strg+D mit Kreis 0–360°, Tab-Eingabe, Umschalt 45°, Kopie                | erledigt |
-| B3   | Spiegeln Strg+M über Achse mit Vorschau, Umschalt 45°, Kopie                    | offen    |
+| B3   | Spiegeln Strg+M über Achse mit Vorschau, Umschalt 45°, Kopie                    | erledigt |
 | B4   | Abgleich mit den Objekten (Möblierung)                                          | offen    |
 
 Entscheidungen aus der Karte:
@@ -146,8 +146,74 @@ Testprojekt mit 17 Objekten, gedreht wurde die Spüle mit ihrem außermittigen B
 
 Grenze der Abnahme: Das Testwerkzeug drückt beim Klick mit Umschalt keine echte Umschalttaste. Die App liest Umschalt über die Taste selbst, deshalb wurde Umschalt per Tastenereignis gesendet. Mit einer echten Tastatur ist das ein normaler Druck auf Umschalt.
 
-## Teil B3 (offen)
+## Teil B3: Spiegeln
 
-- **Spiegeln:** Strg+M, erster Punkt der Achse per Klick, die Achse folgt mit Vorschau der Maus, Umschalt rastet auf 45°.
-- **Kopie:** Strg schaltet wie beim Bewegen und Drehen auf Kopie.
-- **Umsetzung:** Spiegeln wird eine weitere `PlanTransform` im selben Rechenkern.
+### Bedienung
+
+1. Elemente auswählen, Strg+M drücken oder im Rechtsklick-Menü „Spiegeln“ wählen.
+2. Klick 1 setzt den ersten Punkt der Achse.
+3. Die gestrichelte Achse folgt der Maus und zeigt ihren Winkel von 0 bis 180°. Die Vorschau zeigt die gespiegelte Auswahl.
+4. Klick 2 legt die Richtung fest und spiegelt.
+
+Während des Spiegelns:
+
+- **Umschalt** rastet die Achse auf 45°-Schritte ab der Waagerechten.
+- **Tab** öffnet das Feld „Achswinkel °“.
+- **Strg** schaltet auf Kopie, mit „+“ am Cursor. Die Kopie ist danach ausgewählt.
+- **Esc** bricht ab.
+
+Rückgängig ist ein Schritt. Gespiegelt wird nur im Grundriss.
+
+Strg wirkt nur außerhalb des Eingabefelds, wie beim Drehen. Wer eine Kopie mit getipptem Winkel will, drückt erst Strg, dann Tab.
+
+### Je Elementart
+
+| Elementart                                          | Was passiert                                                                                                |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Wand                                                | Punkte spiegeln, Anfang und Ende tauschen. Wandaufbau-Seite und Achslage bleiben richtig.                   |
+| Wandanschlüsse                                      | Innerhalb der Auswahl tauschen die Enden mit. Anschlüsse nach außen entfallen wie beim Bewegen.             |
+| Fenster                                             | Lage wird zu 1 − Lage, Flügel laufen in umgekehrter Reihenfolge, ihre Bänder wechseln die Seite.            |
+| Tür                                                 | Lage wird zu 1 − Lage, Band am anderen Pfosten, Öffnungsseite bleibt. Aus DIN links wird DIN rechts.        |
+| Stütze                                              | Mittelpunkt spiegelt, Winkel wird zu 2α − θ.                                                                |
+| Objekt                                              | Mittelpunkt spiegelt, „gespiegelt“ schaltet um, Winkel wird zu 2α − θ + 180°.                               |
+| Treppe                                              | Start spiegelt, Laufrichtung wird zu 2α − θ, Zeichenachse und Wendung tauschen links und rechts.            |
+| Dach                                                | Umriss und Bezugslinie spiegeln, die Steigseite tauscht.                                                    |
+| Dachflächenfenster                                  | Nur mit dem Dach; seine Lage in der Dachfläche bleibt. Allein wird es abgelehnt.                            |
+| Decke, Durchbruch, Raum, Schraffur, Linie, Geländer | Punkte spiegeln. Das Schraffurmuster behält seinen Winkel.                                                  |
+| Text                                                | Einfügepunkt spiegelt, der Block landet spiegelbildlich zum Punkt, die Schrift bleibt lesbar (siehe unten). |
+| Bild                                                | Wird nicht gespiegelt. Die Bildmitte wandert auf die Spiegelseite, Winkel und Inhalt bleiben.               |
+| Platzierte Zeichnung                                | Nur die Lage spiegelt.                                                                                      |
+| Maßkette                                            | Nur an Achsen in 45°-Schritten, eine schräge 45°-Achse tauscht waagerecht und senkrecht. Sonst Ablehnung.   |
+
+**Text:** Würde die Schrift nach dem Spiegeln nach links laufen, dreht sie um 180° und links- und rechtsbündig tauschen. Bleibt die Leserichtung, tauschen stattdessen oben und unten. Das weicht von der Karte ab, die immer die Ausrichtung tauschen wollte: An einer waagerechten Achse läge der Text sonst auf der falschen Seite seines Punktes.
+
+Zweimal an derselben Achse spiegeln ergibt das Original. Bei Achsen in 45°-Schritten ist das exakt, ohne Rundungsrest. Eine L- oder U-Treppe ohne gespeicherte Wendung trägt danach „links“ ausdrücklich, das bedeutet dasselbe.
+
+### Umsetzung
+
+`reflectionTransform` ist eine weitere `PlanTransform` im Rechenkern `prepared-translation.ts`, mit dem Feld `mirror` für den Achswinkel. `application/selection/mirror.ts` folgt dem Aufbau von `rotate.ts`. Die Eingabe bekam `angleLabel`, damit das Feld „Achswinkel“ heißt. Das Dateiformat bleibt bei 58.
+
+### Mitbehoben
+
+Die Abnahme fand drei ältere Fehler:
+
+- **Mehrfachauswahl:** Strg+E, Strg+D und Strg+M meldeten nach Strg+A oder Rahmenauswahl „Erst ein Element auswählen“. Sie arbeiten jetzt auf der ganzen Auswahl.
+- **Türen in der Auswahl:** Der Rechenkern lehnte eine Auswahl mit Tür ab, Fenster dagegen nicht. Türen folgen jetzt ihrer Wand. Eine Tür ohne ihre Wand wird in der Gruppenbewegung mit Hinweis abgelehnt.
+- **Gestrichelte Linien:** Strichlängen zählen bei nicht skalierenden Linien in Bildschirmpixeln. Der Bezugsstrahl des Drehens wirkte deshalb durchgezogen.
+
+### Abnahme im Browser (05.11.2026)
+
+Testprojekt mit zwei verbundenen Wänden, Fenster, Tür, WC, Text und Treppe, alles per Strg+A ausgewählt (7 Elemente).
+
+| Schritt                                          | Ergebnis                                                                     |
+| ------------------------------------------------ | ---------------------------------------------------------------------------- |
+| Strg+M, Achspunkt, Umschalt, Maus fast senkrecht | Achse rastet auf 90°, Vorschau zeigt das Spiegelbild                         |
+| Klick 2                                          | Spiegelbild übernommen, Tür schlägt spiegelbildlich auf, „Bad“ bleibt lesbar |
+| Strg+Z                                           | Original zurück, Auswahl aufgehoben                                          |
+| Strg+M, Achspunkt, Tab, 0, Enter                 | Spiegelung an der Waagerechten                                               |
+| Strg+M, Achspunkt, Strg, Tab, 0, Enter           | 14 Elemente, Tür mitkopiert, Kopie ausgewählt (7)                            |
+| Rechtsklick                                      | Eintrag „Spiegeln“ mit Strg+M, startet das Spiegeln, Esc bricht ab           |
+| Strg+D und Strg+E mit Mehrfachauswahl            | Starten beide, Bewegen läuft bis zur Platzierung                             |
+| Fenster „Tastenkürzel“                           | Spiegeln mit Strg+M, kein „(folgt)“ mehr                                     |
+
+Nicht im Browser geprüft, nur durch Tests belegt: Dach, Maßketten, Bilder und freie schräge Achsen.

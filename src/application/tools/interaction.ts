@@ -12,8 +12,14 @@ export type ToolInteraction = {
   axisConstraint?: { origin: Point2; direction: readonly [number, number, number] };
   snapping: ToolSnapPolicy;
   origin: Point2;
-  /** `angleOnly`: the angle field alone, Tab goes there (B2: the turn of a rotation). */
-  input: { axisLabel: string | null; degrees: number | null; angleOnly?: true } | null;
+  /** `angleOnly`: the angle field alone, Tab goes there (B2: the turn of a rotation; B3: the
+   * mirror axis, then named by `angleLabel`). */
+  input: {
+    axisLabel: string | null;
+    degrees: number | null;
+    angleOnly?: true;
+    angleLabel?: string;
+  } | null;
   click: "confirm" | "direction";
   preview: (angle: string, length: string, aim: Point2 | null) => PrecisionValues;
   geometryPreview?: {

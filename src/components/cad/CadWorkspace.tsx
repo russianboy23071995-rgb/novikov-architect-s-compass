@@ -41,6 +41,7 @@ import { HotkeySettings } from "./HotkeySettings";
 import { copyTransformed } from "@/application/selection/copy-transform";
 import { CopyCursorBadge } from "./CopyCursorBadge";
 import { useSelectionRotate } from "./useSelectionRotate";
+import { useSelectionMirror } from "./useSelectionMirror";
 import { hotkeyLabel, resolvedHotkeys, type HotkeyCommand } from "@/domain/hotkeys/model";
 import {
   clipboardSummary,
@@ -778,7 +779,30 @@ export function CadWorkspace({
       setModelError(error instanceof Error ? error.message : "Kopie nicht möglich.");
     }
   });
-  const transformActive = groupMove.active || groupRotate.active;
+  // Spiegeln (docs/TASTENKUERZEL.md, B3): axis point, axis direction; the same copy switch.
+  const groupMirror = useSelectionMirror(project, selections, visibility, (next, axis) => {
+    const at = `${axis.toLocaleString("de-DE", { maximumFractionDigits: 2 })}°`;
+    if (!copyMove) {
+      dispatchEditing({ type: "project", project: next });
+      showNotice(`Auswahl an Achse ${at} gespiegelt`);
+      return;
+    }
+    try {
+      const copied = copyTransformed(
+        project,
+        next,
+        selections,
+        (kind) => `${kind}-${crypto.randomUUID()}`,
+      );
+      dispatchEditing({ type: "project", project: copied.project });
+      selectManyCommitted(copied.project, copied.targets);
+      showNotice(clipboardSummary(copied.content, `kopiert und an Achse ${at} gespiegelt`));
+      setModelError("");
+    } catch (error) {
+      setModelError(error instanceof Error ? error.message : "Kopie nicht möglich.");
+    }
+  });
+  const transformActive = groupMove.active || groupRotate.active || groupMirror.active;
   useEffect(() => {
     if (!transformActive) setCopyMove(false);
   }, [transformActive]);
@@ -786,6 +810,7 @@ export function CadWorkspace({
   cancelGroup.current = () => {
     groupMove.cancel();
     groupRotate.cancel();
+    groupMirror.cancel();
   };
   const selectedLayerId = selectedLayerElement(project, selection)?.layerId;
   const selectedIdSet = useMemo(() => new Set(selections.map((t) => t.id)), [selections]);
@@ -1944,6 +1969,16 @@ export function CadWorkspace({
           (mode === "3D" && "Nur im Grundriss."),
         run: () => commandShortcut.current?.("rotate"),
       },
+      {
+        id: "mirror",
+        label: "Spiegeln",
+        shortcut: `${hotkeyLabel(resolvedHotkeys(project.hotkeys).mirror)} · danach ${hotkeyLabel(resolvedHotkeys(project.hotkeys)["copy-toggle"])}: Kopie`,
+        disabled:
+          none ||
+          (!canEditSelection && "Gerade nicht möglich.") ||
+          (mode === "3D" && "Nur im Grundriss."),
+        run: () => commandShortcut.current?.("mirror"),
+      },
       "separator",
       {
         id: "cut",
@@ -2053,24 +2088,35 @@ export function CadWorkspace({
   hotkeysNow.current = project.hotkeys;
   const commandShortcut = useRef<((command: "move" | "rotate" | "mirror") => void) | null>(null);
   commandShortcut.current = (command) => {
-    if (command === "mirror")
-      return setModelError("Spiegeln folgt mit B3 (docs/TASTENKUERZEL.md).");
     if (transformActive || editSession) return;
-    if (!selections.length || !selection) return setModelError("Erst ein Element auswählen.");
+    // A multi-selection (Strg+A, frame) has no single element: all three work on the set.
+    if (!selections.length) return setModelError("Erst ein Element auswählen.");
     if (mode === "3D")
       return setModelError(
         command === "rotate"
           ? "Drehen nur im Grundriss."
-          : "Bewegen per Tastenkürzel nur im Grundriss.",
+          : command === "mirror"
+            ? "Spiegeln nur im Grundriss."
+            : "Bewegen per Tastenkürzel nur im Grundriss.",
       );
     setCopyMove(false);
-    if (command === "move") return startEdit("move");
+    if (command === "move" && selection) return startEdit("move");
     try {
       setDemandOpen(false);
-      groupRotate.begin();
+      if (command === "mirror") groupMirror.begin();
+      else if (command === "rotate") groupRotate.begin();
+      else groupMove.begin();
       setModelError("");
     } catch (error) {
-      setModelError(error instanceof Error ? error.message : "Drehen nicht möglich.");
+      setModelError(
+        error instanceof Error
+          ? error.message
+          : command === "mirror"
+            ? "Spiegeln nicht möglich."
+            : command === "rotate"
+              ? "Drehen nicht möglich."
+              : "Bewegung nicht möglich.",
+      );
     }
   };
   const copyToggleShortcut = useRef<(() => boolean) | null>(null);
@@ -2802,6 +2848,7 @@ export function CadWorkspace({
     windowPlacement ??
       groupMove.adapter ??
       groupRotate.adapter ??
+      groupMirror.adapter ??
       (editSession
         ? editInteraction(
             editSession,
@@ -4279,7 +4326,31 @@ export function CadWorkspace({
                                         ? (point) => groupRotate.pickPivot(point)
                                         : interaction.pick,
                                   }
-                                : undefined
+                                : groupMirror.active
+                                  ? {
+                                      target: interaction.target,
+                                      geometryPreview: groupMirror.adapter?.geometryPreview,
+                                      mirrorGuide: groupMirror.origin
+                                        ? { origin: groupMirror.origin }
+                                        : undefined,
+                                      aim: interaction.draft.move,
+                                      pick:
+                                        groupMirror.stage === "origin"
+                                          ? (point) => {
+                                              try {
+                                                groupMirror.pickOrigin(point);
+                                                setModelError("");
+                                              } catch (error) {
+                                                setModelError(
+                                                  error instanceof Error
+                                                    ? error.message
+                                                    : "Spiegeln nicht möglich.",
+                                                );
+                                              }
+                                            }
+                                          : interaction.pick,
+                                    }
+                                  : undefined
                         }
                         project={project}
                         drawingPreview={activeChain?.preview}
@@ -4660,6 +4731,16 @@ export function CadWorkspace({
                         }}
                       />
                     )}
+                  {groupMirror.active && (
+                    <p
+                      role="status"
+                      className="pointer-events-none absolute bottom-12 left-3 rounded bg-popover px-2 py-1 text-xs"
+                    >
+                      {groupMirror.stage === "origin"
+                        ? "Spiegeln: ersten Achspunkt anklicken · Esc verwirft"
+                        : `Spiegeln: Achsrichtung anklicken · Tab: Achswinkel · Umschalt 45° · ${hotkeyLabel(resolvedHotkeys(project.hotkeys)["copy-toggle"])}: Kopie · Esc verwirft`}
+                    </p>
+                  )}
                   {groupRotate.active && (
                     <p
                       role="status"
