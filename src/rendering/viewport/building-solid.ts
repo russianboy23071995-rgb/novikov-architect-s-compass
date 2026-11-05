@@ -117,7 +117,8 @@ function buildingEntry(input: Project): BuildingEntry {
         (s.columns?.length ?? 0) > 0 ||
         (s.stairs?.length ?? 0) > 0 ||
         (s.railings?.length ?? 0) > 0 ||
-        (s.objects?.length ?? 0) > 0,
+        (s.objects?.length ?? 0) > 0 ||
+        (s.terrains?.length ?? 0) > 0,
     )
     .map((s) => storeyPart(project, s, immutable));
   const result: Solid = {

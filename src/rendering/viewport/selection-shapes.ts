@@ -104,6 +104,8 @@ const PLAN_SHAPES: {
   railing: (r) => ({ points: r.points, closed: false }),
   // The object's box in plan (docs/OBJEKTBIBLIOTHEK.md).
   object: (o) => ({ points: objectOutline(o), closed: true, pick: objectPickRings(o) }),
+  // Outline only: the terrain lies under everything else (docs/GELAENDE.md).
+  terrain: (t) => ({ points: t.outline, closed: true }),
   // Its opening on the roof top, seen from above (docs/DACHFLAECHENFENSTER.md).
   roofWindow: (w, { project }) => {
     const roof = storeyOf(project).roofs?.find((r) => r.id === w.roofId);
@@ -131,6 +133,7 @@ const PLAN_CAPTIONS: { [K in ElementKind]: (element: ElementOf<K>) => string | u
   railing: () => undefined,
   roofWindow: () => undefined,
   object: (o) => objectDefinition(o.catalogId).name,
+  terrain: () => undefined,
 };
 
 /** Shape order of the box selection (kept stable for existing callers). */
@@ -152,6 +155,7 @@ const SHAPE_ORDER: readonly ElementKind[] = [
   "railing",
   "roofWindow",
   "object",
+  "terrain",
 ];
 
 /** Plan paint order, topmost first (lines over walls with their openings over hatches over
@@ -166,6 +170,7 @@ const PICK_RANK: Record<ElementKind, number> = {
   roofWindow: 3.5,
   // Beneath walls and columns, above hatches and rooms (docs/OBJEKTBIBLIOTHEK.md).
   object: 2.5,
+  terrain: 8,
   window: 1,
   door: 1,
   wall: 2,

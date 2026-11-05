@@ -30,6 +30,7 @@ import {
   objectV60Schema,
   objectV61Schema,
 } from "../elements/object/model.ts";
+import { terrainSchema } from "../elements/terrain/model.ts";
 import { hotkeyConflicts, hotkeysSchema, resolvedHotkeys } from "../hotkeys/model.ts";
 import {
   roofWindowProblem,
@@ -876,18 +877,33 @@ export const projectV62Schema = projectV45Schema.extend({
  * Schema 63: elements drawn above or below all kinds (docs/DARSTELLUNGSREIHENFOLGE.md, K3), in
  * drawing order. Ids of deleted elements are ignored and dropped at the next change.
  */
-const storeySchema = storeyV62Schema.extend({
+const storeyV63Schema = storeyV62Schema.extend({
   displayBands: z
     .object({ front: z.array(id).max(20000), back: z.array(id).max(20000) })
     .strict()
     .optional(),
 });
-const layoutDrawingV63Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
+const layoutDrawingV63Schema = z.object({ layoutId: id, storey: storeyV63Schema }).strict();
+export const projectV63Schema = projectV45Schema.extend({
+  schemaVersion: z.literal(63),
+  storeys: z.array(storeyV63Schema).min(1),
+  modelViews: z.array(anyModelViewSchema).optional(),
+  layoutDrawings: z.array(layoutDrawingV63Schema).max(5000).optional(),
+  masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
+  layouts: z.array(layoutV49Schema).max(5000).optional(),
+  projectInfo: projectInfoSchema.optional(),
+  hotkeys: hotkeysSchema.optional(),
+});
+/** Schema 64: the terrain of the project, in its ground storey (docs/GELAENDE.md). */
+const storeySchema = storeyV63Schema.extend({
+  terrains: z.array(terrainSchema).max(1).optional(),
+});
+const layoutDrawingV64Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
 const projectSchema = projectV45Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z.array(storeySchema).min(1),
   modelViews: z.array(anyModelViewSchema).optional(),
-  layoutDrawings: z.array(layoutDrawingV63Schema).max(5000).optional(),
+  layoutDrawings: z.array(layoutDrawingV64Schema).max(5000).optional(),
   masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
   layouts: z.array(layoutV49Schema).max(5000).optional(),
   projectInfo: projectInfoSchema.optional(),

@@ -51,19 +51,21 @@ function* triangles(
           ? "roofWindow"
           : f.object
             ? "object"
-            : f.opening
-              ? f.opening
-              : f.slab
-                ? "slab"
-                : f.roof
-                  ? "roof"
-                  : f.column
-                    ? "column"
-                    : f.stair
-                      ? "stair"
-                      : f.railing
-                        ? "railing"
-                        : "wall",
+            : f.terrain
+              ? "terrain"
+              : f.opening
+                ? f.opening
+                : f.slab
+                  ? "slab"
+                  : f.roof
+                    ? "roof"
+                    : f.column
+                      ? "column"
+                      : f.stair
+                        ? "stair"
+                        : f.railing
+                          ? "railing"
+                          : "wall",
         id: f.wallId,
       });
       yield;

@@ -35,6 +35,7 @@ export function getWallFootSources(project: Project) {
       face.stair ||
       face.railing ||
       face.object ||
+      face.terrain ||
       face.opening
     )
       continue;

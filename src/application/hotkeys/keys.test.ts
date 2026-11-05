@@ -82,14 +82,14 @@ test("change: own shortcut stored in the project, a taken one refused, default n
 });
 
 test("schema 58: shortcuts travel with the file; v57 files refuse them and load with defaults", () => {
-  assert.equal(PROJECT_SCHEMA_VERSION, 63);
+  assert.equal(PROJECT_SCHEMA_VERSION, 64);
   const p = setHotkey(createStandardProject("p", "eg", "og"), "rotate", "Ctrl+Shift+D");
   assert.deepEqual(readProjectFile(serializeProject(p)).hotkeys, { rotate: "Ctrl+Shift+D" });
   const stored = JSON.parse(serializeProject(p));
   assert.throws(() => loadProjectData({ ...stored, schemaVersion: 57 }));
   const plain = JSON.parse(serializeProject(createStandardProject("p", "eg", "og")));
   const loaded = loadProjectData({ ...plain, schemaVersion: 57 });
-  assert.equal(loaded.schemaVersion, 63);
+  assert.equal(loaded.schemaVersion, 64);
   assert.equal(loaded.hotkeys, undefined);
 });
 
