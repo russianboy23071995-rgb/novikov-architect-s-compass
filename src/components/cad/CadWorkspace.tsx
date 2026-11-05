@@ -326,6 +326,12 @@ type FrozenDrawing = Pick<
   "documentId" | "limit" | "center" | "denominator" | "content"
 >;
 
+const ARMED_HINTS = {
+  move: "Bewegen: Punkt am Element anklicken",
+  rotate: "Drehen: Drehpunkt am Element anklicken",
+  mirror: "Spiegeln: ersten Achspunkt am Element anklicken",
+} as const;
+
 export function CadWorkspace({
   layerVisibility,
   initialProject,
@@ -936,6 +942,9 @@ export function CadWorkspace({
     navigatorWidth,
   });
   const [demandOpen, setDemandOpen] = useState(false);
+  /** Bewegen, Drehen or Spiegeln called with nothing selected: waiting for the element. */
+  const [armedCommand, setArmedCommand] = useState<"move" | "rotate" | "mirror" | null>(null);
+  const armedPick = useRef<{ command: "move" | "rotate" | "mirror"; point: Point } | null>(null);
   const [pickedPoint, setPickedPoint] = useState<{
     index: number | null;
     anchor: Point | null;
@@ -974,6 +983,7 @@ export function CadWorkspace({
     cancelCalibration.current();
     setReferenceEpoch((value) => value + 1);
     dispatchEditing({ type: "cancel" });
+    setArmedCommand(null);
     setWallChain(null);
     setPathPoints([]);
     setRoofLine(null);
@@ -1982,6 +1992,12 @@ export function CadWorkspace({
       setModelError(error instanceof Error ? error.message : "Aufheben nicht möglich.");
     }
   };
+  /** "Strg+E | + Kopie: Strg+E+Strg": the command, then with the copy switch pressed after it. */
+  const transformHint = (command: "move" | "rotate" | "mirror") => {
+    const keys = resolvedHotkeys(project.hotkeys);
+    const key = hotkeyLabel(keys[command]);
+    return `${key} | + Kopie: ${key}+${hotkeyLabel(keys["copy-toggle"])}`;
+  };
   const contextEntries = (target: NonNullable<Selection> | null): ContextMenuEntry[] => {
     const none = selections.length === 0 ? "Keine Auswahl." : false;
     const single = target ?? (selections.length === 1 ? selections[0]! : null);
@@ -1989,30 +2005,27 @@ export function CadWorkspace({
       {
         id: "move",
         label: "Bewegen",
-        shortcut: `${hotkeyLabel(resolvedHotkeys(project.hotkeys).move)} · danach ${hotkeyLabel(resolvedHotkeys(project.hotkeys)["copy-toggle"])}: Kopie`,
+        shortcut: transformHint("move"),
         disabled:
-          none ||
-          (!canEditSelection && "Gerade nicht möglich.") ||
+          (!none && !canEditSelection && "Gerade nicht möglich.") ||
           (mode === "3D" && "Nur im Grundriss."),
         run: () => commandShortcut.current?.("move"),
       },
       {
         id: "rotate",
         label: "Drehen",
-        shortcut: `${hotkeyLabel(resolvedHotkeys(project.hotkeys).rotate)} · danach ${hotkeyLabel(resolvedHotkeys(project.hotkeys)["copy-toggle"])}: Kopie`,
+        shortcut: transformHint("rotate"),
         disabled:
-          none ||
-          (!canEditSelection && "Gerade nicht möglich.") ||
+          (!none && !canEditSelection && "Gerade nicht möglich.") ||
           (mode === "3D" && "Nur im Grundriss."),
         run: () => commandShortcut.current?.("rotate"),
       },
       {
         id: "mirror",
         label: "Spiegeln",
-        shortcut: `${hotkeyLabel(resolvedHotkeys(project.hotkeys).mirror)} · danach ${hotkeyLabel(resolvedHotkeys(project.hotkeys)["copy-toggle"])}: Kopie`,
+        shortcut: transformHint("mirror"),
         disabled:
-          none ||
-          (!canEditSelection && "Gerade nicht möglich.") ||
+          (!none && !canEditSelection && "Gerade nicht möglich.") ||
           (mode === "3D" && "Nur im Grundriss."),
         run: () => commandShortcut.current?.("mirror"),
       },
@@ -2091,26 +2104,30 @@ export function CadWorkspace({
         disabled: trimmedSelection().length ? false : "Keine getrimmte Wand ausgewählt.",
         run: untrimSelected,
       },
-      { heading: "Darstellungsreihenfolge" },
-      ...(["front", "forward", "backward", "back"] as const).map((step) => ({
-        id: `order-${step}`,
-        label: DISPLAY_ORDER_LABELS[step],
-        disabled:
-          none ||
-          (!canEditSelection && "Gerade nicht möglich.") ||
-          (!canChangeDisplayOrder(project, selections, step) && "Liegt schon so."),
-        run: () => {
-          try {
-            const next = changeDisplayOrder(project, selections, step);
-            if (next === project) return;
-            dispatchEditing({ type: "project", project: next });
-            showNotice(DISPLAY_ORDER_LABELS[step]);
-            setModelError("");
-          } catch (error) {
-            setModelError(error instanceof Error ? error.message : "Reihenfolge nicht änderbar.");
-          }
-        },
-      })),
+      {
+        id: "order",
+        label: "Darstellungsreihenfolge",
+        submenu: (["front", "forward", "backward", "back"] as const).map((step) => ({
+          id: `order-${step}`,
+          label: DISPLAY_ORDER_LABELS[step],
+          disabled:
+            none ||
+            (!canEditSelection && "Gerade nicht möglich.") ||
+            (!canChangeDisplayOrder(project, selections, step) &&
+              "Liegt schon so. Die Reihenfolge gilt innerhalb einer Elementart."),
+          run: () => {
+            try {
+              const next = changeDisplayOrder(project, selections, step);
+              if (next === project) return;
+              dispatchEditing({ type: "project", project: next });
+              showNotice(DISPLAY_ORDER_LABELS[step]);
+              setModelError("");
+            } catch (error) {
+              setModelError(error instanceof Error ? error.message : "Reihenfolge nicht änderbar.");
+            }
+          },
+        })),
+      },
     ];
   };
   const openContextMenu = (target: NonNullable<Selection> | null, x: number, y: number) => {
@@ -2126,8 +2143,6 @@ export function CadWorkspace({
   const commandShortcut = useRef<((command: "move" | "rotate" | "mirror") => void) | null>(null);
   commandShortcut.current = (command) => {
     if (transformActive || editSession) return;
-    // A multi-selection (Strg+A, frame) has no single element: all three work on the set.
-    if (!selections.length) return setModelError("Erst ein Element auswählen.");
     if (mode === "3D")
       return setModelError(
         command === "rotate"
@@ -2136,6 +2151,14 @@ export function CadWorkspace({
             ? "Spiegeln nur im Grundriss."
             : "Bewegen per Tastenkürzel nur im Grundriss.",
       );
+    // Command first (docs/ANPASSUNGSLISTE.md, 9c): nothing selected, so the next click on an
+    // element picks it and its point. A multi-selection works on the set right away.
+    if (!selections.length) {
+      setTool("select");
+      setArmedCommand(command);
+      setModelError("");
+      return showNotice(ARMED_HINTS[command]);
+    }
     setCopyMove(false);
     if (command === "move" && selection) return startEdit("move");
     try {
@@ -2156,6 +2179,33 @@ export function CadWorkspace({
       );
     }
   };
+  // The picked element is selected: start its command at the clicked point, then hand the point
+  // to the step that asks for it (base point, pivot, first axis point).
+  const runArmedPick = useRef<() => void>(() => undefined);
+  runArmedPick.current = () => {
+    const picked = armedPick.current;
+    if (!picked) return;
+    if (!transformActive) {
+      if (!selections.length) return;
+      setDemandOpen(false);
+      setCopyMove(false);
+      try {
+        if (picked.command === "move") {
+          armedPick.current = null;
+          groupMove.begin(picked.point);
+        } else if (picked.command === "rotate") groupRotate.begin();
+        else groupMirror.begin();
+      } catch (error) {
+        armedPick.current = null;
+        setModelError(error instanceof Error ? error.message : "Nicht möglich.");
+      }
+      return;
+    }
+    armedPick.current = null;
+    if (picked.command === "rotate") groupRotate.pickPivot(picked.point);
+    if (picked.command === "mirror") groupMirror.pickOrigin(picked.point);
+  };
+  useEffect(() => runArmedPick.current(), [selections, transformActive]);
   const copyToggleShortcut = useRef<(() => boolean) | null>(null);
   copyToggleShortcut.current = () => {
     if (!transformActive) return false;
@@ -4522,6 +4572,15 @@ export function CadWorkspace({
                             : tool === "wall"
                               ? (activeChain?.wallIds.length ?? 0) > 0
                               : pathPoints.length >= 2
+                        }
+                        onArmedPick={
+                          armedCommand
+                            ? (target, point) => {
+                                armedPick.current = { command: armedCommand, point };
+                                setArmedCommand(null);
+                                selectElement(target);
+                              }
+                            : undefined
                         }
                         closeAtStart={pathClosure !== "none" || !!activeChain}
                         closeFrom={activeChain?.points}

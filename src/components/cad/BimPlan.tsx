@@ -374,6 +374,8 @@ export type BimPlanProps = {
     | undefined;
   /** The drawing tool closes by a click on its start point (docs/POLYGON_REGELN.md, Regel 3). */
   closeAtStart?: boolean;
+  /** A command waits for its element: the next click on one hands it over with the point. */
+  onArmedPick?: ((target: NonNullable<Selection>, point: Point) => void) | undefined;
   /** Points a run closes on when they are not the draft, as in a wall run. */
   closeFrom?: Point[] | undefined;
   /** Roof tool guide: reference line and rise side; null rise follows the cursor (ROOF D3). */
@@ -465,6 +467,7 @@ export function BimPlan({
   textPreview,
   closeAtStart = false,
   closeFrom,
+  onArmedPick,
   roofGuide = null,
   draftFill,
   draftShape,
@@ -1352,6 +1355,19 @@ export function BimPlan({
           return;
         }
         if ((event.target as Element).closest("[data-reference-panel]")) return;
+        if (onArmedPick) {
+          const node = (event.target as Element).closest("[data-plan-pick]");
+          const kind = node?.getAttribute("data-kind"),
+            id = node?.getAttribute("data-id");
+          const target =
+            overlap.preselected ?? (kind && id ? ({ kind, id } as NonNullable<Selection>) : null);
+          const raw = rawPoint(event);
+          overlap.clear();
+          event.preventDefault();
+          event.stopPropagation();
+          if (target && raw) onArmedPick(target, resolvePointer(raw, false).point);
+          return;
+        }
         // Overlapping elements: the click selects the Tab pre-selection, not the topmost one.
         const chosen = overlap.preselected;
         overlap.clear();
