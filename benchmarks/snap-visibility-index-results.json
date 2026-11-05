@@ -1,0 +1,102 @@
+{
+  "date": "2026-10-27",
+  "states": {
+    "vorher": "main af86749",
+    "nachher": "Branch perf/snap-visibility-index"
+  },
+  "notes": "Beide Stände als Diagnose-Build render-profile (gleiche Messpunkte). Ziehlauf benchmarks/school-acceptance.html?drag=1&fresh=1&images=1: je Lauf 5 Durchgänge mit 30 Mausbewegungen; erst alle Vorher-Läufe, dann alle Nachher-Läufe. Vollständiger Schullauf l (run=1) je zweimal. Dev-Rechner, Fenster sichtbar, 60 Hz. acceptCandidate = Sichtbarkeitsprüfung eines Fangkandidaten.",
+  "dragRun": {
+    "l": {
+      "vorher": [
+        {
+          "medianMs": 652.6,
+          "movesOver40": 26,
+          "slowSnapMoves": 25,
+          "acceptMedianMs": 15.5,
+          "acceptMaxMs": 24.7
+        },
+        {
+          "medianMs": 648.4,
+          "movesOver40": 28,
+          "slowSnapMoves": 25,
+          "acceptMedianMs": 15.2,
+          "acceptMaxMs": 24.8
+        },
+        {
+          "medianMs": 673.0,
+          "movesOver40": 27,
+          "slowSnapMoves": 25,
+          "acceptMedianMs": 16.2,
+          "acceptMaxMs": 26.4
+        }
+      ],
+      "nachher": [
+        {
+          "medianMs": 475.6,
+          "movesOver40": 16,
+          "slowSnapMoves": 5,
+          "acceptMedianMs": 0.1,
+          "acceptMaxMs": 54.0
+        },
+        {
+          "medianMs": 500.4,
+          "movesOver40": 15,
+          "slowSnapMoves": 5,
+          "acceptMedianMs": 0.1,
+          "acceptMaxMs": 36.1
+        },
+        {
+          "medianMs": 504.2,
+          "movesOver40": 15,
+          "slowSnapMoves": 5,
+          "acceptMedianMs": 0.0,
+          "acceptMaxMs": 40.5
+        }
+      ],
+      "nachherNote": "Die 5 verbleibenden langsamen Fangbewegungen sind je Durchgang die erste Prüfung (Bewegung 14): einmaliger Index-Aufbau 34–54 ms. Übrige Bewegungen über 40 ms: Hintergrundarbeit nach dem Öffnen im ersten oder zweiten Durchgang."
+    },
+    "s": {
+      "vorher": [
+        { "medianMs": 526.3, "movesOver40": 8, "acceptMedianMs": 5.6, "acceptMaxMs": 12.9 },
+        { "medianMs": 470.6, "movesOver40": 8, "acceptMedianMs": 5.6, "acceptMaxMs": 12.1 },
+        { "medianMs": 460.2, "movesOver40": 3, "acceptMedianMs": 5.7, "acceptMaxMs": 9.4 }
+      ],
+      "nachher": [
+        { "medianMs": 451.5, "movesOver40": 2, "acceptMedianMs": 0.1, "acceptMaxMs": 16.1 },
+        { "medianMs": 411.8, "movesOver40": 5, "acceptMedianMs": 0.1, "acceptMaxMs": 17.2 },
+        { "medianMs": 437.3, "movesOver40": 6, "acceptMedianMs": 0.1, "acceptMaxMs": 19.5 }
+      ]
+    }
+  },
+  "fullRunL": {
+    "vorher": [
+      {
+        "2D → 3D": 790.1,
+        "3D – Szene fertig": 235.5,
+        "3D: Tür entlang Wand ziehen": 2315.0,
+        "dragLongTaskMs": 1034
+      },
+      {
+        "2D → 3D": 188.8,
+        "3D – Szene fertig": 839.7,
+        "3D: Tür entlang Wand ziehen": 2122.9,
+        "dragLongTaskMs": 925
+      }
+    ],
+    "nachher": [
+      {
+        "2D → 3D": 781.6,
+        "3D – Szene fertig": 189.0,
+        "3D: Tür entlang Wand ziehen": 1845.4,
+        "dragLongTaskMs": 669
+      },
+      {
+        "2D → 3D": 764.9,
+        "3D – Szene fertig": 203.7,
+        "3D: Tür entlang Wand ziehen": 1686.8,
+        "dragLongTaskMs": 769
+      }
+    ],
+    "note": "Alle Schritte ok, keine Fehler. Im Diagnose-Build fällt die Hintergrundarbeit der 3D-Szene teils in den Ziehschritt (Szene fertig kurz); im Nachher-Lauf 2 nach dem ersten Kandidaten alle Prüfungen ≤ 0,1 ms."
+  }
+}

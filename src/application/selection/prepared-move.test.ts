@@ -1,7 +1,8 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createProject, validateProject, type Point } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
+import { validateProject, type Point } from "../../domain/project/schema.ts";
 import { defaultHatchAppearance } from "../../domain/elements/hatch/model.ts";
 import { fullSelectionMove } from "../../../benchmarks/selection-move-oracle.ts";
 import { prepareTranslation } from "../../domain/project/prepared-translation.ts";
@@ -279,7 +280,7 @@ test("detached chain end retains full renderer geometry, zero state and stale-co
 
 test("single wall shared move preserves picked origins and legacy move geometry", async () => {
   const { connectedFixture } = await import("../../../benchmarks/connected-fixture.ts");
-  const { editAtPointer } = await import("../../lib/bim/direct-edit.ts");
+  const { editAtPointer } = await import("../direct-edit/session.ts");
   for (const kind of ["chain", "tees"] as const) {
     const base = connectedFixture(kind, 5),
       target = { kind: "wall" as const, id: "wall-0" },

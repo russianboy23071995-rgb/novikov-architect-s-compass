@@ -3,14 +3,31 @@ import { visiblePlanGeometry } from "../../rendering/viewport/layer-display.ts";
 import type { LayerVisibilityPolicy } from "../../application/layers/visibility.ts";
 import { imageReferenceCorners } from "../../rendering/viewport/image-reference.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
-import { addWall, addWindow, createProject, wallLength } from "../../lib/bim/model.ts";
-import type { Point, Project, Wall } from "../../lib/bim/model.ts";
+import { addWindow } from "../../application/windows/actions.ts";
+import { createProject, createStandardProject } from "../../application/projects/create.ts";
+import { wallLength } from "../../domain/project/schema.ts";
+import { addWall } from "../../application/walls/actions.ts";
+import type { Point, Project, Wall } from "../../domain/project/schema.ts";
 
 export type Selection = import("../../application/selection/target.ts").ElementTarget | null;
 
 export function createExampleProject(): Project {
   return addWindow(
     addWall(createProject("project-1", "storey-1"), {
+      id: "wall-1",
+      start: { x: 0, y: 0 },
+      end: { x: 3, y: 0 },
+      thickness: 0.36,
+      height: 2.8,
+    }),
+    { id: "window-1", wallId: "wall-1", width: 1.2, height: 1.35, sillHeight: 0.9, position: 0.5 },
+  );
+}
+
+/** Project shown when the app starts without a file: the standard EG + 1. OG structure. */
+export function createStartProject(): Project {
+  return addWindow(
+    addWall(createStandardProject("project-1", "storey-1", "storey-2"), {
       id: "wall-1",
       start: { x: 0, y: 0 },
       end: { x: 3, y: 0 },
@@ -57,6 +74,7 @@ export function planBounds(project: Project, visibility?: LayerVisibilityPolicy)
     : storeyOf(project);
   if (
     !storey.walls.length &&
+    !storey.slabs?.length &&
     !storey.lines?.length &&
     !storey.hatches.length &&
     !storey.references.length
@@ -77,6 +95,7 @@ export function planBounds(project: Project, visibility?: LayerVisibilityPolicy)
     for (const point of [body.start, body.end, wall.start, wall.end])
       include(point, wall.thickness / 2);
   }
+  for (const slab of storey.slabs ?? []) for (const point of slab.points) include(point);
   for (const line of storey.lines ?? []) for (const point of line.points) include(point);
   for (const hatch of storey.hatches) for (const point of hatch.points) include(point);
   for (const reference of storey.references)

@@ -3,7 +3,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { rectangleContour, prepareHatchBoundaries } from "./construction.ts";
 import { validateSimplePolygon } from "../../geometry/polygons/simple-polygon.ts";
-import { createProject, addLine } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
+import { addLine } from "../lines/actions.ts";
 import { createLayerVisibilityPolicy, ALL_LAYERS_VISIBLE } from "../layers/visibility.ts";
 import { createDrawing } from "../drawing/actions.ts";
 test("diagonal and oblique side-height rectangles have exact geometry", () => {

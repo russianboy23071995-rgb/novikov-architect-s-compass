@@ -3,12 +3,16 @@ import { readFile, writeFile, unlink } from "node:fs/promises";
 import { cpus } from "node:os";
 import { boundHeightFixture } from "./bound-height-fixture.ts";
 import { createProjectSnapshot } from "../src/domain/project/owned-snapshot.ts";
-import { buildBuildingSolid, buildPreviewSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
+import { buildPreviewSolid } from "../src/rendering/viewport/storey-solid.ts";
 import { buildingViewFixture } from "./building-view-fixture.ts";
 
-const generated = new URL("../src/lib/bim/geometry.bounds-pilot.ts", import.meta.url);
+const generated = new URL(
+  "../src/rendering/viewport/storey-solid.bounds-pilot.ts",
+  import.meta.url,
+);
 let source = (
-  await readFile(new URL("../src/lib/bim/geometry.ts", import.meta.url), "utf8")
+  await readFile(new URL("../src/rendering/viewport/storey-solid.ts", import.meta.url), "utf8")
 ).replaceAll("\r\n", "\n");
 // Isolate XYZ bounds only; transformation and point arrays remain unchanged.
 const original = `      for (const p of vertices)

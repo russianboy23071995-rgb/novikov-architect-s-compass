@@ -205,7 +205,8 @@ export function RecoveryPanel({
             </p>
             <p>
               Projekt: {candidate.project.id} · {content.storeys} Geschosse · {content.walls} Wände
-              · {content.windows} Fenster (gesamtes Projekt)
+              · {content.windows} Fenster · {content.doors} Türen · {content.slabs} Decken ·{" "}
+              {content.roofs} Dächer · {content.rooms} Räume (gesamtes Projekt)
             </p>
             <Button
               size="sm"

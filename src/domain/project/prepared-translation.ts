@@ -1,17 +1,25 @@
+import { textSchema } from "../elements/text/model.ts";
+import { dimensionSchema } from "../elements/dimension/model.ts";
+import { columnSchema } from "../elements/column/model.ts";
+import { stairSchema } from "../elements/stair/model.ts";
 import { translatePoint } from "../../geometry/primitives/point.ts";
 import { wallDependencyClosure } from "../elements/wall/dependency-closure.ts";
 import { prepareProjectSnapshot } from "./prepared-snapshot.ts";
 import { wallBase } from "../elements/wall/heights.ts";
 import { storeyOf } from "../storeys/access.ts";
-import { validateProject, type Project, type Point } from "./schema.ts";
+import { validateProject, type Project, type Point, type Wall } from "./schema.ts";
 import type { GeometryPreview, ModelGeometry } from "./geometry-scope.ts";
 import { validateLineGeometry, validateWindowGeometry } from "./geometry-validation.ts";
+import { doorOpening } from "../elements/door/model.ts";
 import {
   createPreparedWallSolids,
   prepareDetachedEndSolids,
 } from "../elements/wall/connections.ts";
 import { wallBody } from "../elements/wall/body.ts";
 import { hatchSchema } from "../elements/hatch/model.ts";
+import { slabSchema } from "../elements/slab/model.ts";
+import { roofSchema } from "../elements/roof/model.ts";
+import { roomSchema } from "../elements/room/model.ts";
 import { validateReferenceExtent } from "../elements/reference/model.ts";
 
 /** Freeze owned plain data, never caller-owned model objects. */
@@ -29,7 +37,20 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
   const ids = new Set(selectedIds);
   const s = storeyOf(base);
   const available = new Set(
-    [...s.walls, ...s.windows, ...(s.lines ?? []), ...s.hatches, ...s.references].map((e) => e.id),
+    [
+      ...s.walls,
+      ...s.windows,
+      ...(s.slabs ?? []),
+      ...(s.roofs ?? []),
+      ...(s.rooms ?? []),
+      ...(s.columns ?? []),
+      ...(s.stairs ?? []),
+      ...(s.dimensions ?? []),
+      ...(s.texts ?? []),
+      ...(s.lines ?? []),
+      ...s.hatches,
+      ...s.references,
+    ].map((e) => e.id),
   );
   if (!ids.size || ids.size !== selectedIds.length || selectedIds.some((id) => !available.has(id)))
     throw new Error("Ungültige Bewegungsauswahl.");
@@ -45,13 +66,24 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       s.references.some((r) => ids.has(r.id) && r.assetId === a.id),
     ),
     storey: {
+      // The storey height places moving ceiling slabs in the 3D preview.
+      height: s.height,
       walls: s.walls.filter((w) => walls.has(w.id)),
       windows: s.windows.filter((w) => walls.has(w.wallId)),
+      // Doors stay hosted by relative position; they follow their walls like windows.
+      ...(s.doors ? { doors: s.doors.filter((d) => walls.has(d.wallId)) } : {}),
       wallJoins: s.wallJoins.filter((j) => walls.has(j.first.wallId)),
       wallTJunctions: s.wallTJunctions.filter((j) => walls.has(j.hostWallId)),
       lines: (s.lines ?? []).filter((l) => ids.has(l.id)),
       hatches: s.hatches.filter((h) => ids.has(h.id)),
       references: s.references.filter((r) => ids.has(r.id)),
+      ...(s.slabs ? { slabs: s.slabs.filter((slab) => ids.has(slab.id)) } : {}),
+      ...(s.roofs ? { roofs: s.roofs.filter((roof) => ids.has(roof.id)) } : {}),
+      ...(s.rooms ? { rooms: s.rooms.filter((room) => ids.has(room.id)) } : {}),
+      ...(s.columns ? { columns: s.columns.filter((column) => ids.has(column.id)) } : {}),
+      ...(s.stairs ? { stairs: s.stairs.filter((stair) => ids.has(stair.id)) } : {}),
+      ...(s.dimensions ? { dimensions: s.dimensions.filter((d) => ids.has(d.id)) } : {}),
+      ...(s.texts ? { texts: s.texts.filter((t) => ids.has(t.id)) } : {}),
     },
   };
   freeze(affected);
@@ -70,19 +102,28 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       const key = pointKey(p, wallBase(wall));
       counts.set(key, (counts.get(key) ?? 0) + 1);
     }
-  const fixedJoinedNodes = new Set(
-    retainedJoins
-      .filter((j) => !ids.has(j.first.wallId))
-      .map((j) => {
-        const wall = byWall.get(j.first.wallId)!;
-        return pointKey(j.first.endpoint === 0 ? wall.start : wall.end, wallBase(wall));
-      }),
-  );
+  // A join node: its point at the foot heights of both walls, which may differ (L09 U1).
+  const joinNodeKeys = (join: (typeof s.wallJoins)[number], wallOf: (id: string) => Wall) => {
+    const first = wallOf(join.first.wallId),
+      p = join.first.endpoint === 0 ? first.start : first.end;
+    return [...new Set([first, wallOf(join.second.wallId)].map((w) => pointKey(p, wallBase(w))))];
+  };
+  const fixedJoinedNodes = retainedJoins
+    .filter((j) => !ids.has(j.first.wallId))
+    .map((j) => joinNodeKeys(j, (id) => byWall.get(id)!));
   const assets = new Map(affected.assets.map((a) => [a.id, a]));
   const replacedIds = Object.freeze(
     [
       ...storeyOf(affected).walls,
       ...storeyOf(affected).windows,
+      ...(storeyOf(affected).doors ?? []),
+      ...(storeyOf(affected).slabs ?? []),
+      ...(storeyOf(affected).roofs ?? []),
+      ...(storeyOf(affected).rooms ?? []),
+      ...(storeyOf(affected).columns ?? []),
+      ...(storeyOf(affected).stairs ?? []),
+      ...(storeyOf(affected).dimensions ?? []),
+      ...(storeyOf(affected).texts ?? []),
       ...storeyOf(affected).lines!,
       ...storeyOf(affected).hatches,
       ...storeyOf(affected).references,
@@ -109,6 +150,9 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
           ...storeyOf(affected),
           walls: storeyOf(affected).walls.filter((w) => w.id !== movingId),
           windows: storeyOf(affected).windows.filter((w) => w.wallId !== movingId),
+          ...(storeyOf(affected).doors
+            ? { doors: storeyOf(affected).doors!.filter((d) => d.wallId !== movingId) }
+            : {}),
           wallJoins: localJoins,
           wallTJunctions: localTees,
         },
@@ -140,8 +184,9 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       }
     const countAt = (key: string) => (counts.get(key) ?? 0) + (changedCounts.get(key) ?? 0);
     // Spatial dependency: a moving, previously unrelated endpoint may occupy a fixed join.
-    for (const key of changedCounts.keys())
-      if (fixedJoinedNodes.has(key) && countAt(key) !== 2)
+    const nodeCount = (keys: readonly string[]) => keys.reduce((n, k) => n + countAt(k), 0);
+    for (const keys of fixedJoinedNodes)
+      if (keys.some((k) => changedCounts.has(k)) && nodeCount(keys) !== 2)
         throw new Error("Mehrfachanschluss noch nicht unterstützt.");
     const geometry: ModelGeometry = {
       assets: affected.assets,
@@ -160,24 +205,102 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
           ...r,
           origin: translate(r.origin),
         })),
+        ...(storeyOf(affected).slabs
+          ? {
+              slabs: storeyOf(affected).slabs!.map((slab) => ({
+                ...slab,
+                points: slab.points.map(translate),
+              })),
+            }
+          : {}),
+        // A roof moves with its reference line (docs/ROOF_ELEMENT.md, D3).
+        ...(storeyOf(affected).roofs
+          ? {
+              roofs: storeyOf(affected).roofs!.map((roof) => ({
+                ...roof,
+                points: roof.points.map(translate),
+                referenceLine: {
+                  start: translate(roof.referenceLine.start),
+                  end: translate(roof.referenceLine.end),
+                },
+              })),
+            }
+          : {}),
+        ...(storeyOf(affected).rooms
+          ? {
+              rooms: storeyOf(affected).rooms!.map((room) => ({
+                ...room,
+                points: room.points.map(translate),
+              })),
+            }
+          : {}),
+        // A column moves with its centre (docs/STUETZEN.md, P3).
+        ...(storeyOf(affected).columns
+          ? {
+              columns: storeyOf(affected).columns!.map((column) => ({
+                ...column,
+                position: translate(column.position),
+              })),
+            }
+          : {}),
+        // A stair moves with its start point (docs/TREPPE.md, TR2).
+        ...(storeyOf(affected).stairs
+          ? {
+              stairs: storeyOf(affected).stairs!.map((stair) => ({
+                ...stair,
+                start: translate(stair.start),
+              })),
+            }
+          : {}),
+        ...(storeyOf(affected).texts
+          ? {
+              texts: storeyOf(affected).texts!.map((t) => ({
+                ...t,
+                position: translate(t.position),
+              })),
+            }
+          : {}),
+        ...(storeyOf(affected).dimensions
+          ? {
+              dimensions: storeyOf(affected).dimensions!.map((d) => {
+                const moved = translate(
+                  d.orientation === "horizontal" ? { x: 0, y: d.offset } : { x: d.offset, y: 0 },
+                );
+                return {
+                  ...d,
+                  points: d.points.map(translate),
+                  offset: d.orientation === "horizontal" ? moved.y : moved.x,
+                };
+              }),
+            }
+          : {}),
         wallJoins: localJoins,
         wallTJunctions: localTees,
       },
     };
     const localWalls = new Map(storeyOf(geometry).walls.map((w) => [w.id, w]));
-    for (const join of localJoins) {
-      const wall = localWalls.get(join.first.wallId)!;
-      const p = join.first.endpoint === 0 ? wall.start : wall.end;
-      if (countAt(pointKey(p, wallBase(wall))) !== 2)
+    for (const join of localJoins)
+      if (nodeCount(joinNodeKeys(join, (id) => localWalls.get(id)!)) !== 2)
         throw new Error("Mehrfachanschluss noch nicht unterstützt.");
-    }
     for (const wall of storeyOf(geometry).walls)
       if (!detachedEnd || wall.id === movingId) wallBody(wall);
     for (const line of storeyOf(geometry).lines!) validateLineGeometry(line);
     for (const hatch of storeyOf(geometry).hatches) hatchSchema.parse(hatch);
+    for (const slab of storeyOf(geometry).slabs ?? []) slabSchema.parse(slab);
+    for (const roof of storeyOf(geometry).roofs ?? []) roofSchema.parse(roof);
+    for (const room of storeyOf(geometry).rooms ?? []) roomSchema.parse(room);
+    for (const column of storeyOf(geometry).columns ?? []) columnSchema.parse(column);
+    for (const stair of storeyOf(geometry).stairs ?? []) stairSchema.parse(stair);
+    for (const d of storeyOf(geometry).dimensions ?? []) dimensionSchema.parse(d);
+    for (const t of storeyOf(geometry).texts ?? []) textSchema.parse(t);
     for (const opening of storeyOf(geometry).windows)
       if (!detachedEnd || opening.wallId === movingId)
         validateWindowGeometry(opening, localWalls.get(opening.wallId)!);
+    for (const door of storeyOf(geometry).doors ?? [])
+      if (!detachedEnd || door.wallId === movingId) {
+        const wall = localWalls.get(door.wallId)!;
+        validateWindowGeometry(doorOpening(door, wall), wall);
+      }
     for (const reference of storeyOf(geometry).references)
       validateReferenceExtent(reference, assets.get(reference.assetId)!);
     // The exact existing corner/T/opening/solid rules, applied to the dependency closure.
@@ -198,6 +321,15 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(s.lines ? { lines: replace(s.lines, storeyOf(patch.geometry).lines!) } : {}),
       hatches: replace(s.hatches, storeyOf(patch.geometry).hatches),
       references: replace(s.references, storeyOf(patch.geometry).references),
+      ...(s.slabs ? { slabs: replace(s.slabs, storeyOf(patch.geometry).slabs ?? []) } : {}),
+      ...(s.roofs ? { roofs: replace(s.roofs, storeyOf(patch.geometry).roofs ?? []) } : {}),
+      ...(s.rooms ? { rooms: replace(s.rooms, storeyOf(patch.geometry).rooms ?? []) } : {}),
+      ...(s.columns ? { columns: replace(s.columns, storeyOf(patch.geometry).columns ?? []) } : {}),
+      ...(s.stairs ? { stairs: replace(s.stairs, storeyOf(patch.geometry).stairs ?? []) } : {}),
+      ...(s.texts ? { texts: replace(s.texts, storeyOf(patch.geometry).texts ?? []) } : {}),
+      ...(s.dimensions
+        ? { dimensions: replace(s.dimensions, storeyOf(patch.geometry).dimensions ?? []) }
+        : {}),
       wallJoins: retainedJoins,
       wallTJunctions: retainedTees,
     };
@@ -213,7 +345,20 @@ export function prepareStoreysTranslation(source: Project, selectedIds: readonly
   const base = snapshot.base;
   const selected = new Set(selectedIds);
   const parts = base.storeys.flatMap((s) => {
-    const ids = [...s.walls, ...s.windows, ...(s.lines ?? []), ...s.hatches, ...s.references]
+    const ids = [
+      ...s.walls,
+      ...s.windows,
+      ...(s.slabs ?? []),
+      ...(s.roofs ?? []),
+      ...(s.rooms ?? []),
+      ...(s.columns ?? []),
+      ...(s.stairs ?? []),
+      ...(s.dimensions ?? []),
+      ...(s.texts ?? []),
+      ...(s.lines ?? []),
+      ...s.hatches,
+      ...s.references,
+    ]
       .filter((e) => selected.has(e.id))
       .map((e) => e.id);
     return ids.length
@@ -269,7 +414,20 @@ export function prepareStoreysTranslation(source: Project, selectedIds: readonly
 export function prepareTranslation(source: Project, selectedIds: readonly string[]) {
   const s = storeyOf(source);
   const available = new Set(
-    [...s.walls, ...s.windows, ...(s.lines ?? []), ...s.hatches, ...s.references].map((e) => e.id),
+    [
+      ...s.walls,
+      ...s.windows,
+      ...(s.slabs ?? []),
+      ...(s.roofs ?? []),
+      ...(s.rooms ?? []),
+      ...(s.columns ?? []),
+      ...(s.stairs ?? []),
+      ...(s.dimensions ?? []),
+      ...(s.texts ?? []),
+      ...(s.lines ?? []),
+      ...s.hatches,
+      ...s.references,
+    ].map((e) => e.id),
   );
   if (selectedIds.some((id) => !available.has(id))) throw new Error("Ungültige Bewegungsauswahl.");
   return prepareStoreysTranslation(source, selectedIds);

@@ -1,24 +1,21 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  createProject,
-  addWall,
-  addWindow,
-  updateWall,
-  serializeProject,
-  wallLength,
-} from "./model.ts";
+import { serializeProject } from "./model.ts";
+import { createProject } from "../../application/projects/create.ts";
+import { addWindow } from "../../application/windows/actions.ts";
+import { wallLength } from "../../domain/project/schema.ts";
+import { addWall, updateWall } from "../../application/walls/actions.ts";
 import {
   createHistory,
   commitProject,
   undoProject,
   redoProject,
-  readProjectFile,
-} from "./history.ts";
+} from "../../application/history/project-history.ts";
+import { readProjectFile } from "./history.ts";
 import { exportIfc } from "./ifc.ts";
-import { editAtPointer } from "./direct-edit.ts";
-import { buildSolid } from "./geometry.ts";
+import { editAtPointer } from "../../application/direct-edit/session.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 
 test("complete wall-window workflow retains dimensions, host and IDs through undo, file reload and IFC", async () => {
   let history = createHistory(createProject("workflow", "ground"));

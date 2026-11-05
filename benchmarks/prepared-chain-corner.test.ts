@@ -4,8 +4,13 @@ import assert from "node:assert/strict";
 import { prepareChainCorner } from "./prepared-chain-corner.ts";
 import { tPairFixture } from "./t-pair-fixture.ts";
 import { beginWallChain, appendWallChain } from "../src/application/drawing/wall-chain.ts";
-import { validateProject } from "../src/lib/bim/model.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../src/application/history/project-history.ts";
 const fixture = () => {
   const p = tPairFixture();
   return appendWallChain(beginWallChain(p, { x: -20, y: -20 }), p, "first", { x: -15, y: -20 });

@@ -1,15 +1,18 @@
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createProject, serializeProject, validateProject } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
+import { validateProject } from "../../domain/project/schema.ts";
 import {
   createHistory,
   commitProject,
   undoProject,
   redoProject,
-  readProjectFile,
-} from "../../lib/bim/history.ts";
+} from "../history/project-history.ts";
+import { readProjectFile } from "../../lib/bim/history.ts";
 import { createDrawing } from "../drawing/actions.ts";
 import { previewHatch } from "./actions.ts";
 import { changeHatchSizeMode, patternSize } from "./pattern-size.ts";
@@ -106,7 +109,7 @@ test("size edits are one model undo step; view scale stays outside that history;
   assert.deepEqual(readProjectFile(serializeProject(history.present)), history.present);
   const old = { ...p, schemaVersion: 15 };
   const loaded = readProjectFile(legacyFixtureJSON(old));
-  assert.equal(loaded.schemaVersion, 26);
+  assert.equal(loaded.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.deepEqual(storeyOf(loaded), storeyOf(p));
   assert.throws(() =>
     readProjectFile(legacyFixtureJSON({ ...history.present, schemaVersion: 15 })),

@@ -162,3 +162,51 @@ test("exceptions require metadata, exact edges, stale removal and no cycle widen
   );
   assert.match(audit(g, { cycles: [{ edges: cyclicEdges(g) }] }).join(), /metadata/);
 });
+
+test("broken UTF-8 in production texts fails closed; tests and correct umlauts pass", () => {
+  // Built from code points so this file itself stays plain ASCII.
+  const broken = "Projekt wurde ge" + String.fromCharCode(0xc3, 0xa4) + "ndert";
+  const ellipsis =
+    "Bild wird gepr" + String.fromCharCode(0xfc) + "ft" + String.fromCharCode(0xe2, 0x20ac, 0xa6);
+  const correct =
+    "Projekt wurde ge" + String.fromCharCode(0xe4) + "ndert " + String.fromCharCode(0x2026);
+  fixture(
+    {
+      "src/domain/a.ts": `export const a = ${JSON.stringify(broken)};`,
+      "src/components/b.tsx": `export const b = ${JSON.stringify(ellipsis)};`,
+      "src/domain/c.ts": `export const c = ${JSON.stringify(correct)};`,
+      "src/domain/a.test.ts": `export const probe = ${JSON.stringify(broken)};`,
+    },
+    (g) =>
+      assert.deepEqual(
+        audit(g, none).filter((p) => p.includes("mojibake")),
+        [
+          "src/components/b.tsx:1: broken UTF-8 text (mojibake)",
+          "src/domain/a.ts:1: broken UTF-8 text (mojibake)",
+        ],
+      ),
+  );
+});
+
+test("replacement characters in production texts fail closed, also when encoded twice", () => {
+  // "m?glich" with U+FFFD read back as Latin-1, and the raw replacement character.
+  const twice = "Bewegung nicht m" + String.fromCharCode(0xef, 0xbf, 0xbd) + "glich.";
+  const raw = "W" + String.fromCharCode(0xfffd) + "nde";
+  const correct =
+    "na" + String.fromCharCode(0xef) + "ve Bewegung m" + String.fromCharCode(0xf6) + "glich";
+  fixture(
+    {
+      "src/components/a.tsx": `export const a = ${JSON.stringify(twice)};`,
+      "src/domain/b.ts": `export const b = ${JSON.stringify(raw)};`,
+      "src/domain/c.ts": `export const c = ${JSON.stringify(correct)};`,
+    },
+    (g) =>
+      assert.deepEqual(
+        audit(g, none).filter((p) => p.includes("mojibake")),
+        [
+          "src/components/a.tsx:1: broken UTF-8 text (mojibake)",
+          "src/domain/b.ts:1: broken UTF-8 text (mojibake)",
+        ],
+      ),
+  );
+});

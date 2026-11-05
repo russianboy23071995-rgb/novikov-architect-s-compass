@@ -1,3 +1,4 @@
+import { allStoreyElements } from "@/domain/elements/registry";
 import type { BuildingChange } from "@/application/storeys/actions";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { BuildingSettings } from "./BuildingSettings";
@@ -18,7 +19,12 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import type { TreeNode } from "./cad-types";
-import type { Project } from "@/lib/bim/model";
+import type { Project } from "@/domain/project/schema";
+
+/** Navigator folder for the sections (docs/SCHNITT.md, SC1); its entries follow in SC2. */
+export const SECTIONS_FOLDER_ID = "sections";
+/** Navigator folder for the elevations (docs/ANSICHTEN.md, A1). */
+export const ELEVATIONS_FOLDER_ID = "elevations";
 
 const iconFor = (id: string, isGroup: boolean) => {
   if (id.includes("level")) return Layers3;
@@ -71,7 +77,13 @@ function TreeItem({
           className="h-7 min-w-0 flex-1 justify-start gap-1.5 rounded-sm px-0 text-[13px] font-normal hover:bg-transparent"
           aria-pressed={active.includes(node.id)}
           onDoubleClick={() => onRename(node.id)}
-          title={depth === 1 ? "Doppelklick zum Umbenennen" : undefined}
+          title={
+            node.kind === "item"
+              ? "Klick öffnet den Schnitt als Tab · Doppelklick öffnet sein Fenster"
+              : depth === 1
+                ? "Doppelklick zum Umbenennen"
+                : undefined
+          }
           onClick={(event) => onSelect(node.id, node.label, event.ctrlKey || event.metaKey)}
         >
           <Icon className="size-3.5 shrink-0 opacity-70" />
@@ -100,6 +112,8 @@ type ProjectNavigatorProps = DocumentNavigation & {
 
   active: readonly string[];
   onSelect: (id: string, label: string, toggle?: boolean) => void;
+  /** Double click on a section entry opens its window (docs/SCHNITT.md, SC2). */
+  onSectionSettings: (id: string) => void;
   onClose: () => void;
 };
 
@@ -110,6 +124,7 @@ function NavigatorContent({
   project,
   onRenameStorey,
   onBuildingChange,
+  onSectionSettings,
   ...documents
 }: ProjectNavigatorProps) {
   const [settings, setSettings] = useState(false);
@@ -128,8 +143,24 @@ function NavigatorContent({
             .reverse()
             .map((s) => ({ id: s.id, label: s.name, kind: "group" })),
         },
+        {
+          id: SECTIONS_FOLDER_ID,
+          label: "Schnitte",
+          kind: "group",
+          children: (project.sections ?? [])
+            .filter((s) => s.kind !== "elevation")
+            .map((s) => ({ id: s.id, label: `${s.mark} · ${s.name}`, kind: "item" })),
+        },
+        {
+          id: ELEVATIONS_FOLDER_ID,
+          label: "Ansichten",
+          kind: "group",
+          children: (project.sections ?? [])
+            .filter((s) => s.kind === "elevation")
+            .map((s) => ({ id: s.id, label: `${s.mark} · ${s.name}`, kind: "item" })),
+        },
       ] satisfies TreeNode[],
-    [project.id, project.storeys],
+    [project.id, project.storeys, project.sections],
   );
   return (
     <aside
@@ -138,7 +169,7 @@ function NavigatorContent({
     >
       <header className="flex h-10 items-center justify-between border-b border-border px-3">
         <div>
-          <p className="section-title">Navigator</p>
+          <p className="font-display text-[12px] font-semibold uppercase text-primary">Navigator</p>
           <p className="text-xs font-medium text-foreground">Project browser</p>
         </div>
         <Button
@@ -188,6 +219,7 @@ function NavigatorContent({
               active={active}
               onSelect={onSelect}
               onRename={(id) => {
+                if (project.sections?.some((s) => s.id === id)) return onSectionSettings(id);
                 if (id === project.id) setSettings(true);
                 if (project.storeys.some((s) => s.id === id) && id !== project.groundStoreyId)
                   setSettings(true);
@@ -235,11 +267,7 @@ function NavigatorContent({
         <div className="flex justify-between">
           <span>Model elements</span>
           <span className="font-mono text-foreground">
-            {storeyOf(project).walls.length +
-              storeyOf(project).windows.length +
-              storeyOf(project).hatches.length +
-              storeyOf(project).references.length +
-              (storeyOf(project).lines?.length ?? 0)}
+            {allStoreyElements(storeyOf(project)).length}
           </span>
         </div>
         <div className="mt-1 h-1 overflow-hidden rounded-full bg-muted">
@@ -269,6 +297,7 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
   )
     active.current = props.active;
   const onClose = useCallback(() => latest.current.onClose(), []);
+  const onSectionSettings = useCallback((id: string) => latest.current.onSectionSettings(id), []);
   const onSelect = useCallback<ProjectNavigatorProps["onSelect"]>(
     (...args) => latest.current.onSelect(...args),
     [],
@@ -301,6 +330,7 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
       project={props.project}
       active={active.current}
       onSelect={onSelect}
+      onSectionSettings={onSectionSettings}
       onClose={onClose}
     />
   );

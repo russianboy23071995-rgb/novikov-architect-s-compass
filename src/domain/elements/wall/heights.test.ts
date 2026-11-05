@@ -1,16 +1,15 @@
+import { PROJECT_SCHEMA_VERSION } from "../../project/format.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { wallBase, wallHeights } from "./heights.ts";
-import {
-  createProject,
-  addWall,
-  addWindow,
-  updateWall,
-  serializeProject,
-  deserializeProject,
-} from "../../../lib/bim/model.ts";
+import { deriveWallCorner } from "./corner.ts";
+import { serializeProject, deserializeProject } from "../../../lib/bim/model.ts";
+import { createProject } from "../../../application/projects/create.ts";
+import { addWindow } from "../../../application/windows/actions.ts";
+import { addWall, updateWall } from "../../../application/walls/actions.ts";
 import { validateProject } from "../../project/schema.ts";
-import { buildSolid, buildBuildingSolid } from "../../../lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../../../rendering/viewport/building-solid.ts";
+import { buildSolid } from "../../../rendering/viewport/storey-solid.ts";
 import { storeyOf } from "../../storeys/access.ts";
 import {
   addStorey,
@@ -53,7 +52,7 @@ test("V24 migrates at zero with identical material and rejects forged legacy off
   old.schemaVersion = 24;
   delete old.storeys[0].walls[0].baseOffset;
   const restored = deserializeProject(JSON.stringify(old));
-  assert.equal(restored.schemaVersion, 26);
+  assert.equal(restored.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.equal(wallBase(storeyOf(restored).walls[0]!), 0);
   assert.deepEqual(buildSolid(restored), buildSolid(p));
   old.storeys[0].walls[0].baseOffset = 2;
@@ -98,7 +97,7 @@ test("offset follows OG and KG storey levels while absolute datum remains annota
   p = setGroundDatum(p, p, { projectId: p.id, storeyId: "eg", elevation: 100 });
   assert.deepEqual(buildBuildingSolid(p), before);
 });
-test("equal elevated corner keeps geometry; unequal foot heights reject and do not autojoin", () => {
+test("equal elevated corner keeps geometry; partly overlapping heights reject and do not autojoin", () => {
   let p = fixture(0.5);
   p = addWall(p, {
     id: "b",
@@ -110,10 +109,11 @@ test("equal elevated corner keeps geometry; unequal foot heights reject and do n
   });
   assert.equal(storeyOf(p).wallJoins.length, 1);
   assert.equal(buildSolid(p).min[2], 0.5);
-  assert.throws(() => updateWall(p, "b", { baseOffset: 0.6 }), /Fußhöhen/);
+  // w 0,5–3,3 m and b 0,6–3,4 m: neither covers the other (L09 U1).
+  assert.throws(() => updateWall(p, "b", { baseOffset: 0.6 }), /ganz überdecken/);
   const raw = structuredClone(p);
   storeyOf(raw).walls[1]!.baseOffset = 0.6;
-  assert.throws(() => validateProject(raw), /Fußhöhen/);
+  assert.throws(() => validateProject(raw), /ganz überdecken/);
   let free = fixture(0.5);
   free = addWall(free, {
     id: "b",
@@ -149,7 +149,7 @@ test("IFC wall placement carries signed offset once and opening stays relative t
   assert.ok(Math.abs(openingZ - 0.2) < 1e-10);
 });
 
-test("T connections require matching bases; equal signed offsets retain cut bodies", () => {
+test("T connections require overlapping heights; equal signed offsets retain cut bodies", () => {
   let p = fixture(-0.5);
   p = addWall(p, {
     id: "b",
@@ -163,8 +163,11 @@ test("T connections require matching bases; equal signed offsets retain cut bodi
   storeyOf(raw).wallTJunctions = [{ hostWallId: "w", incoming: { wallId: "b", endpoint: 1 } }];
   const connected = validateProject(raw);
   assert.equal(buildSolid(connected).min[2], -0.5);
+  // Different feet are fine while the walls share some height (L09 U1).
   storeyOf(raw).walls[1]!.baseOffset = 0;
-  assert.throws(() => validateProject(raw), /Fußhöhen/);
+  assert.equal(storeyOf(validateProject(raw)).wallTJunctions.length, 1);
+  storeyOf(raw).walls[1]!.baseOffset = 2.3;
+  assert.throws(() => validateProject(raw), /in der Höhe überschneiden/);
 });
 test("prepared XY move ignores coincident join nodes at different heights", () => {
   let p = fixture();
@@ -189,31 +192,21 @@ test("prepared XY move ignores coincident join nodes at different heights", () =
   assert.deepEqual(preview.faces, buildBuildingSolid(action.materialize(p, delta)).faces);
 });
 
-import { DEFAULT_RAW_SLAB_THICKNESS, resolveWallHeightRule } from "./heights.ts";
+import { resolveWallHeightRule } from "./heights.ts";
 
-test("underside binding subtracts slab thickness, includes both offsets and follows storeys", () => {
-  const rule = { kind: "slab-underside", topOffset: -0.1 } as const;
+test("storey binding ends at the own storey top plus extra height and follows storeys", () => {
+  const rule = { kind: "storey", topOffset: -0.3 } as const;
   for (const floor of [-3, 0, 3]) {
-    const result = resolveWallHeightRule({ baseOffset: 0.1 }, floor, rule, {
-      topElevation: floor + 3,
-      thickness: DEFAULT_RAW_SLAB_THICKNESS,
-    });
+    const result = resolveWallHeightRule({ baseOffset: 0.1 }, floor, rule, floor + 3);
     assert.ok(Math.abs(result.height - 2.6) < 1e-12);
     assert.ok(Math.abs(result.top - (floor + 2.7)) < 1e-12);
   }
-  const taller = resolveWallHeightRule(
-    {},
-    0,
-    { kind: "slab-underside", topOffset: 0 },
-    {
-      topElevation: 4,
-      thickness: 0.3,
-    },
-  );
-  assert.equal(taller.height, 3.7);
+  // Parapet: 0,50 m above OK raw floor of the storey above (user decision 29.10.2026).
+  assert.equal(resolveWallHeightRule({}, 0, { kind: "storey", topOffset: 0.5 }, 3).height, 3.5);
+  assert.equal(resolveWallHeightRule({}, 0, { kind: "storey", topOffset: 0 }, 4).height, 4);
 });
 
-test("fixed rule preserves legacy height regardless of upper slab", () => {
+test("fixed rule preserves legacy height regardless of storey levels", () => {
   assert.deepEqual(resolveWallHeightRule({ baseOffset: 0.5 }, 3, { kind: "fixed", height: 2.8 }), {
     bottom: 3.5,
     top: 6.3,
@@ -221,25 +214,13 @@ test("fixed rule preserves legacy height regardless of upper slab", () => {
   });
 });
 
-test("underside rule rejects missing, invalid or collapsed references instead of guessing", () => {
-  const rule = { kind: "slab-underside", topOffset: 0 } as const;
+test("storey rule rejects missing, invalid or collapsed references instead of guessing", () => {
+  const rule = { kind: "storey", topOffset: 0 } as const;
   assert.throws(() => resolveWallHeightRule({}, 0, rule));
-  for (const thickness of [0, -0.2, NaN, Infinity])
-    assert.throws(() => resolveWallHeightRule({}, 0, rule, { topElevation: 3, thickness }));
-  for (const topElevation of [0.2, -1, NaN, Infinity, Number.MAX_VALUE])
-    assert.throws(() => resolveWallHeightRule({}, 0, rule, { topElevation, thickness: 0.2 }));
+  for (const upper of [0, -1, NaN, Infinity])
+    assert.throws(() => resolveWallHeightRule({}, 0, rule, upper));
   for (const topOffset of [NaN, Infinity, -3])
-    assert.throws(() =>
-      resolveWallHeightRule(
-        {},
-        0,
-        { ...rule, topOffset },
-        {
-          topElevation: 3,
-          thickness: 0.2,
-        },
-      ),
-    );
+    assert.throws(() => resolveWallHeightRule({}, 0, { ...rule, topOffset }, 3));
 });
 
 import { setWallHeightRule } from "../../../application/walls/height-binding.ts";
@@ -248,7 +229,7 @@ import {
   commitProject,
   undoProject,
   redoProject,
-} from "../../../lib/bim/history.ts";
+} from "../../../application/history/project-history.ts";
 import { prepareZTranslation } from "../../../application/selection/z-translation.ts";
 import {
   createAssetPreparation,
@@ -264,7 +245,7 @@ function bind(p: ReturnType<typeof heightFixture>) {
     projectId: "p",
     storeyId: "eg",
     wallIds: ["w"],
-    rule: { kind: "slab-underside", storeyId: "og", topOffset: 0 },
+    rule: { kind: "storey", topOffset: -0.2 },
   });
 }
 test("bound heights follow storeys atomically, serialize only source rule, undo and IFC agree", async () => {
@@ -275,7 +256,7 @@ test("bound heights follow storeys atomically, serialize only source rule, undo 
   assert.equal(buildBuildingSolid(changed).max[2], 3.8);
   assert.match(await exportIfc(changed), /'Height',\$,IFCLENGTHMEASURE\(3\.8\)/);
   const raw = JSON.parse(serializeProject(changed));
-  assert.equal(raw.schemaVersion, 26);
+  assert.equal(raw.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.equal(raw.storeys[0].walls[0].height, undefined);
   assert.deepEqual(deserializeProject(JSON.stringify(raw)), changed);
   const h = commitProject(createHistory(p), changed);
@@ -296,13 +277,25 @@ test("V25 remains fixed; bound rule cannot be smuggled into old format; stale he
   const restored = deserializeProject(JSON.stringify(raw));
   const taller = setStoreyHeight(restored, restored, { projectId: "p", storeyId: "eg", height: 4 });
   assert.equal(taller.storeys[0]!.walls[0]!.height, 2.8);
-  raw.storeys[0].walls[0].topBinding = bind(p).storeys[0]!.walls[0]!.topBinding;
+  raw.storeys[0].walls[0].topBinding = {
+    kind: "slab-underside",
+    storeyId: "og",
+    slabThickness: 0.2,
+    topOffset: 0,
+  };
   assert.throws(() => deserializeProject(JSON.stringify(raw)));
   raw.schemaVersion = 26;
   raw.storeys[0].walls[0].height = 90;
   assert.equal(deserializeProject(JSON.stringify(raw)).storeys[0]!.walls[0]!.height, 2.8);
   const bound = bind(p);
-  assert.throws(() => updateWall(bound, "w", { height: 4 }), /Höhenaktion/);
+  // A typed height releases the binding (user decision 29.10.2026).
+  const released = updateWall(bound, "w", { height: 2.6 });
+  assert.equal(released.storeys[0]!.walls[0]!.topBinding, undefined);
+  assert.equal(released.storeys[0]!.walls[0]!.height, 2.6);
+  assert.equal(
+    updateWall(bound, "w", { height: 2.8 }).storeys[0]!.walls[0]!.topBinding?.kind,
+    "storey",
+  );
   const fixed = setWallHeightRule(bound, bound, {
     projectId: "p",
     storeyId: "eg",
@@ -312,13 +305,35 @@ test("V25 remains fixed; bound rule cannot be smuggled into old format; stale he
   assert.equal(fixed.storeys[0]!.walls[0]!.topBinding, undefined);
   assert.equal(fixed.storeys[0]!.walls[0]!.height, 2.7);
 });
-test("binding validates explicit context, upper target and insertion without silently rebinding", () => {
+test("binding validates explicit context, needs a known storey height and survives insertion", () => {
   const p = bind(heightFixture());
-  assert.throws(() => bind(fixture()), /Rohdeckenbezug/);
-  assert.throws(
-    () => addStorey(p, p, { projectId: "p", storeyId: "eg", side: "above", id: "mid", height: 3 }),
-    /Bindung/,
-  );
+  assert.throws(() => bind(fixture()), /Geschosshöhe/);
+  // Only the own storey height is read (A08): a storey inserted above changes nothing.
+  const inserted = addStorey(p, p, {
+    projectId: "p",
+    storeyId: "eg",
+    side: "above",
+    id: "mid",
+    height: 3,
+  });
+  assert.equal(inserted.storeys[0]!.walls[0]!.height, 2.8);
+  // The top storey can be bound too, e.g. a parapet 0,50 m above its storey top.
+  let og = selectWorkingStorey(p, p, "og");
+  og = addWall(og, {
+    id: "attika",
+    start: { x: 0, y: 5 },
+    end: { x: 3, y: 5 },
+    thickness: 0.24,
+    height: 1,
+  });
+  const parapet = setWallHeightRule(og, og, {
+    projectId: "p",
+    storeyId: "og",
+    wallIds: ["attika"],
+    rule: { kind: "storey", topOffset: 0.5 },
+  });
+  assert.equal(parapet.storeys[1]!.walls[0]!.height, 3.5);
+  assert.equal(buildBuildingSolid(parapet).max[2], 6.5);
   assert.throws(
     () =>
       setWallHeightRule(p, heightFixture(), {
@@ -350,12 +365,12 @@ test("bound recovery and rigid Z preview preserve rule and full-path geometry", 
   const action = prepareZTranslation(p, targets);
   const preview = action.evaluate(p, targets, 0.5);
   const moved = action.materialize(p, targets, 0.5);
-  assert.equal(moved.storeys[0]!.walls[0]!.topBinding!.topOffset, 0.5);
+  assert.equal(moved.storeys[0]!.walls[0]!.topBinding!.topOffset, -0.2 + 0.5);
   assert.equal(moved.storeys[0]!.walls[0]!.height, 2.8);
   assert.deepEqual(storeyOf(preview.geometry).walls, moved.storeys[0]!.walls);
 });
 
-test("connected bound walls resize together; mixed invalid heights reject the entire storey change", () => {
+test("connected bound walls resize together; mixed heights keep their join as a butt corner", () => {
   let p = heightFixture();
   p = addWall(p, {
     id: "b",
@@ -366,13 +381,16 @@ test("connected bound walls resize together; mixed invalid heights reject the en
   });
   assert.equal(storeyOf(p).wallJoins.length, 1);
   const mixed = bind(p);
-  assert.throws(() => setStoreyHeight(mixed, mixed, { projectId: "p", storeyId: "eg", height: 4 }));
+  // Mixed heights at a corner are a butt joint since 26.10.2026 (docs/WALL_JUNCTIONS.md).
+  assert.doesNotThrow(() =>
+    setStoreyHeight(mixed, mixed, { projectId: "p", storeyId: "eg", height: 4 }),
+  );
   assert.equal(storeyOf(mixed).walls[0]!.height, 2.8);
   const bound = setWallHeightRule(p, p, {
     projectId: "p",
     storeyId: "eg",
     wallIds: ["w", "b"],
-    rule: { kind: "slab-underside", storeyId: "og", topOffset: 0 },
+    rule: { kind: "storey", topOffset: -0.2 },
   });
   const taller = setStoreyHeight(bound, bound, { projectId: "p", storeyId: "eg", height: 4 });
   assert.equal(storeyOf(taller).wallJoins.length, 1);
@@ -408,7 +426,7 @@ test("bound T junctions and prepared XY movement agree with committed geometry",
     projectId: "p",
     storeyId: "eg",
     wallIds: ["w", "b"],
-    rule: { kind: "slab-underside", storeyId: "og", topOffset: 0 },
+    rule: { kind: "storey", topOffset: -0.2 },
   });
   p = setStoreyHeight(p, p, { projectId: "p", storeyId: "eg", height: 3.5 });
   const action = prepareSelectionTranslation(p, ["w", "b"]);
@@ -458,4 +476,224 @@ test("bound snapshots retain canonical content order through validation, file an
   );
   const history = createHistory(p);
   assert.equal(commitProject(history, deserializeProject(serializeProject(p))), history);
+});
+
+test("schema 29 slab bindings load as storey bindings with unchanged heights", () => {
+  const p = bind(heightFixture());
+  const raw = JSON.parse(serializeProject(p));
+  const legacy = (topOffset: number, storeyId = "og") => ({
+    kind: "slab-underside",
+    storeyId,
+    slabThickness: 0.25,
+    topOffset,
+  });
+  for (const version of [26, 27, 28, 29]) {
+    raw.schemaVersion = version;
+    raw.storeys[0].walls[0].topBinding = legacy(-0.1);
+    if (version < 29) for (const s of raw.storeys) delete s.slabs;
+    if (version < 28) for (const s of raw.storeys) for (const w of s.windows) delete w.mark;
+    const loaded = deserializeProject(JSON.stringify(raw));
+    const wall = loaded.storeys[0]!.walls[0]!;
+    assert.equal(loaded.schemaVersion, PROJECT_SCHEMA_VERSION);
+    assert.deepEqual(wall.topBinding, { kind: "storey", topOffset: -0.1 - 0.25 });
+    assert.equal(wall.height, 3 - 0.25 + -0.1);
+  }
+  raw.schemaVersion = 29;
+  raw.storeys[0].walls[0].topBinding = legacy(0, "eg");
+  assert.throws(() => deserializeProject(JSON.stringify(raw)), /darüberliegende Geschoss/);
+  raw.storeys[0].walls[0].topBinding = { kind: "storey", topOffset: 0 };
+  assert.throws(() => deserializeProject(JSON.stringify(raw)));
+  raw.schemaVersion = PROJECT_SCHEMA_VERSION;
+  raw.storeys[0].walls[0].topBinding = legacy(0);
+  assert.throws(() => deserializeProject(JSON.stringify(raw)));
+});
+
+import { createProject as createTrimProject } from "../../../application/projects/create.ts";
+import { setStoreyHeight as setTrimStoreyHeight } from "../../../application/storeys/actions.ts";
+import { addWall as addTrimWall } from "../../../application/walls/actions.ts";
+import { addWindow as addTrimWindow } from "../../../application/windows/actions.ts";
+import {
+  addRoof as addTrimRoof,
+  updateRoof as updateTrimRoof,
+} from "../../../application/roofs/actions.ts";
+import { trimWallsToRoof, untrimWalls } from "../../../application/walls/roof-trim.ts";
+import { previewDeleteSelection as deleteForTrim } from "../../../application/elements/delete.ts";
+import { wallContourSolid } from "./contour-solid.ts";
+import { wallBody as trimWallBody } from "./body.ts";
+import { serializeProject as serializeTrim } from "../../../lib/bim/model.ts";
+import { loadProjectData as loadTrim } from "../../../interop/project-file/load.ts";
+import { addStorey as addTrimStorey } from "../../../application/storeys/actions.ts";
+import { selectWorkingStorey as selectTrimStorey } from "../../../application/storeys/working-storey.ts";
+
+/** Storey 3,00 m, free wall x = 0 from y = 0 to 6 (0,20 m thick, stored height 2,00 m) under a
+ * 30° roof whose underside is 2,00 m above the floor at y = 0 and rises towards +y. */
+function trimFixture() {
+  let p = createTrimProject("trim", "eg");
+  p = setTrimStoreyHeight(p, p, { projectId: "trim", storeyId: "eg", height: 3 });
+  p = addTrimWall(p, {
+    id: "w",
+    start: { x: 0, y: 0 },
+    end: { x: 0, y: 6 },
+    thickness: 0.2,
+    height: 2,
+  });
+  return addTrimRoof(p, {
+    id: "d",
+    points: [
+      { x: -1, y: -1 },
+      { x: 1, y: -1 },
+      { x: 1, y: 7 },
+      { x: -1, y: 7 },
+    ],
+    referenceLine: { start: { x: -1, y: 0 }, end: { x: 1, y: 0 } },
+    rise: "left",
+    referenceHeight: 2,
+    pitch: 30,
+    thickness: 0.2,
+    eaveCut: "vertical",
+    topCut: "vertical",
+  });
+}
+const tan30 = Math.tan(Math.PI / 6);
+const close = (a: number, b: number) => Math.abs(a - b) < 1e-9;
+const wallSolid = (p: ReturnType<typeof trimFixture>) => {
+  const w = p.storeys[0]!.walls[0]!;
+  return wallContourSolid(w, trimWallBody(w).corners, []);
+};
+
+test("roof trim: wall reaches up to the roof underside, derived plane, checks, undo data", () => {
+  // docs/TRIMMEN_L04B.md (L04b): decisions Q (underside), R (up to the roof), S, T.
+  const base = trimFixture();
+  const p = trimWallsToRoof(base, ["w"], "d");
+  const wall = p.storeys[0]!.walls[0]!;
+  assert.deepEqual(wall.roofTrim, { roofId: "d" });
+  assert.ok(close(wall.trimPlane!.bottom, 2) && close(wall.trimPlane!.top, 2 + 6 * tan30));
+  assert.equal(wall.height, 2); // the stored height stays for "Trimmung aufheben"
+  // Body: raised above the stored 2,00 m and cut along the roof; exact volume, closed.
+  const solid = wallSolid(p);
+  assert.ok(close(solid.volume, 0.2 * 6 * (2 + 3 * tan30)));
+  const zs = solid.faces.flatMap((f) => f.vertices.map((v) => v[2]));
+  assert.ok(close(Math.max(...zs), 2 + 6 * tan30) && close(Math.min(...zs), 0));
+  // A window above the stored height but under the roof is fine; one above the roof is refused.
+  const fits = addTrimWindow(p, {
+    id: "f1",
+    wallId: "w",
+    width: 1,
+    height: 1,
+    sillHeight: 2.2,
+    position: 0.75,
+  });
+  assert.equal(fits.storeys[0]!.windows.length, 1);
+  assert.throws(
+    () =>
+      addTrimWindow(p, {
+        id: "f2",
+        wallId: "w",
+        width: 1,
+        height: 1.5,
+        sillHeight: 1,
+        position: 0.1,
+        mark: "F2",
+      }),
+    /Fenster F2 ragt über die Dachfläche/,
+  );
+  // Moving the roof is checked against the windows too (S) and recomputes the plane.
+  assert.throws(
+    () => updateTrimRoof(fits, "d", { referenceHeight: 0.5 }),
+    /ragt über die Dachfläche/,
+  );
+  const higher = updateTrimRoof(p, "d", { referenceHeight: 2.5 });
+  assert.ok(close(higher.storeys[0]!.walls[0]!.trimPlane!.bottom, 2.5));
+  // A roof below the wall foot cannot trim; an unknown roof is refused.
+  assert.throws(() => updateTrimRoof(p, "d", { referenceHeight: 0.05 }), /unter dem Fuß der Wand/);
+  assert.throws(() => trimWallsToRoof(base, ["w"], "nope"), /genau ein Dach/);
+  // Stored: the reference only, never the derived plane; loads back identically.
+  const file = JSON.parse(serializeTrim(p));
+  assert.deepEqual(file.storeys[0].walls[0].roofTrim, { roofId: "d" });
+  assert.equal("trimPlane" in file.storeys[0].walls[0], false);
+  assert.deepEqual(loadTrim(file), p);
+  // A schema 34 file carries no trims: plain walls load, smuggled trims are refused.
+  assert.deepEqual(loadTrim({ ...JSON.parse(serializeTrim(base)), schemaVersion: 34 }), base);
+  assert.throws(() => loadTrim({ ...file, schemaVersion: 34 }));
+  // Untrim and roof deletion give the stored height back.
+  const untrimmed = untrimWalls(p, ["w"]);
+  assert.equal("roofTrim" in untrimmed.storeys[0]!.walls[0]!, false);
+  assert.equal("trimPlane" in untrimmed.storeys[0]!.walls[0]!, false);
+  assert.throws(() => untrimWalls(base, ["w"]), /nicht getrimmt/);
+  const deleted = deleteForTrim(p, [{ kind: "roof", id: "d" }], undefined);
+  assert.equal("roofTrim" in deleted.result.storeys[0]!.walls[0]!, false);
+  assert.match(deleted.summary, /1 Wandtrimmung wird aufgehoben/);
+});
+
+test("roof trim across storeys: an EG gable trimmed by the roof of the OG", () => {
+  // Masterplan §8 / A08: the trim is a cross-storey input; the plane includes the storey step.
+  let p = createTrimProject("trim2", "eg");
+  p = setTrimStoreyHeight(p, p, { projectId: "trim2", storeyId: "eg", height: 3 });
+  p = addTrimWall(p, {
+    id: "g",
+    start: { x: 0, y: 0 },
+    end: { x: 0, y: 6 },
+    thickness: 0.2,
+    height: 2.8,
+  });
+  p = addTrimStorey(p, p, {
+    projectId: "trim2",
+    id: "og",
+    storeyId: "eg",
+    side: "above",
+    height: 3,
+  });
+  p = selectTrimStorey(p, p, "og");
+  p = addTrimRoof(p, {
+    id: "dach",
+    points: [
+      { x: -1, y: -1 },
+      { x: 1, y: -1 },
+      { x: 1, y: 7 },
+      { x: -1, y: 7 },
+    ],
+    referenceLine: { start: { x: -1, y: 0 }, end: { x: 1, y: 0 } },
+    rise: "left",
+    referenceHeight: 0.5,
+    pitch: 30,
+    thickness: 0.2,
+    eaveCut: "vertical",
+    topCut: "vertical",
+  });
+  const trimmed = trimWallsToRoof(p, ["g"], "dach");
+  const gable = trimmed.storeys.find((s) => s.id === "eg")!.walls[0]!;
+  // OG floor at 3,00 m + 0,50 m → 3,50 m above the EG wall foot at y = 0.
+  assert.ok(close(gable.trimPlane!.bottom, 3.5) && close(gable.trimPlane!.top, 3.5 + 6 * tan30));
+});
+
+test("corner with different feet: the wall covering the other's height runs through (L09 U1)", () => {
+  const w = { id: "w", start: { x: 3, y: 0 }, end: { x: 0, y: 0 }, thickness: 0.36, bodyOffset: 0 };
+  const b = { id: "b", start: { x: 3, y: 0 }, end: { x: 3, y: 3 }, thickness: 0.24, bodyOffset: 0 };
+  const corner = (wb: number, wh: number, bb: number, bh: number) =>
+    deriveWallCorner(
+      { wall: { ...w, baseOffset: wb, height: wh }, endpoint: 0 },
+      { wall: { ...b, baseOffset: bb, height: bh }, endpoint: 0 },
+    );
+  // b on a 0,5 m plinth inside w's height: the same butt joint as a lower b on the same foot.
+  const raised = corner(0, 2.8, 0.5, 2),
+    lower = corner(0, 2.8, 0, 2);
+  assert.deepEqual(raised, lower);
+  // w runs through to the far face of b (x = 3,12), b ends at the inner face of w (y = 0,18).
+  const ring = (id: string) => raised.walls.find((c) => c.wallId === id)!.points;
+  assert.ok(ring("w").some((p) => Math.abs(p.x - 3.12) < 1e-9));
+  assert.ok(ring("b").every((p) => p.y >= 0.18 - 1e-9));
+  // Swapped: b covers w, so b runs through.
+  const swapped = corner(0.5, 2, 0, 2.8);
+  assert.ok(
+    swapped.walls.find((c) => c.wallId === "b")!.points.some((p) => Math.abs(p.y + 0.18) < 1e-9),
+  );
+  assert.throws(() => corner(0, 2.8, 0.5, 2.8), /ganz überdecken/);
+  // In the project the pair joins automatically and the 3D body keeps both feet.
+  let p = addWall(createProject("p", "eg"), { ...w, height: 2.8 });
+  p = addWall(p, { ...b, height: 2, baseOffset: 0.5 });
+  assert.equal(storeyOf(p).wallJoins.length, 1);
+  assert.equal(buildSolid(p).min[2], 0);
+  assert.equal(buildSolid(p).max[2], 2.8);
+  // Lifting w by 0,6 m leaves a partial overlap: rejected with the rule, not the old foot rule.
+  assert.throws(() => updateWall(p, "w", { baseOffset: 0.6 }), /ganz überdecken/);
 });

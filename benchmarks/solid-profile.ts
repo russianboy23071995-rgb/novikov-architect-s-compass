@@ -1,6 +1,6 @@
 import { storeyOf } from "../src/domain/storeys/access.ts";
 import { diagnosticRenderer } from "./legacy-solid-renderer";
-import { buildSolid } from "../src/lib/bim/geometry";
+import { buildSolid } from "../src/rendering/viewport/storey-solid";
 import { connectedFixture } from "./connected-fixture";
 import { createProjectionFrame } from "../src/geometry/projections/orthographic";
 import { createProjectionState } from "../src/rendering/viewport/projection-state";

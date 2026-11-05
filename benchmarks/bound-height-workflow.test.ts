@@ -3,8 +3,13 @@ import assert from "node:assert/strict";
 import { boundHeightFixture, fullHeightFixture } from "./bound-height-fixture.ts";
 import { setStoreyHeight } from "../src/application/storeys/actions.ts";
 import { serializeProject, deserializeProject } from "../src/lib/bim/model.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../src/application/history/project-history.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import { exportIfc } from "../src/lib/bim/ifc.ts";
 import { resolveStoreyLevels } from "../src/domain/storeys/heights.ts";
 
@@ -12,7 +17,8 @@ test("basement signed offsets and mixed join conflicts remain atomic through fil
   const base = fullHeightFixture();
   const change = (p: typeof base, storeyId: string, height: number) =>
     setStoreyHeight(p, p, { projectId: p.id, storeyId, height });
-  assert.throws(() => change(base, "og", 4), /Eckanschluss/);
+  // Joined walls may differ in height since 26.10.2026 (butt corner, docs/WALL_JUNCTIONS.md).
+  assert.doesNotThrow(() => change(base, "og", 4));
   assert.throws(() => change(base, "eg", 2), /Window/);
   const eg = change(base, "eg", 4);
   const next = change(eg, "kg", 3.5);
@@ -20,10 +26,11 @@ test("basement signed offsets and mixed join conflicts remain atomic through fil
     p.storeys.flatMap((s) => s.walls).find((w) => w.id === id)!;
   assert.equal(wall(next, "kg-a").height, 3.3);
   assert.equal(wall(next, "kg-a").baseOffset, -0.1);
-  assert.equal(wall(next, "kg-a").topBinding!.topOffset, -0.1);
+  // Former UK Rohdecke 0,20 m is part of the extra height since schema 30.
+  assert.equal(wall(next, "kg-a").topBinding!.topOffset, -0.1 - 0.2);
   assert.equal(wall(next, "eg-offset").height, 3.9);
   assert.equal(wall(next, "eg-offset").baseOffset, 0.1);
-  assert.equal(wall(next, "eg-offset").topBinding!.topOffset, 0.2);
+  assert.equal(wall(next, "eg-offset").topBinding!.topOffset, 0.2 - 0.2);
   assert.equal(wall(next, "og-b").topBinding, undefined);
   assert.equal(wall(next, "og-b").height, 2.8);
   assert.deepEqual(

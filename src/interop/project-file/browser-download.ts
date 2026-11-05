@@ -13,3 +13,19 @@ export function browserProjectDownload(text: string, filename: string): void {
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 }
+
+/** Same download initiation for other text files (e.g. the room list as CSV). */
+export function browserTextDownload(text: string, filename: string, type: string): void {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  let anchor: HTMLAnchorElement | undefined;
+  try {
+    anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+  } finally {
+    anchor?.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+}

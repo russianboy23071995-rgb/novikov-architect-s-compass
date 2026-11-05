@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-24",
+  "baseline": "feat/door-preview-scopes 3ac3025",
+  "runtime": "Windows Node 24.22.1",
+  "method": "opening-overlap-profile.ts; working storey with 100 walls, windows and doors (500 each over five storeys); without overlaps and with every door over its window; median of 31 samples; three process runs. planSceneMs is the whole plan scene including the overlap set (owned-snapshot caches active).",
+  "runs": [
+    {
+      "walls": 500,
+      "windows": 500,
+      "doors": 500,
+      "clear": {
+        "overlaps": 0,
+        "storeyOverlapsMs": 0.16169999999999618,
+        "previewHintMs": 0.3202999999999747,
+        "planSceneMs": 0.42149999999998045
+      },
+      "overlapping": {
+        "overlaps": 100,
+        "storeyOverlapsMs": 0.08329999999995152,
+        "previewHintMs": 0.2954000000000292,
+        "planSceneMs": 0.3162999999999556
+      }
+    },
+    {
+      "walls": 500,
+      "windows": 500,
+      "doors": 500,
+      "clear": {
+        "overlaps": 0,
+        "storeyOverlapsMs": 0.09999999999999432,
+        "previewHintMs": 0.27959999999998786,
+        "planSceneMs": 0.5285000000000082
+      },
+      "overlapping": {
+        "overlaps": 100,
+        "storeyOverlapsMs": 0.06630000000001246,
+        "previewHintMs": 0.33679999999998245,
+        "planSceneMs": 0.37810000000001764
+      }
+    },
+    {
+      "walls": 500,
+      "windows": 500,
+      "doors": 500,
+      "clear": {
+        "overlaps": 0,
+        "storeyOverlapsMs": 0.10560000000000969,
+        "previewHintMs": 0.2938000000000329,
+        "planSceneMs": 0.4046000000000163
+      },
+      "overlapping": {
+        "overlaps": 100,
+        "storeyOverlapsMs": 0.06150000000002365,
+        "previewHintMs": 0.3161999999999807,
+        "planSceneMs": 0.4551999999999907
+      }
+    }
+  ]
+}

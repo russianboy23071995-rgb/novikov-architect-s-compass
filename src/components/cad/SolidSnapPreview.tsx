@@ -1,6 +1,6 @@
 import { MovementOriginAxes } from "./MovementOriginAxes";
 import type { ProjectionState } from "@/rendering/viewport/projection-state";
-import type { Point } from "@/lib/bim/model";
+import type { Point } from "@/domain/project/schema";
 import type { SnapReference } from "@/constraints/snapping/engine";
 import type { useSolidInference } from "./useSolidInference";
 

@@ -1,0 +1,342 @@
+{
+  "date": "2026-10-26",
+  "states": {
+    "vorher": "main fba664d (vor PR467)",
+    "nachher": "main 8534bf7 (nach PR467–PR470)"
+  },
+  "notes": "Browser-Schullauf (benchmarks/school-acceptance.html, images=1), Dev-Rechner, Fenster sichtbar (visibilityState visible). Modell l: vier Wechselpaare vorher/nachher; Paar 1 ist der Aufwärmlauf (kalter Browser) und zählt nicht zum Median. s und x: je ein Paar (vorher als Block l4/s/x, dann nachher l4/s/x). Alle Schritte ok, keine Fehler. Profil: JS-Self-Profiling (Build-Modus js-profile), 10 ms Abtastung, Fenster von 2D→3D bis Undo, Modell l, je ein Lauf.",
+  "profile": {
+    "l": {
+      "vorher": {
+        "windowMs": 2761,
+        "samples": 260,
+        "idle": 83,
+        "incl": {
+          "validateProject": 56,
+          "buildWorldPicking": 27,
+          "restoreCheckedSnapshot": 20,
+          "payloadKey": 8,
+          "connectedWallSolids": 3
+        }
+      },
+      "nachher": {
+        "windowMs": 2836,
+        "samples": 229,
+        "idle": 82,
+        "incl": {
+          "validateProject": 18,
+          "buildWorldPicking": 26,
+          "restoreCheckedSnapshot": 18,
+          "payloadKey": 11,
+          "connectedWallSolids": 7
+        }
+      },
+      "restoreCheckedSnapshotPerStepNachher": {
+        "Geschosswechsel": 10,
+        "Auswahl/Wandlänge": 8,
+        "3D – Szene fertig": 4,
+        "3D: Tür entlang Wand ziehen": 14,
+        "Undo": 2,
+        "Redo": 9
+      }
+    }
+  },
+  "runs": [
+    {
+      "state": "nachher",
+      "size": "l",
+      "run": 1,
+      "steps": {
+        "Wandlänge – Übernehmen": 239.9,
+        "Tür setzen": 296.3,
+        "Löschen (Entf)": 323.7,
+        "2D → 3D": 169,
+        "3D – Szene fertig": 842.4,
+        "3D: Tür entlang Wand ziehen": 1896,
+        "3D → 2D": 147.9,
+        "Speichern (Datei erzeugen)": 256.9,
+        "Autosicherung aktuell": 6.7,
+        "Wiederherstellung – Stand prüfen": 583.3,
+        "Wiederherstellung – Projekt laden": 594.8
+      },
+      "allOk": true,
+      "session": 167.2,
+      "sessionP95": 300.5,
+      "undo": 14,
+      "redo": 168.1,
+      "errors": 0,
+      "script": "school-acceptance-BGEWrBcb.js"
+    },
+    {
+      "state": "vorher",
+      "size": "l",
+      "run": 1,
+      "steps": {
+        "2D → 3D": 1271.3,
+        "3D – Szene fertig": 2395.8,
+        "3D: Tür entlang Wand ziehen": 766.7,
+        "3D → 2D": 94.6,
+        "Autosicherung aktuell": 5.3,
+        "Wandlänge – Übernehmen": 244,
+        "Tür setzen": 547.1,
+        "Löschen (Entf)": 328.3,
+        "Speichern (Datei erzeugen)": 250.1,
+        "Wiederherstellung – Stand prüfen": 646.1,
+        "Wiederherstellung – Projekt laden": 590.5
+      },
+      "session": 169.7,
+      "sessionP95": 278.1,
+      "undo": 13.9,
+      "redo": 184.1,
+      "errors": 0
+    },
+    {
+      "state": "nachher",
+      "size": "l",
+      "run": 2,
+      "steps": {
+        "Wandlänge – Übernehmen": 231,
+        "Tür setzen": 301.1,
+        "Löschen (Entf)": 329.8,
+        "2D → 3D": 150.3,
+        "3D – Szene fertig": 808.2,
+        "3D: Tür entlang Wand ziehen": 1782.7,
+        "3D → 2D": 117.8,
+        "Speichern (Datei erzeugen)": 256.9,
+        "Autosicherung aktuell": 5.1,
+        "Wiederherstellung – Stand prüfen": 599,
+        "Wiederherstellung – Projekt laden": 523.8
+      },
+      "allOk": true,
+      "session": 178.8,
+      "sessionP95": 279.8,
+      "undo": 13.9,
+      "redo": 189.2,
+      "errors": 0,
+      "script": "school-acceptance-BGEWrBcb.js"
+    },
+    {
+      "state": "vorher",
+      "size": "l",
+      "run": 2,
+      "steps": {
+        "Wandlänge – Übernehmen": 244.8,
+        "Tür setzen": 321,
+        "Löschen (Entf)": 328.6,
+        "2D → 3D": 241.8,
+        "3D – Szene fertig": 715.4,
+        "3D: Tür entlang Wand ziehen": 1758.1,
+        "3D → 2D": 170.1,
+        "Speichern (Datei erzeugen)": 243.2,
+        "Autosicherung aktuell": 1.6,
+        "Wiederherstellung – Stand prüfen": 613.4,
+        "Wiederherstellung – Projekt laden": 589.3
+      },
+      "allOk": true,
+      "session": 162.5,
+      "sessionP95": 255.9,
+      "undo": 14,
+      "redo": 178.1,
+      "errors": 0,
+      "script": "school-acceptance-DOgEaitt.js"
+    },
+    {
+      "state": "nachher",
+      "size": "l",
+      "run": 3,
+      "steps": {
+        "Wandlänge – Übernehmen": 221.2,
+        "Tür setzen": 299.4,
+        "Löschen (Entf)": 287.7,
+        "2D → 3D": 166.8,
+        "3D – Szene fertig": 847.1,
+        "3D: Tür entlang Wand ziehen": 1822.7,
+        "3D → 2D": 100,
+        "Speichern (Datei erzeugen)": 249.7,
+        "Autosicherung aktuell": 5.9,
+        "Wiederherstellung – Stand prüfen": 581.3,
+        "Wiederherstellung – Projekt laden": 567.5
+      },
+      "allOk": true,
+      "session": 164.2,
+      "sessionP95": 265.8,
+      "undo": 13.9,
+      "redo": 173.6,
+      "errors": 0,
+      "script": "school-acceptance-BGEWrBcb.js"
+    },
+    {
+      "state": "vorher",
+      "size": "l",
+      "run": 3,
+      "steps": {
+        "Wandlänge – Übernehmen": 201,
+        "Tür setzen": 324.9,
+        "Löschen (Entf)": 296.2,
+        "2D → 3D": 227.7,
+        "3D – Szene fertig": 802.2,
+        "3D: Tür entlang Wand ziehen": 1814.9,
+        "3D → 2D": 140.3,
+        "Speichern (Datei erzeugen)": 256.9,
+        "Autosicherung aktuell": 6.5,
+        "Wiederherstellung – Stand prüfen": 603.5,
+        "Wiederherstellung – Projekt laden": 635.1
+      },
+      "allOk": true,
+      "session": 162.7,
+      "sessionP95": 272.1,
+      "undo": 13.9,
+      "redo": 194.8,
+      "errors": 0,
+      "script": "school-acceptance-DOgEaitt.js"
+    },
+    {
+      "state": "nachher",
+      "size": "l",
+      "run": 4,
+      "steps": {
+        "Wandlänge – Übernehmen": 226.9,
+        "Tür setzen": 295.5,
+        "Löschen (Entf)": 281.9,
+        "2D → 3D": 153.1,
+        "3D – Szene fertig": 808.3,
+        "3D: Tür entlang Wand ziehen": 1588.8,
+        "3D → 2D": 102.8,
+        "Speichern (Datei erzeugen)": 250,
+        "Autosicherung aktuell": 2.3,
+        "Wiederherstellung – Stand prüfen": 598.5,
+        "Wiederherstellung – Projekt laden": 576.5
+      },
+      "allOk": true,
+      "session": 174.3,
+      "sessionP95": 202,
+      "undo": 13.9,
+      "redo": 155.2,
+      "errors": 0,
+      "script": "school-acceptance-BGEWrBcb.js"
+    },
+    {
+      "state": "vorher",
+      "size": "l",
+      "run": 4,
+      "steps": {
+        "Wandlänge – Übernehmen": 225.3,
+        "Tür setzen": 282.1,
+        "Löschen (Entf)": 314.3,
+        "2D → 3D": 230.4,
+        "3D – Szene fertig": 710.9,
+        "3D: Tür entlang Wand ziehen": 1547.4,
+        "3D → 2D": 134.7,
+        "Speichern (Datei erzeugen)": 285.2,
+        "Autosicherung aktuell": 8.4,
+        "Wiederherstellung – Stand prüfen": 592.1,
+        "Wiederherstellung – Projekt laden": 544.4
+      },
+      "allOk": true,
+      "session": 166.5,
+      "sessionP95": 315.3,
+      "undo": 14,
+      "redo": 162.5,
+      "errors": 0,
+      "script": "school-acceptance-DOgEaitt.js"
+    },
+    {
+      "state": "nachher",
+      "size": "s",
+      "run": 1,
+      "steps": {
+        "Wandlänge – Übernehmen": 174.1,
+        "Tür setzen": 140.3,
+        "Löschen (Entf)": 108.5,
+        "2D → 3D": 94.9,
+        "3D – Szene fertig": 857.5,
+        "3D: Tür entlang Wand ziehen": 1362.2,
+        "3D → 2D": 72.4,
+        "Speichern (Datei erzeugen)": 179.9,
+        "Autosicherung aktuell": 6.7,
+        "Wiederherstellung – Stand prüfen": 480.6,
+        "Wiederherstellung – Projekt laden": 287.1
+      },
+      "allOk": true,
+      "session": 68.6,
+      "sessionP95": 90.8,
+      "undo": 13.9,
+      "redo": 59.1,
+      "errors": 0,
+      "script": "school-acceptance-BGEWrBcb.js"
+    },
+    {
+      "state": "vorher",
+      "size": "s",
+      "run": 1,
+      "steps": {
+        "Wandlänge – Übernehmen": 115.2,
+        "Tür setzen": 228.5,
+        "Löschen (Entf)": 115.2,
+        "2D → 3D": 122.6,
+        "3D – Szene fertig": 793.4,
+        "3D: Tür entlang Wand ziehen": 1158.3,
+        "3D → 2D": 86,
+        "Speichern (Datei erzeugen)": 194.5,
+        "Autosicherung aktuell": 10.3,
+        "Wiederherstellung – Stand prüfen": 515.5,
+        "Wiederherstellung – Projekt laden": 283.1
+      },
+      "allOk": true,
+      "session": 65.7,
+      "sessionP95": 77.9,
+      "undo": 14,
+      "redo": 86.1,
+      "errors": 0,
+      "script": "school-acceptance-DOgEaitt.js"
+    },
+    {
+      "state": "nachher",
+      "size": "x",
+      "run": 1,
+      "steps": {
+        "Wandlänge – Übernehmen": 433.8,
+        "Löschen (Entf)": 734.8,
+        "2D → 3D": 793.5,
+        "3D – Szene fertig": 486.6,
+        "3D: Tür entlang Wand ziehen": 16.8,
+        "3D → 2D": 161.5,
+        "Speichern (Datei erzeugen)": 381.8,
+        "Autosicherung aktuell": 7,
+        "Wiederherstellung – Stand prüfen": 1385.2,
+        "Wiederherstellung – Projekt laden": 959.6
+      },
+      "allOk": true,
+      "session": 418.2,
+      "sessionP95": 567.2,
+      "undo": 13.9,
+      "redo": 307.4,
+      "errors": 0,
+      "script": "school-acceptance-BGEWrBcb.js"
+    },
+    {
+      "state": "vorher",
+      "size": "x",
+      "run": 1,
+      "steps": {
+        "Wandlänge – Übernehmen": 541,
+        "Löschen (Entf)": 651.1,
+        "2D → 3D": 974.5,
+        "3D – Szene fertig": 484,
+        "3D: Tür entlang Wand ziehen": 13.9,
+        "3D → 2D": 155.2,
+        "Speichern (Datei erzeugen)": 513.9,
+        "Autosicherung aktuell": 2.4,
+        "Wiederherstellung – Stand prüfen": 1245.1,
+        "Wiederherstellung – Projekt laden": 838.2
+      },
+      "allOk": true,
+      "session": 432.4,
+      "sessionP95": 573.8,
+      "undo": 13.9,
+      "redo": 313.1,
+      "errors": 0,
+      "script": "school-acceptance-DOgEaitt.js"
+    }
+  ]
+}

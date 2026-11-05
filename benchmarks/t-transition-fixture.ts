@@ -1,6 +1,6 @@
 import { tPairFixture } from "./t-pair-fixture.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
-import { validateProject } from "../src/lib/bim/model.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 
 /** Two supported T groups, three hosted windows and one unrelated wall. */
 export function tTransitionFixture() {

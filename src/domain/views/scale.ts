@@ -40,3 +40,16 @@ export function workingPlanScale(
 ): ScaleContext & { view: WorkingPlanIdentity } {
   return { view: { kind: "working-plan", projectId, storeyId }, denominator };
 }
+
+/** Output scale of the working storey's plan (1:denominator); 1:100 until one is set. */
+export function planDenominator(project: {
+  workingStoreyId?: string | undefined;
+  groundStoreyId?: string;
+  storeys: readonly { id: string }[];
+  workingViews?: readonly { storeyId: string; denominator: number }[] | undefined;
+}): number {
+  const storeyId = project.workingStoreyId ?? project.storeys[0]?.id;
+  return (
+    project.workingViews?.find((v) => v.storeyId === storeyId)?.denominator ?? DEFAULT_OUTPUT_SCALE
+  );
+}

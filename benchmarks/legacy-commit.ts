@@ -1,0 +1,41 @@
+import { projectStorageData } from "../src/domain/project/storage-data.ts";
+import { assertRasterBudgetChange } from "../src/domain/project/raster-budget.ts";
+import { sameProjectModel, sameProjectContent } from "../src/domain/project/model-equality.ts";
+import { assertValidatedProjectSize } from "../src/interop/project-file/size.ts";
+import { validateProject, type Project } from "../src/domain/project/schema.ts";
+import { HISTORY_LIMIT, type ProjectHistory } from "../src/application/history/project-history.ts";
+
+/** Frozen pre-cache size computation (main 1f05fea): one JSON string of the whole project. */
+export function legacyProjectByteLength(project: Project): number {
+  const structure = {
+    ...projectStorageData(project),
+    assets: project.assets.map((asset) => ({ ...asset, data: "" })),
+  };
+  return (
+    new TextEncoder().encode(JSON.stringify(structure)).byteLength +
+    project.assets.reduce((bytes, asset) => bytes + asset.data.length, 0)
+  );
+}
+
+/** Frozen pre-sharing commit (main 04bdd24) for same-session comparison; diagnostics only. */
+export function legacyCreateHistory(project: Project): ProjectHistory {
+  return { past: [], present: validateProject(project), future: [] };
+}
+export function legacyCommitProject(
+  history: ProjectHistory,
+  project: Project,
+  options: { legacyFileOpen?: boolean } = {},
+): ProjectHistory {
+  const next = validateProject(project);
+  assertValidatedProjectSize(next);
+  const previous = validateProject(history.present);
+  assertValidatedProjectSize(previous);
+  if (!options.legacyFileOpen) assertRasterBudgetChange(previous, next);
+  if (sameProjectContent(next, previous)) return history;
+  if (sameProjectModel(history.present, next)) return { ...history, present: next };
+  return {
+    past: [...history.past, history.present].slice(-HISTORY_LIMIT),
+    present: next,
+    future: [],
+  };
+}

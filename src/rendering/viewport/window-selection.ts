@@ -5,17 +5,22 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../../application/selection/target.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
-import { wallLength } from "../../lib/bim/model.ts";
+import { wallLength } from "../../domain/project/schema.ts";
 import type { Vector3 } from "../../geometry/projections/orthographic.ts";
 import { triangleDepth } from "../../geometry/projections/triangle-depth.ts";
 import { nearestWallSurface } from "./wall-depth.ts";
 import type { DisplaySurfaces } from "./layer-display.ts";
 import type { OutlineEdge } from "./selection-outline.ts";
 
-export type WindowSelectionSurface = { id: string; vertices: Vector3[]; outline: OutlineEdge[] };
+export type WindowSelectionSurface = {
+  kind: "window" | "door";
+  id: string;
+  vertices: Vector3[];
+  outline: OutlineEdge[];
+};
 
-/** Disposable opening rectangle on the physical wall centre plane. This is hit/
- * outline geometry, not glazing, a second BIM object or exported material. */
+/** Disposable opening rectangle on the physical wall centre plane for windows and doors.
+ * This is hit/outline geometry, not glazing, a leaf, a second BIM object or material. */
 export function windowSelectionSurfaces(
   project: Project,
   allows: (id: string) => boolean,
@@ -28,7 +33,20 @@ export function windowPreviewSurfaces(
   allows: (id: string) => boolean,
 ): WindowSelectionSurface[] {
   const walls = new Map(storeyOf(project).walls.map((wall) => [wall.id, wall]));
-  return storeyOf(project).windows.flatMap((opening) => {
+  // Absolute underside: windows above the wall base, doors above the storey level.
+  const openings = [
+    ...storeyOf(project).windows.map((w) => ({
+      kind: "window" as const,
+      opening: w,
+      bottom: (wall: Parameters<typeof wallBase>[0]) => w.sillHeight + wallBase(wall, elevation),
+    })),
+    ...(storeyOf(project).doors ?? []).map((d) => ({
+      kind: "door" as const,
+      opening: d,
+      bottom: (_wall: Parameters<typeof wallBase>[0]) => elevation + d.zOffset,
+    })),
+  ];
+  return openings.flatMap(({ kind, opening, bottom: underside }) => {
     const wall = walls.get(opening.wallId);
     if (!wall || !allows(wall.id) || !allows(opening.id)) return [];
     const body = wallBody(wall),
@@ -37,7 +55,7 @@ export function windowPreviewSurfaces(
     const uy = (wall.end.y - wall.start.y) / length;
     const left = opening.position * length - opening.width / 2;
     const right = left + opening.width;
-    const bottom = opening.sillHeight + wallBase(wall, elevation),
+    const bottom = underside(wall),
       top = bottom + opening.height;
     const at = (along: number, z: number): Vector3 => [
       body.start.x + ux * along,
@@ -54,7 +72,7 @@ export function windowPreviewSurfaces(
       ]);
       return rim.map((v, i) => [v, rim[(i + 1) % 4]!] as OutlineEdge);
     });
-    return [{ id: opening.id, vertices, outline }];
+    return [{ kind, id: opening.id, vertices, outline }];
   });
 }
 
@@ -78,7 +96,22 @@ export function pickSolidElement(
   if (![x, y].every(Number.isFinite) || Math.abs(x) > 1 || Math.abs(y) > 1) return null;
   const wall = nearestWallSurface(solid, project, x, y);
   let depth = wall?.depth ?? Infinity;
-  let target: ElementTarget | null = wall ? { kind: "wall", id: wall.wallId } : null;
+  let target: ElementTarget | null = wall
+    ? {
+        kind: wall.opening
+          ? wall.opening
+          : wall.slab
+            ? "slab"
+            : wall.roof
+              ? "roof"
+              : wall.column
+                ? "column"
+                : wall.stair
+                  ? "stair"
+                  : "wall",
+        id: wall.wallId,
+      }
+    : null;
   for (const window of windows) {
     const points = window.vertices.map(project);
     for (const [a, b, c] of [
@@ -88,7 +121,7 @@ export function pickSolidElement(
       const hit = triangleDepth(points[a!]!, points[b!]!, points[c!]!, x, y);
       if (hit !== null && hit < depth) {
         depth = hit;
-        target = { kind: "window", id: window.id };
+        target = { kind: window.kind, id: window.id };
       }
     }
   }
@@ -98,6 +131,8 @@ export function pickSolidElement(
 /** Opening hit planes share the same all-storey scene and world elevations as wall surfaces. */
 export function buildingWindowSelectionSurfaces(project: Project, allows: (id: string) => boolean) {
   return project.storeys.flatMap((s) =>
-    s.windows.length ? windowSelectionSurfaces({ ...project, workingStoreyId: s.id }, allows) : [],
+    s.windows.length || s.doors?.length
+      ? windowSelectionSurfaces({ ...project, workingStoreyId: s.id }, allows)
+      : [],
   );
 }

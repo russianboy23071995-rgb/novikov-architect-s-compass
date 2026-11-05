@@ -1,3 +1,4 @@
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import { createDrawing } from "../drawing/actions.ts";
@@ -7,16 +8,12 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { applyLineStyle } from "./appearance.ts";
 import { builtInLineStyles, deleteLineStyle } from "./style-library.ts";
-import {
-  createProject,
-  addLine,
-  serializeProject,
-  deserializeProject,
-  updateLine,
-} from "../../lib/bim/model.ts";
+import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
+import { addLine, updateLine } from "./actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
-import { createHistory, commitProject, undoProject } from "../../lib/bim/history.ts";
+import { createHistory, commitProject, undoProject } from "../history/project-history.ts";
 import {
   linePatternLayout,
   linePatternStroke,
@@ -48,7 +45,7 @@ test("schema 9 loads unchanged geometry as schema 11; invalid embedded patterns 
   const { hatchPatterns: _patterns, ...old } = project;
   const legacy = { ...old, schemaVersion: 9 };
   const loaded = loadProjectData(legacyProjectFixture(legacy));
-  assert.equal(loaded.schemaVersion, 26);
+  assert.equal(loaded.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.deepEqual(storeyOf(loaded), storeyOf(project));
   assert.throws(() =>
     addLine(project, {

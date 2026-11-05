@@ -1,7 +1,12 @@
 import { storeyOf, replaceStorey } from "../src/domain/storeys/access.ts";
 import { recoveryFixture } from "./recovery-capacity-fixture.ts";
 import { createImageAssetHandle } from "../src/domain/elements/reference/model.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../src/application/history/project-history.ts";
 import {
   openRecoveryV2Pilot,
   createRecoveryV2Storage,

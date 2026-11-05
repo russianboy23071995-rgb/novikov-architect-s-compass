@@ -2,8 +2,9 @@ import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { pickWall, isSelectionClick } from "./picking.ts";
-import { buildSolid, initialCamera, projectPoint } from "./geometry.ts";
-import { addWall, updateWall } from "./model.ts";
+import { initialCamera, projectPoint } from "./geometry.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
+import { addWall, updateWall } from "../../application/walls/actions.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import {
   createProjectionFrame,

@@ -1,6 +1,6 @@
 /** Isolated storage experiment; never imported by product code. */
 import { z } from "zod";
-import { validateProject, type Project } from "../src/lib/bim/model.ts";
+import { validateProject, type Project } from "../src/domain/project/schema.ts";
 import { readProjectFile } from "../src/lib/bim/history.ts";
 import { imageAssetSchema, type ImageAsset } from "../src/domain/elements/reference/model.ts";
 import {

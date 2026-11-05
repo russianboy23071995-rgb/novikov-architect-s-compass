@@ -1,0 +1,29 @@
+{
+  "runtime": "node v24.22.1 win32 x64",
+  "date": "2026-10-26T11:03:19.440Z",
+  "states": 5,
+  "queries": 10668,
+  "counterCheckDetected": true,
+  "results": [
+    {
+      "label": "geladen",
+      "queries": 2136
+    },
+    {
+      "label": "Wandlänge",
+      "queries": 2136
+    },
+    {
+      "label": "Wand zurück",
+      "queries": 2136
+    },
+    {
+      "label": "Linie löschen",
+      "queries": 2130
+    },
+    {
+      "label": "Tür löschen",
+      "queries": 2130
+    }
+  ]
+}

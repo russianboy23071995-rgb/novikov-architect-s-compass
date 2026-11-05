@@ -119,16 +119,21 @@ import { acquisitionReference } from "../../constraints/inference/construction-r
 import { editInteraction } from "./adapters.ts";
 import { resolveEditSnap } from "../direct-edit/snapping.ts";
 import { projectSnapReferences, getProjectSnapReferences } from "../snapping/project-references.ts";
+import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import { validateProject } from "../../domain/project/schema.ts";
+import { updateLine } from "../lines/actions.ts";
+import { updateWall } from "../walls/actions.ts";
 import {
-  validateProject,
-  updateLine,
-  updateWall,
-  serializeProject,
-  deserializeProject,
-} from "../../lib/bim/model.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../history/project-history.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
-import { addWall, addWindow, addLine, createProject } from "../../lib/bim/model.ts";
+import { addWindow } from "../windows/actions.ts";
+import { addLine } from "../lines/actions.ts";
+import { createProject } from "../projects/create.ts";
+import { addWall } from "../walls/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { sameHoverSession } from "../../constraints/inference/hover-reference.ts";
 import { createAffineScreenMetric } from "../../geometry/projections/screen-metric.ts";
@@ -357,9 +362,16 @@ test("model revision, undo/redo and loaded same-ID projects use matching referen
   assert.notEqual(after, before);
   assert.deepEqual(after, projectSnapReferences(next.present));
   assert.deepEqual(before, projectSnapReferences(original));
+  // Kept history steps hold no derived data: undo/redo rebuild equal references once and then
+  // reuse them while the step stays present (docs/performance/HISTORY_MEMORY.md).
   const undone = undoProject(next);
-  assert.equal(getProjectSnapReferences(undone.present), before);
-  assert.equal(getProjectSnapReferences(redoProject(undone).present), after);
+  const restored = getProjectSnapReferences(undone.present);
+  assert.notEqual(restored, before);
+  assert.deepEqual(restored, before);
+  assert.equal(getProjectSnapReferences(undone.present), restored);
+  const redone = getProjectSnapReferences(redoProject(undone).present);
+  assert.notEqual(redone, after);
+  assert.deepEqual(redone, after);
   const loaded = deserializeProject(serializeProject(changed));
   assert.notEqual(getProjectSnapReferences(loaded), after);
   assert.deepEqual(getProjectSnapReferences(loaded), projectSnapReferences(loaded));
@@ -688,7 +700,7 @@ test("shared grid settings affect drawing and movement without disabling feature
 
 test("grid targets survive contour/wall preview, history and zoom metrics", async () => {
   const { createDrawing, defaultHatchFill } = await import("../drawing/actions.ts");
-  const { editAtPointer } = await import("../../lib/bim/direct-edit.ts");
+  const { editAtPointer } = await import("../direct-edit/session.ts");
   const ring = [
     { x: -3, y: 2 },
     { x: -1, y: 2 },

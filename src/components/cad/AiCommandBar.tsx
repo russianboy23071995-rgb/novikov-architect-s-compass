@@ -11,7 +11,7 @@ import {
 } from "@/application/commands/selection-command";
 import { singleTarget, type SelectionSet } from "@/application/selection/state";
 import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
-import type { Project } from "@/lib/bim/model";
+import type { Project } from "@/domain/project/schema";
 import { recognitionConstructor } from "@/lib/bim/voice";
 import { startSelectionVoice } from "@/application/commands/selection-voice";
 
@@ -110,7 +110,10 @@ export function AiCommandBar({
     }
   };
   return (
-    <div className="command-glass absolute bottom-5 left-1/2 z-30 w-[min(620px,calc(100%-32px))] -translate-x-1/2 rounded-xl border border-border p-2">
+    <div
+      data-menu-obstacle
+      className="command-glass absolute bottom-5 left-1/2 z-30 w-[min(620px,calc(100%-32px))] -translate-x-1/2 rounded-xl border border-border p-2"
+    >
       <form
         onFocus={onFocus}
         className="flex items-center gap-1"
@@ -121,12 +124,6 @@ export function AiCommandBar({
       >
         <img src={novikovLogo} alt="NOVIKOV" className="size-6 object-contain" />
         <div className="min-w-0 flex-1">
-          <span className="block truncate px-2 text-[9px] text-muted-foreground">
-            Lokale Modellbefehle ·{" "}
-            {selectionCount > 1
-              ? `${selectionCount} Elemente ausgewählt`
-              : (selection?.id ?? "Kein Bauteil ausgewählt")}
-          </span>
           <Input
             disabled={listening}
             value={command}
@@ -172,30 +169,11 @@ export function AiCommandBar({
           <ArrowUp />
         </Button>
       </form>
-      <p className="mt-1 text-[10px] text-muted-foreground">
-        Wandlänge, Wandhöhe, Wandstärke, Fensterbreite, Fensterhöhe, Brüstungshöhe auf Zahl m/cm/mm
-        · Fenster zentrieren · Auswahl um 2 m bei 90 Grad verschieben
-      </p>
-      <p className="mt-1 text-[10px] text-muted-foreground">
-        {voiceAvailable
-          ? "Mikrofon startet nur per Klick. Der Browser kann Audio an seinen Spracherkennungsdienst senden. Auswahlwechsel beendet die Aufnahme."
-          : "Spracherkennung in diesem Browser nicht verfügbar. Textbefehle bleiben nutzbar."}
-      </p>
       {selection?.kind === "reference" && (
         <p className="mt-1 text-xs">
           {calibration
             ? "Zwei Messpunkte gebunden. Befehl: Referenz auf 5 m kalibrieren."
             : "Zuerst im On-Demand-Menü zwei Messpunkte für die Kalibrierung aufnehmen."}
-        </p>
-      )}
-      {selection?.kind === "hatch" && (
-        <p className="px-2 text-xs text-muted-foreground">
-          Schraffurfüllung über die Eigenschaften ändern; Befehle zur Füllung folgen später.
-        </p>
-      )}
-      {selection?.kind === "line" && (
-        <p className="mt-1 text-[10px] text-muted-foreground">
-          Linienstile über die Eigenschaften ändern; Stilbefehle folgen später.
         </p>
       )}
       {error && (

@@ -1,6 +1,8 @@
+import { withoutOpeningMarks } from "../../test/legacy-project-fixture.ts";
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
-import { addWall } from "../../lib/bim/model.ts";
+import { addWall } from "../walls/actions.ts";
 import { ensureDocumentFolder } from "./documents.ts";
 import { beginSelectionMove, previewSelectionMove } from "../selection/move.ts";
 import { createDrawing } from "../drawing/actions.ts";
@@ -21,18 +23,15 @@ import {
 } from "../layers/visibility-actions.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
 import {
-  readProjectFile,
   commitProject,
   createHistory,
   undoProject,
   redoProject,
-} from "../../lib/bim/history.ts";
-import {
-  updateWall,
-  serializeProject,
-  validateProject,
-  type Project,
-} from "../../lib/bim/model.ts";
+} from "../history/project-history.ts";
+import { readProjectFile } from "../../lib/bim/history.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { validateProject, type Project } from "../../domain/project/schema.ts";
+import { updateWall } from "../walls/actions.ts";
 import { resolveModelLength } from "../../domain/views/display-size.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 const create = (p: Project, id = "doc-a", denominator = 50) =>
@@ -209,10 +208,10 @@ test("strict document input rejects bad references, duplicate IDs, invalid names
 test("schema 16 migration preserves working state without inventing documents", () => {
   const old = { ...createExampleProject(), schemaVersion: 16 };
   const migrated = readProjectFile(legacyFixtureJSON(old));
-  assert.equal(migrated.schemaVersion, 26);
+  assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.equal(migrated.drawingDocuments, undefined);
   assert.equal(migrated.modelViews, undefined);
-  assert.deepEqual(storeyOf(migrated), storeyOf(old));
+  assert.deepEqual(withoutOpeningMarks(storeyOf(migrated)), storeyOf(old));
   assert.throws(() => readProjectFile(legacyFixtureJSON({ ...old, drawingDocuments: [] })));
   assert.throws(() => validateProject(old));
 });
@@ -289,7 +288,7 @@ test("captured view framing and folder survive project history and file roundtri
 test("schema 17 migration keeps existing documents without inventing crop or folders", () => {
   const legacy = { ...create(createExampleProject()), schemaVersion: 17 };
   const migrated = readProjectFile(legacyFixtureJSON(legacy));
-  assert.equal(migrated.schemaVersion, 26);
+  assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.deepEqual(migrated.drawingDocuments, legacy.drawingDocuments);
   assert.equal(migrated.documentFolders, undefined);
   assert.throws(() => readProjectFile(legacyFixtureJSON({ ...legacy, documentFolders: [] })));
@@ -438,12 +437,14 @@ test("drawing creation rejects foreign/stale contexts and keeps shared geometry"
   const scoped = createDrawing(base, base, "a", request, documentBinding(base, "doc-a"));
   assert.doesNotThrow(() => validateProject({ ...scoped, drawingDocuments: [] }));
   assert.deepEqual(
-    storeyOf(readProjectFile(legacyFixtureJSON({ ...scoped, schemaVersion: 18 }))),
+    withoutOpeningMarks(
+      storeyOf(readProjectFile(legacyFixtureJSON({ ...scoped, schemaVersion: 18 }))),
+    ),
     storeyOf(scoped),
   );
   const legacy = readProjectFile(legacyFixtureJSON({ ...base, schemaVersion: 18 }));
-  assert.equal(legacy.schemaVersion, 26);
-  assert.deepEqual(storeyOf(legacy), storeyOf(base));
+  assert.equal(legacy.schemaVersion, PROJECT_SCHEMA_VERSION);
+  assert.deepEqual(withoutOpeningMarks(storeyOf(legacy)), storeyOf(base));
   const wall = createDrawing(
     base,
     base,
@@ -492,8 +493,8 @@ test("v19 migration promotes former local lines and hatches without loss or dupl
     },
   };
   const migrated = readProjectFile(legacyFixtureJSON(legacy));
-  assert.deepEqual(migrated, p);
-  assert.deepEqual(readProjectFile(serializeProject(migrated)), p);
+  assert.deepEqual(withoutOpeningMarks(migrated), p);
+  assert.deepEqual(withoutOpeningMarks(readProjectFile(serializeProject(migrated))), p);
   const context = resolveWorkingView(migrated);
   const display = createLayerDisplay(migrated, context.visibility, context.visibility.context);
   assert.equal(display.plan.lines.length, 1);

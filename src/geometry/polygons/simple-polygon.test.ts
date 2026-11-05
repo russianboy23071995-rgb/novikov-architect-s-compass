@@ -191,3 +191,29 @@ test("arithmetic overflow is rejected instead of reporting a valid contour", () 
     { valid: false, reason: "numeric-range", indices: [] },
   );
 });
+
+// Ear clipping for ceiling slabs (docs/SLAB_ELEMENT.md, Teil B).
+import { triangulateSimplePolygon } from "./triangulate.ts";
+test("ear clipping covers simple rings of either winding with counterclockwise triangles", () => {
+  const area = (p: { x: number; y: number }[], [a, b, c]: [number, number, number]) =>
+    ((p[b]!.x - p[a]!.x) * (p[c]!.y - p[a]!.y) - (p[b]!.y - p[a]!.y) * (p[c]!.x - p[a]!.x)) / 2;
+  const lShape = [
+    { x: 0, y: 0 },
+    { x: 6, y: 0 },
+    { x: 6, y: 3 },
+    { x: 3, y: 3 },
+    { x: 3, y: 5 },
+    { x: 0, y: 5 },
+  ];
+  // A straight extra vertex never yields a zero-area triangle; the covered area stays exact.
+  const withStraight = [lShape[0]!, { x: 3, y: 0 }, ...lShape.slice(1)];
+  for (const ring of [lShape, [...lShape].reverse(), withStraight]) {
+    const triangles = triangulateSimplePolygon(ring);
+    assert.ok(triangles.every((t) => area(ring, t) > 0));
+    assert.equal(
+      triangles.reduce((sum, t) => sum + area(ring, t), 0),
+      24,
+    );
+  }
+  assert.equal(triangulateSimplePolygon(lShape).length, 4);
+});

@@ -2,11 +2,18 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { selectionZInteraction } from "./z-interaction.ts";
 import { beginSelectionMove } from "./move.ts";
-import { createProject, addWall, addWindow } from "../../lib/bim/model.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
+import { createProject } from "../projects/create.ts";
+import { addWindow } from "../windows/actions.ts";
+import { addWall } from "../walls/actions.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../history/project-history.ts";
 import { ALL_LAYERS_VISIBLE, createLayerVisibilityPolicy } from "../layers/visibility.ts";
 import { confirmInteraction } from "../tools/interaction.ts";
-import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../../rendering/viewport/building-solid.ts";
 import { selectionMoveSurfaces } from "../../rendering/viewport/selection-move-preview.ts";
 import { validateProject } from "../../domain/project/schema.ts";
 

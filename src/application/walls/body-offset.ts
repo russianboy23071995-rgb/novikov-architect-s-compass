@@ -1,9 +1,9 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
-import { updateWall } from "../../lib/bim/model.ts";
+import { updateWall } from "./actions.ts";
 import { assertAxisInside } from "../../domain/elements/wall/axis-position.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../selection/target.ts";
-import { commitProject, type ProjectHistory } from "../../lib/bim/history.ts";
+import { commitProject, type ProjectHistory } from "../history/project-history.ts";
 
 export type WallOffsetRequest = { projectId: string; wallId: string; offset: number };
 export function previewWallOffset(

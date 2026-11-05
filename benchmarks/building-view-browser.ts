@@ -1,6 +1,6 @@
 import { buildingViewFixture } from "./building-view-fixture.ts";
 import { selectWorkingStorey } from "../src/application/storeys/working-storey.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import { createSolidRenderer } from "../src/rendering/viewport/solid-renderer.ts";
 import { createProjectionFrame } from "../src/geometry/projections/orthographic.ts";
 import { createProjectionState } from "../src/rendering/viewport/projection-state.ts";

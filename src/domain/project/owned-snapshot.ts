@@ -1,4 +1,9 @@
-import { validateProject, type Project } from "./schema.ts";
+import {
+  REUSABLE_ELEMENT_LISTS,
+  storeyValidationKeys,
+  validateProject,
+  type Project,
+} from "./schema.ts";
 import { resolveStoreyLevels } from "../storeys/heights.ts";
 import type { WallSolidReuse } from "../elements/wall/connections.ts";
 
@@ -14,15 +19,114 @@ function freeze<T>(value: T): T {
   return value;
 }
 
+// Frozen storeys of owned snapshots with the key their scope validation passed under and the
+// pattern IDs it used. Only these exact objects can skip their storey scope validation.
+const validStoreys = new WeakMap<object, { key: readonly unknown[]; used: readonly string[] }>();
+const sameKey = (a: readonly unknown[], b: readonly unknown[]) =>
+  a.length === b.length && a.every((value, i) => Object.is(value, b[i]));
+let reusedStoreys = 0;
+// Elements of owned snapshots: deeply frozen output of a full validation.
+const validElements = new WeakSet<object>();
+let reusedElements = 0;
+/** Diagnostic count of elements that skipped parsing, for tests and measurements. */
+export const elementValidationReuseCount = () => reusedElements;
+/** Diagnostic count of skipped storey scope validations, for tests and measurements. */
+export const storeyValidationReuseCount = () => reusedStoreys;
+
+const hasId = (value: unknown): value is { id: string } =>
+  !!value && typeof value === "object" && typeof (value as { id?: unknown }).id === "string";
+
+/** Reuse previous owned subtrees whose serialized content is identical; key order included.
+ * Frozen parts of the fresh result (verified asset handles) are never rebuilt.
+ */
+function share(next: unknown, previous: unknown): unknown {
+  if (next === previous) return previous;
+  if (!next || typeof next !== "object" || !previous || typeof previous !== "object") return next;
+  if (Object.isFrozen(next)) return next;
+  if (Array.isArray(next)) {
+    if (!Array.isArray(previous)) return next;
+    const byId = new Map(previous.filter(hasId).map((item) => [item.id, item]));
+    let same = next.length === previous.length;
+    const result = next.map((item, i) => {
+      const shared = share(item, hasId(item) ? byId.get(item.id) : previous[i]);
+      if (shared !== previous[i]) same = false;
+      return shared;
+    });
+    return same ? previous : result;
+  }
+  if (Array.isArray(previous)) return next;
+  const left = next as Record<string, unknown>,
+    right = previous as Record<string, unknown>;
+  const keys = Object.keys(left).filter((k) => left[k] !== undefined);
+  const other = Object.keys(right).filter((k) => right[k] !== undefined);
+  let same = keys.length === other.length && keys.every((k, i) => k === other[i]);
+  const result: Record<string, unknown> = {};
+  for (const key of Object.keys(left)) {
+    result[key] = share(left[key], right[key]);
+    if (result[key] !== right[key]) same = false;
+  }
+  return same ? previous : result;
+}
+
 /** Own a validated immutable structure without freezing caller data.
  * Already verified immutable image handles may remain shared.
+ * With an owned base, unchanged subtrees keep the base's object identity.
  * Keep validateProject's public mutable-copy contract unchanged.
  */
-export function createProjectSnapshot(source: Project, reuse?: WallSolidReuse): Project {
+export function createProjectSnapshot(
+  source: Project,
+  reuse?: WallSolidReuse,
+  base?: Project,
+): Project {
   if (owned.has(source)) return source;
-  const snapshot = freeze(validateProject(source, reuse));
+  const used: (readonly string[])[] = [];
+  const validated = validateProject(source, reuse, {
+    lookup: (storey, key) => {
+      const entry = storey && typeof storey === "object" ? validStoreys.get(storey) : undefined;
+      if (!entry || !sameKey(entry.key, key)) return undefined;
+      reusedStoreys++;
+      return entry.used;
+    },
+    record: (index, patterns) => (used[index] = patterns),
+    knownElement: (element) => {
+      const known = !!element && typeof element === "object" && validElements.has(element);
+      if (known) reusedElements++;
+      return known;
+    },
+  });
+  const snapshot = freeze(
+    base && owned.has(base) ? (share(validated, base) as Project) : validated,
+  );
   owned.add(snapshot);
+  const keys = storeyValidationKeys(snapshot);
+  snapshot.storeys.forEach((storey, i) => {
+    const registered = validStoreys.has(storey);
+    validStoreys.set(storey, { key: keys[i]!, used: used[i]! });
+    // A storey object seen before already registered its (frozen, unchanged) elements.
+    if (!registered)
+      for (const name of REUSABLE_ELEMENT_LISTS)
+        for (const element of (storey[name] as readonly object[] | undefined) ?? [])
+          validElements.add(element);
+  });
   return snapshot;
+}
+
+/** Commands keep their input's ownership: an owned input yields an owned result sharing its
+ * unchanged parts, so a following commit need not validate again. Any other input keeps
+ * validateProject's mutable copy. Both paths run the same full validation.
+ */
+export function validateLike(input: Project, proposed: unknown, reuse?: WallSolidReuse): Project {
+  // Like validateProject, the proposal is unchecked data until validation below.
+  return owned.has(input)
+    ? createProjectSnapshot(proposed as Project, reuse, input)
+    : validateProject(proposed, reuse);
+}
+
+/** A command's own input: an owned snapshot is already validated and immutable; any other
+ * input is validated into a mutable copy as before.
+ */
+export function validatedInput(project: Project): Project {
+  return owned.has(project) ? project : validateProject(project);
 }
 
 /** Only factory-owned, deeply immutable and fully validated projects qualify. */

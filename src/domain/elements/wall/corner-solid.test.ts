@@ -5,8 +5,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { deriveCornerSolids } from "./corner-solid.ts";
 import { deriveRightAngleCorner } from "./corner.ts";
-import { createProject, addWall, addWindow } from "../../../lib/bim/model.ts";
-import { buildSolid } from "../../../lib/bim/geometry.ts";
+import { createProject } from "../../../application/projects/create.ts";
+import { addWindow } from "../../../application/windows/actions.ts";
+import { addWall } from "../../../application/walls/actions.ts";
+import { buildSolid } from "../../../rendering/viewport/storey-solid.ts";
 import {
   extrudeProfileWithOpenings,
   type ProfileFace,

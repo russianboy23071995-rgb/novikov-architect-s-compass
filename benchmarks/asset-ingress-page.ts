@@ -6,15 +6,12 @@ import {
   commitProject,
   undoProject,
   redoProject,
-  readProjectFile,
-} from "../src/lib/bim/history";
-import {
-  addWall,
-  updateLine,
-  updateWall,
-  serializeProject,
-  validateProject,
-} from "../src/lib/bim/model";
+} from "../src/application/history/project-history";
+import { readProjectFile } from "../src/lib/bim/history";
+import { serializeProject } from "../src/lib/bim/model";
+import { updateLine } from "../src/application/lines/actions.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
+import { addWall, updateWall } from "../src/application/walls/actions.ts";
 const button = document.querySelector<HTMLButtonElement>("#run")!,
   output = document.querySelector<HTMLPreElement>("#report")!;
 button.onclick = async () => {

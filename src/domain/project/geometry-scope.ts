@@ -12,7 +12,10 @@ export type WallGeometry =
 export type ModelGeometry =
   | Project
   | {
-      storey: Omit<Project["storeys"][number], "id" | "name" | "height">;
+      // The height is optional here: ceiling slabs need it for their level (docs/SLAB_ELEMENT.md).
+      storey: Omit<Project["storeys"][number], "id" | "name" | "height"> & {
+        height?: number | null;
+      };
       assets: Project["assets"];
     };
 export type GeometryPreview = {

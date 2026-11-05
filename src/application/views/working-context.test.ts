@@ -4,14 +4,15 @@ import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { resolveWorkingView, assertWorkingViewCurrent } from "./working-context.ts";
 import { changeProjectScale } from "./project-scale.ts";
-import { updateWall, serializeProject } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { updateWall } from "../walls/actions.ts";
 import {
   createHistory,
   commitProject,
   undoProject,
   redoProject,
-  readProjectFile,
-} from "../../lib/bim/history.ts";
+} from "../history/project-history.ts";
+import { readProjectFile } from "../../lib/bim/history.ts";
 import { changeLayerVisibility, emptyVisibilityHistory } from "../layers/visibility-actions.ts";
 import { visibleLayerTarget, isLayerVisible } from "../layers/visibility.ts";
 import { createVisibleToolSourceQuery } from "../tools/snapping.ts";

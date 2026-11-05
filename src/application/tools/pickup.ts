@@ -1,3 +1,6 @@
+import type { PlanText } from "../../domain/elements/text/model.ts";
+import { columnSettings, type ColumnDefaults } from "../columns/defaults.ts";
+import { stairSettings, type StairDefaults } from "../stairs/defaults.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { patternSize } from "../hatches/pattern-size.ts";
 import type { Project } from "../../domain/project/schema.ts";
@@ -21,13 +24,16 @@ export type LineDefaults = Pick<
 >;
 export type WallDefaults = Pick<
   Project["storeys"][number]["walls"][number],
-  "thickness" | "height" | "bodyOffset" | "layerId"
+  "thickness" | "height" | "bodyOffset" | "layerId" | "renovation" | "assemblyId"
 >;
 export type ToolDefaults =
   | { tool: "hatch"; values: HatchDefaults }
   | { tool: "window"; values: WindowDefaults }
   | { tool: "line"; values: LineDefaults }
-  | { tool: "wall"; values: WallDefaults };
+  | { tool: "wall"; values: WallDefaults }
+  | { tool: "column"; values: ColumnDefaults }
+  | { tool: "stair"; values: StairDefaults }
+  | { tool: "text"; values: Omit<PlanText, "id" | "position" | "content"> };
 
 /** Read-only capability boundary. Add supported element adapters here, not gesture copies. */
 export function pickupToolDefaults(
@@ -46,6 +52,8 @@ export function pickupToolDefaults(
         height: source.height,
         bodyOffset: source.bodyOffset,
         layerId: source.layerId,
+        renovation: source.renovation ?? "existing",
+        ...(source.assemblyId ? { assemblyId: source.assemblyId } : {}),
       },
     };
   }
@@ -77,6 +85,23 @@ export function pickupToolDefaults(
         layerId: source.layerId,
       },
     };
+  }
+  // Columns hand over every setting, size and height rule included (docs/STUETZEN.md, P3).
+  if (target.kind === "column") {
+    const source = storeyOf(project).columns?.find((item) => item.id === target.id);
+    return source ? { tool: "column", values: columnSettings(source) } : null;
+  }
+  // Stairs hand over every setting, axis and height rule included (docs/TREPPE.md, TR2).
+  if (target.kind === "stair") {
+    const source = storeyOf(project).stairs?.find((item) => item.id === target.id);
+    return source ? { tool: "stair", values: stairSettings(source) } : null;
+  }
+  // Texts hand over every setting except position and content (docs/TEXT.md).
+  if (target.kind === "text") {
+    const source = storeyOf(project).texts?.find((item) => item.id === target.id);
+    if (!source) return null;
+    const { id: _id, position: _position, content: _content, ...values } = source;
+    return { tool: "text", values: structuredClone(values) };
   }
   if (target.kind !== "hatch") return null;
   const source = storeyOf(project).hatches.find((item) => item.id === target.id);

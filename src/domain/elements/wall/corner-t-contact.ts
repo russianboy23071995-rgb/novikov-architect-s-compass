@@ -5,7 +5,11 @@ import { wallBody } from "./body.ts";
 import { pointsCompatible, coordinatesCompatible } from "../../../geometry/tolerances/model.ts";
 import { measureHalfPlane } from "../../../geometry/projections/half-plane.ts";
 
-/** Bounded combination: right-angle corners at either host end, contact on its untouched side. */
+/** Corners at either host end, right-angled or oblique (user decision 26.10.2026,
+ * docs/OBLIQUE_T_JUNCTIONS.md): the contact lies on an untouched side of the composed corner
+ * ring, and the incoming wall stays clear of every corner partner. Corner and T rings are
+ * convex quadrilaterals for any mitre angle.
+ */
 export function validateCornerTContact(
   project: WallGeometry,
   host: Wall,
@@ -20,12 +24,6 @@ export function validateCornerTContact(
   const partners = joins.map((join) => {
     const partnerId = join.first.wallId === host.id ? join.second.wallId : join.first.wallId;
     const partner = storeyOf(project).walls.find((w) => w.id === partnerId)!;
-    const hx = host.end.x - host.start.x,
-      hy = host.end.y - host.start.y;
-    const px = partner.end.x - partner.start.x,
-      py = partner.end.y - partner.start.y;
-    if (Math.abs((hx * px + hy * py) / (Math.hypot(hx, hy) * Math.hypot(px, py))) > 1e-10)
-      throw new Error("Ecke und T benoetigen vorerst eine rechtwinklige Ecke.");
     return partner;
   });
   const ring = corners.get(host.id);

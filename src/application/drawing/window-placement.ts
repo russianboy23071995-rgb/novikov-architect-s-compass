@@ -3,19 +3,23 @@ import { boundedWindowPosition } from "../../domain/elements/wall/window-range.t
 import { precisionTarget } from "../input/precision.ts";
 import { parseMetres } from "../../core/units/metres.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
-import { addWindow, wallLength } from "../../lib/bim/model.ts";
+import { addWindow } from "../windows/actions.ts";
+import { wallLength } from "../../domain/project/schema.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import { projectDirection } from "../../geometry/projections/direction.ts";
 import type { LayerVisibilityPolicy } from "../layers/visibility.ts";
 import { isLayerVisible } from "../layers/visibility.ts";
 import type { ToolInteraction } from "../tools/interaction.ts";
 import { querySnap } from "../../constraints/snapping/engine.ts";
+import { newOpeningMark } from "../openings/marks.ts";
+import { WINDOW_INSERT_DEFAULTS, type WindowInsert } from "../../domain/elements/window/insert.ts";
 
 export const defaultDrawingWindow = { width: 1.2, height: 1.35, sillHeight: 0.9 } as const;
 
 export type WindowDimensions = { width: number; height: number; sillHeight: number };
+/** `insert`: the window element new windows get (FT1); null: opening only; absent: defaults. */
 export type WindowDimensionDraft = Readonly<
-  Record<keyof WindowDimensions, string> & { layerId?: string }
+  Record<keyof WindowDimensions, string> & { layerId?: string; insert?: WindowInsert | null }
 >;
 export function parseWindowDimensions(draft: WindowDimensionDraft): WindowDimensions {
   const width = parseMetres(draft.width),
@@ -30,7 +34,27 @@ export function parseWindowDimensions(draft: WindowDimensionDraft): WindowDimens
   return { width, height, sillHeight };
 }
 
-function findWindowHost(project: Project, visibility: LayerVisibilityPolicy, point: Point) {
+/** Screen distance around a wall body that still picks the wall for an opening (user decision
+ * 26.10.2026, docs/OPENING_HIT_TOLERANCE.md); below the snap radius so both do not compete.
+ */
+export const OPENING_HOST_RADIUS_PX = 8;
+/** The host tolerance in metres at the current view scale; 0 without a usable scale. */
+export function openingHostTolerance(pixelsPerMetre: number): number {
+  return Number.isFinite(pixelsPerMetre) && pixelsPerMetre > 0
+    ? OPENING_HOST_RADIUS_PX / pixelsPerMetre
+    : 0;
+}
+
+/** Nearest visible wall for an opening; shared by every wall opening. A wall whose body
+ * contains the point wins; otherwise the nearest body face within `tolerance` metres.
+ * Tolerance 0 keeps the strict body test.
+ */
+export function findOpeningHost(
+  project: Project,
+  visibility: LayerVisibilityPolicy,
+  point: Point,
+  tolerance = 0,
+) {
   const hosts = storeyOf(project)
     .walls.filter((w) => isLayerVisible(project, visibility, w.id))
     .flatMap((wall) => {
@@ -42,17 +66,22 @@ function findWindowHost(project: Project, visibility: LayerVisibilityPolicy, poi
         ((projected.x - body.start.x) * direction.x + (projected.y - body.start.y) * direction.y) /
         (length * length);
       const distance = Math.hypot(point.x - projected.x, point.y - projected.y);
-      return distance <= wall.thickness / 2 + 1e-9
+      const outside = Math.max(0, distance - wall.thickness / 2 - 1e-9);
+      return outside <= Math.max(0, tolerance)
         ? [
             {
               wall,
               position,
+              outside,
               distance: Math.hypot(distance, Math.max(0, -position, position - 1) * length),
             },
           ]
         : [];
     })
-    .sort((a, b) => a.distance - b.distance || a.wall.id.localeCompare(b.wall.id));
+    .sort(
+      (a, b) =>
+        a.outside - b.outside || a.distance - b.distance || a.wall.id.localeCompare(b.wall.id),
+    );
   return hosts[0];
 }
 
@@ -60,26 +89,20 @@ export function windowPlacementHost(
   project: Project,
   visibility: LayerVisibilityPolicy,
   point: Point,
+  tolerance = 0,
 ): string {
-  const host = findWindowHost(project, visibility, point);
+  const host = findOpeningHost(project, visibility, point, tolerance);
   if (!host) throw new Error("Eine sichtbare Wand anklicken.");
   return host.wall.id;
 }
 
-/** Host projection is shared by preview and commit; no mutation or UI state. */
-export function placeWindow(
-  base: Project,
+/** Host and relative position for a placement: a fixed host keeps the pointer on its axis. */
+export function resolveOpeningHost(
   current: Project,
   visibility: LayerVisibilityPolicy,
-  id: string,
   point: Point,
-  dimensions: WindowDimensions = defaultDrawingWindow,
   hostId?: string,
-  layerId: string = current.defaultLayerIds.window,
-): Project {
-  if (base !== current || !visibility.isCurrent(current, visibility.context))
-    throw new Error("Fensterplatzierung nicht mehr aktuell. Werkzeug erneut starten.");
-  if (![point.x, point.y].every(Number.isFinite)) throw new Error("Ungültige Fensterposition.");
+) {
   const wall = hostId
     ? storeyOf(current).walls.find(
         (w) => w.id === hostId && isLayerVisible(current, visibility, w.id),
@@ -96,8 +119,27 @@ export function placeWindow(
               (point.y - body.start.y) * (wall.end.y - wall.start.y)) /
             wallLength(wall) ** 2,
         }
-      : findWindowHost(current, visibility, point);
+      : findOpeningHost(current, visibility, point);
   if (!host) throw new Error("Zum Platzieren eine sichtbare Wand anfahren.");
+  return host;
+}
+
+/** Host projection is shared by preview and commit; no mutation or UI state. */
+export function placeWindow(
+  base: Project,
+  current: Project,
+  visibility: LayerVisibilityPolicy,
+  id: string,
+  point: Point,
+  dimensions: WindowDimensions = defaultDrawingWindow,
+  hostId?: string,
+  layerId: string = current.defaultLayerIds.window,
+  insert: WindowInsert | null = WINDOW_INSERT_DEFAULTS,
+): Project {
+  if (base !== current || !visibility.isCurrent(current, visibility.context))
+    throw new Error("Fensterplatzierung nicht mehr aktuell. Werkzeug erneut starten.");
+  if (![point.x, point.y].every(Number.isFinite)) throw new Error("Ungültige Fensterposition.");
+  const host = resolveOpeningHost(current, visibility, point, hostId);
   if (!current.layers.some((layer) => layer.id === layerId))
     throw new Error("Die Fensterebene existiert nicht mehr.");
   if (visibility.context.hiddenLayerIds.includes(layerId))
@@ -108,19 +150,24 @@ export function placeWindow(
     wallId: host.wall.id,
     position: boundedWindowPosition(current, host.wall, dimensions.width, host.position),
     ...dimensions,
+    mark: newOpeningMark(current, "window"),
+    ...(insert ? { insert } : {}),
   });
 }
 
 /** Unanchored placement: the shared snap engine runs, but no artificial movement
- * origin or polar input is pinned before the host is chosen. */
-export function windowPlacementInteraction(
+ * origin or polar input is pinned before the host is chosen. Window and door share this
+ * lifecycle; only their placement action and labels differ.
+ */
+export function openingPlacementInteraction(
   base: Project,
   visibility: LayerVisibilityPolicy,
   id: string,
   current: () => { project: Project; visibility: LayerVisibilityPolicy },
+  place: (project: Project, point: Point) => Project,
   commit: (next: Project, id: string) => void,
   cancel: () => void,
-  settings?: { draft: WindowDimensionDraft; currentDraft: () => WindowDimensionDraft },
+  labels: { axis: string; mouse: string; origin: string },
   hostId?: string,
 ): ToolInteraction {
   const wall = hostId ? storeyOf(base).walls.find((w) => w.id === hostId) : null;
@@ -134,30 +181,18 @@ export function windowPlacementInteraction(
     const now = current();
     if (now.visibility !== visibility)
       throw new Error("Sichtbarkeit geändert. Werkzeug erneut starten.");
-    if (settings && settings.currentDraft() !== settings.draft)
-      throw new Error("Fenstermaße geändert. Aktuelle Vorschau verwenden.");
-    const dimensions = settings ? parseWindowDimensions(settings.draft) : defaultDrawingWindow;
-    return placeWindow(
-      base,
-      now.project,
-      visibility,
-      id,
-      point,
-      dimensions,
-      hostId,
-      settings?.draft.layerId,
-    );
+    return place(now.project, point);
   };
   return {
     identity: {},
     origin: body?.start ?? { x: 0, y: 0 },
-    input: body ? { axisLabel: "Fenstermitte ab Wandanfang", degrees } : null,
+    input: body ? { axisLabel: labels.axis, degrees } : null,
     click: "confirm",
     snapping: {
       origin:
         body && direction
           ? {
-              entityId: "@window-placement-origin",
+              entityId: labels.origin,
               feature: hostId!,
               point: body.start,
               directions: [direction],
@@ -165,7 +200,9 @@ export function windowPlacementInteraction(
           : null,
       sources: (refs) => [...refs],
       resolve: (cursor, context) => {
-        const host = wall ? { wall } : findWindowHost(base, visibility, cursor);
+        const host = wall
+          ? { wall }
+          : findOpeningHost(base, visibility, cursor, openingHostTolerance(context.pixelsPerMetre));
         if (!host) return querySnap(cursor, context);
         const body = wallBody(host.wall);
         return querySnap(cursor, {
@@ -180,7 +217,7 @@ export function windowPlacementInteraction(
       },
     },
     preview: (_angle, length, aim) => {
-      if (!body || degrees === null) throw new Error("Fensterposition per Maus wählen.");
+      if (!body || degrees === null) throw new Error(labels.mouse);
       const result = precisionTarget(body.start, aim, String(degrees), length);
       preview(result.point);
       return result;
@@ -192,4 +229,96 @@ export function windowPlacementInteraction(
     commit: (point) => commit(preview(point), id),
     cancel,
   };
+}
+
+/** Side of a wall a point lies on, seen along the wall from its start to its end. */
+export function wallSideOf(
+  wall: { start: Point; end: Point },
+  anchor: Point,
+  point: Point,
+): "left" | "right" {
+  const cross =
+    (wall.end.x - wall.start.x) * (point.y - anchor.y) -
+    (wall.end.y - wall.start.y) * (point.x - anchor.x);
+  return cross >= 0 ? "left" : "right";
+}
+
+/**
+ * Second click of a window or door (docs/FENSTER_TUEREN.md, R1): the position is fixed, the
+ * pointer chooses the side of the wall – the outside of a window, the side a door opens to.
+ * Free snapping (no wall axis), so the pointer can leave the wall; `place` builds the model for
+ * a side and validates it.
+ */
+export function openingSideInteraction(
+  id: string,
+  wall: { start: Point; end: Point },
+  anchor: Point,
+  place: (side: "left" | "right") => Project,
+  commit: (next: Project, id: string) => void,
+  cancel: () => void,
+): ToolInteraction {
+  const preview = (point: Point) => place(wallSideOf(wall, anchor, point));
+  return {
+    identity: {},
+    origin: anchor,
+    input: null,
+    click: "confirm",
+    snapping: {
+      origin: null,
+      sources: (refs) => [...refs],
+      resolve: (cursor, context) =>
+        querySnap(cursor, { ...context, orthoOrigin: null, angleOrigin: null }),
+    },
+    preview: () => {
+      throw new Error("Seite per Maus wählen.");
+    },
+    previewProject: preview,
+    validate: (point) => {
+      preview(point);
+    },
+    commit: (point) => commit(preview(point), id),
+    cancel,
+  };
+}
+
+export function windowPlacementInteraction(
+  base: Project,
+  visibility: LayerVisibilityPolicy,
+  id: string,
+  current: () => { project: Project; visibility: LayerVisibilityPolicy },
+  commit: (next: Project, id: string) => void,
+  cancel: () => void,
+  settings?: { draft: WindowDimensionDraft; currentDraft: () => WindowDimensionDraft },
+  hostId?: string,
+): ToolInteraction {
+  return openingPlacementInteraction(
+    base,
+    visibility,
+    id,
+    current,
+    (project, point) => {
+      if (settings && settings.currentDraft() !== settings.draft)
+        throw new Error("Fenstermaße geändert. Aktuelle Vorschau verwenden.");
+      const dimensions = settings ? parseWindowDimensions(settings.draft) : defaultDrawingWindow;
+      return placeWindow(
+        base,
+        project,
+        visibility,
+        id,
+        point,
+        dimensions,
+        hostId,
+        settings?.draft.layerId,
+        settings?.draft.insert === undefined ? WINDOW_INSERT_DEFAULTS : settings.draft.insert,
+      );
+    },
+    commit,
+    cancel,
+    {
+      axis: "Fenstermitte ab Wandanfang",
+      mouse: "Fensterposition per Maus wählen.",
+      origin: "@window-placement-origin",
+    },
+    hostId,
+  );
 }

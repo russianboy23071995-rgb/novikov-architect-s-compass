@@ -59,7 +59,7 @@ export function CornerPreviewDialog({
               }}
             >
               <option value="corner">Rechtwinklige Ecke</option>
-              <option value="t">Rechtwinkliger T-Anschluss</option>
+              <option value="t">T-Anschluss</option>
             </select>
           </label>
           <span>
@@ -161,7 +161,6 @@ export function CornerPreviewDialog({
                   grid={false}
                   active
                   onActivate={() => {}}
-                  onFullscreen={() => {}}
                   project={project}
                   viewContext={viewContext}
                   cornerPreview={preview}

@@ -1,10 +1,17 @@
+import type { WallRenovation } from "../../domain/elements/wall/renovation.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import type { ViewIdentity } from "../../domain/views/scale.ts";
 import { previewHatch } from "../hatches/actions.ts";
 import type { Hatch } from "../../domain/elements/hatch/model.ts";
 import { pointsCompatible } from "../../geometry/tolerances/model.ts";
-import { addLine, addWall } from "../../lib/bim/model.ts";
-import type { Point, Project } from "../../lib/bim/model.ts";
+import { addLine } from "../lines/actions.ts";
+import { addWall } from "../walls/actions.ts";
+import { addSlab } from "../slabs/actions.ts";
+import { addRoof } from "../roofs/actions.ts";
+import { addRoom } from "../rooms/actions.ts";
+import type { HeightLine } from "../../domain/elements/room/height-line.ts";
+import type { Roof } from "../../domain/elements/roof/model.ts";
+import type { Point, Project } from "../../domain/project/schema.ts";
 import type { LineAppearance } from "../../lib/bim/lines.ts";
 import { precisionTarget } from "../input/precision.ts";
 export const defaultDrawingWall = { thickness: 0.36, height: 2.8 } as const;
@@ -39,12 +46,25 @@ export type DrawingRequest =
       height: number;
       bodyOffset?: number;
       layerId?: string;
+      renovation?: WallRenovation | undefined;
+      /** Wall build-up (docs/WANDAUFBAU.md); thickness must be its sum. */
+      assemblyId?: string | undefined;
     }
   | {
       kind: "line";
       points: Point[];
       lineKind: "line" | "polyline";
       appearance: LineAppearance;
+      layerId?: string;
+    }
+  | { kind: "slab"; points: Point[]; thickness: number; topOffset: number; layerId?: string }
+  | ({ kind: "roof"; points: Point[]; layerId?: string } & Omit<Roof, "id" | "points" | "layerId">)
+  | {
+      kind: "room";
+      points: Point[];
+      name?: string;
+      floorBuildUp?: number;
+      heightLines?: HeightLine[];
       layerId?: string;
     };
 export function assertDrawingContext(base: Project, current: Project) {
@@ -98,6 +118,32 @@ export function createDrawing(
         ...(request.layerId ? { layerId: request.layerId } : {}),
       },
     });
+  if (request.kind === "slab")
+    return addSlab(current, {
+      id,
+      points: closedDrawingContour(request.points),
+      thickness: request.thickness,
+      topOffset: request.topOffset,
+      ...(request.layerId ? { layerId: request.layerId } : {}),
+    });
+  if (request.kind === "room")
+    return addRoom(current, {
+      id,
+      points: closedDrawingContour(request.points),
+      ...(request.name ? { name: request.name } : {}),
+      ...(request.floorBuildUp !== undefined ? { floorBuildUp: request.floorBuildUp } : {}),
+      ...(request.heightLines ? { heightLines: request.heightLines } : {}),
+      ...(request.layerId ? { layerId: request.layerId } : {}),
+    });
+  if (request.kind === "roof") {
+    const { kind: _kind, points, layerId, ...values } = request;
+    return addRoof(current, {
+      id,
+      points: closedDrawingContour(points),
+      ...values,
+      ...(layerId ? { layerId } : {}),
+    });
+  }
   return request.kind === "wall"
     ? addWall(current, {
         id,
@@ -106,6 +152,8 @@ export function createDrawing(
         thickness: request.thickness,
         bodyOffset: request.bodyOffset ?? request.thickness / 2,
         ...(request.layerId ? { layerId: request.layerId } : {}),
+        ...(request.renovation ? { renovation: request.renovation } : {}),
+        ...(request.assemblyId ? { assemblyId: request.assemblyId } : {}),
         height: request.height,
       })
     : addLine(current, {

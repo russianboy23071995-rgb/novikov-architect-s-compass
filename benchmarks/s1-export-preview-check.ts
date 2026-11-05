@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { readProjectFile } from "../src/lib/bim/history.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import { selectionMoveSurfaces } from "../src/rendering/viewport/selection-move-preview.ts";
 import { prepareSelectionTranslation } from "../src/application/selection/storey-translation.ts";
 import { prepareZTranslation } from "../src/application/selection/z-translation.ts";

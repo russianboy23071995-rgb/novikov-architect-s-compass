@@ -2,14 +2,17 @@ import { storeyOf } from "../src/domain/storeys/access.ts";
 import { largePointFixture } from "./large-point-fixture";
 import { prepareTranslation } from "../src/domain/project/prepared-translation";
 import { tPairFixture } from "./t-pair-fixture";
-import { createProject, validateProject, serializeProject, updateLine } from "../src/lib/bim/model";
+import { serializeProject } from "../src/lib/bim/model";
+import { createProject } from "../src/application/projects/create.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
+import { updateLine } from "../src/application/lines/actions.ts";
 import {
   createHistory,
   commitProject,
   undoProject,
   redoProject,
-  readProjectFile,
-} from "../src/lib/bim/history";
+} from "../src/application/history/project-history";
+import { readProjectFile } from "../src/lib/bim/history";
 import { defaultLineAppearance } from "../src/lib/bim/lines";
 import { importImage } from "../src/interop/images/import";
 import { previewCreateReference } from "../src/application/references/actions";

@@ -2,8 +2,10 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
-import { addLine, serializeProject, updateWall } from "../../lib/bim/model.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { addLine } from "../lines/actions.ts";
+import { updateWall } from "../walls/actions.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { createLayerVisibilityPolicy } from "./visibility.ts";
 

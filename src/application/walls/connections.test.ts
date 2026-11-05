@@ -1,21 +1,22 @@
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  addWall,
-  addWindow,
-  updateWall,
-  updateWindow,
-  createProject,
-  serializeProject,
-  deserializeProject,
-  validateProject,
-} from "../../lib/bim/model.ts";
+import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import { addWindow, updateWindow } from "../windows/actions.ts";
+import { createProject } from "../projects/create.ts";
+import { validateProject } from "../../domain/project/schema.ts";
+import { addWall, updateWall } from "./actions.ts";
 import { moveElement } from "../direct-edit/transforms.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../history/project-history.ts";
 import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
 import { projectSnapPrimitives } from "../snapping/project-references.ts";
@@ -137,7 +138,8 @@ test("near endpoints and T contacts do not silently become end joins; ambiguous/
     () => addWall(a(), { id: "B", start: { x: 3, y: 0 }, end: { x: 6, y: 0 }, ...dimensions }),
     /Gehrung/,
   );
-  assert.throws(() => updateWall(p, "A", { height: 3 }), /gleiche/);
+  // A different height keeps the join as a butt corner (26.10.2026, docs/WALL_JUNCTIONS.md).
+  assert.deepEqual(storeyOf(updateWall(p, "A", { height: 3 })).wallJoins, storeyOf(p).wallJoins);
   assert.equal(serializeProject(p), before);
 });
 
@@ -161,7 +163,7 @@ test("V5 migration does not auto-connect old touching walls; forged/stale/duplic
   const { assets, hatchPatterns, ...legacyRoot } = p;
   const old = { ...legacyRoot, schemaVersion: 5, storey };
   const migrated = loadProjectData(legacyProjectFixture(old));
-  assert.equal(migrated.schemaVersion, 26);
+  assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.deepEqual(storeyOf(migrated).wallJoins, []);
   assert.deepEqual(storeyOf(migrated).walls, storeyOf(p).walls);
   assert.equal(storeyOf(updateWall(migrated, "A", { height: 3 })).wallJoins.length, 0);

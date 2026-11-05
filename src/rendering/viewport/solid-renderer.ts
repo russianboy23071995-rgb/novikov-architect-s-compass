@@ -2,7 +2,7 @@ import { CAD_TURQUOISE_RGB } from "./highlight.ts";
 import { outlineTriangles } from "./selection-outline.ts";
 import type { OutlineEdge } from "./selection-outline.ts";
 import { cameraMatrix } from "../../geometry/projections/camera-matrix.ts";
-import { createSolidBufferCache } from "./solid-buffer.ts";
+import { createSolidBufferCache, SOLID_VERTEX_FLOATS } from "./solid-buffer.ts";
 import type { Vector3 } from "../../geometry/projections/orthographic.ts";
 import type { ProjectionState } from "./projection-state.ts";
 import type { DisplaySurfaces } from "./layer-display.ts";
@@ -27,11 +27,14 @@ export function createMatrixResources(
   };
   const vertex = shader(
     gl.VERTEX_SHADER,
-    "attribute vec3 position; attribute vec3 color; uniform mat4 camera; varying vec3 vColor; void main(){gl_Position=camera*vec4(position,1.0);vColor=color;}",
+    // Higher display priority wins on coincident faces: a depth step far below model
+    // precision (1e-5 of the NDC range, about 0.5 mm at 100 m depth) instead of flicker.
+    "attribute vec3 position; attribute vec3 color; attribute float priority; attribute float opacity; uniform mat4 camera; varying vec3 vColor; varying float vOpacity; void main(){gl_Position=camera*vec4(position,1.0);gl_Position.z-=priority*1e-5*gl_Position.w;vColor=color;vOpacity=opacity;}",
   );
   const fragment = shader(
     gl.FRAGMENT_SHADER,
-    "precision mediump float; varying vec3 vColor; void main(){gl_FragColor=vec4(vColor,1.0);}",
+    // Two passes (G1): opaque faces first with depth writes, then glass blended over them.
+    "precision mediump float; varying vec3 vColor; varying float vOpacity; uniform float glassPass; void main(){if((vOpacity<0.999)!=(glassPass>0.5))discard;gl_FragColor=vec4(vColor,vOpacity);}",
   );
   const program = gl.createProgram()!;
   gl.attachShader(program, vertex);
@@ -46,7 +49,11 @@ export function createMatrixResources(
   const buffer = gl.createBuffer(),
     borderBuffer = gl.createBuffer();
   const position = gl.getAttribLocation(program, "position"),
-    color = gl.getAttribLocation(program, "color");
+    color = gl.getAttribLocation(program, "color"),
+    priority = gl.getAttribLocation(program, "priority"),
+    opacity = gl.getAttribLocation(program, "opacity");
+  const glassPass = gl.getUniformLocation(program, "glassPass");
+  const stride = SOLID_VERTEX_FLOATS * 4;
   const cameraUniform = gl.getUniformLocation(program, "camera");
   const cache = createSolidBufferCache();
   let localOrigin: Vector3 = [...origin],
@@ -87,10 +94,24 @@ export function createMatrixResources(
         cameraMatrix(projection.frame, projection.camera, projection.aspect, localOrigin),
       );
       gl.enableVertexAttribArray(position);
-      gl.vertexAttribPointer(position, 3, gl.FLOAT, false, 24, 0);
+      gl.vertexAttribPointer(position, 3, gl.FLOAT, false, stride, 0);
       gl.enableVertexAttribArray(color);
-      gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 24, 12);
+      gl.vertexAttribPointer(color, 3, gl.FLOAT, false, stride, 12);
+      gl.enableVertexAttribArray(priority);
+      gl.vertexAttribPointer(priority, 1, gl.FLOAT, false, stride, 24);
+      gl.enableVertexAttribArray(opacity);
+      gl.vertexAttribPointer(opacity, 1, gl.FLOAT, false, stride, 28);
+      gl.uniform1f(glassPass, 0);
       gl.drawArrays(gl.TRIANGLES, 0, vertexCount);
+      // Glass over the opaque model: blended, no depth writes, so panes behind panes show too.
+      gl.uniform1f(glassPass, 1);
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      gl.depthMask(false);
+      gl.drawArrays(gl.TRIANGLES, 0, vertexCount);
+      gl.depthMask(true);
+      gl.disable(gl.BLEND);
+      gl.uniform1f(glassPass, 0);
       const border = [
         ...outlineTriangles(outline, projection),
         ...outlineTriangles(windowOutline, projection, 3, [0.72, 0.93, 0.94]),
@@ -99,6 +120,11 @@ export function createMatrixResources(
       if (border.length) {
         gl.bindBuffer(gl.ARRAY_BUFFER, borderBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(border), gl.DYNAMIC_DRAW);
+        // Outline triangles carry no priority: constant 0 instead of the solid buffer.
+        gl.disableVertexAttribArray(priority);
+        gl.vertexAttrib1f(priority, 0);
+        gl.disableVertexAttribArray(opacity);
+        gl.vertexAttrib1f(opacity, 1);
         gl.vertexAttribPointer(position, 3, gl.FLOAT, false, 24, 0);
         gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 24, 12);
         gl.uniformMatrix4fv(

@@ -1,7 +1,7 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { querySnap } from "../../constraints/snapping/engine.ts";
-import type { EditSession } from "../../lib/bim/direct-edit.ts";
-import type { Point, Project } from "../../domain/project/schema.ts";
+import type { EditSession } from "../direct-edit/session.ts";
+import type { Point, Project, Wall } from "../../domain/project/schema.ts";
 import type {
   SnapCandidate,
   SnapContext,
@@ -44,6 +44,13 @@ export function tAxisReference(
   );
 }
 
+/** The new wall (fixed end to foot) is not parallel to the host axis; any other angle is a T. */
+function notParallel(fixed: Point, foot: Point, axis: Point) {
+  const wall = { x: foot.x - fixed.x, y: foot.y - fixed.y };
+  const lengths = Math.hypot(wall.x, wall.y) * Math.hypot(axis.x, axis.y);
+  return lengths > 0 && Math.abs(wall.x * axis.y - wall.y * axis.x) / lengths > 1e-9;
+}
+
 export function findTAxisReference(
   fixed: Point,
   excludedId: string | null,
@@ -73,8 +80,20 @@ export function findTAxisReference(
     )
       continue;
     const { start, end } = source.segment;
-    const point = projectDirection(fixed, start, { x: end.x - start.x, y: end.y - start.y });
-    if (!point || metric.distance(cursor, point) > context.endpointRadiusPx) continue;
+    const axis = { x: end.x - start.x, y: end.y - start.y };
+    // The perpendicular foot of the fixed end wins near the cursor; otherwise the cursor foot on
+    // the axis gives an oblique T at any non-parallel angle (26.10.2026).
+    const square = projectDirection(fixed, start, axis);
+    const foot = projectDirection(cursor, start, axis);
+    const point =
+      square && metric.distance(cursor, square) <= context.endpointRadiusPx
+        ? square
+        : foot &&
+            metric.distance(cursor, foot) <= context.endpointRadiusPx &&
+            notParallel(fixed, foot, axis)
+          ? foot
+          : null;
+    if (!point) continue;
     const t =
       ((point.x - start.x) * (end.x - start.x) + (point.y - start.y) * (end.y - start.y)) /
       ((end.x - start.x) ** 2 + (end.y - start.y) ** 2);
@@ -96,14 +115,86 @@ export function findTAxisReference(
   return targets.size === 1 ? [...targets.values()][0]! : null;
 }
 
-/** Validate the same snapped relation on preview and commit; never discover from coordinates alone. */
+/** The only wall whose axis interior holds `point` exactly (model tolerance), not parallel to the
+ * moved wall. None or several (a crossing) give null. Pure geometry, cheap enough per preview.
+ */
+export function automaticTHost(
+  walls: readonly Wall[],
+  wallId: string,
+  point: Point,
+  far: Point,
+): string | null {
+  let found: string | null = null;
+  for (const wall of walls) {
+    if (wall.id === wallId) continue;
+    const axis = { x: wall.end.x - wall.start.x, y: wall.end.y - wall.start.y };
+    const lengthSquared = axis.x ** 2 + axis.y ** 2;
+    if (!(lengthSquared > 0)) continue;
+    const t =
+      ((point.x - wall.start.x) * axis.x + (point.y - wall.start.y) * axis.y) / lengthSquared;
+    if (!(t > 0 && t < 1)) continue;
+    const foot = { x: wall.start.x + t * axis.x, y: wall.start.y + t * axis.y };
+    if (
+      !pointsCompatible(foot, point) ||
+      pointsCompatible(point, wall.start) ||
+      pointsCompatible(point, wall.end) ||
+      !notParallel(far, point, axis)
+    )
+      continue;
+    if (found) return null;
+    found = wall.id;
+  }
+  return found;
+}
+
+/** Like corners, a wall end that lies exactly on another wall's axis interior becomes a T when it
+ * is drawn or edited there, however the point was found (user decision 26.10.2026,
+ * docs/OBLIQUE_T_JUNCTIONS.md). An end that is already joined, a crossing of two axes or a T the
+ * project rules reject leave the proposal unchanged (no T), as before.
+ */
+export function connectAutomaticT(
+  proposed: Project,
+  wallId: string,
+  endpoint: 0 | 1,
+  point: Point,
+): Project {
+  const s = storeyOf(proposed);
+  const moved = s.walls.find((w) => w.id === wallId);
+  if (!moved || !pointsCompatible(endpoint === 0 ? moved.start : moved.end, point)) return proposed;
+  if (
+    s.wallJoins.some((j) =>
+      [j.first, j.second].some((e) => e.wallId === wallId && e.endpoint === endpoint),
+    ) ||
+    s.wallTJunctions.some((r) => r.incoming.wallId === wallId && r.incoming.endpoint === endpoint)
+  )
+    return proposed;
+  const host = automaticTHost(s.walls, wallId, point, endpoint === 0 ? moved.end : moved.start);
+  if (!host) return proposed;
+  try {
+    return previewTConnection(proposed, proposed, {
+      projectId: proposed.id,
+      kind: "connect",
+      relation: { hostWallId: host, incoming: { wallId, endpoint } },
+    });
+  } catch {
+    return proposed;
+  }
+}
+
+/** Validate the same snapped relation on preview and commit; without a T snap, only an exact
+ * axis contact may connect automatically (connectAutomaticT). */
 export function connectSnappedT(
   session: EditSession,
   proposed: Project,
   point: Point,
   candidate?: SnapCandidate | null,
 ) {
-  if (candidate?.sourceFeature !== "t-axis") return proposed;
+  if (candidate?.sourceFeature !== "t-axis") {
+    const incoming = tAxisEndpoint(session);
+    return incoming
+      ? connectAutomaticT(proposed, incoming.wall.id, incoming.endpoint as 0 | 1, point)
+      : proposed;
+  }
   const incoming = tAxisEndpoint(session);
   if (!incoming || !candidate.sourceEntityId || !pointsCompatible(candidate.worldPoint, point))
     throw new Error("T-Fangziel ist nicht mehr gültig.");
@@ -123,7 +214,8 @@ export function connectWallAtTAxis(
   point: Point,
   candidate?: SnapCandidate | null,
 ) {
-  if (candidate?.sourceFeature !== "t-axis") return proposed;
+  if (candidate?.sourceFeature !== "t-axis")
+    return connectAutomaticT(proposed, wallId, endpoint, point);
   if (!candidate.sourceEntityId || !pointsCompatible(candidate.worldPoint, point))
     throw new Error("T-Fangziel ist nicht mehr g\u00fcltig.");
   const moved = storeyOf(proposed).walls.find((w) => w.id === wallId);

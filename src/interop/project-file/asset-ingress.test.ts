@@ -1,16 +1,13 @@
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON, legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  createProject,
-  addWall,
-  addLine,
-  updateWall,
-  updateLine,
-  serializeProject,
-  validateProject,
-} from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../../application/projects/create.ts";
+import { addLine, updateLine } from "../../application/lines/actions.ts";
+import { validateProject } from "../../domain/project/schema.ts";
+import { addWall, updateWall } from "../../application/walls/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { loadProjectData } from "./load.ts";
 import { createImageAssetHandle } from "../../domain/elements/reference/model.ts";
@@ -20,8 +17,8 @@ import {
   commitProject,
   undoProject,
   redoProject,
-  readProjectFile,
-} from "../../lib/bim/history.ts";
+} from "../../application/history/project-history.ts";
+import { readProjectFile } from "../../lib/bim/history.ts";
 function fixture() {
   const p = addLine(
     addWall(createProject("p", "s"), {
@@ -121,7 +118,7 @@ test("validated assets survive version-9 migration while model relationships rem
   const before = structuredClone(old),
     migrated = loadProjectData(legacyProjectFixture(old));
   assert.deepEqual(old, before);
-  assert.equal(migrated.schemaVersion, 26);
+  assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.deepEqual(migrated.assets, source.assets);
   assert.ok(Object.isFrozen(migrated.assets[0]));
   assert.equal(validateProject(migrated).assets[0], migrated.assets[0]);
@@ -163,7 +160,7 @@ test("file ingress renews handles and shares them through wall/line edits and hi
   assert.deepEqual(reopened, h.present);
   assert.notEqual(reopened.assets[0], asset);
   assert.equal(validateProject(reopened).assets[0], reopened.assets[0]);
-  assert.equal(reopened.schemaVersion, 26);
+  assert.equal(reopened.schemaVersion, PROJECT_SCHEMA_VERSION);
 });
 test("file ingress rejects corrupt storage, references and geometry before returning handles", () => {
   for (const mutate of [

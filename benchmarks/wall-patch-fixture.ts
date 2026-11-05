@@ -1,6 +1,6 @@
 import { buildingViewFixture } from "./building-view-fixture.ts";
 import { tPairFixture } from "./t-pair-fixture.ts";
-import { validateProject } from "../src/lib/bim/model.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
 export function wallPatchFixture(count = 3) {
   const p = buildingViewFixture(count);

@@ -6,11 +6,18 @@ import { beginSelectionMove, previewSelectionMove } from "../selection/move.ts";
 import { selectionIndex } from "../selection/state.ts";
 import { createLayerVisibilityPolicy, ALL_LAYERS_VISIBLE } from "../layers/visibility.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { addWall, serializeProject } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { addWall } from "../walls/actions.ts";
 import { createDrawing, defaultHatchFill } from "../drawing/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
-import { previewCommand } from "../../lib/bim/commands.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
+import { previewOffsetCommand } from "../drawing/offset-command.ts";
+import { previewWallCommand } from "../walls/command.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../history/project-history.ts";
 function fixture() {
   let p = createExampleProject();
   p = addWall(p, {
@@ -133,7 +140,7 @@ test("existing singleton commands retain their original action and require visib
   const text = "Wandlänge auf 6 m";
   assert.deepEqual(
     previewSelectionCommand(p, [target], v, text).result,
-    previewCommand(p, target, text).result,
+    previewWallCommand(p, target, text)!.result,
   );
 });
 test("acceptance has one undo/redo; preview and cancellation require no model history", () => {
@@ -158,7 +165,7 @@ test("integrated offset command preserves selection context and commits one undo
   const preview = previewSelectionCommand(p, targets, visibility, "Offset um 1 cm");
   assert.equal(
     serializeProject(preview.result),
-    serializeProject(previewCommand(p, target, "Offset um 1 cm").result),
+    serializeProject(previewOffsetCommand(p, target, "Offset um 1 cm")!.result),
   );
   const result = applySelectionCommand(p, targets, visibility, preview);
   const history = commitProject(createHistory(p), result);

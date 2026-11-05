@@ -1,3 +1,4 @@
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { createStandardLayers } from "../../domain/layers/model.ts";
 import { querySnap } from "../../constraints/snapping/engine.ts";
@@ -12,7 +13,7 @@ import {
 import { createLocalSnapSources } from "./local-sources.ts";
 import { createToolSourceQuery } from "../tools/snapping.ts";
 import { pickReferenceSegments } from "../../rendering/viewport/reference-picking.ts";
-import { validateProject } from "../../lib/bim/model.ts";
+import { validateProject } from "../../domain/project/schema.ts";
 import { sameHoverSession } from "../../constraints/inference/hover-reference.ts";
 import {
   createAffineScreenMetric,
@@ -83,7 +84,7 @@ test("reference selection draft, cancel, validation and clear never change commi
 });
 function fixture() {
   return validateProject({
-    schemaVersion: 26,
+    schemaVersion: PROJECT_SCHEMA_VERSION,
     groundStoreyId: "s",
     groundDatum: 0,
     hatchPatterns: [],

@@ -1,7 +1,9 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { addWall, addWindow, createProject } from "../../lib/bim/model.ts";
+import { addWindow } from "../../application/windows/actions.ts";
+import { createProject } from "../../application/projects/create.ts";
+import { addWall } from "../../application/walls/actions.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { exportCornerIfc } from "./corner.ts";
 import { writeIfc } from "./writer.ts";
@@ -144,4 +146,35 @@ test("shared writer rejects unknown and invalid profile overrides", async () => 
     writeIfc(fixture(), date, new Map([["A", [ccw[0]!, ccw[2]!, ccw[1]!, ccw[3]!]]])),
     /Invalid IFC wall profile/,
   );
+});
+
+test("the regular export is described as such; only acceptance exports carry the test text", async () => {
+  // File description chosen by the caller (finding 27.10.2026, docs/T_IFC_ACCEPTANCE.md).
+  const header = (step: string) => step.split("\n")[2];
+  const regular = "FILE_DESCRIPTION(('NOVIKOV CAD parametric BIM export'),'2;1');";
+  const acceptance =
+    "FILE_DESCRIPTION(('NOVIKOV CAD corner acceptance test - explicit temporary pair'),'2;1');";
+  // With an automatic corner join (connected walls pass profiles) and without any join.
+  let joined = createProject("j", "s");
+  for (const wall of [
+    { id: "A", start: { x: 0, y: 0 }, end: { x: 3, y: 0 } },
+    { id: "B", start: { x: 3, y: 0 }, end: { x: 3, y: 3 } },
+  ])
+    joined = addWall(joined, { ...wall, thickness: 0.36, height: 2.8 });
+  assert.equal(storeyOf(joined).wallJoins.length, 1);
+  assert.equal(header(await exportIfc(joined, date)), regular);
+  assert.equal(header(await exportIfc(fixture(), date)), regular);
+  assert.equal(header(await exportCornerIfc(fixture(), ...targets, date)), acceptance);
+  let t = createProject("t", "s");
+  for (const wall of [
+    { id: "host", start: { x: 0, y: 0 }, end: { x: 6, y: 0 } },
+    { id: "incoming", start: { x: 3, y: -3 }, end: { x: 3, y: 0 } },
+  ])
+    t = addWall(t, { ...wall, thickness: 0.36, height: 2.8 });
+  assert.equal(
+    header(await exportTJunctionIfc(t, "host", { wallId: "incoming", endpoint: 1 }, date)),
+    acceptance,
+  );
+  // writeIfc without a description stays the regular export, even with profiles.
+  assert.equal(header(await writeIfc(fixture(), date)), regular);
 });

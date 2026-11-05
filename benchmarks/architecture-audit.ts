@@ -1,7 +1,8 @@
 import { storeyOf } from "../src/domain/storeys/access.ts";
 /** Full-snapshot materialization diagnostic; after A-04 this is NOT the pointer path. */
 import assert from "node:assert/strict";
-import { createProject, validateProject } from "../src/lib/bim/model.ts";
+import { createProject } from "../src/application/projects/create.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { beginSelectionMove, previewSelectionMove } from "../src/application/selection/move.ts";
 import { connectedWallContours } from "../src/domain/elements/wall/connections.ts";
 import { wallBody } from "../src/domain/elements/wall/body.ts";

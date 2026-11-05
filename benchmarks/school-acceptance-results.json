@@ -1,0 +1,542 @@
+{
+  "date": "2026-10-25",
+  "base": "main bae380f, branch feat/school-acceptance-run",
+  "build": "production build (vite build --config benchmarks/production-workspace.config.ts), preview http://127.0.0.1:8085/benchmarks/school-acceptance.html?size=<s|l|x>&images=1&run=1",
+  "browser": "Claude desktop built-in browser, Chrome/152.0.7977.167, Windows 10/11 x64",
+  "notes": "One run per size. ms = action until visible state plus two frames. heapMB = performance.memory.usedJSHeapSize (includes uncollected garbage). Snap = pointermove until two frames (frame-bound lower limit ~14–17 ms). session = select + preview + apply of one wall length edit. Size x has no doors (3D door drag skipped).",
+  "runs": {
+    "s": {
+      "model": {
+        "size": "s",
+        "withImages": true,
+        "counts": {
+          "walls": 80,
+          "windows": 120,
+          "doors": 60,
+          "lines": 2640,
+          "hatches": 65,
+          "references": 5,
+          "total": 2970
+        },
+        "imageBytes": 22023239,
+        "fileMB": 28.82
+      },
+      "steps": [
+        {
+          "step": "Modell erzeugen (nicht App)",
+          "ms": 3076,
+          "longTaskMs": 0,
+          "heapMB": 143.7,
+          "ok": true
+        },
+        {
+          "step": "Öffnen – Datei prüfen",
+          "ms": 313,
+          "longTaskMs": 1131,
+          "heapMB": 178.2,
+          "ok": true
+        },
+        {
+          "step": "Öffnen – Projekt laden",
+          "ms": 289,
+          "longTaskMs": 252,
+          "heapMB": 198.4,
+          "ok": true
+        },
+        {
+          "step": "Geschoss 1. Obergeschoss",
+          "ms": 240,
+          "longTaskMs": 184,
+          "heapMB": 220.3,
+          "ok": true
+        },
+        {
+          "step": "Geschoss 2. Obergeschoss",
+          "ms": 257,
+          "longTaskMs": 131,
+          "heapMB": 195.2,
+          "ok": true
+        },
+        {
+          "step": "Geschoss 3. Obergeschoss",
+          "ms": 271,
+          "longTaskMs": 308,
+          "heapMB": 186.4,
+          "ok": true
+        },
+        {
+          "step": "Geschoss 4. Obergeschoss",
+          "ms": 173,
+          "longTaskMs": 125,
+          "heapMB": 196.7,
+          "ok": true
+        },
+        {
+          "step": "Geschoss Erdgeschoss",
+          "ms": 218,
+          "longTaskMs": 133,
+          "heapMB": 211.5,
+          "ok": true
+        },
+        { "step": "Auswahl wall", "ms": 84, "longTaskMs": 56, "heapMB": 222, "ok": true },
+        { "step": "Wandlänge – Vorschau", "ms": 27, "longTaskMs": 0, "heapMB": 222, "ok": true },
+        {
+          "step": "Wandlänge – Übernehmen",
+          "ms": 104,
+          "longTaskMs": 95,
+          "heapMB": 235.7,
+          "ok": true
+        },
+        { "step": "Auswahl window", "ms": 28, "longTaskMs": 0, "heapMB": 235.7, "ok": true },
+        {
+          "step": "Fensterbreite – Vorschau",
+          "ms": 26,
+          "longTaskMs": 0,
+          "heapMB": 222.3,
+          "ok": true
+        },
+        {
+          "step": "Fensterbreite – Übernehmen",
+          "ms": 113,
+          "longTaskMs": 103,
+          "heapMB": 223.8,
+          "ok": true
+        },
+        { "step": "Auswahl door", "ms": 21, "longTaskMs": 0, "heapMB": 223.8, "ok": true },
+        { "step": "Tür DIN – Vorschau", "ms": 20, "longTaskMs": 0, "heapMB": 236.7, "ok": true },
+        { "step": "Tür DIN – Übernehmen", "ms": 94, "longTaskMs": 82, "heapMB": 237.1, "ok": true },
+        { "step": "Tür setzen", "ms": 205, "longTaskMs": 104, "heapMB": 254.8, "ok": true },
+        { "step": "Auswahl door", "ms": 23, "longTaskMs": 0, "heapMB": 233.7, "ok": true },
+        { "step": "Tür entlang Wand", "ms": 250, "longTaskMs": 0, "heapMB": 258.1, "ok": true },
+        { "step": "Auswahl line", "ms": 27, "longTaskMs": 0, "heapMB": 258.1, "ok": true },
+        { "step": "Löschen (Entf)", "ms": 136, "longTaskMs": 122, "heapMB": 246.1, "ok": true },
+        { "step": "Auswahl door", "ms": 22, "longTaskMs": 0, "heapMB": 258.9, "ok": true },
+        { "step": "2D → 3D", "ms": 468, "longTaskMs": 132, "heapMB": 354.8, "ok": true },
+        {
+          "step": "3D: Tür entlang Wand ziehen",
+          "ms": 954,
+          "longTaskMs": 449,
+          "heapMB": 307.6,
+          "ok": true
+        },
+        { "step": "3D → 2D", "ms": 105, "longTaskMs": 0, "heapMB": 342.9, "ok": true },
+        {
+          "step": "Speichern (Datei erzeugen)",
+          "ms": 216,
+          "longTaskMs": 139,
+          "heapMB": 431.6,
+          "ok": true
+        },
+        {
+          "step": "Neu öffnen – Datei prüfen",
+          "ms": 300,
+          "longTaskMs": 326,
+          "heapMB": 455,
+          "ok": true
+        },
+        {
+          "step": "Neu öffnen – Projekt laden",
+          "ms": 237,
+          "longTaskMs": 204,
+          "heapMB": 503.4,
+          "ok": true
+        },
+        { "step": "Autosicherung aktuell", "ms": 6, "longTaskMs": 0, "heapMB": 882.9, "ok": true },
+        {
+          "step": "Neuladen bis Wiederherstellungsangebot",
+          "ms": 146,
+          "longTaskMs": 51,
+          "heapMB": 871.1,
+          "ok": true
+        },
+        {
+          "step": "Wiederherstellung – Stand prüfen",
+          "ms": 421,
+          "longTaskMs": 123,
+          "heapMB": 954.5,
+          "ok": true
+        },
+        {
+          "step": "Wiederherstellung – Projekt laden",
+          "ms": 354,
+          "longTaskMs": 281,
+          "heapMB": 982.5,
+          "ok": true
+        }
+      ],
+      "snap": { "n": 100, "median": 17.9, "p95": 21.1, "max": 22.7 },
+      "undo": { "n": 20, "median": 14.7, "p95": 218.7, "max": 218.7 },
+      "redo": { "n": 20, "median": 98.7, "p95": 192.4, "max": 192.4 },
+      "session": { "n": 50, "median": 304.4, "p95": 413.5, "max": 481.7 },
+      "sessionHeap": [
+        628, 382.2, 449.3, 462.1, 477.2, 514.9, 522.8, 534.3, 564.3, 575.5, 605.7, 618.9, 621.5,
+        659.4, 681.1, 691.5, 719.8, 730.8, 760, 770.4, 799.9, 813.4, 815, 851.3, 857, 894.8, 895.7,
+        905.6, 476.9, 495.8, 504.3, 515.8, 546.3, 558, 598.1, 616.2, 645.5, 656.6, 686.3, 702.1,
+        705.1, 741.5, 747.3, 758.2, 786.7, 796.7, 825.2, 835.6, 864, 874.2
+      ],
+      "heapAfterIdle": 882.9,
+      "errors": [],
+      "loadToRestoredMs": 988,
+      "heapAfterRestoreIdle": 1232.3
+    },
+    "l": {
+      "model": {
+        "size": "l",
+        "withImages": true,
+        "counts": {
+          "walls": 240,
+          "windows": 360,
+          "doors": 180,
+          "lines": 9000,
+          "hatches": 195,
+          "references": 5,
+          "total": 9980
+        },
+        "imageBytes": 22023239,
+        "fileMB": 30.71
+      },
+      "steps": [
+        {
+          "step": "Modell erzeugen (nicht App)",
+          "ms": 4302,
+          "longTaskMs": 0,
+          "heapMB": 402.8,
+          "ok": true
+        },
+        {
+          "step": "Öffnen – Datei prüfen",
+          "ms": 559,
+          "longTaskMs": 1806,
+          "heapMB": 172.6,
+          "ok": true
+        },
+        {
+          "step": "Öffnen – Projekt laden",
+          "ms": 640,
+          "longTaskMs": 604,
+          "heapMB": 220.4,
+          "ok": true
+        },
+        {
+          "step": "Geschoss 1. Obergeschoss",
+          "ms": 460,
+          "longTaskMs": 378,
+          "heapMB": 282.3,
+          "ok": true
+        },
+        {
+          "step": "Geschoss 2. Obergeschoss",
+          "ms": 405,
+          "longTaskMs": 301,
+          "heapMB": 363.4,
+          "ok": true
+        },
+        {
+          "step": "Geschoss 3. Obergeschoss",
+          "ms": 470,
+          "longTaskMs": 396,
+          "heapMB": 287.5,
+          "ok": true
+        },
+        {
+          "step": "Geschoss 4. Obergeschoss",
+          "ms": 398,
+          "longTaskMs": 296,
+          "heapMB": 349.5,
+          "ok": true
+        },
+        {
+          "step": "Geschoss Erdgeschoss",
+          "ms": 443,
+          "longTaskMs": 319,
+          "heapMB": 411.9,
+          "ok": true
+        },
+        { "step": "Auswahl wall", "ms": 223, "longTaskMs": 51, "heapMB": 443.7, "ok": true },
+        { "step": "Wandlänge – Vorschau", "ms": 116, "longTaskMs": 52, "heapMB": 478, "ok": true },
+        {
+          "step": "Wandlänge – Übernehmen",
+          "ms": 389,
+          "longTaskMs": 314,
+          "heapMB": 535,
+          "ok": true
+        },
+        { "step": "Auswahl window", "ms": 71, "longTaskMs": 0, "heapMB": 547.7, "ok": true },
+        {
+          "step": "Fensterbreite – Vorschau",
+          "ms": 47,
+          "longTaskMs": 0,
+          "heapMB": 582.9,
+          "ok": true
+        },
+        {
+          "step": "Fensterbreite – Übernehmen",
+          "ms": 271,
+          "longTaskMs": 259,
+          "heapMB": 582.6,
+          "ok": true
+        },
+        { "step": "Auswahl door", "ms": 35, "longTaskMs": 0, "heapMB": 582.6, "ok": true },
+        { "step": "Tür DIN – Vorschau", "ms": 55, "longTaskMs": 0, "heapMB": 593.1, "ok": true },
+        {
+          "step": "Tür DIN – Übernehmen",
+          "ms": 275,
+          "longTaskMs": 260,
+          "heapMB": 620.7,
+          "ok": true
+        },
+        { "step": "Tür setzen", "ms": 485, "longTaskMs": 412, "heapMB": 633.3, "ok": true },
+        { "step": "Auswahl door", "ms": 43, "longTaskMs": 0, "heapMB": 641.4, "ok": true },
+        { "step": "Tür entlang Wand", "ms": 517, "longTaskMs": 0, "heapMB": 684.2, "ok": true },
+        { "step": "Auswahl line", "ms": 48, "longTaskMs": 0, "heapMB": 672.9, "ok": true },
+        { "step": "Löschen (Entf)", "ms": 515, "longTaskMs": 502, "heapMB": 699.9, "ok": true },
+        { "step": "Auswahl door", "ms": 40, "longTaskMs": 0, "heapMB": 709, "ok": true },
+        { "step": "2D → 3D", "ms": 831, "longTaskMs": 283, "heapMB": 811.5, "ok": true },
+        {
+          "step": "3D: Tür entlang Wand ziehen",
+          "ms": 1598,
+          "longTaskMs": 1180,
+          "heapMB": 611.1,
+          "ok": true
+        },
+        { "step": "3D → 2D", "ms": 164, "longTaskMs": 114, "heapMB": 609.6, "ok": true },
+        {
+          "step": "Speichern (Datei erzeugen)",
+          "ms": 306,
+          "longTaskMs": 243,
+          "heapMB": 683.9,
+          "ok": true
+        },
+        {
+          "step": "Neu öffnen – Datei prüfen",
+          "ms": 427,
+          "longTaskMs": 445,
+          "heapMB": 746.5,
+          "ok": true
+        },
+        {
+          "step": "Neu öffnen – Projekt laden",
+          "ms": 634,
+          "longTaskMs": 567,
+          "heapMB": 784.7,
+          "ok": true
+        },
+        {
+          "step": "Autosicherung aktuell",
+          "ms": 16,
+          "longTaskMs": 0,
+          "heapMB": 1465.4,
+          "ok": true
+        },
+        {
+          "step": "Neuladen bis Wiederherstellungsangebot",
+          "ms": 140,
+          "longTaskMs": 51,
+          "heapMB": 1474.3,
+          "ok": true
+        },
+        {
+          "step": "Wiederherstellung – Stand prüfen",
+          "ms": 674,
+          "longTaskMs": 315,
+          "heapMB": 1603.6,
+          "ok": true
+        },
+        {
+          "step": "Wiederherstellung – Projekt laden",
+          "ms": 916,
+          "longTaskMs": 697,
+          "heapMB": 1661.7,
+          "ok": true
+        }
+      ],
+      "snap": { "n": 100, "median": 14.7, "p95": 22.1, "max": 40.1 },
+      "undo": { "n": 20, "median": 13.9, "p95": 266.4, "max": 266.4 },
+      "redo": { "n": 20, "median": 198.8, "p95": 466, "max": 466 },
+      "session": { "n": 50, "median": 861.6, "p95": 1369.7, "max": 1825.2 },
+      "sessionHeap": [
+        1035.3, 1218.5, 530.7, 589.9, 650.3, 764.7, 816.4, 877.1, 928.9, 1008.8, 1057.9, 1138.9,
+        1188.8, 1239.8, 1314.6, 1366.9, 1442.1, 730.4, 789.6, 845.6, 907.1, 987.7, 1037.3, 1117.2,
+        1166.4, 1221.3, 1297, 1351.4, 1425.1, 1478.5, 1528.7, 1605.3, 1657.8, 1736.5, 1786.2,
+        1865.1, 1913.6, 1967, 2042, 2097.3, 2151.1, 2354.9, 2427.8, 2479.5, 1172.1, 1231.1, 1285.2,
+        1367.3, 1415.5, 1467.9
+      ],
+      "heapAfterIdle": 1465.4,
+      "errors": [],
+      "loadToRestoredMs": 1794,
+      "heapAfterRestoreIdle": 2047.8
+    },
+    "x": {
+      "model": {
+        "size": "x",
+        "withImages": true,
+        "counts": null,
+        "imageBytes": 22023239,
+        "fileMB": 31.06
+      },
+      "steps": [
+        {
+          "step": "Modell erzeugen (nicht App)",
+          "ms": 9744,
+          "longTaskMs": 0,
+          "heapMB": 124.9,
+          "ok": true
+        },
+        {
+          "step": "Öffnen – Datei prüfen",
+          "ms": 1616,
+          "longTaskMs": 4362,
+          "heapMB": 228.7,
+          "ok": true
+        },
+        {
+          "step": "Öffnen – Projekt laden",
+          "ms": 2022,
+          "longTaskMs": 1893,
+          "heapMB": 373.7,
+          "ok": true
+        },
+        {
+          "step": "Geschoss Geschoss 0",
+          "ms": 1157,
+          "longTaskMs": 1072,
+          "heapMB": 169.8,
+          "ok": true
+        },
+        {
+          "step": "Geschoss Geschoss 1",
+          "ms": 698,
+          "longTaskMs": 602,
+          "heapMB": 200.3,
+          "ok": true
+        },
+        {
+          "step": "Geschoss Geschoss 3",
+          "ms": 583,
+          "longTaskMs": 492,
+          "heapMB": 249.7,
+          "ok": true
+        },
+        {
+          "step": "Geschoss Geschoss 4",
+          "ms": 662,
+          "longTaskMs": 584,
+          "heapMB": 276.4,
+          "ok": true
+        },
+        {
+          "step": "Geschoss Geschoss 2",
+          "ms": 583,
+          "longTaskMs": 507,
+          "heapMB": 307.7,
+          "ok": true
+        },
+        { "step": "Auswahl wall", "ms": 70, "longTaskMs": 57, "heapMB": 318.4, "ok": true },
+        {
+          "step": "Wandlänge – Vorschau",
+          "ms": 146,
+          "longTaskMs": 139,
+          "heapMB": 336.5,
+          "ok": true
+        },
+        {
+          "step": "Wandlänge – Übernehmen",
+          "ms": 1013,
+          "longTaskMs": 996,
+          "heapMB": 383.1,
+          "ok": true
+        },
+        { "step": "Auswahl window", "ms": 59, "longTaskMs": 0, "heapMB": 392, "ok": true },
+        {
+          "step": "Fensterbreite – Vorschau",
+          "ms": 128,
+          "longTaskMs": 121,
+          "heapMB": 401.3,
+          "ok": true
+        },
+        {
+          "step": "Fensterbreite – Übernehmen",
+          "ms": 578,
+          "longTaskMs": 573,
+          "heapMB": 433.8,
+          "ok": true
+        },
+        { "step": "Auswahl line", "ms": 63, "longTaskMs": 0, "heapMB": 442.7, "ok": true },
+        { "step": "Löschen (Entf)", "ms": 1349, "longTaskMs": 1298, "heapMB": 542.1, "ok": true },
+        { "step": "2D → 3D", "ms": 1708, "longTaskMs": 1670, "heapMB": 450.2, "ok": true },
+        {
+          "step": "3D: Tür entlang Wand ziehen",
+          "ms": 24,
+          "longTaskMs": 0,
+          "heapMB": 450.2,
+          "ok": true
+        },
+        { "step": "3D → 2D", "ms": 237, "longTaskMs": 222, "heapMB": 446.4, "ok": true },
+        {
+          "step": "Speichern (Datei erzeugen)",
+          "ms": 670,
+          "longTaskMs": 602,
+          "heapMB": 711,
+          "ok": true
+        },
+        {
+          "step": "Neu öffnen – Datei prüfen",
+          "ms": 1125,
+          "longTaskMs": 1152,
+          "heapMB": 840.7,
+          "ok": true
+        },
+        {
+          "step": "Neu öffnen – Projekt laden",
+          "ms": 1793,
+          "longTaskMs": 1717,
+          "heapMB": 984.5,
+          "ok": true
+        },
+        {
+          "step": "Autosicherung aktuell",
+          "ms": 3599,
+          "longTaskMs": 3196,
+          "heapMB": 1579.5,
+          "ok": true
+        },
+        {
+          "step": "Neuladen bis Wiederherstellungsangebot",
+          "ms": 135,
+          "longTaskMs": 52,
+          "heapMB": 1588.8,
+          "ok": true
+        },
+        {
+          "step": "Wiederherstellung – Stand prüfen",
+          "ms": 1527,
+          "longTaskMs": 1193,
+          "heapMB": 1805.2,
+          "ok": true
+        },
+        {
+          "step": "Wiederherstellung – Projekt laden",
+          "ms": 2075,
+          "longTaskMs": 1952,
+          "heapMB": 1950,
+          "ok": true
+        }
+      ],
+      "snap": { "n": 100, "median": 20.4, "p95": 475.3, "max": 1646.8 },
+      "undo": { "n": 20, "median": 14, "p95": 648.6, "max": 648.6 },
+      "redo": { "n": 20, "median": 613.1, "p95": 1511.8, "max": 1511.8 },
+      "session": { "n": 50, "median": 3219, "p95": 4093.2, "max": 4462.6 },
+      "sessionHeap": [
+        529.2, 956.7, 830.3, 1207.6, 1514.4, 1817.7, 808.2, 1235.6, 1464.4, 1710.5, 1939.6, 837.3,
+        1106.2, 1348.4, 1578.7, 1816.3, 868, 1113.5, 1345.5, 1588.1, 1845.4, 2082.7, 2311, 1036.7,
+        1270.3, 1513.6, 1744.9, 1983.9, 2241.3, 2479, 1033.6, 1348.3, 1581.6, 1800.9, 2058.8,
+        2297.5, 2529.8, 1181.1, 1417.5, 1660.8, 1893.6, 2137.8, 2367.5, 2606.2, 1278.7, 1525.6,
+        1764.6, 2006.1, 2239, 2477.4
+      ],
+      "heapAfterIdle": 2866.4,
+      "errors": [],
+      "loadToRestoredMs": 3810,
+      "heapAfterRestoreIdle": 2465.4
+    }
+  }
+}

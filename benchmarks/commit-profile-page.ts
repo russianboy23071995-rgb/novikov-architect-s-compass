@@ -1,15 +1,16 @@
 import { storeyOf } from "../src/domain/storeys/access.ts";
 import { capacityFixture, sourceFile, tick } from "./capacity";
 import { importImage } from "../src/interop/images/import";
-import { validateProject, updateLine } from "../src/lib/bim/model";
+import { validateProject } from "../src/domain/project/schema.ts";
+import { updateLine } from "../src/application/lines/actions.ts";
 import {
   createHistory,
   commitProject,
   HISTORY_LIMIT,
   type ProjectHistory,
-} from "../src/lib/bim/history";
+} from "../src/application/history/project-history";
 import { assertProjectFileSize } from "../src/interop/project-file/size";
-import type { Project } from "../src/lib/bim/model";
+import type { Project } from "../src/domain/project/schema.ts";
 // Retained pre-K05b JSON baseline; checked against the public function on every sample.
 function profile(history: ProjectHistory, project: Project) {
   const phases: Record<string, number> = {};

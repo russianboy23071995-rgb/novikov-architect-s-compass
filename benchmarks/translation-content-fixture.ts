@@ -1,4 +1,5 @@
-import { createProject, validateProject } from "../src/lib/bim/model.ts";
+import { createProject } from "../src/application/projects/create.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { createImageAssetHandle } from "../src/domain/elements/reference/model.ts";
 export function translationFixture(count: number, payloadBytes = 0) {
   const p = createProject("profile", "s0");

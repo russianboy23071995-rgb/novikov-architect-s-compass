@@ -1,0 +1,86 @@
+{
+  "date": "2026-10-25",
+  "base": "feat/history-memory 3662dc7 (Verlauf hält nur Modelldaten, Speicherbudget, Musterabgleich behält eigenen Snapshot)",
+  "build": "production build (vite build --config benchmarks/production-workspace.config.ts), preview http://127.0.0.1:8085/benchmarks/school-acceptance.html?size=<s|l|x>&images=1&run=1",
+  "browser": "Claude desktop built-in browser, Chrome/152.0.7977.167, Windows 11 x64",
+  "notes": "Same page and machine as benchmarks/school-acceptance-results.json (baseline). Summary values per size; sessionHeap = usedJSHeapSize after each of the 50 session edits (includes uncollected garbage). A/B on the same machine the same afternoon: baseline a24e63c session median 288/284 ms (s), step-2-only ca89aab 284 ms (s).",
+  "runs": {
+    "s": {
+      "counts": { "total": 2970 },
+      "fileMB": 28.8,
+      "allStepsOk": true,
+      "errors": 0,
+      "session": { "median": 103.1, "p95": 264.9, "max": 340.7 },
+      "sessionRepeat": { "median": 104.5, "p95": 118.7, "max": 313.2 },
+      "snap": { "median": 13.9, "p95": 14.4, "max": 15.3 },
+      "undo": { "median": 13.9, "p95": 190.1 },
+      "redo": { "median": 102.1, "p95": 346.9 },
+      "releasedPerEdit": 3,
+      "commitWallLength": 156.7,
+      "toggle3D": 132.8,
+      "drag3D": 865.2,
+      "save": 172.9,
+      "autosaveLongTaskMs": 0,
+      "loadToRestoredMs": 938,
+      "heapAfterIdle": 746.2,
+      "heapAfterIdleRepeat": 467.7,
+      "sessionHeap": [
+        764.1, 938.4, 1015.5, 1033.6, 1020.7, 1031.1, 1042.1, 1052.6, 1064.1, 1078.7, 1065.7,
+        1076.1, 1087, 1097.2, 1108.6, 1124.2, 1111, 1121, 1131.7, 1142.4, 1152.4, 1169.5, 1156.4,
+        1166.3, 1176.8, 1187.5, 1197.3, 1214.4, 1225, 1209.2, 1219.2, 1229.8, 1240.4, 1250.3,
+        1267.3, 1283.1, 1263.5, 1273.8, 1284.5, 1294.6, 1305.9, 1320.5, 1307.2, 1317.1, 1327.7,
+        1338.3, 1348.1, 1365.4, 1381.1, 1361.4
+      ]
+    },
+    "l": {
+      "counts": { "total": 9980 },
+      "fileMB": 30.7,
+      "allStepsOk": true,
+      "errors": 0,
+      "session": { "median": 284.3, "p95": 408.3, "max": 509.3 },
+      "sessionRepeat": { "median": 286.8, "p95": 430.8, "max": 528.1 },
+      "snap": { "median": 13.9, "p95": 19.9, "max": 22.4 },
+      "undo": { "median": 13.9, "p95": 512.8 },
+      "redo": { "median": 240.2, "p95": 568.8 },
+      "releasedPerEdit": 3,
+      "commitWallLength": 324,
+      "toggle3D": 277.7,
+      "drag3D": 2058.4,
+      "save": 263.9,
+      "autosaveLongTaskMs": 0,
+      "loadToRestoredMs": 1447,
+      "heapAfterIdle": 1270.9,
+      "heapAfterIdleRepeat": 440.8,
+      "sessionHeap": [
+        847.4, 1006.7, 1078.6, 1114.6, 1121.7, 1157.6, 1164.4, 1200.6, 1208.1, 1244.3, 1250.7, 1287,
+        1293.9, 464.8, 503.6, 514.1, 552, 560.1, 573.3, 608.1, 644.5, 652.2, 688.5, 696, 732.1,
+        739.4, 775.6, 782.9, 819, 826.4, 841.5, 875.1, 911, 918.1, 954.1, 961.3, 997.4, 1004.1,
+        1040.4, 1046.8, 1083.6, 1091.7, 1128.4, 1136.9, 1173.9, 1183.1, 1219.5, 1227, 1263.4, 1270.9
+      ]
+    },
+    "x": {
+      "counts": null,
+      "fileMB": 31.1,
+      "allStepsOk": true,
+      "errors": 0,
+      "session": { "median": 945.8, "p95": 1143.6, "max": 1520.5 },
+      "snap": { "median": 19.5, "p95": 527.3, "max": 1472.5 },
+      "undo": { "median": 13.9, "p95": 793.9 },
+      "redo": { "median": 527.6, "p95": 1514.1 },
+      "releasedPerEdit": 3,
+      "commitWallLength": 936.4,
+      "toggle3D": 1515,
+      "save": 739.7,
+      "autosaveLongTaskMs": 0,
+      "loadToRestoredMs": 3134,
+      "heapAfterIdle": 1048.9,
+      "sessionHeap": [
+        1003.3, 498.8, 721.7, 770.8, 848.3, 925.2, 1003.4, 1049.8, 1125.7, 1202.1, 1279.4, 1328.4,
+        1402.7, 543.4, 603.3, 683.3, 763.9, 812.1, 888.4, 965.2, 1043.6, 1091.6, 1167.1, 1243.2,
+        1319.8, 1369.6, 1443.5, 543.2, 603, 683, 763.7, 811.7, 887.8, 964.7, 1045.5, 1091.9, 1167.5,
+        1244.2, 1321.5, 1370.5, 1444.7, 1520.4, 545.2, 633.1, 714.8, 765.5, 842, 918.9, 997.4,
+        1045.5
+      ]
+    }
+  }
+}

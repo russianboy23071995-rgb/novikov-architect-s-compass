@@ -5,7 +5,7 @@ import {
 } from "../src/rendering/viewport/prepared-model.ts";
 import type { Project, Point } from "../src/domain/project/schema.ts";
 import type { Vector3 } from "../src/geometry/projections/orthographic.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import { selectionEdges } from "../src/rendering/viewport/selection-outline.ts";
 import { classifyAnchorVisibility } from "../src/rendering/viewport/anchor-visibility.ts";
 import type { ProjectionState } from "../src/rendering/viewport/projection-state.ts";

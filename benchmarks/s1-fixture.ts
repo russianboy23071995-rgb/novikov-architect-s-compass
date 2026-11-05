@@ -1,5 +1,5 @@
 import { translationFixture } from "./translation-content-fixture.ts";
-import { validateProject } from "../src/lib/bim/model.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { defaultHatchAppearance } from "../src/domain/elements/hatch/model.ts";
 import { changeDrawingDocument } from "../src/application/views/documents.ts";
 import { createImageAssetHandle, type ImageAsset } from "../src/domain/elements/reference/model.ts";

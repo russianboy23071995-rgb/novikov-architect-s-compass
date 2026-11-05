@@ -2,7 +2,10 @@ import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { serializeProject, createProject, addWall, addWindow } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
+import { addWindow } from "../windows/actions.ts";
+import { addWall } from "../walls/actions.ts";
 import { addStorey, setStoreyHeight } from "../storeys/actions.ts";
 import { selectWorkingStorey } from "../storeys/working-storey.ts";
 import { createEditingState } from "../direct-edit/controller.ts";
@@ -46,7 +49,15 @@ const date = new Date("2026-10-10T12:00:00Z");
 
 test("loaded recovery summary counts all storeys even when the active storey is empty", async () => {
   let project = createProject("multi-floor-recovery", "eg");
-  assert.deepEqual(recoveryContentSummary(project), { storeys: 1, walls: 0, windows: 0 });
+  assert.deepEqual(recoveryContentSummary(project), {
+    storeys: 1,
+    walls: 0,
+    windows: 0,
+    doors: 0,
+    slabs: 0,
+    roofs: 0,
+    rooms: 0,
+  });
   project = setStoreyHeight(project, project, { projectId: project.id, storeyId: "eg", height: 3 });
   project = addStorey(project, project, {
     projectId: project.id,
@@ -87,10 +98,18 @@ test("loaded recovery summary counts all storeys even when the active storey is 
   assert.ok(candidate);
   const before = serializeProject(candidate.project);
   const stored = records.get(project.id);
-  assert.deepEqual(recoveryContentSummary(candidate.project), { storeys: 3, walls: 2, windows: 2 });
+  assert.deepEqual(recoveryContentSummary(candidate.project), {
+    storeys: 3,
+    walls: 2,
+    windows: 2,
+    doors: 0,
+    slabs: 0,
+    roofs: 0,
+    rooms: 0,
+  });
   assert.deepEqual(
     recoveryContentSummary(selectWorkingStorey(candidate.project, candidate.project, "kg")),
-    { storeys: 3, walls: 2, windows: 2 },
+    { storeys: 3, walls: 2, windows: 2, doors: 0, slabs: 0, roofs: 0, rooms: 0 },
   );
   assert.equal(serializeProject(candidate.project), before);
   assert.equal(records.get(project.id), stored);
@@ -209,4 +228,54 @@ test("migration quota failure still permits listing and preparing legacy project
   assert.equal((await readProjectRecovery(catalog, "A"))?.project.id, "A");
   assert.equal((await readProjectRecovery(catalog, "B"))?.project.id, "B");
   assert.equal(records.get("legacy"), original);
+});
+
+test("file and recovery summaries count doors, slabs and roofs of every storey", async () => {
+  const { slabAcceptanceProject } = await import("../../../benchmarks/slab-ifc-acceptance.ts");
+  const { addDoor } = await import("../doors/actions.ts");
+  const { DOOR_DEFAULTS } = await import("../../domain/elements/door/model.ts");
+  const { projectElementCounts } = await import("../storeys/context.ts");
+  let p = slabAcceptanceProject();
+  p = addDoor(p, { id: "og-t1", wallId: "og-w3", position: 0.5, ...DOOR_DEFAULTS });
+  const { roofAcceptanceRoof } = await import("../../../benchmarks/roof-ifc-acceptance.ts");
+  const { addRoof } = await import("../roofs/actions.ts");
+  p = addRoof(p, roofAcceptanceRoof());
+  const { addRoom } = await import("../rooms/actions.ts");
+  p = addRoom(p, {
+    id: "og-r1",
+    points: [
+      { x: 1, y: 1 },
+      { x: 3, y: 1 },
+      { x: 3, y: 3 },
+    ],
+  });
+  p = selectWorkingStorey(p, p, "eg");
+  assert.deepEqual(recoveryContentSummary(p), {
+    storeys: 2,
+    walls: 8,
+    windows: 2,
+    doors: 1,
+    slabs: 2,
+    roofs: 1,
+    rooms: 1,
+  });
+  assert.deepEqual(projectElementCounts(p), {
+    walls: 8,
+    windows: 2,
+    doors: 1,
+    slabs: 2,
+    roofs: 1,
+    rooms: 1,
+    lines: 0,
+    hatches: 0,
+    references: 0,
+  });
+  // Roofs survive the project file and the recovery codec unchanged (docs/ROOF_ELEMENT.md, D5).
+  const { createProjectRecoveryCodec } =
+    await import("../../interop/project-file/recovery-codec.ts");
+  const { serializeProject } = await import("../../lib/bim/model.ts");
+  const { readProjectFile } = await import("../../lib/bim/history.ts");
+  assert.deepEqual(readProjectFile(serializeProject(p)), p);
+  const codec = createProjectRecoveryCodec();
+  assert.deepEqual(await codec.restore(await codec.prepare(p)), p);
 });

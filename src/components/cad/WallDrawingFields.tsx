@@ -27,7 +27,14 @@ export function WallDrawingFields({
             type="number"
             min="0.001"
             step="0.01"
-            className="block h-8 w-24 rounded border bg-background px-2"
+            className="block h-8 w-24 rounded border bg-background px-2 read-only:opacity-60"
+            // With a build-up the thickness is the sum of its layers (docs/WANDAUFBAU.md).
+            readOnly={field === "thickness" && !!value.assemblyId}
+            title={
+              field === "thickness" && value.assemblyId
+                ? "Aus dem Wandaufbau (Reiter Wandaufbau)"
+                : undefined
+            }
             value={Number.isFinite(value[field]) ? value[field] : ""}
             onChange={(e) => {
               const next = e.target.valueAsNumber;

@@ -1,3 +1,4 @@
+import { withoutOpeningMarks } from "../../test/legacy-project-fixture.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
@@ -5,17 +6,14 @@ import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import { previewWallOffset, commitWallOffset } from "./body-offset.ts";
-import {
-  updateWall,
-  windowCentre,
-  serializeProject,
-  deserializeProject,
-  validateProject,
-} from "../../lib/bim/model.ts";
-import { createHistory, undoProject, redoProject } from "../../lib/bim/history.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import { windowCentre } from "../windows/actions.ts";
+import { validateProject } from "../../domain/project/schema.ts";
+import { updateWall } from "./actions.ts";
+import { createHistory, undoProject, redoProject } from "../history/project-history.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import { projectSnapPrimitives } from "../snapping/project-references.ts";
-import { editAtPointer, editAnchor } from "../../lib/bim/direct-edit.ts";
+import { editAtPointer, editAnchor } from "../direct-edit/session.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
@@ -175,7 +173,7 @@ test("strict V4 migration adds zero only at file boundary; V5 requires offset", 
     schemaVersion: 4,
     storey: { ...oldStorey, walls: storeyOf(current).walls.map(({ bodyOffset, ...w }) => w) },
   };
-  assert.deepEqual(loadProjectData(legacyProjectFixture(old)), current);
+  assert.deepEqual(withoutOpeningMarks(loadProjectData(legacyProjectFixture(old))), current);
   assert.throws(() => validateProject(old));
   assert.throws(() => loadProjectData(legacyProjectFixture({ ...old, schemaVersion: 5 })));
   assert.throws(() =>

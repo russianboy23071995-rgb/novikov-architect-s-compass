@@ -9,21 +9,18 @@ import {
   previewEdit,
 } from "../../application/direct-edit/controller.ts";
 import { editSnapReferences, resolveEditSnap } from "../../application/direct-edit/snapping.ts";
-import {
-  addLine,
-  addWall,
-  createProject,
-  serializeProject,
-  updateWall,
-} from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { addLine } from "../../application/lines/actions.ts";
+import { createProject } from "../../application/projects/create.ts";
+import { addWall, updateWall } from "../../application/walls/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import {
   commitProject,
   createHistory,
   undoProject,
   redoProject,
-  readProjectFile,
-} from "../../lib/bim/history.ts";
+} from "../../application/history/project-history.ts";
+import { readProjectFile } from "../../lib/bim/history.ts";
 import { querySnap } from "./engine.ts";
 import type { SnapContext } from "./engine.ts";
 import {

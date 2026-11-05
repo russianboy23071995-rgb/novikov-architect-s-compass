@@ -1,3 +1,4 @@
+import { storeyOpenings } from "./openings.ts";
 import { storeyOf } from "../../storeys/access.ts";
 import { validateProject, type Project } from "../../project/schema.ts";
 import { inspectCornerOpenings, type CornerTarget } from "./corner-openings.ts";
@@ -15,7 +16,7 @@ export function deriveCornerSolids(input: Project, first: CornerTarget, second: 
       );
   const walls = inspection.corner.walls.map((contour) => {
     const wall = storeyOf(project).walls.find((w) => w.id === contour.wallId)!;
-    return wallContourSolid(wall, contour.points, storeyOf(project).windows);
+    return wallContourSolid(wall, contour.points, storeyOpenings(storeyOf(project)));
   });
   const volume = walls.reduce((sum, w) => sum + w.volume, 0);
   if (!Number.isFinite(volume)) throw new Error("Anschlussvolumen nicht darstellbar.");

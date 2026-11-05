@@ -3,7 +3,7 @@ import { prepareWallDrawing } from "./prepared-wall.ts";
 import { prepareChainCorner } from "./prepared-chain-corner.ts";
 import { appendWallChain, type WallChain } from "./wall-chain-actions.ts";
 import { assertDrawingContext } from "./actions.ts";
-import type { Point, Project } from "../../lib/bim/model.ts";
+import type { Point, Project } from "../../domain/project/schema.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 export {
   beginWallChain,

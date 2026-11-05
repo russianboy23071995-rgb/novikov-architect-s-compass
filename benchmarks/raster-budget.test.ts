@@ -1,3 +1,4 @@
+import { PROJECT_SCHEMA_VERSION } from "../src/domain/project/format.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { rasterFixture } from "./raster-budget-fixture.ts";
@@ -10,12 +11,18 @@ import {
   createProjectRecoveryCodec,
   payloadKey,
 } from "../src/interop/project-file/recovery-codec.ts";
-import { serializeProject, createProject } from "../src/lib/bim/model.ts";
+import { serializeProject } from "../src/lib/bim/model.ts";
+import { createProject } from "../src/application/projects/create.ts";
 import {
   prepareProjectOpen,
   requestProjectDownload,
 } from "../src/application/project-files/operations.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../src/application/history/project-history.ts";
 import { createEditingState, editingReducer } from "../src/application/direct-edit/controller.ts";
 import { previewCreateReference } from "../src/application/references/actions.ts";
 import { prepareRecoveryV2Writer } from "../src/application/project-files/recovery-v2-writer.ts";
@@ -123,7 +130,7 @@ test("legacy migration preserves oversized assets; shared references do not cons
     size: Buffer.byteLength(text),
     text: async () => text,
   });
-  assert.equal(opened.project.schemaVersion, 26);
+  assert.equal(opened.project.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.deepEqual(opened.project.assets, nine.assets);
   const shared = {
     ...eight,

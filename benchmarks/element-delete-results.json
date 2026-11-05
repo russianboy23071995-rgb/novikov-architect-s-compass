@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-24",
+  "baseline": "feat/opening-overlap-hint 365e0f2",
+  "runtime": "Windows Node 24.22.1",
+  "method": "element-delete-profile.ts; 500 walls with a window and a door each across five storeys; delete one wall and 50 walls of the working storey; preview alone and preview plus history commit (owned snapshot, storey validation reuse); median of 15; three process runs.",
+  "runs": [
+    {
+      "walls": 500,
+      "windows": 500,
+      "doors": 500,
+      "oneWall": {
+        "previewMs": 11.13839999999999,
+        "previewAndCommitMs": 11.376699999999914
+      },
+      "fiftyWalls": {
+        "previewMs": 10.227800000000002,
+        "previewAndCommitMs": 8.388000000000034
+      }
+    },
+    {
+      "walls": 500,
+      "windows": 500,
+      "doors": 500,
+      "oneWall": {
+        "previewMs": 10.928899999999999,
+        "previewAndCommitMs": 10.050899999999956
+      },
+      "fiftyWalls": {
+        "previewMs": 8.142000000000053,
+        "previewAndCommitMs": 11.912800000000061
+      }
+    },
+    {
+      "walls": 500,
+      "windows": 500,
+      "doors": 500,
+      "oneWall": {
+        "previewMs": 11.763300000000015,
+        "previewAndCommitMs": 10.17820000000006
+      },
+      "fiftyWalls": {
+        "previewMs": 9.081900000000019,
+        "previewAndCommitMs": 8.84839999999997
+      }
+    }
+  ]
+}

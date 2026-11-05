@@ -1,4 +1,7 @@
-import { createProject, addWall, addWindow, validateProject } from "../src/lib/bim/model.ts";
+import { createProject } from "../src/application/projects/create.ts";
+import { addWindow } from "../src/application/windows/actions.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
+import { addWall } from "../src/application/walls/actions.ts";
 import { setStoreyHeight, addStorey } from "../src/application/storeys/actions.ts";
 import { setWallHeightRule } from "../src/application/walls/height-binding.ts";
 import { prepareZTranslation } from "../src/application/selection/z-translation.ts";
@@ -25,7 +28,7 @@ p = setWallHeightRule(p, p, {
   projectId: "p",
   storeyId: "eg",
   wallIds: ["a", "b"],
-  rule: { kind: "slab-underside", storeyId: "og", topOffset: 0 },
+  rule: { kind: "storey", topOffset: 0 - 0.2 },
 });
 const targets = [
   { kind: "wall", id: "a" },

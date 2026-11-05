@@ -3,7 +3,7 @@ import { createPointPreview } from "../tools/point-preview.ts";
 import { previewCreateReference } from "../references/actions.ts";
 import { previewSelectionCommand, applySelectionCommand } from "../commands/selection-command.ts";
 import { imageReferenceCorners } from "../../rendering/viewport/image-reference.ts";
-import { editAtPointer } from "../../lib/bim/direct-edit.ts";
+import { editAtPointer } from "../direct-edit/session.ts";
 import { resolveToolSnap } from "../tools/snapping.ts";
 import { resolveEditSnap, editDirection } from "../direct-edit/snapping.ts";
 import { moveElement } from "../direct-edit/transforms.ts";
@@ -11,23 +11,25 @@ import { previewNumericMove } from "../direct-edit/numeric.ts";
 import { editMovementAxis } from "../tools/adapters.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  createProject,
-  addWall,
-  addWindow,
-  serializeProject,
-  deserializeProject,
-} from "../../lib/bim/model.ts";
+import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
+import { addWindow } from "../windows/actions.ts";
+import { addWall } from "../walls/actions.ts";
 import { createDrawing, defaultHatchFill } from "../drawing/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { beginSelectionMove, previewSelectionMove, selectionMoveInteraction } from "./move.ts";
 import { selectionIndex } from "./state.ts";
 import { previewTConnection } from "../walls/t-connections.ts";
 import { createLayerVisibilityPolicy, ALL_LAYERS_VISIBLE } from "../layers/visibility.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../history/project-history.ts";
 import { confirmInteraction } from "../tools/interaction.ts";
 import { connectedWallContours } from "../../domain/elements/wall/connections.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 const origin = { x: 0, y: 0 },
   target = { x: 2, y: -1 };
@@ -1099,7 +1101,7 @@ test("failed multi-storey preview and cancellation never publish a partial floor
   assert.equal(command.result.storeys.find((s) => s.id === "og")!.walls[0]!.start.x, 2);
 });
 
-import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../../rendering/viewport/building-solid.ts";
 import {
   selectionMoveSurfaces,
   selectionMoveWindows,

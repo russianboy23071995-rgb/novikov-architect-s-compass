@@ -3,7 +3,8 @@ import {
   insertStorey,
   changeStoreyHeight,
 } from "../../domain/storeys/heights.ts";
-import { validateProject, type Project } from "../../domain/project/schema.ts";
+import type { Project } from "../../domain/project/schema.ts";
+import { validateLike } from "../../domain/project/owned-snapshot.ts";
 export type RenameStorey = { projectId: string; storeyId: string; name: string };
 function assertContext(
   base: Project,
@@ -24,7 +25,7 @@ export function renameStorey(base: Project, current: Project, request: RenameSto
     throw new Error("Geschossname: Bitte 1 bis 120 Zeichen eingeben.");
   const target = current.storeys.find((s) => s.id === request.storeyId)!;
   if (target.name === name) return current;
-  return validateProject({
+  return validateLike(current, {
     ...current,
     storeys: current.storeys.map((s) => (s === target ? { ...s, name } : s)),
   });
@@ -43,7 +44,7 @@ export function setStoreyHeight(
     request.height,
   );
   if (storeys === current.storeys) return current;
-  return validateProject({ ...current, storeys });
+  return validateLike(current, { ...current, storeys });
 }
 export type AddStorey = {
   projectId: string;
@@ -82,7 +83,7 @@ export function addStorey(base: Project, current: Project, request: AddStorey): 
     request.side,
     added,
   );
-  return validateProject({ ...current, storeys });
+  return validateLike(current, { ...current, storeys });
 }
 export type SetGroundDatum = { projectId: string; storeyId: string; elevation: number };
 /** Height reference of local EG zero; does not translate local geometry. */
@@ -92,7 +93,7 @@ export function setGroundDatum(base: Project, current: Project, request: SetGrou
     throw new Error("Der EG-Bezug muss am Erdgeschoss gesetzt werden.");
   if (!Number.isFinite(request.elevation)) throw new Error("Endliche EG-Kote erforderlich.");
   if (request.elevation === current.groundDatum) return current;
-  return validateProject({ ...current, groundDatum: request.elevation });
+  return validateLike(current, { ...current, groundDatum: request.elevation });
 }
 
 export type BuildingChange =

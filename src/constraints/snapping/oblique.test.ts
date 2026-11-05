@@ -6,7 +6,9 @@ import type { SnapContext, SnapReference } from "./engine.ts";
 import { cursorGuide, advanceGuideDirections } from "../guides/directions.ts";
 import { acquisitionReference } from "../inference/construction-reference.ts";
 import { advanceHoverReference, emptyHoverReference } from "../inference/hover-reference.ts";
-import { createProject, addLine, serializeProject } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../../application/projects/create.ts";
+import { addLine } from "../../application/lines/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import {
   createEditingState,

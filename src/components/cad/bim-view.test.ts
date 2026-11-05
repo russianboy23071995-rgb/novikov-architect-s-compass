@@ -2,16 +2,21 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import { largePointFixture } from "../../../benchmarks/large-point-fixture.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createExampleProject, drawingPoint, endAtLength, planBounds } from "./bim-view.ts";
 import {
-  addWall,
-  createProject,
-  updateWall,
-  windowCentre,
-  validateProject,
-  serializeProject,
-  deserializeProject,
-} from "../../lib/bim/model.ts";
+  createExampleProject,
+  createStartProject,
+  drawingPoint,
+  endAtLength,
+  planBounds,
+} from "./bim-view.ts";
+import { resolveStoreyLevels } from "../../domain/storeys/heights.ts";
+import { addSlab } from "../../application/slabs/actions.ts";
+import { buildBuildingSolid } from "../../rendering/viewport/building-solid.ts";
+import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../../application/projects/create.ts";
+import { windowCentre } from "../../application/windows/actions.ts";
+import { validateProject } from "../../domain/project/schema.ts";
+import { addWall, updateWall } from "../../application/walls/actions.ts";
 
 test("UI example uses the agreed wall/window dimensions and stable initial IDs", () => {
   const project = createExampleProject();
@@ -134,4 +139,65 @@ test("fit bounds retain mixed walls, lines, hatch and rotated reference extents"
   ];
   const validated = validateProject(project);
   assert.equal(planBounds(validated), "-9.5 -10.5 22 17");
+});
+
+// A plan with only a ceiling slab fits the slab (docs/SLAB_ELEMENT.md).
+import { addSlab as addPlanSlab } from "../../application/slabs/actions.ts";
+import { createProject as emptyPlanProject } from "../../application/projects/create.ts";
+test("plan bounds include ceiling slabs", () => {
+  const p = addPlanSlab(emptyPlanProject("p", "eg"), {
+    id: "s",
+    points: [
+      { x: 0, y: 0 },
+      { x: 10, y: 0 },
+      { x: 10, y: 4 },
+    ],
+    thickness: 0.2,
+    topOffset: 0,
+  });
+  assert.equal(planBounds(p), "-1.5 -5.5 13 7");
+});
+
+test("start project always has Erdgeschoss and 1. Obergeschoss at 3,00 m; slabs show in 3D", () => {
+  const project = createStartProject();
+  assert.deepEqual(
+    project.storeys.map((s) => [s.id, s.name, s.height]),
+    [
+      ["storey-1", "Erdgeschoss", 3],
+      ["storey-2", "1. Obergeschoss", 3],
+    ],
+  );
+  assert.equal(project.groundStoreyId, "storey-1");
+  assert.equal(project.workingStoreyId ?? project.groundStoreyId, "storey-1");
+  assert.deepEqual(
+    resolveStoreyLevels(project.storeys, project.groundStoreyId, project.groundDatum).map((l) => [
+      l.elevation,
+      l.upperElevation,
+    ]),
+    [
+      [0, 3],
+      [3, 6],
+    ],
+  );
+  // Same example wall and window as before, now on the standard structure.
+  assert.deepEqual(storeyOf(project).walls, storeyOf(createExampleProject()).walls);
+  assert.deepEqual(storeyOf(project).windows, storeyOf(createExampleProject()).windows);
+  assert.deepEqual(createStartProject(), project);
+  const withSlab = addSlab(project, {
+    id: "slab-1",
+    points: [
+      { x: 0, y: 0 },
+      { x: 3, y: 0 },
+      { x: 3, y: 2 },
+      { x: 0, y: 2 },
+    ],
+    thickness: 0.2,
+    topOffset: 0,
+  });
+  const solid = buildBuildingSolid(withSlab);
+  const slabFaces = solid.faces.filter((f) => "slab" in f && f.slab);
+  assert.ok(slabFaces.length > 0, "slab is part of the 3D building solid");
+  const z = slabFaces.flatMap((f) => f.vertices.map((v) => v[2]));
+  assert.equal(Math.max(...z), 3);
+  assert.ok(Math.abs(Math.min(...z) - 2.8) < 1e-9);
 });

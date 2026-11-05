@@ -10,6 +10,8 @@ const standards = [
   ["interior-wall", "Innenwand"],
   ["roof", "Dach"],
   ["slab", "Decke"],
+  ["column", "Stütze"],
+  ["stair", "Treppe"],
   ["window", "Fenster"],
   ["door", "Tür"],
   ["furniture", "Möblierung"],
@@ -29,6 +31,38 @@ export function isStandardLayerId(id: string): boolean {
       id === `layer:${key}` ||
       (id.startsWith(`layer:${key}:`) && /^[1-9]\d*$/.test(id.slice(`layer:${key}:`.length))),
   );
+}
+
+/** The reserved standard layer of one key (stable ID namespace, never the editable name). */
+export function standardLayerId(
+  layers: readonly Layer[],
+  key: (typeof standards)[number][0],
+): string | undefined {
+  return layers.find(
+    (l) =>
+      l.id === `layer:${key}` ||
+      (l.id.startsWith(`layer:${key}:`) && /^[1-9]d*$/.test(l.id.slice(`layer:${key}:`.length))),
+  )?.id;
+}
+
+/** A standard layer added to an older project, with a collision suffix like the other
+ * standard layers; unchanged when it exists (Stütze 36 → 37, Treppe 39 → 40). */
+export function withStandardLayer<T extends { layers: Layer[] }>(
+  project: T,
+  key: "column" | "stair",
+): T {
+  if (standardLayerId(project.layers, key)) return project;
+  const occupied = new Set(project.layers.map((l) => l.id));
+  let id = `layer:${key}`,
+    suffix = 1;
+  while (occupied.has(id)) id = `layer:${key}:${suffix++}`;
+  const name = standards.find(([k]) => k === key)![1];
+  return { ...project, layers: [...project.layers, { id, name }] };
+}
+
+/** Schema 36 → 37 (docs/STUETZEN.md). */
+export function withColumnLayer<T extends { layers: Layer[] }>(project: T): T {
+  return withStandardLayer(project, "column");
 }
 
 /** Shared by new projects and migration. Never infer defaults from editable names. */

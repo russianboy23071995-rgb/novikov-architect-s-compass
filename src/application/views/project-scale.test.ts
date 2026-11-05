@@ -1,21 +1,19 @@
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
+import { validateProject } from "../../domain/project/schema.ts";
+import { addWall, updateWall } from "../walls/actions.ts";
 import {
-  createProject,
-  addWall,
-  updateWall,
-  serializeProject,
-  validateProject,
-} from "../../lib/bim/model.ts";
-import {
-  readProjectFile,
   createHistory,
   commitProject,
   undoProject,
   redoProject,
-} from "../../lib/bim/history.ts";
+} from "../history/project-history.ts";
+import { readProjectFile } from "../../lib/bim/history.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
 import { changeProjectScale, projectScaleContext } from "./project-scale.ts";
 
@@ -42,7 +40,7 @@ test("stored scale round-trip preserves geometry and semantic ownership; old fil
   assert.equal(serializeProject(base), before);
   const old = { ...base, schemaVersion: 14 };
   const migrated = readProjectFile(legacyFixtureJSON(old));
-  assert.equal(migrated.schemaVersion, 26);
+  assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.equal(projectScaleContext(migrated).denominator, 100);
   assert.deepEqual(storeyOf(migrated), storeyOf(base));
   assert.throws(() => validateProject(old));

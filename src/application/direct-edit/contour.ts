@@ -2,10 +2,13 @@ import type { Point2 } from "../../geometry/primitives/point.ts";
 import { closedContour } from "./contour-source.ts";
 export { closedContour } from "./contour-source.ts";
 import { boundedOffsetTarget } from "./offset.ts";
-import type { Project } from "../../lib/bim/model.ts";
-import { updateLine } from "../../lib/bim/model.ts";
-import type { EditSession } from "../../lib/bim/direct-edit.ts";
+import type { Project } from "../../domain/project/schema.ts";
+import { updateLine } from "../lines/actions.ts";
+import type { EditSession } from "./session.ts";
 import { previewHatch } from "../hatches/actions.ts";
+import { updateSlab } from "../slabs/actions.ts";
+import { updateRoof } from "../roofs/actions.ts";
+import { updateRoom } from "../rooms/actions.ts";
 import { editContourEdge, prepareContourEdgeEdit } from "../../geometry/polygons/edit-edge.ts";
 export function previewContourEdge(
   session: EditSession,
@@ -28,6 +31,13 @@ export function previewContourEdge(
       id: session.target.id,
       changes: { points },
     });
+  if (session.target.kind === "slab")
+    return updateSlab(session.base, session.target.id, { points });
+  // Roof outlines keep their reference line; the roof schema re-checks the end cuts.
+  if (session.target.kind === "roof")
+    return updateRoof(session.base, session.target.id, { points });
+  if (session.target.kind === "room")
+    return updateRoom(session.base, session.target.id, { points });
   return updateLine(session.base, session.target.id, { points: [...points, { ...points[0]! }] });
 }
 

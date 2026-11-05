@@ -1,26 +1,22 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  addLine,
-  updateLine,
-  createProject,
-  serializeProject,
-  deserializeProject,
-} from "./model.ts";
-import type { DrawingLine } from "./model.ts";
+import { serializeProject, deserializeProject } from "./model.ts";
+import { addLine, updateLine } from "../../application/lines/actions.ts";
+import { createProject } from "../../application/projects/create.ts";
+import type { DrawingLine } from "../../domain/project/schema.ts";
 import { defaultLineAppearance, lineLength, linePath, parsePenWidth } from "./lines.ts";
 import {
   createHistory,
   commitProject,
   undoProject,
   redoProject,
-  readProjectFile,
-} from "./history.ts";
+} from "../../application/history/project-history.ts";
+import { readProjectFile } from "./history.ts";
 import { createExampleProject, planBounds, drawingPoint } from "../../components/cad/bim-view.ts";
-import { buildSolid } from "./geometry.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import { exportIfc } from "./ifc.ts";
-import { previewCommand } from "./commands.ts";
+import { previewWallCommand } from "../../application/walls/command.ts";
 const line: DrawingLine = {
   id: "line-1",
   layerId: "layer:drawing",
@@ -160,7 +156,7 @@ test("2D lines do not become 3D solids or IFC walls and cannot receive wall comm
   const date = new Date("2026-01-01T00:00:00Z");
   assert.equal(await exportIfc(next, date), await exportIfc(p, date));
   assert.throws(
-    () => previewCommand(next, { kind: "line", id: line.id }, "Wandlänge 6 m"),
+    () => previewWallCommand(next, { kind: "line", id: line.id }, "Wandlänge 6 m"),
     /Wand auswählen/,
   );
 });

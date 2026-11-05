@@ -1,7 +1,8 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createProject, serializeProject } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
 import { createDrawing, defaultHatchFill, closedDrawingContour } from "./actions.ts";
 import { drawingInteraction } from "../tools/adapters.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
@@ -12,7 +13,7 @@ import { createLayerVisibilityPolicy } from "../layers/visibility.ts";
 import { selectedLayerElement } from "../layers/selection.ts";
 import { visiblePlanGeometry } from "../../rendering/viewport/layer-display.ts";
 import { planBounds } from "../../components/cad/bim-view.ts";
-import { previewCommand } from "../../lib/bim/commands.ts";
+import { previewOffsetCommand } from "./offset-command.ts";
 const points = [
   { x: 0, y: 0 },
   { x: 3, y: 0 },
@@ -121,11 +122,11 @@ test("hatch selection supports layer assignment and plan extents without becomin
   assert.equal(storeyOf(assigned.history.present).hatches[0]!.layerId, layer);
   assert.equal(assigned.history.past.length, 1);
   assert.equal(planBounds(p), "-1.5 -3.5 6 5");
-  assert.throws(() => previewCommand(p, target, "Wandlänge auf 6 m"));
+  assert.equal(previewOffsetCommand(p, target, "Wandlänge auf 6 m"), null);
 });
 
-import { editAtPointer } from "../../lib/bim/direct-edit.ts";
-import type { EditAction } from "../../lib/bim/direct-edit.ts";
+import { editAtPointer } from "../direct-edit/session.ts";
+import type { EditAction } from "../direct-edit/session.ts";
 import { editInteraction } from "../tools/adapters.ts";
 import { editDirection } from "../direct-edit/snapping.ts";
 
@@ -197,7 +198,16 @@ test("hatch corner rejects crossed or collapsed contours, stale context and inva
     index: 1,
     anchor: points[1]!,
   });
-  for (const point of [{ x: -1, y: 1 }, points[0]!, { x: NaN, y: 0 }]) {
+  // A corner on its neighbour no longer collapses the contour: it deletes the corner
+  // (docs/POLYGON_REGELN.md, Regel 2); a triangle keeps its three corners.
+  assert.deepEqual(
+    storeyOf(editAtPointer(state.session!, state.session!.base, points[0]!)).hatches[0]!.points,
+    [points[0], points[2], points[3]],
+  );
+  for (const point of [
+    { x: -1, y: 1 },
+    { x: NaN, y: 0 },
+  ]) {
     assert.throws(() => editAtPointer(state.session!, state.session!.base, point));
     const rejected = editingReducer(state, {
       type: "confirm",

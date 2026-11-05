@@ -1,7 +1,9 @@
 import { prepareProjectSnapshot } from "../../domain/project/prepared-snapshot.ts";
 import { validateWindowGeometry } from "../../domain/project/geometry-validation.ts";
+import { doorOpening } from "../../domain/elements/door/model.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
-import { validateProject, type Project } from "../../domain/project/schema.ts";
+import type { Project } from "../../domain/project/schema.ts";
+import { validateLike } from "../../domain/project/owned-snapshot.ts";
 import type { GeometryPreview } from "../../domain/project/geometry-scope.ts";
 import {
   wallBase,
@@ -9,7 +11,7 @@ import {
   resolveWallHeightRule,
 } from "../../domain/elements/wall/heights.ts";
 import { resolveStoreyLevels } from "../../domain/storeys/heights.ts";
-import { commitProject, type ProjectHistory } from "../../lib/bim/history.ts";
+import { commitProject, type ProjectHistory } from "../history/project-history.ts";
 import { type SelectionSet } from "./state.ts";
 import { sameTargets, assertMovableSelection } from "./move.ts";
 import type { LayerVisibilityPolicy } from "../layers/visibility.ts";
@@ -24,6 +26,8 @@ function freeze<T>(value: T): T {
 }
 /** One prepared vertical action for UI and future text/voice adapters.
  * Window sill/host and storey membership remain unchanged; only wall bases move.
+ * Doors move with their wall (user decision 24.10.2026): the storey-relative z offset
+ * changes by the wall's base change, so the door keeps its height above the wall foot.
  */
 export function prepareZTranslation(
   source: Project,
@@ -39,12 +43,12 @@ export function prepareZTranslation(
   const moving = new Set(targets.filter((t) => t.kind === "wall").map((t) => t.id));
   if (!moving.size) throw new Error("Mindestens eine Wand auswählen.");
   const levels = new Map(
-    resolveStoreyLevels(base.storeys, base.groundStoreyId).map((s) => [s.storeyId, s.elevation]),
+    resolveStoreyLevels(base.storeys, base.groundStoreyId).map((s) => [s.storeyId, s]),
   );
   const parts = base.storeys
     .filter((s) => s.walls.some((w) => moving.has(w.id)))
     .map((s) => {
-      const elevation = levels.get(s.id);
+      const { elevation, upperElevation } = levels.get(s.id)!;
       if (elevation == null) throw new Error("Geschosshöhe nicht aufgelöst.");
       const neighbours = new Map<string, Set<string>>();
       for (const [a, b] of [
@@ -64,6 +68,7 @@ export function prepareZTranslation(
         for (const neighbour of neighbours.get(id) ?? []) closure.add(neighbour);
       const walls = s.walls.filter((w) => closure.has(w.id));
       const windows = s.windows.filter((w) => closure.has(w.wallId));
+      const doors = (s.doors ?? []).filter((d) => closure.has(d.wallId));
       const joins = s.wallJoins.filter(
         (j) => moving.has(j.first.wallId) === moving.has(j.second.wallId),
       );
@@ -74,11 +79,13 @@ export function prepareZTranslation(
         s,
         closure,
         elevation,
+        upperElevation,
         walls,
         windows,
+        doors,
         joins,
         tees,
-        replacedIds: [...walls, ...windows].map((w) => w.id),
+        replacedIds: [...walls, ...windows, ...doors].map((w) => w.id),
       };
     });
   const assertContext = (current: Project, currentTargets: SelectionSet) => {
@@ -95,6 +102,7 @@ export function prepareZTranslation(
     wall: Project["storeys"][number]["walls"][number],
     delta: number,
     elevation: number,
+    upperElevation: number | null,
   ) => {
     if (!moving.has(wall.id) || delta === 0) return wall;
     // A rigid translation moves both ends, retaining the reference and changing its offset.
@@ -107,12 +115,8 @@ export function prepareZTranslation(
         : {}),
     };
     if (next.topBinding) {
-      const upper = levels.get(next.topBinding.storeyId);
-      if (upper == null) throw new Error("Der Rohdeckenbezug fehlt.");
-      next.height = resolveWallHeightRule(next, elevation, next.topBinding, {
-        topElevation: upper,
-        thickness: next.topBinding.slabThickness,
-      }).height;
+      if (upperElevation == null) throw new Error("Der Geschossbezug fehlt.");
+      next.height = resolveWallHeightRule(next, elevation, next.topBinding, upperElevation).height;
     }
     wallHeights(next, elevation);
     if (wallBase(next) === wallBase(wall))
@@ -126,30 +130,45 @@ export function prepareZTranslation(
   ): GeometryPreview => {
     assertContext(current, currentTargets);
     if (!Number.isFinite(delta)) throw new Error("Endlicher Z-Versatz erforderlich.");
-    const patches = parts.map((p) => ({
-      storeyId: p.s.id,
-      replacedIds: p.replacedIds,
-      geometry: {
-        assets: [],
-        storey: {
-          walls: p.walls.map((w) => shifted(w, delta, p.elevation)),
-          windows: p.windows,
-          wallJoins: (delta === 0 ? p.s.wallJoins : p.joins).filter((j) =>
-            p.closure.has(j.first.wallId),
-          ),
-          wallTJunctions: (delta === 0 ? p.s.wallTJunctions : p.tees).filter((j) =>
-            p.closure.has(j.hostWallId),
-          ),
-          lines: [],
-          hatches: [],
-          references: [],
+    const patches = parts.map((p) => {
+      const walls = p.walls.map((w) => shifted(w, delta, p.elevation, p.upperElevation));
+      const before = new Map(p.walls.map((w) => [w.id, w]));
+      const after = new Map(walls.map((w) => [w.id, w]));
+      const doors = p.doors.map((d) => {
+        const old = before.get(d.wallId)!,
+          next = after.get(d.wallId)!;
+        return next === old ? d : { ...d, zOffset: d.zOffset + wallBase(next) - wallBase(old) };
+      });
+      return {
+        storeyId: p.s.id,
+        replacedIds: p.replacedIds,
+        geometry: {
+          assets: [],
+          storey: {
+            walls,
+            windows: p.windows,
+            ...(p.s.doors ? { doors } : {}),
+            wallJoins: (delta === 0 ? p.s.wallJoins : p.joins).filter((j) =>
+              p.closure.has(j.first.wallId),
+            ),
+            wallTJunctions: (delta === 0 ? p.s.wallTJunctions : p.tees).filter((j) =>
+              p.closure.has(j.hostWallId),
+            ),
+            lines: [],
+            hatches: [],
+            references: [],
+          },
         },
-      },
-    }));
+      };
+    });
     for (const patch of patches) {
       const walls = new Map(patch.geometry.storey.walls.map((w) => [w.id, w]));
       for (const opening of patch.geometry.storey.windows)
         validateWindowGeometry(opening, walls.get(opening.wallId)!);
+      for (const door of patch.geometry.storey.doors ?? []) {
+        const wall = walls.get(door.wallId)!;
+        validateWindowGeometry(doorOpening(door, wall), wall);
+      }
     }
     return freeze({ ...patches[0]!, storeyPatches: patches });
   };
@@ -158,16 +177,18 @@ export function prepareZTranslation(
     snapshot.assertCurrent(current);
     if (delta === 0) return current;
     const patches = new Map(preview.storeyPatches!.map((p) => [p.storeyId, p]));
-    return validateProject({
+    return validateLike(base, {
       ...base,
       storeys: base.storeys.map((s) => {
         const patch = patches.get(s.id),
           part = parts.find((p) => p.s.id === s.id);
         if (!patch || !part) return s;
         const changed = new Map(storeyOf(patch.geometry).walls.map((w) => [w.id, w]));
+        const doors = new Map((storeyOf(patch.geometry).doors ?? []).map((d) => [d.id, d]));
         return {
           ...s,
           walls: s.walls.map((w) => changed.get(w.id) ?? w),
+          ...(s.doors ? { doors: s.doors.map((d) => doors.get(d.id) ?? d) } : {}),
           wallJoins: part.joins,
           wallTJunctions: part.tees,
         };

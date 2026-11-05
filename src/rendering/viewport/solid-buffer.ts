@@ -15,19 +15,47 @@ const sameFaces = (a: Face[], b: Face[]) =>
         face.vertices.every((p, j) => p.every((v, k) => v === other.vertices[j]![k])))
     );
   });
+/** Floats per vertex: XYZ, RGB, the display priority below and the opacity. */
+export const SOLID_VERTEX_FLOATS = 8;
+/** Opacity of window glass (docs/FENSTER_TUEREN.md, G1); everything else is opaque. */
+export const GLASS_OPACITY = 0.35;
+/**
+ * Display priority on coincident faces (docs/SLAB_ELEMENT.md, C3 Variante A): with equal
+ * construction priority a ceiling slab is drawn over a wall face lying in the same plane,
+ * so the shared surfaces never flicker. Later a material priority (0–100) decides cutting.
+ */
+export const SLAB_DISPLAY_PRIORITY = 1;
 export function packSolidFaces(faces: readonly Face[], origin: Vector3, selected: boolean) {
-  // Convex fan: n-2 triangles, three vertices, XYZ + RGB. Round to Float32
+  // Convex fan: n-2 triangles, three vertices, XYZ + RGB + priority + opacity. Round to Float32
   // only at the final write, exactly as the previous array conversion did.
   let length = 0;
-  for (const face of faces) length += Math.max(0, face.vertices.length - 2) * 18;
+  for (const face of faces)
+    length += Math.max(0, face.vertices.length - 2) * 3 * SOLID_VERTEX_FLOATS;
   const data = new Float32Array(length);
   let offset = 0;
   for (const face of faces) {
     const light =
       0.5 + 0.5 * Math.max(0, face.normal[0] * 0.3 - face.normal[1] * 0.4 + face.normal[2] * 0.866);
-    const r = (selected ? 0.38 : 0.72) * light;
-    const g = (selected ? 0.65 : 0.75) * light;
-    const b = (selected ? 0.78 : 0.79) * light;
+    // Ceiling slabs a little lighter than walls (user decision 28.10.2026).
+    // Roofs a warm grey, so they read apart from walls and slabs (docs/ROOF_ELEMENT.md, D2).
+    // Window and door elements (FT2): white frames, a bluish pane, a light wooden door leaf.
+    const [r, g, b] = (
+      selected
+        ? [0.38, 0.65, 0.78]
+        : face.glass
+          ? [0.6, 0.76, 0.88]
+          : face.opening === "window"
+            ? [0.95, 0.95, 0.95]
+            : face.opening === "door"
+              ? [0.88, 0.82, 0.72]
+              : face.slab
+                ? [0.84, 0.85, 0.87]
+                : face.roof
+                  ? [0.8, 0.72, 0.68]
+                  : [0.72, 0.75, 0.79]
+    ).map((c) => c * light) as [number, number, number];
+    const priority = face.slab || face.roof ? SLAB_DISPLAY_PRIORITY : 0;
+    const opacity = face.glass && !selected ? GLASS_OPACITY : 1;
     for (const triangle of faceTriangles(face.vertices.length))
       for (const index of triangle) {
         const point = face.vertices[index]!;
@@ -37,6 +65,8 @@ export function packSolidFaces(faces: readonly Face[], origin: Vector3, selected
         data[offset++] = r;
         data[offset++] = g;
         data[offset++] = b;
+        data[offset++] = priority;
+        data[offset++] = opacity;
       }
   }
   return data;
@@ -139,8 +169,8 @@ export function createSolidBufferCache() {
       origin = [...nextOrigin];
       previous = solid;
       previousSelected = new Set(selected);
-      vertexCount = length / 6;
-      return { full, patches: full ? [] : patches, vertexCount: length / 6 };
+      vertexCount = length / SOLID_VERTEX_FLOATS;
+      return { full, patches: full ? [] : patches, vertexCount };
     },
   };
 }

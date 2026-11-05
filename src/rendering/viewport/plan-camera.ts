@@ -71,3 +71,28 @@ export function capturePlanFraming(camera: PlanCamera, size: ViewSize): Document
     height: size.height / camera.pixelsPerMetre,
   });
 }
+
+export type ScreenInsets = { left: number; top: number; right: number; bottom: number };
+
+/**
+ * Fits the bounds into the free part of the surface between floating palettes
+ * (docs/GLAS_PALETTEN.md): the drawing surface spans the whole stage, the bounds land inside.
+ */
+export function fitPlanInset(bounds: string, size: ViewSize, insets: ScreenInsets): PlanCamera {
+  const free = {
+    width: Math.max(1, size.width - insets.left - insets.right),
+    height: Math.max(1, size.height - insets.top - insets.bottom),
+  };
+  const fitted = fitPlan(bounds, free);
+  const offset = {
+    x: insets.left + free.width / 2 - size.width / 2,
+    y: insets.top + free.height / 2 - size.height / 2,
+  };
+  return {
+    pixelsPerMetre: fitted.pixelsPerMetre,
+    center: {
+      x: fitted.center.x - offset.x / fitted.pixelsPerMetre,
+      y: fitted.center.y + offset.y / fitted.pixelsPerMetre,
+    },
+  };
+}

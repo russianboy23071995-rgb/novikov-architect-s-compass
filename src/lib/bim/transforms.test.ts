@@ -2,10 +2,17 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { addLine, addWall, serializeProject, deserializeProject, updateWall } from "./model.ts";
+import { serializeProject, deserializeProject } from "./model.ts";
+import { addLine } from "../../application/lines/actions.ts";
+import { addWall, updateWall } from "../../application/walls/actions.ts";
 import { defaultLineAppearance } from "./lines.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "./history.ts";
-import { buildSolid } from "./geometry.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../../application/history/project-history.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import {
   editablePoints,
   moveElement,
@@ -13,7 +20,7 @@ import {
   stretchEndpoint,
   moveWindowAlongWall,
   parseMetres,
-} from "./transforms.ts";
+} from "../../application/direct-edit/transforms.ts";
 const target = { kind: "wall" as const, id: "wall-1" };
 const lineTarget = { kind: "line" as const, id: "poly-1" };
 const poly = () =>
@@ -119,7 +126,11 @@ test("polyline stretch changes only terminal segment, preserving intermediate ve
 test("degenerate geometry and too-short host walls are rejected atomically", () => {
   const p = poly(),
     before = serializeProject(p);
-  assert.throws(() => moveElementPoint(p, lineTarget, 1, { x: 0, y: 0 }));
+  // A polyline point placed on its neighbour is deleted (docs/POLYGON_REGELN.md, Regel 2).
+  assert.deepEqual(storeyOf(moveElementPoint(p, lineTarget, 1, { x: 0, y: 0 })).lines![0]!.points, [
+    { x: 0, y: 0 },
+    { x: 6, y: 4 },
+  ]);
   assert.throws(() => moveElementPoint(p, target, 1, { x: 0, y: 0 }));
   assert.throws(() => stretchEndpoint(p, target, "end", 1));
   for (const value of [0, -1, NaN, Infinity])
@@ -168,7 +179,10 @@ test("metre input accepts signed decimal comma/point and rejects incomplete inpu
 });
 
 test("window cap remains valid at both joined ends and preserves the base", async () => {
-  const { addWall, addWindow, createProject, validateProject } = await import("./model.ts");
+  const { addWindow } = await import("../../application/windows/actions.ts");
+  const { createProject } = await import("../../application/projects/create.ts");
+  const { validateProject } = await import("../../domain/project/schema.ts");
+  const { addWall } = await import("../../application/walls/actions.ts");
   let p = createProject("caps", "level");
   for (const wall of [
     { id: "host", start: { x: 0, y: 0 }, end: { x: 6, y: 0 } },

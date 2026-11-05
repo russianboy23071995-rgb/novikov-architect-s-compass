@@ -1,0 +1,122 @@
+{
+  "date": "2026-10-24",
+  "baseline": "feat/door-part-b3 5baa305; full action + buildBuildingSolid",
+  "runtime": "Windows Node 24.22.1",
+  "method": "door-scopes-profile.ts, 500 walls and windows across five storeys, without and with 500 doors; wall endpoint, XY move and Z move of one wall; seven targets, first separate, warm median of six; three process runs. Excludes React/UI/frame/GC.",
+  "runs": [
+    {
+      "walls": 500,
+      "windows": 500,
+      "withoutDoors": {
+        "endpoint": {
+          "firstMs": [65.62560000000002, 4.5493999999999915],
+          "warmFullMs": 47.2654,
+          "warmPreparedMs": 0.7069000000000187
+        },
+        "xy": {
+          "firstMs": [71.99900000000002, 0.9316000000000031],
+          "warmFullMs": 51.30010000000016,
+          "warmPreparedMs": 0.3392000000000053
+        },
+        "z": {
+          "firstMs": [90.79629999999997, 0.5778999999999996],
+          "warmFullMs": 49.42450000000008,
+          "warmPreparedMs": 0.316899999999805
+        }
+      },
+      "withDoors": {
+        "endpoint": {
+          "firstMs": [74.17110000000002, 4.665700000000015],
+          "warmFullMs": 64.30180000000018,
+          "warmPreparedMs": 0.5192000000001826
+        },
+        "xy": {
+          "firstMs": [70.68579999999997, 0.40660000000002583],
+          "warmFullMs": 64.2527,
+          "warmPreparedMs": 0.2664999999997235
+        },
+        "z": {
+          "firstMs": [70.64779999999996, 0.6743000000001302],
+          "warmFullMs": 64.12300000000005,
+          "warmPreparedMs": 0.31419999999980064
+        }
+      }
+    },
+    {
+      "walls": 500,
+      "windows": 500,
+      "withoutDoors": {
+        "endpoint": {
+          "firstMs": [66.8757, 3.6123000000000047],
+          "warmFullMs": 54.68319999999994,
+          "warmPreparedMs": 0.5434000000000196
+        },
+        "xy": {
+          "firstMs": [75.99750000000006, 1.02150000000006],
+          "warmFullMs": 62.00310000000002,
+          "warmPreparedMs": 0.358600000000024
+        },
+        "z": {
+          "firstMs": [74.62649999999996, 0.8410000000000082],
+          "warmFullMs": 58.660600000000045,
+          "warmPreparedMs": 0.2817999999999756
+        }
+      },
+      "withDoors": {
+        "endpoint": {
+          "firstMs": [61.30859999999984, 4.454899999999952],
+          "warmFullMs": 83.32529999999997,
+          "warmPreparedMs": 0.5628999999998996
+        },
+        "xy": {
+          "firstMs": [73.66380000000004, 0.4034999999998945],
+          "warmFullMs": 94.67509999999993,
+          "warmPreparedMs": 0.3787000000002081
+        },
+        "z": {
+          "firstMs": [52.93589999999995, 0.34149999999999636],
+          "warmFullMs": 94.49489999999969,
+          "warmPreparedMs": 0.3057999999996355
+        }
+      }
+    },
+    {
+      "walls": 500,
+      "windows": 500,
+      "withoutDoors": {
+        "endpoint": {
+          "firstMs": [66.08519999999999, 4.0482000000000085],
+          "warmFullMs": 50.36279999999999,
+          "warmPreparedMs": 0.6131000000000313
+        },
+        "xy": {
+          "firstMs": [90.17929999999996, 1.4206000000000358],
+          "warmFullMs": 56.40859999999998,
+          "warmPreparedMs": 0.35029999999994743
+        },
+        "z": {
+          "firstMs": [73.10119999999995, 0.66599999999994],
+          "warmFullMs": 54.47320000000002,
+          "warmPreparedMs": 0.3342999999999847
+        }
+      },
+      "withDoors": {
+        "endpoint": {
+          "firstMs": [70.09500000000003, 3.9153000000001157],
+          "warmFullMs": 74.16470000000004,
+          "warmPreparedMs": 0.5666999999998552
+        },
+        "xy": {
+          "firstMs": [80.61509999999998, 0.3713999999999942],
+          "warmFullMs": 73.13530000000014,
+          "warmPreparedMs": 0.4250999999999294
+        },
+        "z": {
+          "firstMs": [67.35130000000004, 0.4954000000000178],
+          "warmFullMs": 116.40080000000034,
+          "warmPreparedMs": 0.34009999999989304
+        }
+      }
+    }
+  ]
+}
