@@ -31,6 +31,8 @@ export type SnapCandidate = {
     | "intersection"
     | "axis-intersection";
   sourceReferences?: readonly SnapReference[];
+  /** Directions of the edges meeting at a corner: what a Shift press there runs parallel to. */
+  sourceDirections?: readonly Point2[];
   secondaryGuideOrigin?: Point2;
   guideOrigin?: Point2;
   angleDegrees?: number;

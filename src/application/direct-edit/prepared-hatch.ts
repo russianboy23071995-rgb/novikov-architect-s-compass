@@ -161,6 +161,7 @@ export function prepareHatchContourPreview(session: EditSession): PreparedDirect
                   ...level,
                   walls: [],
                   windows: [],
+                  doors: [],
                   lines: [],
                   wallJoins: [],
                   wallTJunctions: [],
