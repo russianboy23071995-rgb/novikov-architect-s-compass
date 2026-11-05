@@ -1177,7 +1177,7 @@ test("polar input rejects missing direction or length and nonfinite parameters",
   }
 });
 
-test("Shift accepts only exact on-axis points and preserves continuous fallback without grid jumps", () => {
+test("Shift keeps exact on-axis points, projects near corners, no grid jumps", () => {
   const origin = { x: 0, y: 0 },
     cursor = { x: 2.023, y: 0.041 };
   const ref = (x: number, y: number) => ({ entityId: "target", feature: "point", point: { x, y } });
@@ -1193,7 +1193,11 @@ test("Shift accepts only exact on-axis points and preserves continuous fallback 
   const exact = querySnap(cursor, { ...c, references: [ref(2, 0)] });
   assert.deepEqual(exact.point, { x: 2, y: 0 });
   assert.equal(exact.candidate?.kind, "endpoint");
-  for (const references of [[], [ref(2, 0.02)], [ref(2.2, 0)]]) {
+  // A corner beside the axis ends it level with that corner (docs/ANPASSUNGSLISTE.md, 3a).
+  const beside = querySnap(cursor, { ...c, references: [ref(2, 0.02)] });
+  assert.deepEqual(beside.point, { x: 2, y: 0 });
+  assert.equal(beside.candidate?.kind, "axis-intersection");
+  for (const references of [[], [ref(2.2, 0)]]) {
     const free = querySnap(cursor, { ...c, references });
     assert.deepEqual(free.point, { x: cursor.x, y: 0 });
     assert.equal(free.candidate?.sourceFeature, "shift-45");
@@ -1212,4 +1216,41 @@ test("unconstrained polar input keeps exact mouse coordinates but rejects distan
   const aim = { x: 22.8, y: -15.3 };
   assert.deepEqual(resolvePolarInput({ x: 10.2, y: 1.7 }, aim, null, null).point, aim);
   assert.throws(() => resolvePolarInput({ x: 1e308, y: 0 }, { x: -1e308, y: 0 }, null, null));
+});
+
+test("Shift: a corner near the cursor ends the held axis level with it (ANPASSUNGSLISTE 3a)", () => {
+  const corner = { entityId: "wand1", feature: "end", point: { x: 5, y: 1 } };
+  const base = {
+    references: [corner],
+    pixelsPerMetre: 100,
+    enabled: true,
+    endpointRadiusPx: 12,
+    gridSpacing: null,
+    orthoOrigin: null,
+    angleOrigin: { x: 0, y: 0 },
+    angleDirection: { x: 1, y: 0 },
+  };
+  // The cursor is at the corner of the wall above; the point stays on the axis, below it.
+  const held = querySnap({ x: 5.05, y: 0.97 }, base);
+  assert.deepEqual(held.point, { x: 5, y: 0 });
+  assert.equal(held.candidate?.kind, "axis-intersection");
+  assert.deepEqual(held.candidate?.guideOrigin, corner.point);
+  // Away from the corner the axis alone decides.
+  assert.deepEqual(querySnap({ x: 3, y: 0.7 }, base).point, { x: 3, y: 0 });
+  // An oblique axis takes the perpendicular foot.
+  const oblique = querySnap(corner.point, { ...base, angleDirection: { x: 1, y: 1 } });
+  assert.ok(Math.hypot(oblique.point.x - 3, oblique.point.y - 3) < 1e-9);
+  // Without Shift the corner itself wins; an editing axis does not project at all.
+  const free = { ...base, angleOrigin: null, angleDirection: null };
+  assert.deepEqual(querySnap(corner.point, free).point, corner.point);
+  assert.deepEqual(
+    querySnap(
+      { x: 5, y: 1 },
+      {
+        ...free,
+        fixedAxis: { origin: { x: 0, y: 0 }, direction: { x: 1, y: 0 } },
+      },
+    ).candidate?.kind ?? null,
+    null,
+  );
 });

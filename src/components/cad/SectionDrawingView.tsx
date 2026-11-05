@@ -48,6 +48,7 @@ export function SectionDrawingView({
   document,
   onSaveDocument,
   selectedIds,
+  snap = true,
 }: {
   /** The drawing document shown, with its drawing name and scale (docs/ABBILDER.md, AB2). */
   document?: { name: string; scale: string } | null | undefined;
@@ -67,6 +68,8 @@ export function SectionDrawingView({
   onRemoveHeightMarks?: ((id: string) => void) | undefined;
   /** Selected elements, drawn in the selection colour (docs/FILTER.md, L45). */
   selectedIds?: ReadonlySet<string> | undefined;
+  /** The Rasterengine switch of the status bar. */
+  snap?: boolean | undefined;
 }) {
   const drawing = useMemo(() => cachedSectionDrawing(project, section), [project, section]);
   const extent = useMemo(() => sectionGraphicExtent(drawing, denominator), [drawing, denominator]);
@@ -112,11 +115,17 @@ export function SectionDrawingView({
   const marks = section.heightMarks ?? [];
   const selectedMarks = marks.find((m) => m.id === selected) ?? null;
   /** Drawing point (z up) of the pointer, snapped within 10 screen pixels. */
-  const snapAt = (clientX: number, clientY: number): SectionSnap | null => {
+  const snapAt = (clientX: number, clientY: number, shift: boolean): SectionSnap | null => {
     const p = toModel(clientX, clientY);
     const m = svg.current?.getScreenCTM();
     if (!p || !m) return null;
-    return snapSectionPoint(corners, levels, { x: p.x, y: -p.y }, 10 / m.a);
+    // Shift holds the direction from the last mark, or from the column of the first.
+    const from =
+      draft?.points.at(-1) ?? (draft && draft.x !== null ? { x: draft.x, y: -p.y } : null);
+    return snapSectionPoint(corners, levels, { x: p.x, y: -p.y }, 10 / m.a, {
+      enabled: snap,
+      shiftFrom: shift ? from : null,
+    });
   };
   const finish = (doubleClick: boolean) => {
     if (!draft || draft.x === null || !heightTool) return;
@@ -268,7 +277,7 @@ export function SectionDrawingView({
               if (!drawingMarks) return;
               // The second click of a double click adds nothing; the double click finishes.
               if (event.detail > 1) return;
-              const at = snapAt(event.clientX, event.clientY);
+              const at = snapAt(event.clientX, event.clientY, event.shiftKey);
               if (!at) return;
               setDraft((now) =>
                 !now || now.x === null
@@ -294,7 +303,7 @@ export function SectionDrawingView({
               const start = drag.current;
               const m = svg.current?.getScreenCTM();
               if (!start || !m) {
-                if (drawingMarks) setHover(snapAt(event.clientX, event.clientY));
+                if (drawingMarks) setHover(snapAt(event.clientX, event.clientY, event.shiftKey));
                 return;
               }
               setBox({
