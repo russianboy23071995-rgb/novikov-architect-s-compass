@@ -4,8 +4,13 @@ import assert from "node:assert/strict";
 import { prepareWallDrawing } from "./prepared-wall-drawing.ts";
 import { tPairFixture } from "./t-pair-fixture.ts";
 import { beginWallChain, appendWallChain } from "../src/application/drawing/wall-chain.ts";
-import { validateProject } from "../src/lib/bim/model.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../src/application/history/project-history.ts";
 test("free first segment equals full path and preserves neighbours/windows/history", () => {
   const p = tPairFixture(),
     origin = { x: -20, y: -20 },
@@ -17,7 +22,8 @@ test("free first segment equals full path and preserves neighbours/windows/histo
   ]) {
     const full = appendWallChain(beginWallChain(p, origin), p, "new", point).preview;
     const r = pilot.evaluate(point);
-    assert.equal(r.path, "local");
+    // An end exactly on the host axis becomes an automatic T and takes the full path (26.10.2026).
+    assert.equal(r.path, point.y === 0 ? "full" : "local");
     assert.deepEqual(r.project, full);
     assert.deepEqual(validateProject(r.project), full);
     const h = commitProject(createHistory(p), pilot.confirm(point));

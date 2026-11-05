@@ -1,5 +1,6 @@
 import { translationFixture } from "./translation-content-fixture.ts";
 import { validateProject } from "../src/domain/project/schema.ts";
+import { DOOR_DEFAULTS } from "../src/domain/elements/door/model.ts";
 export function buildingViewFixture(walls = 30) {
   const p = translationFixture(5);
   p.storeys = p.storeys.map((s) => ({
@@ -17,4 +18,22 @@ export function buildingViewFixture(walls = 30) {
     })),
   }));
   return validateProject(p);
+}
+
+/** Same building with one door per wall left of its centred window. */
+export function buildingDoorFixture(walls = 30) {
+  const p = buildingViewFixture(walls);
+  return validateProject({
+    ...p,
+    storeys: p.storeys.map((s) => ({
+      ...s,
+      doors: s.walls.map((w, i) => ({
+        id: `${s.id}-door${i}`,
+        wallId: w.id,
+        position: 0.2,
+        ...DOOR_DEFAULTS,
+        layerId: s.windows[0]!.layerId,
+      })),
+    })),
+  });
 }

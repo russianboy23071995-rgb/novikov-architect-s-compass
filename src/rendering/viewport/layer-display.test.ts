@@ -2,9 +2,11 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { addWall, addLine, updateWall, serializeProject } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { addLine } from "../../application/lines/actions.ts";
+import { addWall, updateWall } from "../../application/walls/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "./storey-solid.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { createLayerVisibilityPolicy } from "../../application/layers/visibility.ts";
 import { createLayerDisplay } from "./layer-display.ts";
@@ -121,8 +123,16 @@ test("hidden host removes plan symbols and solid surfaces but independent drawin
     references: [],
     windows: [],
     lines: [],
+    slabs: [],
+    roofs: [],
+    rooms: [],
+    columns: [],
+    stairs: [],
+    dimensions: [],
+    texts: [],
     hatches: [],
     openings: [],
+    doors: [],
   });
   assert.equal(hidden.surfaces.faces.length, 0);
   assert.ok(hidden.surfaces.min.every(Number.isFinite));

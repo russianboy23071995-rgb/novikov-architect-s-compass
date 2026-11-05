@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import { CadWorkspace } from "../src/components/cad/CadWorkspace";
-import type { Project } from "../src/lib/bim/model";
+import type { Project } from "../src/domain/project/schema.ts";
 import { runCapacity, tick, heap } from "./capacity";
 import "../src/styles.css";
 if (!import.meta.env.DEV) throw new Error("Development diagnostics only");

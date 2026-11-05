@@ -1,6 +1,39 @@
 import { PROJECT_SCHEMA_VERSION } from "./format.ts";
-import { wallHeights } from "../elements/wall/heights.ts";
-import { wallTopBindingSchema, resolveBoundWallHeights } from "../elements/wall/height-binding.ts";
+import { wallBase, wallHeights } from "../elements/wall/heights.ts";
+import {
+  doorSchema,
+  doorV27Schema,
+  insertedDoorSchema,
+  openingMarkSchema,
+} from "../elements/door/model.ts";
+import {
+  doorInsertProblem,
+  windowInsertProblem,
+  windowInsertSchema,
+} from "../elements/window/insert.ts";
+import { slabSchema } from "../elements/slab/model.ts";
+import { roofSchema } from "../elements/roof/model.ts";
+import { columnLevels, columnSchema } from "../elements/column/model.ts";
+import { dimensionSchema } from "../elements/dimension/model.ts";
+import { textSchema } from "../elements/text/model.ts";
+import { stairGeometry, stairSchema } from "../elements/stair/model.ts";
+import { sectionSchema } from "../views/sections.ts";
+import { roomNumberKey, roomSchema, roomV32Schema, roomV33Schema } from "../elements/room/model.ts";
+import {
+  legacyWallTopBindingSchema,
+  resolveBoundWallHeights,
+  wallTopBindingSchema,
+} from "../elements/wall/height-binding.ts";
+import { resolveRoofTrims } from "../elements/wall/roof-trim.ts";
+import { WALL_RENOVATIONS } from "../elements/wall/renovation.ts";
+import {
+  assemblyLibraryProblem,
+  assemblyThickness,
+  materialsSchema,
+  projectMaterials,
+  projectWallAssemblies,
+  wallAssembliesSchema,
+} from "../elements/wall/assembly.ts";
 import { resolveStoreyLevels } from "../storeys/heights.ts";
 import {
   modelViewSchema,
@@ -88,6 +121,9 @@ const legacyProjectSchema = z
 
 const currentWallSchema = wallSchema.extend({ layerId: id });
 const currentWindowSchema = windowSchema.extend({ layerId: id });
+const markedWindowSchema = currentWindowSchema.extend({ mark: openingMarkSchema.optional() });
+/** Schema 42: optionally a window element in the opening (docs/FENSTER_TUEREN.md, FT1). */
+const insertedWindowSchema = markedWindowSchema.extend({ insert: windowInsertSchema.optional() });
 const legacyCurrentLineSchema = lineSchema.extend({ layerId: id });
 const currentLineSchema = legacyCurrentLineSchema.extend({
   style: z.enum(["solid", "dashed", "break", "custom"]),
@@ -260,17 +296,314 @@ export const projectV25Schema = projectV24Schema.extend({
     .array(projectV22Schema.shape.storey.extend({ walls: z.array(raisedWallSchema) }))
     .min(1),
 });
-const boundWallSchema = raisedWallSchema
-  .extend({
-    height: positive.optional(),
-    topBinding: wallTopBindingSchema.optional(),
-  })
-  .refine((w) => w.topBinding !== undefined || w.height !== undefined, "Feste Wandhöhe fehlt.")
-  .transform(({ height, ...w }) => ({ ...w, height: height ?? 0 }));
-const projectSchema = projectV25Schema.extend({
-  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+const boundWall = <B extends z.ZodTypeAny, E extends z.ZodRawShape = Record<never, never>>(
+  binding: B,
+  extra?: E,
+) =>
+  raisedWallSchema
+    .extend({ height: positive.optional(), topBinding: binding.optional(), ...(extra as E) })
+    .refine((w) => w.topBinding !== undefined || w.height !== undefined, "Feste Wandhöhe fehlt.")
+    .transform(({ height, ...w }) => ({ ...w, height: height ?? 0 }));
+/** Schema 26–29: walls bound to the underside of an assumed raw slab. */
+const legacyBoundWallSchema = boundWall(legacyWallTopBindingSchema);
+/** Schema 30: walls bound to their own storey height plus extra height (29.10.2026). */
+const boundWallSchema = boundWall(wallTopBindingSchema);
+const finite = z.number().finite();
+/** Schema 35: optional trim reference to a roof (docs/TRIMMEN_L04B.md, L04b). `trimPlane` is
+ * the derived cut (resolveRoofTrims), recomputed on every validation and never stored. */
+const trimShape = {
+  roofTrim: z.object({ roofId: id }).strict().optional(),
+  trimPlane: z
+    .object({ a: finite, b: finite, c: finite, top: finite, bottom: finite })
+    .strict()
+    .optional(),
+};
+const trimmableWallSchema = boundWall(wallTopBindingSchema, trimShape);
+/** Schema 36: renovation status Bestand/Neubau/Abbruch (docs/BAUZUSTAND.md); absent = Bestand. */
+const renovatedWallSchema = boundWall(wallTopBindingSchema, {
+  ...trimShape,
+  renovation: z.enum(WALL_RENOVATIONS).optional(),
+});
+/** Schema 43: optional wall build-up reference (docs/WANDAUFBAU.md, SA1). */
+const assembledWallSchema = boundWall(wallTopBindingSchema, {
+  ...trimShape,
+  renovation: z.enum(WALL_RENOVATIONS).optional(),
+  assemblyId: id.optional(),
+  assemblyFlipped: z.boolean().optional(),
+});
+export const projectV26Schema = projectV25Schema.extend({
+  schemaVersion: z.literal(26),
   storeys: z
-    .array(projectV22Schema.shape.storey.extend({ walls: z.array(boundWallSchema) }))
+    .array(projectV22Schema.shape.storey.extend({ walls: z.array(legacyBoundWallSchema) }))
+    .min(1),
+});
+/** Schema 27 adds hosted single-leaf doors per storey (user decision 24.10.2026). */
+export const projectV27Schema = projectV26Schema.extend({
+  schemaVersion: z.literal(27),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(legacyBoundWallSchema),
+        doors: z.array(doorV27Schema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 28 adds optional position numbers to windows and doors (user decision 25.10.2026). */
+export const projectV28Schema = projectV27Schema.extend({
+  schemaVersion: z.literal(28),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(legacyBoundWallSchema),
+        windows: z.array(markedWindowSchema),
+        doors: z.array(doorSchema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 29 adds floor slabs per storey (user decision 28.10.2026). */
+export const projectV29Schema = projectV28Schema.extend({
+  schemaVersion: z.literal(29),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(legacyBoundWallSchema),
+        windows: z.array(markedWindowSchema),
+        doors: z.array(doorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 30 binds wall tops to the storey height instead of an assumed slab (29.10.2026). */
+export const projectV30Schema = projectV29Schema.extend({
+  schemaVersion: z.literal(30),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(boundWallSchema),
+        windows: z.array(markedWindowSchema),
+        doors: z.array(doorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 31 adds single inclined roof surfaces per storey (docs/ROOF_ELEMENT.md, 29.10.2026). */
+export const projectV31Schema = projectV30Schema.extend({
+  schemaVersion: z.literal(31),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(boundWallSchema),
+        windows: z.array(markedWindowSchema),
+        doors: z.array(doorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+        roofs: z.array(roofSchema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 32 adds rooms per storey (docs/ROOM_ELEMENT.md, 29.10.2026). */
+export const projectV32Schema = projectV31Schema.extend({
+  schemaVersion: z.literal(32),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(boundWallSchema),
+        windows: z.array(markedWindowSchema),
+        doors: z.array(doorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+        roofs: z.array(roofSchema).optional(),
+        rooms: z.array(roomV32Schema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 33 adds optional height lines per room (docs/ROOM_ELEMENT.md, R3). */
+export const projectV33Schema = projectV32Schema.extend({
+  schemaVersion: z.literal(33),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(boundWallSchema),
+        windows: z.array(markedWindowSchema),
+        doors: z.array(doorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+        roofs: z.array(roofSchema).optional(),
+        rooms: z.array(roomV33Schema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 34: height lines with colour, line style and references (R3b). */
+export const projectV34Schema = projectV33Schema.extend({
+  schemaVersion: z.literal(34),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(boundWallSchema),
+        windows: z.array(markedWindowSchema),
+        doors: z.array(doorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+        roofs: z.array(roofSchema).optional(),
+        rooms: z.array(roomSchema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 35: walls may be trimmed at a roof (docs/TRIMMEN_L04B.md, L04b). */
+export const projectV35Schema = projectV34Schema.extend({
+  schemaVersion: z.literal(35),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(trimmableWallSchema),
+        windows: z.array(markedWindowSchema),
+        doors: z.array(doorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+        roofs: z.array(roofSchema).optional(),
+        rooms: z.array(roomSchema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 36: walls carry a renovation status (docs/BAUZUSTAND.md, S2). */
+export const projectV36Schema = projectV35Schema.extend({
+  schemaVersion: z.literal(36),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(renovatedWallSchema),
+        windows: z.array(markedWindowSchema),
+        doors: z.array(doorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+        roofs: z.array(roofSchema).optional(),
+        rooms: z.array(roomSchema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 37: columns per storey (docs/STUETZEN.md, L05). */
+export const projectV37Schema = projectV36Schema.extend({
+  schemaVersion: z.literal(37),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(renovatedWallSchema),
+        windows: z.array(markedWindowSchema),
+        doors: z.array(doorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+        roofs: z.array(roofSchema).optional(),
+        rooms: z.array(roomSchema).optional(),
+        columns: z.array(columnSchema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 38: dimension chains per storey (docs/MASSKETTE.md, L12). */
+export const projectV38Schema = projectV37Schema.extend({
+  schemaVersion: z.literal(38),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(renovatedWallSchema),
+        windows: z.array(markedWindowSchema),
+        doors: z.array(doorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+        roofs: z.array(roofSchema).optional(),
+        rooms: z.array(roomSchema).optional(),
+        columns: z.array(columnSchema).optional(),
+        dimensions: z.array(dimensionSchema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 39: texts per storey (docs/TEXT.md, L12). */
+export const projectV39Schema = projectV38Schema.extend({
+  schemaVersion: z.literal(39),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(renovatedWallSchema),
+        windows: z.array(markedWindowSchema),
+        doors: z.array(doorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+        roofs: z.array(roofSchema).optional(),
+        rooms: z.array(roomSchema).optional(),
+        columns: z.array(columnSchema).optional(),
+        dimensions: z.array(dimensionSchema).optional(),
+        texts: z.array(textSchema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 40: stairs per storey (docs/TREPPE.md, L06). */
+export const projectV40Schema = projectV39Schema.extend({
+  schemaVersion: z.literal(40),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(renovatedWallSchema),
+        windows: z.array(markedWindowSchema),
+        doors: z.array(doorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+        roofs: z.array(roofSchema).optional(),
+        rooms: z.array(roomSchema).optional(),
+        columns: z.array(columnSchema).optional(),
+        dimensions: z.array(dimensionSchema).optional(),
+        texts: z.array(textSchema).optional(),
+        stairs: z.array(stairSchema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 41: sections of the building (docs/SCHNITT.md, SC2). */
+export const projectV41Schema = projectV40Schema.extend({
+  schemaVersion: z.literal(41),
+  sections: z.array(sectionSchema).optional(),
+});
+/** Schema 42: window and door elements in their openings (docs/FENSTER_TUEREN.md, FT1). */
+export const projectV42Schema = projectV41Schema.extend({
+  schemaVersion: z.literal(42),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(renovatedWallSchema),
+        windows: z.array(insertedWindowSchema),
+        doors: z.array(insertedDoorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+        roofs: z.array(roofSchema).optional(),
+        rooms: z.array(roomSchema).optional(),
+        columns: z.array(columnSchema).optional(),
+        dimensions: z.array(dimensionSchema).optional(),
+        texts: z.array(textSchema).optional(),
+        stairs: z.array(stairSchema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 43: materials, wall assemblies and walls referencing them (docs/WANDAUFBAU.md). */
+const projectSchema = projectV42Schema.extend({
+  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+  materials: materialsSchema.optional(),
+  wallAssemblies: wallAssembliesSchema.optional(),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(assembledWallSchema),
+        windows: z.array(insertedWindowSchema),
+        doors: z.array(insertedDoorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+        roofs: z.array(roofSchema).optional(),
+        rooms: z.array(roomSchema).optional(),
+        columns: z.array(columnSchema).optional(),
+        dimensions: z.array(dimensionSchema).optional(),
+        texts: z.array(textSchema).optional(),
+        stairs: z.array(stairSchema).optional(),
+      }),
+    )
     .min(1),
 });
 type SingleProject = z.infer<typeof projectV23Schema>;
@@ -452,8 +785,8 @@ export function validateLegacyProject(value: unknown): LegacyProject {
 }
 
 /** All lengths and coordinates are in metres; position is dimensionless. */
-export type Wall = z.infer<typeof boundWallSchema>;
-export type BimWindow = z.infer<typeof currentWindowSchema>;
+export type Wall = z.infer<typeof assembledWallSchema>;
+export type BimWindow = z.infer<typeof insertedWindowSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type Point = z.infer<typeof pointSchema>;
 export type DrawingLine = z.infer<typeof currentLineSchema>;
@@ -462,9 +795,168 @@ export function wallLength(wall: { start: Point; end: Point }): number {
   return Math.hypot(wall.end.x - wall.start.x, wall.end.y - wall.start.y);
 }
 
-/** Validates unknown data; owned immutable asset handles may be shared. Other data is copied. */
-export function validateProject(value: unknown, reuse?: WallSolidReuse): Project {
-  const project = resolveBoundWallHeights(projectSchema.parse(value));
+/** Reuse of a storey's scope result; only provenance-holding callers may provide one. */
+export type StoreyValidationMemo = {
+  /** Pattern IDs used by an identical, previously validated storey under the same key. */
+  lookup(storey: unknown, key: readonly unknown[]): readonly string[] | undefined;
+  record(index: number, used: readonly string[]): void;
+  /** True only for an element object an earlier validation produced and nobody can change. */
+  knownElement?(element: unknown): boolean;
+};
+
+// Element lists whose entries parse independently of each other and of the storey context, so
+// a known element of a changed storey may skip parsing (docs/performance/EDIT_CYCLE.md, Teil B).
+// Walls stay out: their bound heights depend on the storey levels and are resolved after
+// parsing. Every check over the whole storey still runs on the reassembled lists.
+export const REUSABLE_ELEMENT_LISTS = [
+  "windows",
+  "doors",
+  "slabs",
+  "roofs",
+  "rooms",
+  "lines",
+  "hatches",
+  "references",
+] as const;
+
+/** The changed storeys with known elements taken out of their lists, and where they were. */
+function withoutKnownElements(
+  input: Record<string, unknown> & { storeys: unknown[] },
+  memo: StoreyValidationMemo,
+  skip: readonly (readonly string[] | undefined)[] | undefined,
+) {
+  const removed = new Map<number, Map<string, Map<number, unknown>>>();
+  const storeys = input.storeys.map((storey, index) => {
+    if (skip?.[index] || !storey || typeof storey !== "object") return storey;
+    const lists = new Map<string, Map<number, unknown>>();
+    const copy: Record<string, unknown> = { ...(storey as Record<string, unknown>) };
+    for (const name of REUSABLE_ELEMENT_LISTS) {
+      const list = copy[name];
+      if (!Array.isArray(list)) continue;
+      const known = new Map<number, unknown>();
+      list.forEach((element, i) => {
+        if (memo.knownElement!(element)) known.set(i, element);
+      });
+      if (!known.size) continue;
+      lists.set(name, known);
+      copy[name] = list.filter((_, i) => !known.has(i));
+    }
+    if (!lists.size) return storey;
+    removed.set(index, lists);
+    return copy;
+  });
+  return removed.size ? { value: { ...input, storeys }, removed } : undefined;
+}
+
+/** Put known elements back at their original positions in the parsed lists. */
+function restoreKnownElements(
+  storeys: Record<string, unknown>[],
+  removed: ReadonlyMap<number, ReadonlyMap<string, ReadonlyMap<number, unknown>>>,
+) {
+  for (const [index, lists] of removed) {
+    const storey = storeys[index]!;
+    for (const [name, known] of lists) {
+      const parsed = [...(storey[name] as unknown[])];
+      for (const [position, element] of [...known].sort((a, b) => a[0] - b[0]))
+        parsed.splice(position, 0, element);
+      storey[name] = parsed;
+    }
+  }
+}
+
+/** Everything a storey's scope validation reads besides the storey itself: its own and the next
+ * storey's resolved levels (bound wall heights) and every other project value by identity.
+ * Any difference forces full validation of that storey. Extend this when a new rule reads more.
+ */
+function storeyKeys(
+  identity: Record<string, unknown>,
+  storeys: readonly { id: string; height: number | null }[],
+  groundStoreyId: string,
+): unknown[][] {
+  const levels = new Map(
+    resolveStoreyLevels(storeys, groundStoreyId).map((s) => [s.storeyId, s.elevation]),
+  );
+  const shared = Object.keys(identity)
+    .filter((name) => name !== "storeys")
+    .sort()
+    .flatMap((name) => [name, identity[name]]);
+  return storeys.map((storey, index) => {
+    const next = storeys[index + 1];
+    return [levels.get(storey.id), next?.id, next && levels.get(next.id), ...shared];
+  });
+}
+
+const sameKey = (a: readonly unknown[], b: readonly unknown[]) =>
+  a.length === b.length && a.every((value, i) => Object.is(value, b[i]));
+
+/** Decide reuse before parsing, from the caller's storey objects and unparsed levels.
+ * Malformed input that cannot even yield levels simply parses in full.
+ */
+function reusableStoreys(
+  input: Record<string, unknown> & { storeys: unknown[] },
+  memo: StoreyValidationMemo,
+) {
+  let keys: unknown[][];
+  try {
+    keys = storeyKeys(
+      input,
+      input.storeys as { id: string; height: number | null }[],
+      input["groundStoreyId"] as string,
+    );
+  } catch {
+    return undefined;
+  }
+  const known = input.storeys.map((storey, i) => memo.lookup(storey, keys[i]!));
+  return known.some(Boolean) ? { keys, known } : undefined;
+}
+
+/** Same storey identity and scalar fields for parsing, with its element lists left empty. */
+function withoutReusedContent(
+  input: Record<string, unknown> & { storeys: unknown[] },
+  known: readonly (readonly string[] | undefined)[],
+) {
+  return {
+    ...input,
+    storeys: input.storeys.map((storey, i) =>
+      known[i]
+        ? Object.fromEntries(
+            Object.entries(storey as object).map(([k, v]) => [k, Array.isArray(v) ? [] : v]),
+          )
+        : storey,
+    ),
+  };
+}
+
+/** Keys of a validated project, for registering its storeys after validation. */
+export function storeyValidationKeys(project: Project): unknown[][] {
+  return storeyKeys(project, project.storeys, project.groundStoreyId);
+}
+
+/** Validates unknown data; owned immutable asset handles may be shared. Other data is copied.
+ * With a memo, project-wide checks still run in full; a storey's own scope result is reused
+ * only for the identical storey object under an identical key.
+ */
+export function validateProject(
+  value: unknown,
+  reuse?: WallSolidReuse,
+  memo?: StoreyValidationMemo,
+): Project {
+  // Identities come from the caller's value; parsing copies them.
+  const input = memo ? (value as Record<string, unknown> & { storeys: unknown[] }) : undefined;
+  const early = input && reusableStoreys(input, memo!);
+  const reduced = early ? withoutReusedContent(input!, early.known) : value;
+  const elements =
+    input && memo!.knownElement
+      ? withoutKnownElements(reduced as typeof input, memo!, early?.known)
+      : undefined;
+  const parsed = projectSchema.parse(elements ? elements.value : reduced);
+  if (elements) restoreKnownElements(parsed.storeys as Record<string, unknown>[], elements.removed);
+  // A reused storey is the validated output of an identical earlier parse; put it back.
+  if (early)
+    parsed.storeys = parsed.storeys.map((storey, i) =>
+      early.known[i] ? (input!.storeys[i] as typeof storey) : storey,
+    );
+  const project = resolveRoofTrims(resolveBoundWallHeights(parsed));
   const levels = resolveStoreyLevels(project.storeys, project.groundStoreyId, project.groundDatum);
   if (
     project.workingStoreyId &&
@@ -488,10 +980,19 @@ export function validateProject(value: unknown, reuse?: WallSolidReuse): Project
     ...(project.modelViews ?? []),
     ...(project.drawingDocuments ?? []),
     ...(project.documentFolders ?? []),
+    ...(project.sections ?? []),
     ...project.storeys.flatMap((s) => [
       s,
       ...s.walls,
       ...s.windows,
+      ...(s.doors ?? []),
+      ...(s.slabs ?? []),
+      ...(s.roofs ?? []),
+      ...(s.rooms ?? []),
+      ...(s.columns ?? []),
+      ...(s.dimensions ?? []),
+      ...(s.texts ?? []),
+      ...(s.stairs ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,
@@ -503,10 +1004,19 @@ export function validateProject(value: unknown, reuse?: WallSolidReuse): Project
   }
   const used = new Set<string>();
   const { storeys, groundStoreyId: _ground, ...shared } = project;
+  validateRoomNumbers(storeys);
   const localLevels = new Map(
     resolveStoreyLevels(storeys, project.groundStoreyId).map((s) => [s.storeyId, s.elevation]),
   );
-  for (const storey of storeys) {
+  // The early decision used unparsed levels; it stands only if parsed levels give the same key.
+  const keys = early && storeyKeys(input!, storeys, project.groundStoreyId);
+  for (const [index, storey] of storeys.entries()) {
+    const known = early?.known[index];
+    if (known && sameKey(early!.keys[index]!, keys![index]!)) {
+      known.forEach((id) => used.add(id));
+      memo!.record(index, known);
+      continue;
+    }
     const elevation = localLevels.get(storey.id);
     for (const wall of storey.walls) wallHeights(wall, elevation ?? 0);
     const modelViews = project.modelViews?.filter((v) => v.storeyId === storey.id);
@@ -522,9 +1032,137 @@ export function validateProject(value: unknown, reuse?: WallSolidReuse): Project
       ),
     };
     const scope = validateStoreyScope(scopeInput, scopeInput, reuse);
+    validateStoreyDoors(storey, project.layers);
+    validateStoreyInserts(storey);
+    validateStoreySlabs(storey, project.layers);
+    validateStoreyRoofs(storey, project.layers);
+    validateStoreyRooms(storey, project.layers);
+    validateStoreyColumns(storey, project.layers);
+    // Stairs: existing layer and a climbable height (docs/TREPPE.md).
+    for (const stair of storey.stairs ?? []) {
+      if (!project.layers.some((l) => l.id === stair.layerId))
+        throw new Error("Unknown layer: " + stair.layerId);
+      if (!stairGeometry(stair, storey.height))
+        throw new Error(`Treppe ${stair.id}: Höhe unbekannt oder nicht positiv.`);
+    }
+    for (const annotation of [...(storey.dimensions ?? []), ...(storey.texts ?? [])])
+      if (!project.layers.some((l) => l.id === annotation.layerId))
+        throw new Error("Unknown layer: " + annotation.layerId);
     scope.hatchPatterns.forEach((p) => used.add(p.id));
+    memo?.record(
+      index,
+      scope.hatchPatterns.map((p) => p.id),
+    );
   }
+  validateWallAssemblies(project);
   return { ...project, hatchPatterns: project.hatchPatterns.filter((p) => used.has(p.id)) };
+}
+
+/** Library rules; a wall with a build-up has its thickness (docs/WANDAUFBAU.md, SA1). */
+function validateWallAssemblies(project: Project): void {
+  const assemblies = projectWallAssemblies(project);
+  const problem = assemblyLibraryProblem(projectMaterials(project), assemblies);
+  if (problem) throw new Error(problem);
+  const byId = new Map(assemblies.map((a) => [a.id, a]));
+  for (const wall of project.storeys.flatMap((s) => s.walls)) {
+    if (wall.assemblyId === undefined) {
+      if (wall.assemblyFlipped !== undefined)
+        throw new Error(`Wand ${wall.id}: gespiegelt ohne Wandaufbau.`);
+      continue;
+    }
+    const assembly = byId.get(wall.assemblyId);
+    if (!assembly) throw new Error(`Wand ${wall.id}: unbekannter Wandaufbau ${wall.assemblyId}.`);
+    if (Math.abs(assemblyThickness(assembly) - wall.thickness) > 1e-6)
+      throw new Error(
+        `Wand ${wall.id}: Wandstärke ${wall.thickness} m passt nicht zum Aufbau ${assembly.name} (${assemblyThickness(assembly)} m).`,
+      );
+  }
+}
+
+/** Doors fit their host wall in length and height; underside is relative to the storey level. */
+function validateStoreyDoors(storey: Project["storeys"][number], layers: { id: string }[]): void {
+  if (!storey.doors?.length) return;
+  const walls = new Map(storey.walls.map((w) => [w.id, w]));
+  const layerIds = new Set(layers.map((l) => l.id));
+  for (const door of storey.doors) {
+    const wall = walls.get(door.wallId);
+    if (!wall) throw new Error(`Tür ${door.id}: unbekannte Wand ${door.wallId}.`);
+    if (!layerIds.has(door.layerId)) throw new Error("Unknown layer: " + door.layerId);
+    const length = Math.hypot(wall.end.x - wall.start.x, wall.end.y - wall.start.y);
+    const centre = door.position * length;
+    if (door.width > length || centre < door.width / 2 || length - centre < door.width / 2)
+      throw new Error(`Tür ${door.id} muss in die Wandlänge passen.`);
+    const bottom = door.zOffset - wallBase(wall);
+    if (bottom < 0 || bottom + door.height > wall.height)
+      throw new Error(`Tür ${door.id} muss in die Wandhöhe passen.`);
+  }
+}
+
+/** Window and door elements fit their opening and the wall thickness (FT1). */
+function validateStoreyInserts(storey: Project["storeys"][number]): void {
+  const walls = new Map(storey.walls.map((w) => [w.id, w]));
+  for (const window of storey.windows) {
+    const wall = walls.get(window.wallId);
+    const problem =
+      window.insert && wall ? windowInsertProblem(window.insert, window, wall.thickness) : null;
+    if (problem) throw new Error(`Fenster ${window.mark ?? window.id}: ${problem}`);
+  }
+  for (const door of storey.doors ?? []) {
+    const wall = walls.get(door.wallId);
+    const problem =
+      door.insert && wall ? doorInsertProblem(door.insert, door, wall.thickness) : null;
+    if (problem) throw new Error(`Tür ${door.mark ?? door.id}: ${problem}`);
+  }
+}
+
+/** Slabs reference an existing layer; their outline and values are checked by the schema. */
+function validateStoreySlabs(storey: Project["storeys"][number], layers: { id: string }[]): void {
+  if (!storey.slabs?.length) return;
+  const layerIds = new Set(layers.map((l) => l.id));
+  for (const slab of storey.slabs)
+    if (!layerIds.has(slab.layerId)) throw new Error("Unknown layer: " + slab.layerId);
+}
+
+/** Rooms reference an existing layer; their numbers are unique in the whole project (N32). */
+function validateStoreyRooms(storey: Project["storeys"][number], layers: { id: string }[]): void {
+  if (!storey.rooms?.length) return;
+  const layerIds = new Set(layers.map((l) => l.id));
+  for (const room of storey.rooms)
+    if (!layerIds.has(room.layerId)) throw new Error("Unknown layer: " + room.layerId);
+}
+
+/** Room numbers across all storeys, also reused ones: a cheap text comparison per room. */
+function validateRoomNumbers(storeys: readonly Project["storeys"][number][]): void {
+  const numbers = new Set<string>();
+  for (const storey of storeys)
+    for (const room of storey.rooms ?? []) {
+      const key = roomNumberKey(room.number);
+      if (numbers.has(key))
+        throw new Error(`Raumnummer ${room.number.trim()} ist bereits vergeben.`);
+      numbers.add(key);
+    }
+}
+
+/** Columns reference an existing layer and keep a positive height; a bound top needs the storey
+ * height (docs/STUETZEN.md). */
+function validateStoreyColumns(storey: Project["storeys"][number], layers: { id: string }[]): void {
+  if (!storey.columns?.length) return;
+  const layerIds = new Set(layers.map((l) => l.id));
+  for (const column of storey.columns) {
+    if (!layerIds.has(column.layerId)) throw new Error("Unknown layer: " + column.layerId);
+    const levels = columnLevels(column, storey.height);
+    if (!levels) throw new Error(`Stütze ${column.id}: Geschossbindung braucht eine Geschosshöhe.`);
+    if (levels.top - levels.bottom <= 1e-9)
+      throw new Error(`Stütze ${column.id}: Oberkante muss über dem Fuß liegen.`);
+  }
+}
+
+/** Roofs reference an existing layer; outline, values and end cuts are checked by the schema. */
+function validateStoreyRoofs(storey: Project["storeys"][number], layers: { id: string }[]): void {
+  if (!storey.roofs?.length) return;
+  const layerIds = new Set(layers.map((l) => l.id));
+  for (const roof of storey.roofs)
+    if (!layerIds.has(roof.layerId)) throw new Error("Unknown layer: " + roof.layerId);
 }
 
 function validateStoreyScope(

@@ -5,7 +5,7 @@ import { fullHeightFixture } from "./bound-height-fixture.ts";
 import { beginSelectionMove, previewSelectionMove } from "../src/application/selection/move.ts";
 import { setStoreyHeight } from "../src/application/storeys/actions.ts";
 import { selectWorkingStorey } from "../src/application/storeys/working-storey.ts";
-import { updateWindow } from "../src/lib/bim/model.ts";
+import { updateWindow } from "../src/application/windows/actions.ts";
 
 // Real UI downloads, in order: placed, Undo, Redo+cancel, height, storey switch.
 const paths = process.argv.slice(2);

@@ -15,6 +15,7 @@ export function WindowPlacementFields({
   precision,
   onPrecision,
   pickingHost,
+  choosingSide,
 }: {
   layers: Project["layers"];
   value: WindowDimensionDraft;
@@ -22,6 +23,8 @@ export function WindowPlacementFields({
   error: string;
   precision: boolean;
   pickingHost: boolean;
+  /** Position set: the pointer chooses the outside (R1). */
+  choosingSide: boolean;
   onPrecision: (value: boolean) => void;
 }) {
   return (
@@ -61,11 +64,13 @@ export function WindowPlacementFields({
         Position per Maß
       </label>
       <p className="text-xs text-muted-foreground">
-        {precision
-          ? pickingHost
-            ? "Zuerst die Wand anklicken. Danach Tab: Abstand der Fenstermitte."
-            : "Wand fixiert · Tab: Abstand der Fenstermitte ab Wandanfang · Enter/Klick setzt Fenster."
-          : "Wand anfahren · Klick setzt Fenster · Esc bricht ab. Nur neue Fenster."}
+        {choosingSide
+          ? "Klick auf die Außenseite der Wand · Esc bricht ab."
+          : precision
+            ? pickingHost
+              ? "Zuerst die Wand anklicken. Danach Tab: Abstand der Fenstermitte."
+              : "Wand fixiert · Tab: Abstand der Fenstermitte ab Wandanfang · Enter/Klick setzt die Position."
+            : "Wand anfahren · Klick 1 Position, Klick 2 Außenseite (nur Öffnung: ein Klick) · Esc bricht ab."}
       </p>
       {error && (
         <p role="alert" className="text-xs text-destructive">

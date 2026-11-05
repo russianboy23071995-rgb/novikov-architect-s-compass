@@ -9,7 +9,7 @@ import {
   previewPointReferences,
   emptyHoverReference,
   sameHoverSession,
-  suspendHoverReference,
+  suspendHoverSnapshot,
   sameReference,
 } from "@/constraints/inference/hover-reference";
 import type { HoverReferenceState } from "@/constraints/inference/hover-reference";
@@ -38,13 +38,15 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
     if (!compatible)
       state.current = { context, value: emptyHoverReference(), guides: [], cursor: null };
     if (context.suspended || !cursor || (compatible && state.current!.context !== context)) {
-      const next = {
-        ...state.current!,
+      // A new context identity alone must not render again, or an unstable caller loops.
+      const { snapshot: next, changed } = suspendHoverSnapshot(
+        state.current!,
         context,
-        value: suspendHoverReference(state.current!.value, !cursor),
-      };
+        !cursor,
+        !!compatible,
+      );
       state.current = next;
-      setSnapshot(next);
+      if (changed) setSnapshot(next);
       return;
     }
     const current = state.current!.value;

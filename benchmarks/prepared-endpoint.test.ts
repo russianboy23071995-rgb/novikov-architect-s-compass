@@ -3,13 +3,19 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { prepareEndpoint } from "./prepared-endpoint.ts";
 import { tPairFixture } from "./t-pair-fixture.ts";
-import { updateWall, validateProject } from "../src/lib/bim/model.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
+import { updateWall } from "../src/application/walls/actions.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../src/application/history/project-history.ts";
 import {
   connectedWallSolids,
   createWallSolidReuse,
 } from "../src/domain/elements/wall/connections.ts";
-import { buildPreviewSolid } from "../src/lib/bim/geometry.ts";
+import { buildPreviewSolid } from "../src/rendering/viewport/storey-solid.ts";
 import { connectionGroupFixture } from "./connection-group-fixture.ts";
 
 test("prepared extrusion reuse invalidates exact geometry inputs and still validates openings", () => {

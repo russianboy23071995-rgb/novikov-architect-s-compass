@@ -1,0 +1,96 @@
+{
+  "runtime": "node v24.22.1 win32 x64",
+  "date": "2026-10-24T13:29:24.525Z",
+  "results": [
+    {
+      "size": 5000,
+      "operation": "storeyRename",
+      "equivalent": true,
+      "legacyTotalMs": {
+        "median": 731.91,
+        "p95": 812.25,
+        "n": 11
+      },
+      "currentTotalMs": {
+        "median": 53.65,
+        "p95": 58.79,
+        "n": 11
+      }
+    },
+    {
+      "size": 5000,
+      "operation": "layerRename",
+      "equivalent": true,
+      "legacyTotalMs": {
+        "median": 1009.82,
+        "p95": 1231.74,
+        "n": 11
+      },
+      "currentTotalMs": {
+        "median": 260.79,
+        "p95": 447.99,
+        "n": 11
+      }
+    },
+    {
+      "size": 5000,
+      "operation": "hatchCreate",
+      "equivalent": true,
+      "legacyTotalMs": {
+        "median": 983.18,
+        "p95": 1008.75,
+        "n": 11
+      },
+      "currentTotalMs": {
+        "median": 55.38,
+        "p95": 62.4,
+        "n": 11
+      }
+    },
+    {
+      "size": 20000,
+      "operation": "storeyRename",
+      "equivalent": true,
+      "legacyTotalMs": {
+        "median": 2996.77,
+        "p95": 3120.39,
+        "n": 11
+      },
+      "currentTotalMs": {
+        "median": 215.02,
+        "p95": 237.83,
+        "n": 11
+      }
+    },
+    {
+      "size": 20000,
+      "operation": "layerRename",
+      "equivalent": true,
+      "legacyTotalMs": {
+        "median": 3950.83,
+        "p95": 5124.49,
+        "n": 11
+      },
+      "currentTotalMs": {
+        "median": 1031.11,
+        "p95": 1358.42,
+        "n": 11
+      }
+    },
+    {
+      "size": 20000,
+      "operation": "hatchCreate",
+      "equivalent": true,
+      "legacyTotalMs": {
+        "median": 4067.03,
+        "p95": 4394.38,
+        "n": 11
+      },
+      "currentTotalMs": {
+        "median": 224.32,
+        "p95": 273.55,
+        "n": 11
+      }
+    }
+  ]
+}

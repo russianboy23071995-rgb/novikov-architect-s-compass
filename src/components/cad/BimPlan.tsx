@@ -1,4 +1,43 @@
+import type { DimensionStyle } from "./DimensionStyleFields";
+import { TextGraphic } from "./TextGraphic";
+import type { PlanText } from "@/domain/elements/text/model";
+import { DimensionGraphic } from "./DimensionGraphic";
+import { StairPlanGraphic } from "./StairPlanGraphic";
+import { SectionPlanGraphic } from "./SectionPlanGraphic";
+import { LineLengthHelper } from "./LineLengthHelper";
+import { acceptsTraceCandidate } from "@/application/views/tracing";
+import type { LocalSnapSources } from "@/application/snapping/local-sources";
+import type { LengthDirection } from "@/application/lines/actions";
+import {
+  sectionLookTo,
+  sectionSymbolHeight,
+  type Section,
+  type SectionSymbolSize,
+} from "@/domain/views/sections";
+import {
+  stairDirectionTo,
+  stairGeometry,
+  stairTreadForLength,
+  stairPlan,
+  stairTurnTo,
+  type Stair,
+} from "@/domain/elements/stair/model";
+import { defaultCutFill, type CutFill } from "./cut-fill";
+import { snapPointLabel } from "@/application/snapping/point-label";
+import { capturedVertex } from "@/application/direct-edit/transforms";
+import {
+  dragSectionGrip,
+  sectionGripPoint,
+  type SectionGrip,
+} from "@/application/sections/actions";
+import {
+  capturedStart,
+  closesAtStart,
+  MIN_CLOSING_POINTS,
+} from "@/application/drawing/path-closure";
+import type { ElementKind } from "../../application/selection/target.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
+import { columnOutline } from "../../domain/elements/column/model.ts";
 import type { WorkingViewContext } from "@/application/views/working-context";
 import type { HatchPatternSize } from "@/domain/elements/hatch/model";
 import { HatchPattern } from "./HatchPattern";
@@ -6,7 +45,7 @@ import type { HatchPatternDefinition } from "@/domain/elements/hatch/pattern";
 import { createDoubleSecondaryClick } from "@/application/input/double-secondary";
 import { AngleMeasurementOverlay } from "./AngleMeasurementOverlay";
 import type { AngleMeasurement } from "@/application/measurement/angle";
-import { CAD_SHIMMER } from "@/rendering/viewport/highlight";
+import { CAD_SHIMMER, CAD_TURQUOISE } from "@/rendering/viewport/highlight";
 import { AreaMeasurementOverlay } from "./AreaMeasurementOverlay";
 import type { AreaMeasurement } from "@/application/measurement/area";
 import { DistanceOverlay } from "./DistanceOverlay";
@@ -15,7 +54,13 @@ import { PlanSceneRun } from "./PlanSceneRun";
 import { derivePlanScene, planSceneRuns, type PlanRun } from "@/rendering/viewport/plan-scene";
 import type { GeometryPreview } from "@/domain/project/geometry-scope";
 import { useSelectionMarquee } from "./useSelectionMarquee";
-import { planSelectionShapes } from "@/rendering/viewport/selection-shapes";
+import {
+  planElementCaption,
+  planSelectionShapes,
+  shapesAt,
+} from "@/rendering/viewport/selection-shapes";
+import { useOverlapCycle } from "./useOverlapCycle";
+
 import type { SelectionSet } from "@/application/selection/state";
 import type { ToolInteraction } from "@/application/tools/interaction";
 import { drawingWallVisibility } from "@/rendering/viewport/layer-display";
@@ -33,6 +78,7 @@ import { validateSimplePolygon } from "@/geometry/polygons/simple-polygon";
 import { closedContour } from "@/application/direct-edit/contour";
 import { pointsCompatible } from "@/geometry/tolerances/model";
 import type { Hatch } from "@/domain/elements/hatch/model";
+import { assemblyLibraryOf } from "@/rendering/viewport/wall-layers";
 import { isLayerVisible } from "@/application/layers/visibility";
 import type { ReferenceSelectionBinding } from "./useReferenceSelection";
 import { ReferenceSelectionPanel } from "./ReferenceSelectionPanel";
@@ -50,6 +96,7 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import {
   createToolSourceQuery,
   createVisibleToolSourceQuery,
+  createTracedToolSourceQuery,
   toolPinnedReferences,
 } from "@/application/tools/snapping";
 import type { ToolSnapPolicy } from "@/application/tools/snapping";
@@ -58,13 +105,19 @@ import { getLocalSnapSources } from "@/application/snapping/local-sources";
 import { panPlan, planScaleBar, planViewBox, zoomPlan } from "@/rendering/viewport/plan-camera";
 import type { PlanCamera, ViewSize } from "@/rendering/viewport/plan-camera";
 import { previewEdit } from "@/application/direct-edit/controller";
-import type { EditSession } from "@/lib/bim/direct-edit";
-import type { Point, Project } from "@/lib/bim/model";
+import { previewOverlapHint } from "@/application/openings/overlap-hint";
+import type { EditSession } from "@/application/direct-edit/session";
+import type { Point, Project } from "@/domain/project/schema";
 import type { Selection } from "./bim-view";
 import { linePath } from "@/lib/bim/lines";
 
 export type BimPlanProps = {
   pickupScope?: object;
+  /** Right-click menu (docs/KONTEXTMENUE.md): on an element or on empty canvas (null). When
+   * set it replaces the former double right-click pickup, which moves into the menu. */
+  onContextMenu?: (target: NonNullable<Selection> | null, x: number, y: number) => void;
+  /** Double click on an element while selecting: its settings window (docs/EINSTELLUNGSFENSTER.md). */
+  onElementSettings?: (target: NonNullable<Selection>) => void;
   onPickup?: (target: NonNullable<Selection>) => void;
   draftContour?: ((point: Point) => Point[]) | undefined;
   placement?:
@@ -98,12 +151,86 @@ export type BimPlanProps = {
   hoverDwellMs?: number;
   start: Point | null;
   draftPoints?: Point[];
+  /** False while the draft holds no segment yet (only the click of this double click): a double
+   * click then opens the element under the cursor instead of finishing (docs/BAUZUSTAND.md). */
+  draftFinishable?: boolean;
+  /** Text being typed (docs/TEXT.md): drawn live at its insertion point. */
+  textPreview?: Omit<PlanText, "id" | "layerId"> | undefined;
+  /** Stair being drawn (docs/TREPPE.md, TR2/TR3): start on the drawing axis; the pointer gives
+   * the run direction, then for L and U the side of the turn; the full stair follows live. */
+  stairDraft?:
+    | {
+        start: Point;
+        /** Set by the second click of an L or U: the pointer now chooses the turn. */
+        direction: number | null;
+        values: Omit<Stair, "id" | "start" | "direction">;
+        storeyHeight: number | null;
+      }
+    | undefined;
+  /** Sections of the building, shown in every storey's plan (docs/SCHNITT.md, SC2). */
+  sections?: readonly Section[] | undefined;
+  /** Double click on a section line opens its window. */
+  onSectionSettings?: ((id: string) => void) | undefined;
+  /** Transparency trace (S4): outlines of another storey under the plan, optional snapping. */
+  tracing?:
+    | {
+        walls: Point[][];
+        columns: Point[][];
+        color: string;
+        opacity: number;
+        snap: { sources: LocalSnapSources; ids: ReadonlySet<string> } | null;
+      }
+    | null
+    | undefined;
+  /** Model point of the click that selected the element; picks the segment of a line (S3). */
+  selectionAnchor?: Point | null | undefined;
+  /** Length helper of a selected line: new length of a segment (docs/LINIEN.md, S3). */
+  onLineLength?:
+    | ((lineId: string, segment: number, length: number, direction: LengthDirection) => void)
+    | undefined;
+  /** Selected section line (SC5): highlighted with grips at both ends and in the middle. */
+  selectedSectionId?: string | null | undefined;
+  /** Click on a section line selects it; null when the click selects nothing. */
+  onSectionSelect?: ((id: string | null) => void) | undefined;
+  /** A grip was dragged: the new line of the section (one undo step). */
+  onSectionLine?: ((id: string, line: { start: Point; end: Point }) => void) | undefined;
+  /** Section being drawn: start, then end; the pointer gives the end, then the viewing side. */
+  sectionDraft?:
+    | {
+        start: Point;
+        end: Point | null;
+        mark: string;
+        symbolSize: SectionSymbolSize;
+        kind?: "elevation";
+      }
+    | undefined;
+  /** Running dimension chain (docs/MASSKETTE.md): line position, points so far, direction. */
+  dimensionDraft?:
+    | {
+        orientation: "horizontal" | "vertical";
+        line: Point | null;
+        points: readonly Point[];
+        /** Editing an existing chain: "line" moves its dimension line with the pointer,
+         * "remove" shows its points to click; adding behaves like drawing. */
+        mode?: "add" | "remove" | "line" | undefined;
+        /** Terminator, figures and height of the chain being drawn or edited. */
+        style?: DimensionStyle | undefined;
+      }
+    | undefined;
+  /** The drawing tool closes by a click on its start point (docs/POLYGON_REGELN.md, Regel 3). */
+  closeAtStart?: boolean;
+  /** Roof tool guide: reference line and rise side; null rise follows the cursor (ROOF D3). */
+  roofGuide?: { start: Point; end: Point; rise: "left" | "right" | null } | null;
   draftFill?: Hatch["fill"] | undefined;
   draftPattern?: HatchPatternDefinition | null | undefined;
   draftPatternRotation?: number | undefined;
   draftPatternSize?: HatchPatternSize | undefined;
   gridSettings?: GridSettings;
   wallOutlineWidth?: number;
+  /** Fill of cut walls and roof cuts (docs/SCHNITTDARSTELLUNG.md). */
+  cutFill?: CutFill;
+  /** Neubau red, Abbruch yellow (docs/BAUZUSTAND.md). */
+  showRenovation?: boolean;
   snap: boolean;
   ortho: boolean;
   onSelect: (
@@ -122,6 +249,8 @@ export type BimPlanProps = {
   onEditDirection?: (session: EditSession, point: Point, candidate?: SnapCandidate | null) => void;
   onEditCommit?: (session: EditSession, point: Point, candidate?: SnapCandidate | null) => void;
   onContourStretch?: (selection: NonNullable<Selection>, index: number, anchor: Point) => void;
+  /** Click on a corner grip: true when the workspace started moving that corner (Regel 1). */
+  onCornerPick?: (selection: NonNullable<Selection>, index: number, anchor: Point) => boolean;
   onEditCancel?: () => void;
   onPoint: (point: Point, candidate?: SnapCandidate | null) => void;
   onFinish?: () => void;
@@ -130,6 +259,8 @@ export type BimPlanProps = {
 export function BimPlan({
   pickupScope,
   onPickup,
+  onContextMenu,
+  onElementSettings,
   draftContour,
   placement,
   drawingPreview,
@@ -149,6 +280,21 @@ export function BimPlan({
   hoverDwellMs = DEFAULT_HOVER_DWELL_MS,
   start,
   draftPoints = [],
+  draftFinishable = true,
+  dimensionDraft,
+  stairDraft,
+  sections,
+  onSectionSettings,
+  selectedSectionId,
+  onSectionSelect,
+  onSectionLine,
+  selectionAnchor,
+  onLineLength,
+  tracing,
+  sectionDraft,
+  textPreview,
+  closeAtStart = false,
+  roofGuide = null,
   draftFill,
   draftPattern,
   draftPatternRotation,
@@ -156,6 +302,8 @@ export function BimPlan({
   snap,
   gridSettings = defaultGridSettings,
   wallOutlineWidth = 1,
+  cutFill = defaultCutFill,
+  showRenovation = false,
   ortho,
   onSelect,
   onPoint,
@@ -163,6 +311,7 @@ export function BimPlan({
   editSession: requestedEditSession,
   onEditCommit,
   onContourStretch,
+  onCornerPick,
   onEditCancel,
   numericTarget,
   drawingTarget,
@@ -205,6 +354,18 @@ export function BimPlan({
     index: number;
   } | null>(null);
   const gripClick = useRef(false);
+  // Dragging a grip of the selected section line (SC5); the preview replaces the stored line.
+  const sectionDrag = useRef<{
+    id: string;
+    grip: SectionGrip;
+    pointerId: number;
+    line: { start: Point; end: Point };
+  } | null>(null);
+  const [sectionPreview, setSectionPreview] = useState<{
+    id: string;
+    start: Point;
+    end: Point;
+  } | null>(null);
   const matchingGrip = useCallback(() => {
     const drag = gripDrag.current;
     return (
@@ -283,12 +444,15 @@ export function BimPlan({
   useEffect(() => setHover(null), [endpointSnap, camera, editSession]);
   const pinnedReferences = useMemo(() => toolPinnedReferences(snapping), [snapping]);
   const modelSources = useMemo(() => getLocalSnapSources(project), [project]);
+  const traceSnap = tracing?.snap ?? null;
   const sourceQuery = useMemo(
     () =>
-      visibility
-        ? createVisibleToolSourceQuery(project, visibility, visibility.context, snapping)
-        : createToolSourceQuery(modelSources, snapping),
-    [modelSources, snapping, project, visibility],
+      visibility && traceSnap
+        ? createTracedToolSourceQuery(project, visibility, visibility.context, snapping, traceSnap)
+        : visibility
+          ? createVisibleToolSourceQuery(project, visibility, visibility.context, snapping)
+          : createToolSourceQuery(modelSources, snapping),
+    [modelSources, snapping, project, visibility, traceSnap],
   );
   const density = useSnapDensity(
     sourceQuery,
@@ -342,8 +506,10 @@ export function BimPlan({
   } = useHoverReference(hover, trackingContext, hoverDwellMs);
   const activeReference = activeReferences.at(-1) ?? null;
   const resolveLockedSnap = useShiftSnapLock(visibilitySession, referenceReset);
-  const resolvePointer = (point: Point, shift = shiftHeld) =>
-    resolveLockedSnap(
+  // A point caught on the transparency trace (S4) is a plain point: it belongs to another
+  // storey, so it must never become a join or host target of the working storey.
+  const resolvePointer = (point: Point, shift = shiftHeld) => {
+    const result = resolveLockedSnap(
       snapping,
       point,
       {
@@ -359,12 +525,32 @@ export function BimPlan({
         activeReference,
         activeReferences,
         guideDirections,
+        ...(traceSnap ? { acceptCandidate: acceptsTraceCandidate(traceSnap.ids) } : {}),
       },
       { ortho, shift, featureSnap: endpointSnap },
     );
+    // Keep the snapped point and its marker, drop only what ties it to the other storey.
+    return result.candidate?.sourceEntityId && traceSnap?.ids.has(result.candidate.sourceEntityId)
+      ? {
+          ...result,
+          candidate: {
+            ...result.candidate,
+            sourceEntityId: null,
+            sourceFeature: "trace",
+            sourceReferences: [],
+          },
+        }
+      : result;
+  };
   const pointerSnap = hover ? resolvePointer(hover) : null;
-  const resolvedHover =
-    placement?.target !== undefined
+  // Regel 3: near its start a closable drawing aims exactly at the start (preview = click).
+  const startTarget =
+    drawing && closeAtStart && hover
+      ? capturedStart(draftPoints, hover, camera.pixelsPerMetre, "polygon")
+      : null;
+  const resolvedHover = startTarget
+    ? { point: startTarget, candidate: null }
+    : placement?.target !== undefined
       ? placement.target
         ? { point: placement.target, candidate: null }
         : null
@@ -392,7 +578,13 @@ export function BimPlan({
     parallel: "Parallel",
     endpoint: resolvedHover?.candidate?.sourceReferences?.[0]?.dependencies
       ? "Hilfspunkt"
-      : "Endpunkt",
+      : ((resolvedHover?.candidate &&
+          snapPointLabel(
+            project,
+            resolvedHover.candidate.sourceEntityId,
+            resolvedHover.candidate.sourceFeature,
+          )) ??
+        "Endpunkt"),
     grid: "Raster",
     horizontal: "Horizontal",
     vertical: "Vertikal",
@@ -428,13 +620,18 @@ export function BimPlan({
     () => (selectedRing ? validateSimplePolygon(selectedRing) : null),
     [selectedRing],
   );
+  // Regel 2: near another corner of the edited element the corner itself wins over all snaps.
+  const resolveEditPointer = (point: Point, shift = shiftHeld) => {
+    const corner = editSession ? capturedVertex(editSession, point, camera.pixelsPerMetre) : null;
+    return corner ? { point: corner, candidate: null } : resolvePointer(point, shift);
+  };
   const resolvedEdit =
     numericTarget !== undefined
       ? numericTarget
         ? { point: numericTarget, candidate: null }
         : null
       : editSession && editPointer?.session === editSession
-        ? resolvePointer(editPointer.point)
+        ? resolveEditPointer(editPointer.point)
         : null;
   let preview: Project | null = null;
   let editError = "";
@@ -498,20 +695,32 @@ export function BimPlan({
     drawingResult.project ??
     (drawing ? drawingPreview : null) ??
     project;
+  // Overlapping openings stay allowed; placement and edit previews only show a hint.
+  const overlapHint = useMemo(
+    () => (placementProject || preview ? previewOverlapHint(project, shown) : ""),
+    [placementProject, preview, project, shown],
+  );
+  const hintPoint = editSession ? resolvedEdit?.point : resolvedHover?.point;
   const allowsShown = useMemo(
     () => drawingWallVisibility(project, shown, visibility),
     [project, shown, visibility],
   );
+  // Library identity changes only when the project's library does (docs/WANDAUFBAU.md).
+  const library = useMemo(
+    () => assemblyLibraryOf(project),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [project.materials, project.wallAssemblies],
+  );
   const scene = useMemo(
-    () => derivePlanScene(shown, allowsShown, project.hatchPatterns),
-    [shown, allowsShown, project.hatchPatterns],
+    () => derivePlanScene(shown, allowsShown, project.hatchPatterns, library),
+    [shown, allowsShown, project.hatchPatterns, library],
   );
   const previewScene = useMemo(
     () =>
       geometryPreview
-        ? derivePlanScene(geometryPreview.geometry, allowsShown, project.hatchPatterns)
+        ? derivePlanScene(geometryPreview.geometry, allowsShown, project.hatchPatterns, library)
         : null,
-    [geometryPreview, allowsShown, project.hatchPatterns],
+    [geometryPreview, allowsShown, project.hatchPatterns, library],
   );
   const sceneRuns = useMemo(
     () => planSceneRuns(scene, placement?.geometryPreview?.replacedIds ?? []),
@@ -540,6 +749,24 @@ export function BimPlan({
       ?.points.forEach((point, index) =>
         handles.push({ point, index, label: `Schraffurecke ${index + 1}` }),
       );
+  } else if (selection?.kind === "room") {
+    storeyOf(project)
+      .rooms?.find((r) => r.id === selection.id)
+      ?.points.forEach((point, index) =>
+        handles.push({ point, index, label: `Raumecke ${index + 1}` }),
+      );
+  } else if (selection?.kind === "roof") {
+    storeyOf(project)
+      .roofs?.find((r) => r.id === selection.id)
+      ?.points.forEach((point, index) =>
+        handles.push({ point, index, label: `Dachecke ${index + 1}` }),
+      );
+  } else if (selection?.kind === "slab") {
+    storeyOf(project)
+      .slabs?.find((s) => s.id === selection.id)
+      ?.points.forEach((point, index) =>
+        handles.push({ point, index, label: `Deckenecke ${index + 1}` }),
+      );
   } else if (selection?.kind === "line") {
     const line = storeyOf(project).lines?.find((item) => item.id === selection.id);
     line?.points.forEach((point, index) => {
@@ -552,6 +779,23 @@ export function BimPlan({
         return;
       handles.push({ point, index, label: `Linienpunkt ${index + 1}` });
     });
+  } else if (selection?.kind === "column") {
+    // E1: corners of a rectangular column, the centre of a round one; a click moves the column
+    // with that point as its handle.
+    const column = storeyOf(project).columns?.find((c) => c.id === selection.id);
+    if (column)
+      (column.shape.kind === "circle" ? [column.position] : columnOutline(column)).forEach(
+        (point, index) => handles.push({ point, index, label: `Stützenecke ${index + 1}` }),
+      );
+  } else if (selection?.kind === "stair") {
+    // E1: corners of the stair outline; a click moves the stair with that corner as its handle.
+    const stair = storeyOf(project).stairs?.find((s) => s.id === selection.id);
+    if (stair) {
+      const g = stairGeometry(stair, storeyOf(project).height ?? null);
+      (g ? stairPlan(stair, g).outline : [stair.start]).forEach((point, index) =>
+        handles.push({ point, index, label: `Treppenecke ${index + 1}` }),
+      );
+    }
   }
   const pointFromEvent = (event: React.MouseEvent<SVGSVGElement>) => {
     const matrix = event.currentTarget.getScreenCTM();
@@ -584,12 +828,27 @@ export function BimPlan({
       pickupScope,
     ],
   );
-  const selectProps = (kind: "wall" | "window" | "line" | "hatch" | "reference", id: string) => ({
+  const contextMenuReady = () =>
+    !!onContextMenu &&
+    interactive &&
+    !editSession &&
+    !selecting &&
+    !pan &&
+    !placement &&
+    !drawing &&
+    !referenceSelection?.selecting;
+  const selectProps = (kind: ElementKind, id: string) => ({
     role: "button",
     tabIndex: drawing ? -1 : 0,
     "aria-label": `Select ${kind} ${id}`,
     "aria-pressed": selectedIds.has(id),
     onContextMenu: (event: React.MouseEvent) => {
+      if (contextMenuReady()) {
+        event.preventDefault();
+        event.stopPropagation();
+        onContextMenu!({ kind, id }, event.clientX, event.clientY);
+        return;
+      }
       if (
         !onPickup ||
         !interactive ||
@@ -674,6 +933,8 @@ export function BimPlan({
       placement={!!placement}
       pixelsPerMetre={camera.pixelsPerMetre}
       wallOutlineWidth={wallOutlineWidth}
+      cutFill={cutFill}
+      showRenovation={showRenovation}
       cornerGeometry={cornerPreview?.base === shown ? cornerPreview.geometry : undefined}
       allowsShown={allowsShown}
       canPick={canPick}
@@ -684,6 +945,18 @@ export function BimPlan({
     () =>
       planSelectionShapes(project).filter((s) => isLayerVisible(project, visibility, s.target.id)),
     [project, visibility],
+  );
+  // Tab cycling through overlapping elements (docs/TAB_AUSWAHL.md); select tool only.
+  const overlap = useOverlapCycle(
+    interactive &&
+      !placement &&
+      !drawing &&
+      !editSession &&
+      !selecting &&
+      !pan &&
+      !referenceSelection?.selecting,
+    shapes,
+    camera.pixelsPerMetre,
   );
   const marquee = useSelectionMarquee(
     interactive && !placement && !drawing && !editSession && !selecting && !pan,
@@ -720,7 +993,12 @@ export function BimPlan({
         if (event.button !== 2) secondary.current.reset();
         marquee.down(event);
       }}
-      onContextMenu={() => secondary.current.reset()}
+      onContextMenu={(event) => {
+        secondary.current.reset();
+        if (!contextMenuReady()) return;
+        event.preventDefault();
+        onContextMenu!(null, event.clientX, event.clientY);
+      }}
       onKeyDownCapture={() => secondary.current.reset()}
       onPointerMoveCapture={marquee.move}
       onPointerUpCapture={marquee.up}
@@ -742,6 +1020,24 @@ export function BimPlan({
         editDown.current = editSession ?? null;
       }}
       onPointerUp={(event) => {
+        const dragged = sectionDrag.current;
+        if (dragged?.pointerId === event.pointerId) {
+          sectionDrag.current = null;
+          gripClick.current = true;
+          if (event.currentTarget.hasPointerCapture(event.pointerId))
+            event.currentTarget.releasePointerCapture(event.pointerId);
+          const line = sectionPreview?.id === dragged.id ? sectionPreview : null;
+          setSectionPreview(null);
+          if (
+            line &&
+            (line.start.x !== dragged.line.start.x ||
+              line.start.y !== dragged.line.start.y ||
+              line.end.x !== dragged.line.end.x ||
+              line.end.y !== dragged.line.end.y)
+          )
+            onSectionLine?.(dragged.id, { start: line.start, end: line.end });
+          return;
+        }
         const drag = gripDrag.current;
         if (drag?.gesture.pointerId === event.pointerId) {
           const result = draggedPoint(event);
@@ -752,7 +1048,7 @@ export function BimPlan({
             event.currentTarget.releasePointerCapture(event.pointerId);
           if (result?.moved && editSession) {
             try {
-              const snapped = resolvePointer(result.point, event.shiftKey);
+              const snapped = resolveEditPointer(result.point, event.shiftKey);
               onEditCommit?.(editSession, snapped.point, snapped.candidate);
             } catch {
               /* Keep the shared edit session available for correction. */
@@ -767,6 +1063,10 @@ export function BimPlan({
       }}
       onLostPointerCapture={() => {
         marquee.cancel();
+        if (sectionDrag.current) {
+          sectionDrag.current = null;
+          setSectionPreview(null);
+        }
         navigation.current = null;
         if (gripDrag.current) {
           gripDrag.current = null;
@@ -775,6 +1075,10 @@ export function BimPlan({
       }}
       onPointerCancel={() => {
         marquee.cancel();
+        if (sectionDrag.current) {
+          sectionDrag.current = null;
+          setSectionPreview(null);
+        }
         navigation.current = null;
         editDown.current = null;
         if (gripDrag.current) {
@@ -792,6 +1096,15 @@ export function BimPlan({
           return;
         }
         if ((event.target as Element).closest("[data-reference-panel]")) return;
+        // Overlapping elements: the click selects the Tab pre-selection, not the topmost one.
+        const chosen = overlap.preselected;
+        if (chosen && (event.target as Element).closest("[data-plan-pick]")) {
+          event.preventDefault();
+          event.stopPropagation();
+          overlap.clear();
+          latestSelect.current(chosen.kind, chosen.id).onClick(event);
+          return;
+        }
         if (selecting && referenceSelection && !navigationClick.current && !pan) {
           event.preventDefault();
           event.stopPropagation();
@@ -833,23 +1146,39 @@ export function BimPlan({
           );
           return;
         }
-        if (pan || selecting) return;
+        const sectionGrip = sectionDrag.current;
+        if (sectionGrip?.pointerId === event.pointerId) {
+          const raw = rawPoint(event);
+          if (!raw) return;
+          // Snaps like drawing; Shift keeps the direction of the line, so ends only change length.
+          const to = resolvePointer(raw, false).point;
+          const line = dragSectionGrip(sectionGrip.line, sectionGrip.grip, to, event.shiftKey);
+          if (line) setSectionPreview({ id: sectionGrip.id, ...line });
+          return;
+        }
+        if (pan || selecting) return overlap.clear();
+        overlap.move(gripDrag.current ? null : rawPoint(event));
         if (gripDrag.current && gripDrag.current.gesture.pointerId !== event.pointerId) return;
         const drawingPoint = draggedPoint(event)?.point ?? rawPoint(event);
         if (endpointSnap || editSession) setHover(drawingPoint);
         if (placement && drawingPoint)
           placement.aim(resolvePointer(drawingPoint, event.shiftKey).point);
         if (drawing && drawingPoint)
-          onDrawingAim?.(resolvePointer(drawingPoint, event.shiftKey).point);
+          onDrawingAim?.(
+            (closeAtStart
+              ? capturedStart(draftPoints, drawingPoint, camera.pixelsPerMetre, "polygon")
+              : null) ?? resolvePointer(drawingPoint, event.shiftKey).point,
+          );
         if (editSession) {
           const point = drawingPoint;
           if (point) {
             setEditPointer({ session: editSession, point });
-            onEditAim?.(editSession, resolvePointer(point, event.shiftKey).point);
+            onEditAim?.(editSession, resolveEditPointer(point, event.shiftKey).point);
           }
         }
       }}
       onPointerLeave={() => {
+        overlap.clear();
         if (selecting) return;
         setHover(null);
         setEditPointer(null);
@@ -863,7 +1192,7 @@ export function BimPlan({
           if (point) {
             setEditPointer({ session: editSession, point });
             try {
-              const snapped = resolvePointer(point, event.shiftKey);
+              const snapped = resolveEditPointer(point, event.shiftKey);
               const target = snapped.point;
               if (onEditDirection) onEditDirection(editSession, target, snapped.candidate);
               else onEditCommit?.(editSession, target, snapped.candidate);
@@ -877,9 +1206,22 @@ export function BimPlan({
           event.currentTarget.focus();
           if (onFinish && event.detail > 1) return;
           const snap = pointFromEvent(event);
-          const point = drawingTarget !== undefined ? drawingTarget : snap?.point;
-          if (point) onPoint(point, drawingTarget !== undefined ? null : snap?.candidate);
-        } else if (event.target === event.currentTarget) onSelect(null);
+          const raw = closeAtStart ? rawPoint(event) : null;
+          const start = raw
+            ? capturedStart(draftPoints, raw, camera.pixelsPerMetre, "polygon")
+            : null;
+          const point = start ?? (drawingTarget !== undefined ? drawingTarget : snap?.point);
+          if (point) onPoint(point, start || drawingTarget !== undefined ? null : snap?.candidate);
+        } else if ((event.target as Element).closest("[data-section-id]") && onSectionSelect) {
+          // A section line belongs to no storey: it has its own selection (SC5).
+          event.currentTarget.focus();
+          onSectionSelect(
+            (event.target as Element).closest("[data-section-id]")!.getAttribute("data-section-id"),
+          );
+        } else if (event.target === event.currentTarget) {
+          onSelect(null);
+          onSectionSelect?.(null);
+        }
       }}
       onDoubleClick={(event) => {
         if (selecting || pan || navigationClick.current) return;
@@ -888,10 +1230,39 @@ export function BimPlan({
           placement.finish();
           return;
         }
-        if (drawing && onFinish) {
+        if (drawing && onFinish && draftFinishable) {
           event.preventDefault();
           onFinish();
+          return;
         }
+        // A section line belongs to no storey and is not an element: it opens its own window.
+        const sectionId = (event.target as Element)
+          .closest("[data-section-id]")
+          ?.getAttribute("data-section-id");
+        if (sectionId && onSectionSettings && !editSession && (!drawing || !draftFinishable)) {
+          event.preventDefault();
+          onSectionSettings(sectionId);
+          return;
+        }
+        // Selecting, or a drawing tool without a started draft: the element under the cursor (or
+        // the Tab pre-selection) opens its window.
+        const idleDrawing = drawing && !!onFinish && !draftFinishable;
+        if (!onElementSettings || (drawing && !idleDrawing) || placement || editSession) return;
+        if (!interactive) return;
+        // Overlays of a selected element (axis, grips) lie on top, so the element is found
+        // geometrically under the cursor, like the Tab cycling; the DOM target is the fallback.
+        const node = (event.target as Element).closest("[data-plan-pick]");
+        const kind = node?.getAttribute("data-kind"),
+          id = node?.getAttribute("data-id");
+        const point = rawPoint(event);
+        const hit = point ? shapesAt(shapes, point, 6 / camera.pixelsPerMetre)[0] : undefined;
+        const picked =
+          overlap.preselected ??
+          hit?.target ??
+          (kind && id ? ({ kind, id } as NonNullable<Selection>) : null);
+        if (!picked) return;
+        event.preventDefault();
+        onElementSettings(picked);
       }}
       onKeyDown={(event) => {
         if (selecting) return;
@@ -928,6 +1299,21 @@ export function BimPlan({
               height={viewSize.height / camera.pixelsPerMetre}
               fill={`url(#${gridId})`}
             />
+          </g>
+        )}
+        {tracing && (
+          <g aria-label="Transparenzpause" pointerEvents="none" opacity={tracing.opacity}>
+            {[...tracing.walls, ...tracing.columns].map((outline, i) => (
+              <polygon
+                key={i}
+                points={outline.map((p) => `${p.x},${-p.y}`).join(" ")}
+                fill={tracing.color}
+                fillOpacity={0.35}
+                stroke={tracing.color}
+                strokeWidth={1.5}
+                vectorEffect="non-scaling-stroke"
+              />
+            ))}
           </g>
         )}
         {marquee.box && (
@@ -1105,6 +1491,14 @@ export function BimPlan({
               className="cursor-pointer outline-none focus:stroke-foreground"
               onClick={(event) => {
                 event.stopPropagation();
+                // Regel 1: a click moves the corner at once, also wall ends and corners and the
+                // corners of columns and stairs (E1); right click keeps every point action.
+                if (onCornerPick?.(selection, index, point)) return;
+                onSelect(selection, { x: event.clientX, y: event.clientY }, index, point);
+              }}
+              onContextMenu={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
                 onSelect(selection, { x: event.clientX, y: event.clientY }, index, point);
               }}
               onKeyDown={(event) => {
@@ -1212,6 +1606,275 @@ export function BimPlan({
               </g>
             );
           })()}
+        {selection?.kind === "line" &&
+          onLineLength &&
+          !drawing &&
+          !editSession &&
+          (() => {
+            const line = (storeyOf(project).lines ?? []).find((l) => l.id === selection.id);
+            if (!line) return null;
+            // The segment nearest to the click that selected the line; the first without one.
+            const distance = (a: Point, b: Point, p: Point) => {
+              const dx = b.x - a.x,
+                dy = b.y - a.y;
+              const t = Math.max(
+                0,
+                Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy || 1)),
+              );
+              return Math.hypot(p.x - a.x - dx * t, p.y - a.y - dy * t);
+            };
+            let segment = 0;
+            if (selectionAnchor)
+              line.points.slice(1).forEach((b, i) => {
+                const a = line.points[i]!;
+                const best = line.points[segment + 1]!;
+                if (
+                  distance(a, b, selectionAnchor) <
+                  distance(line.points[segment]!, best, selectionAnchor)
+                )
+                  segment = i;
+              });
+            const a = line.points[segment]!,
+              b = line.points[segment + 1]!;
+            if (Math.hypot(b.x - a.x, b.y - a.y) < 1e-9) return null;
+            return (
+              <LineLengthHelper
+                key={`${line.id}:${segment}`}
+                start={a}
+                end={b}
+                pixelsPerMetre={camera.pixelsPerMetre}
+                onLength={(length, direction) => onLineLength(line.id, segment, length, direction)}
+              />
+            );
+          })()}
+        {sections?.map((stored) => {
+          const section =
+            sectionPreview?.id === stored.id ? { ...stored, ...sectionPreview } : stored;
+          const chosen = selectedSectionId === section.id && !drawing && !editSession;
+          return (
+            <g key={section.id} aria-label={`Schnitt ${section.mark}-${section.mark}`}>
+              <SectionPlanGraphic
+                section={section}
+                pixelsPerMetre={camera.pixelsPerMetre}
+                height={sectionSymbolHeight(section.symbolSize, scaleContext.denominator)}
+                color={chosen ? "#0284c7" : "var(--foreground)"}
+                pick={!!onSectionSettings}
+              />
+              {chosen &&
+                (["start", "end", "move"] as const).map((grip) => {
+                  const point = sectionGripPoint(section, grip);
+                  return (
+                    <circle
+                      key={grip}
+                      data-section-grip={grip}
+                      cx={point.x}
+                      cy={-point.y}
+                      r={5 / camera.pixelsPerMetre}
+                      fill="white"
+                      stroke="#0284c7"
+                      strokeWidth={2}
+                      vectorEffect="non-scaling-stroke"
+                      role="button"
+                      aria-label={
+                        grip === "move"
+                          ? `Schnitt ${section.mark}-${section.mark} verschieben`
+                          : `Schnitt ${section.mark}-${section.mark} ${grip === "start" ? "Anfang" : "Ende"} ziehen`
+                      }
+                      className={grip === "move" ? "cursor-move" : "cursor-pointer"}
+                      onPointerDown={(event) => {
+                        if (event.button !== 0 || pan || !interactive || !onSectionLine) return;
+                        if (!svg.current) return;
+                        event.preventDefault();
+                        event.stopPropagation();
+                        svg.current.focus();
+                        gripClick.current = false;
+                        navigationClick.current = false;
+                        sectionDrag.current = {
+                          id: stored.id,
+                          grip,
+                          pointerId: event.pointerId,
+                          line: { start: stored.start, end: stored.end },
+                        };
+                        svg.current.setPointerCapture(event.pointerId);
+                      }}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                      }}
+                    >
+                      <title>
+                        {grip === "move"
+                          ? "Ziehen verschiebt die Schnittlinie"
+                          : "Ziehen verlängert, kürzt oder dreht die Linie · Shift: nur Länge"}
+                      </title>
+                    </circle>
+                  );
+                })}
+            </g>
+          );
+        })}
+        {drawing &&
+          sectionDraft &&
+          (() => {
+            const aim = resolvedHover?.point;
+            const end = sectionDraft.end ?? aim;
+            if (
+              !end ||
+              Math.hypot(end.x - sectionDraft.start.x, end.y - sectionDraft.start.y) < 1e-6
+            )
+              return null;
+            const look =
+              sectionDraft.end && aim
+                ? sectionLookTo(sectionDraft.start, sectionDraft.end, aim)
+                : "left";
+            return (
+              <g aria-label="Schnitt in Arbeit" opacity={0.85}>
+                <SectionPlanGraphic
+                  section={{
+                    start: sectionDraft.start,
+                    end,
+                    look,
+                    mark: sectionDraft.mark,
+                    ...(sectionDraft.kind ? { kind: sectionDraft.kind } : {}),
+                  }}
+                  pixelsPerMetre={camera.pixelsPerMetre}
+                  height={sectionSymbolHeight(sectionDraft.symbolSize, scaleContext.denominator)}
+                  color="#0284c7"
+                />
+              </g>
+            );
+          })()}
+        {drawing && textPreview && (
+          <g aria-label="Text in Arbeit" opacity={0.85}>
+            <TextGraphic
+              text={textPreview}
+              denominator={scaleContext.denominator}
+              pixelsPerMetre={camera.pixelsPerMetre}
+            />
+          </g>
+        )}
+        {drawing &&
+          stairDraft &&
+          (() => {
+            const aim = resolvedHover?.point;
+            const direction =
+              stairDraft.direction ?? (aim ? stairDirectionTo(stairDraft.start, aim) : null) ?? 0;
+            const turn =
+              stairDraft.direction !== null && aim
+                ? stairTurnTo(stairDraft.start, direction, aim)
+                : stairDraft.values.turn;
+            // TR4: before the direction is fixed the pointer distance is the run length.
+            const drawn =
+              stairDraft.direction === null && aim
+                ? stairTreadForLength(
+                    stairDraft.values,
+                    stairDraft.storeyHeight,
+                    Math.hypot(aim.x - stairDraft.start.x, aim.y - stairDraft.start.y),
+                  )
+                : null;
+            const values =
+              drawn !== null ? { ...stairDraft.values, tread: drawn } : stairDraft.values;
+            const g = stairGeometry(values, stairDraft.storeyHeight);
+            if (!g) return null;
+            const stair = { ...values, turn, start: stairDraft.start, direction };
+            const cm = (m: number) =>
+              (m * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 });
+            return (
+              <g aria-label="Treppe in Arbeit" opacity={0.85}>
+                {aim && (
+                  <text
+                    aria-label="Treppenwerte"
+                    x={aim.x + 14 / camera.pixelsPerMetre}
+                    y={-aim.y + 26 / camera.pixelsPerMetre}
+                    fontSize={12 / camera.pixelsPerMetre}
+                    fill={g.issues.length ? "#dc2626" : "#0284c7"}
+                    pointerEvents="none"
+                  >
+                    {`${g.riserCount} × ${cm(g.riser)} / ${cm(g.tread)} cm · Lauf ${(
+                      (g.flights[0]! - 1) *
+                      g.tread
+                    )
+                      .toFixed(2)
+                      .replace(".", ",")} m${g.issues.length ? " · DIN-Abweichung" : ""}`}
+                  </text>
+                )}
+                <StairPlanGraphic
+                  plan={stairPlan(stair, g, 1 - stairDraft.values.baseOffset)}
+                  pixelsPerMetre={camera.pixelsPerMetre}
+                  color="#0284c7"
+                  width={1.5}
+                />
+              </g>
+            );
+          })()}
+        {drawing && dimensionDraft && (
+          <g pointerEvents="none" aria-label="Maßkette in Arbeit">
+            {dimensionDraft.line && (
+              <DimensionGraphic
+                orientation={dimensionDraft.orientation}
+                offset={(() => {
+                  const line =
+                    dimensionDraft.mode === "line" && resolvedHover
+                      ? resolvedHover.point
+                      : dimensionDraft.line;
+                  return dimensionDraft.orientation === "horizontal" ? line.y : line.x;
+                })()}
+                points={[
+                  ...dimensionDraft.points,
+                  ...(resolvedHover && !dimensionDraft.mode ? [resolvedHover.point] : []),
+                  ...(resolvedHover && dimensionDraft.mode === "add" ? [resolvedHover.point] : []),
+                ]}
+                denominator={scaleContext.denominator}
+                pixelsPerMetre={camera.pixelsPerMetre}
+                color="#0284c7"
+                terminator={dimensionDraft.style?.terminator}
+                units={dimensionDraft.style?.units}
+                textSize={dimensionDraft.style?.textSize}
+              />
+            )}
+            {(() => {
+              // The dimension line position: a dashed guide through the first click.
+              const p =
+                dimensionDraft.mode === "line"
+                  ? (resolvedHover?.point ?? dimensionDraft.line)
+                  : (dimensionDraft.line ?? resolvedHover?.point);
+              if (!p) return null;
+              const far = 1e4;
+              return dimensionDraft.orientation === "horizontal" ? (
+                <line
+                  x1={p.x - far}
+                  y1={-p.y}
+                  x2={p.x + far}
+                  y2={-p.y}
+                  stroke="#0284c7"
+                  strokeOpacity={0.5}
+                  strokeWidth={1 / camera.pixelsPerMetre}
+                  strokeDasharray={`${6 / camera.pixelsPerMetre} ${4 / camera.pixelsPerMetre}`}
+                />
+              ) : (
+                <line
+                  x1={p.x}
+                  y1={-p.y - far}
+                  x2={p.x}
+                  y2={-p.y + far}
+                  stroke="#0284c7"
+                  strokeOpacity={0.5}
+                  strokeWidth={1 / camera.pixelsPerMetre}
+                  strokeDasharray={`${6 / camera.pixelsPerMetre} ${4 / camera.pixelsPerMetre}`}
+                />
+              );
+            })()}
+            {dimensionDraft.points.map((p, i) => (
+              <circle
+                key={i}
+                cx={p.x}
+                cy={-p.y}
+                r={(dimensionDraft.mode === "remove" ? 5 : 3) / camera.pixelsPerMetre}
+                fill={dimensionDraft.mode === "remove" ? "#dc2626" : "#0284c7"}
+              />
+            ))}
+          </g>
+        )}
         {drawing && draftPoints.length > 0 && (
           <polyline
             points={draftPoints.map((p) => `${p.x},${-p.y}`).join(" ")}
@@ -1220,6 +1883,88 @@ export function BimPlan({
             strokeWidth={0.025}
             pointerEvents="none"
           />
+        )}
+        {drawing &&
+          roofGuide &&
+          (() => {
+            const { start, end } = roofGuide;
+            const length = Math.hypot(end.x - start.x, end.y - start.y);
+            const left = { x: -(end.y - start.y) / length, y: (end.x - start.x) / length };
+            const aim = resolvedHover?.point;
+            const side =
+              roofGuide.rise ??
+              (aim &&
+              (end.x - start.x) * (aim.y - start.y) - (end.y - start.y) * (aim.x - start.x) < 0
+                ? "right"
+                : "left");
+            const rise = side === "left" ? left : { x: -left.x, y: -left.y };
+            const mid = { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 };
+            const tip = {
+              x: mid.x + (rise.x * 48) / camera.pixelsPerMetre,
+              y: mid.y + (rise.y * 48) / camera.pixelsPerMetre,
+            };
+            return (
+              <g pointerEvents="none" aria-label="Bezugslinie und Steigrichtung">
+                <line
+                  x1={start.x}
+                  y1={-start.y}
+                  x2={end.x}
+                  y2={-end.y}
+                  stroke="#0284c7"
+                  strokeWidth={2}
+                  strokeDasharray="8 3 2 3"
+                  vectorEffect="non-scaling-stroke"
+                />
+                <line
+                  x1={mid.x}
+                  y1={-mid.y}
+                  x2={tip.x}
+                  y2={-tip.y}
+                  stroke="#0284c7"
+                  strokeWidth={2}
+                  vectorEffect="non-scaling-stroke"
+                />
+                <circle cx={tip.x} cy={-tip.y} r={4 / camera.pixelsPerMetre} fill="#0284c7" />
+                <text
+                  x={tip.x}
+                  y={-tip.y - 8 / camera.pixelsPerMetre}
+                  fontSize={11 / camera.pixelsPerMetre}
+                  fill="#0284c7"
+                >
+                  {roofGuide.rise ? "steigt" : "Klick: steigt hierhin"}
+                </text>
+              </g>
+            );
+          })()}
+        {drawing && closeAtStart && draftPoints.length >= MIN_CLOSING_POINTS && (
+          <circle
+            role="img"
+            aria-label="Startpunkt: Klick schließt den Umriss"
+            cx={draftPoints[0]!.x}
+            cy={-draftPoints[0]!.y}
+            r={6 / camera.pixelsPerMetre}
+            fill={
+              resolvedHover && closesAtStart(draftPoints, resolvedHover.point, "polygon")
+                ? "var(--primary)"
+                : "var(--background)"
+            }
+            stroke="var(--primary)"
+            strokeWidth={2}
+            vectorEffect="non-scaling-stroke"
+            pointerEvents="none"
+          />
+        )}
+        {overlapHint && !editError && hintPoint && (
+          <text
+            role="status"
+            x={hintPoint.x}
+            y={-hintPoint.y - 18 / camera.pixelsPerMetre}
+            fontSize={12 / camera.pixelsPerMetre}
+            fill="#b45309"
+            pointerEvents="none"
+          >
+            {overlapHint}
+          </text>
         )}
         {(drawingResult.error || (placement && editError)) && resolvedHover && (
           <text
@@ -1383,6 +2128,85 @@ export function BimPlan({
               </text>
             </g>
           )}
+        {overlap.state && (
+          <g pointerEvents="none" aria-label="Übereinanderliegende Elemente">
+            {(() => {
+              // Thin turquoise outline of the pre-selected element in its real shape, no fill.
+              const shape = overlap.preselected && overlap.shapeOf(overlap.preselected);
+              if (!shape) return null;
+              const points = shape.points.map((p) => `${p.x},${-p.y}`).join(" ");
+              const Outline = shape.closed === false ? "polyline" : "polygon";
+              return (
+                <Outline
+                  aria-label="Vorauswahl"
+                  points={points}
+                  fill="none"
+                  stroke={CAD_TURQUOISE}
+                  strokeWidth={2}
+                  strokeLinejoin="round"
+                  vectorEffect="non-scaling-stroke"
+                />
+              );
+            })()}
+            {(() => {
+              // Collapsed: one short line. Expanded (after Tab): the elements with a small bar
+              // in front of the pre-selection. Screen-constant size like the snap label.
+              const s = 1 / camera.pixelsPerMetre;
+              const { cycle, point } = overlap.state;
+              const rows = cycle.expanded
+                ? cycle.targets.map((t) => planElementCaption(project, t))
+                : [`${cycle.targets.length} Elemente · Tab`];
+              const x = point.x + 12 * s,
+                y = -point.y + 12 * s,
+                line = 13,
+                left = cycle.expanded ? 12 : 6;
+              const width = (Math.max(...rows.map((r) => r.length)) * 5.6 + left + 8) * s;
+              return (
+                <g aria-label={cycle.expanded ? "Tab-Auswahl" : "Hinweis mehrere Elemente"}>
+                  <rect
+                    x={x}
+                    y={y}
+                    width={width}
+                    height={(rows.length * line + 6) * s}
+                    rx={4 * s}
+                    fill="var(--background)"
+                    fillOpacity={0.94}
+                    stroke={CAD_TURQUOISE}
+                    strokeWidth={1}
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  {rows.map((row, i) => {
+                    const chosen = cycle.expanded && i === cycle.index;
+                    return (
+                      <g key={i}>
+                        {chosen && (
+                          <rect
+                            aria-label="Vorauswahl-Markierung"
+                            x={x + 5 * s}
+                            y={y + (i * line + 4.5) * s}
+                            width={3 * s}
+                            height={10 * s}
+                            rx={1.5 * s}
+                            fill={CAD_TURQUOISE}
+                          />
+                        )}
+                        <text
+                          x={x + left * s}
+                          y={y + (i * line + 13) * s}
+                          fontSize={10 * s}
+                          fontWeight={chosen ? 600 : 400}
+                          fill="var(--foreground)"
+                        >
+                          {row}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </g>
+              );
+            })()}
+          </g>
+        )}
         {selecting && (
           <g pointerEvents="none">
             <rect

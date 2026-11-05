@@ -26,11 +26,16 @@ import {
   documentVisibilityKey,
 } from "../layers/visibility-actions.ts";
 import type { VisibilityHistory, VisibilityAction } from "../layers/visibility-actions.ts";
-import { editAnchor, editAtPointer } from "../../lib/bim/direct-edit.ts";
-import type { EditAction, EditSession, EditTarget } from "../../lib/bim/direct-edit.ts";
-import { commitProject, createHistory, redoProject, undoProject } from "../../lib/bim/history.ts";
-import type { ProjectHistory } from "../../lib/bim/history.ts";
-import type { Point, Project } from "../../lib/bim/model.ts";
+import { editAnchor, editAtPointer } from "./session.ts";
+import type { EditAction, EditSession, EditTarget } from "./session.ts";
+import {
+  commitProject,
+  createHistory,
+  redoProject,
+  undoProject,
+} from "../history/project-history.ts";
+import type { ProjectHistory } from "../history/project-history.ts";
+import type { Point, Project } from "../../domain/project/schema.ts";
 import { commitLayerAssignment, commitLayerManagement } from "../layers/actions.ts";
 import type { ManageLayerRequest } from "../layers/actions.ts";
 import { selectedLayerElement } from "../layers/selection.ts";
@@ -51,7 +56,7 @@ export function supportsHorizontalWorkplaneEdit(
   action: EditAction,
   index: number | null,
 ): boolean {
-  if (target.kind === "window") return action === "axis";
+  if (target.kind === "window" || target.kind === "door") return action === "axis";
   if (target.kind !== "wall") return false;
   if (action === "point" || action === "stretch") return index === 0 || index === 1;
   return ["move", "axis", "x", "y"].includes(action);
@@ -400,9 +405,15 @@ function reduceWithPatterns(
     const resolution = resolveProjectHatchPatterns(snapshot, snapshot, [...catalog.values()]);
     const next = reduceEditing(state, incoming ? { ...event, project: resolution.project } : event);
     if (next.error) return next;
+    // An incoming project was committed as the resolution, and a no-op resolution keeps the
+    // restored step: keep the history's owned snapshot then. Replacing it with the (possibly
+    // mutable) resolution object ended structural sharing for every later commit
+    // (docs/performance/HISTORY_MEMORY.md).
+    const present =
+      incoming || resolution.project === snapshot ? next.history.present : resolution.project;
     return {
       ...next,
-      history: { ...next.history, present: resolution.project },
+      history: { ...next.history, present },
       error: resolution.conflicts.length
         ? `Musterkonflikt: ${resolution.conflicts.join(", ")}. Eingebettete Darstellung erhalten.`
         : (event.patternLibraryError ?? ""),

@@ -1,58 +1,10 @@
 import { PROJECT_MIN_READ_VERSION, PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
-import { assertRasterBudgetChange } from "../../domain/project/raster-budget.ts";
-import { storeyOf } from "../../domain/storeys/access.ts";
-import { sameProjectModel, sameProjectContent } from "../../domain/project/model-equality.ts";
-import {
-  ProjectFileSizeError,
-  assertValidatedProjectSize,
-} from "../../interop/project-file/size.ts";
-import { deserializeProject, validateProject } from "./model.ts";
-import type { Project } from "./model.ts";
-export type ProjectHistory = { past: Project[]; present: Project; future: Project[] };
-export const HISTORY_LIMIT = 100;
+import { ProjectFileSizeError } from "../../interop/project-file/size.ts";
+import { deserializeProject } from "./model.ts";
+import type { Project } from "../../domain/project/schema.ts";
 export { PROJECT_FILE_LIMIT } from "../../interop/project-file/size.ts";
-export function createHistory(project: Project): ProjectHistory {
-  return { past: [], present: validateProject(project), future: [] };
-}
-export function commitProject(
-  history: ProjectHistory,
-  project: Project,
-  options: { legacyFileOpen?: boolean } = {},
-): ProjectHistory {
-  const next = validateProject(project);
-  assertValidatedProjectSize(next);
-  // Preserve the previous serialization boundary's validation of the existing snapshot.
-  const previous = validateProject(history.present);
-  assertValidatedProjectSize(previous);
-  if (!options.legacyFileOpen) assertRasterBudgetChange(previous, next);
-  if (sameProjectContent(next, previous)) return history;
-  if (sameProjectModel(history.present, next)) return { ...history, present: next };
-  return {
-    past: [...history.past, history.present].slice(-HISTORY_LIMIT),
-    present: next,
-    future: [],
-  };
-}
-export function undoProject(history: ProjectHistory): ProjectHistory {
-  const previous = history.past.at(-1);
-  return previous
-    ? {
-        past: history.past.slice(0, -1),
-        present: retainViewSettings(previous, history.present),
-        future: [history.present, ...history.future],
-      }
-    : history;
-}
-export function redoProject(history: ProjectHistory): ProjectHistory {
-  const next = history.future[0];
-  return next
-    ? {
-        past: [...history.past, history.present].slice(-HISTORY_LIMIT),
-        present: retainViewSettings(next, history.present),
-        future: history.future.slice(1),
-      }
-    : history;
-}
+
+/** File bridge only: the history lives in application/history/project-history.ts. */
 export function readProjectFile(text: string): Project {
   try {
     return deserializeProject(text);
@@ -62,39 +14,4 @@ export function readProjectFile(text: string): Project {
       `Ungültige Projektdatei: erwartet wird ein NOVIKOV-JSON-Projekt (Version ${PROJECT_MIN_READ_VERSION} bis ${PROJECT_SCHEMA_VERSION}, Meter) mit gültigen Bauteilen.`,
     );
   }
-}
-
-/** Model undo never rewinds the independent palette settings. Deleted IDs cannot survive. */
-function retainViewSettings(snapshot: Project, current: Project): Project {
-  const requested = snapshot.id === current.id ? current.workingStoreyId : snapshot.workingStoreyId;
-  const workingStoreyId =
-    requested && snapshot.storeys.some((s) => s.id === requested) ? requested : undefined;
-  const ids = new Set(snapshot.layers.map((l) => l.id));
-  const hiddenLayerIds = current.bimVisibility.hiddenLayerIds.filter((id) => ids.has(id));
-  const workingViews =
-    snapshot.id === current.id
-      ? current.workingViews?.filter((view) => snapshot.storeys.some((s) => s.id === view.storeyId))
-      : snapshot.workingViews;
-  const drawingDocuments = snapshot.drawingDocuments?.map((doc) => {
-    const latest =
-      snapshot.id === current.id
-        ? current.drawingDocuments?.find((d) => d.id === doc.id)
-        : undefined;
-    return { ...doc, hiddenLayerIds: (latest ?? doc).hiddenLayerIds.filter((id) => ids.has(id)) };
-  });
-  if (
-    workingStoreyId === snapshot.workingStoreyId &&
-    JSON.stringify(drawingDocuments) === JSON.stringify(snapshot.drawingDocuments) &&
-    JSON.stringify(workingViews) === JSON.stringify(snapshot.workingViews) &&
-    JSON.stringify(hiddenLayerIds) === JSON.stringify(snapshot.bimVisibility.hiddenLayerIds)
-  )
-    return snapshot;
-  const { workingViews: _previousViews, workingStoreyId: _previousStorey, ...model } = snapshot;
-  return {
-    ...model,
-    ...(workingStoreyId ? { workingStoreyId } : {}),
-    ...(drawingDocuments ? { drawingDocuments } : {}),
-    ...(workingViews ? { workingViews } : {}),
-    bimVisibility: { hiddenLayerIds },
-  };
 }

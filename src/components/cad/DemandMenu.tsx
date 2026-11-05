@@ -1,43 +1,9 @@
 import { closedContour } from "@/application/direct-edit/contour";
 import { useEffect, useRef, useState } from "react";
-import type { Point, Project } from "../../lib/bim/model.ts";
+import type { Point, Project } from "../../domain/project/schema.ts";
 import type { Selection } from "./bim-view.ts";
 import { clampMenuPosition, selectionSummary } from "./demand-menu.ts";
-import type { EditAction } from "@/lib/bim/direct-edit";
-import {
-  AlongAxisIcon,
-  AxisIcon,
-  EdgeStretchIcon,
-  ElementMoveIcon,
-  KinkIcon,
-  OffsetIcon,
-  PointMoveIcon,
-  PointStretchIcon,
-  PropertiesIcon,
-  ReferencesIcon,
-} from "./DemandMenuIcons";
-
-function IconButton({
-  label,
-  onClick,
-  children,
-}: {
-  label: string;
-  onClick: () => void;
-  children: import("react").ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      title={label}
-      onClick={onClick}
-      className="flex aspect-square items-center justify-center rounded-md border border-border bg-card/60 text-foreground transition-colors hover:bg-muted"
-    >
-      {children}
-    </button>
-  );
-}
+import type { EditAction } from "@/application/direct-edit/session";
 
 export function DemandMenu({
   calibrationControls,
@@ -45,36 +11,50 @@ export function DemandMenu({
   selection,
   position,
   onPosition,
+  onResetPosition,
   onInfo,
   pointIndex,
   edgeIndex,
   onAction,
   onReferences,
+  onChainAction,
   onMoveSelection,
+  onDeleteSelection,
   selectionCount = 0,
+  solid = false,
 }: {
+  /** Opened from the 3D view: slab outlines are edited in the plan only. */
+  solid?: boolean;
   calibrationControls?: import("react").ReactNode;
   onMoveSelection?: (() => void) | undefined;
+  /** Shared delete operation for the current selection (single or multiple elements). */
+  onDeleteSelection?: (() => void) | undefined;
   selectionCount?: number;
   project: Project;
   selection: Selection;
   position: Point;
   onPosition: (point: Point) => void;
+  /** Forget the remembered position, so the menu follows the cursor again. */
+  onResetPosition?: (() => void) | undefined;
   onInfo: () => void;
   pointIndex: number | null;
   edgeIndex?: number | null;
   onAction: (action: EditAction) => void;
   onReferences?: (() => void) | undefined;
+  /** Chain edits of a selected dimension chain (docs/MASSKETTE.md, M2–M4). */
+  onChainAction?: ((action: "add" | "remove" | "line") => void) | undefined;
 }) {
   const panel = useRef<HTMLDivElement>(null);
   const drag = useRef<{ id: number; pointer: Point; origin: Point } | null>(null);
-  const [bounds, setBounds] = useState({
+  const [bounds, setBounds] = useState<Parameters<typeof clampMenuPosition>[1]>({
     width: 1024,
     height: 768,
     menuWidth: 240,
     menuHeight: 160,
   });
   useEffect(() => {
+    // The command bar is an obstacle: the menu must never cover it (it grows with previews).
+    const obstacles = () => [...document.querySelectorAll("[data-menu-obstacle]")];
     const measure = () => {
       const rect = panel.current?.getBoundingClientRect();
       setBounds({
@@ -82,10 +62,15 @@ export function DemandMenu({
         height: window.innerHeight,
         menuWidth: rect?.width ?? 240,
         menuHeight: rect?.height ?? 160,
+        obstacles: obstacles().map((element) => {
+          const { left, top, right, bottom } = element.getBoundingClientRect();
+          return { left, top, right, bottom };
+        }),
       });
     };
     const observer = new ResizeObserver(measure);
     if (panel.current) observer.observe(panel.current);
+    for (const element of obstacles()) observer.observe(element);
     window.addEventListener("resize", measure);
     measure();
     return () => {
@@ -95,7 +80,10 @@ export function DemandMenu({
   }, []);
   const visible = clampMenuPosition(position, bounds);
   const summary = selectionSummary(project, selection);
-  if (!summary && !onReferences && !onMoveSelection && !calibrationControls) return null;
+  // Wall-hosted openings only move along their wall.
+  const opening = selection?.kind === "window" || selection?.kind === "door";
+  if (!summary && !onReferences && !onMoveSelection && !onDeleteSelection && !calibrationControls)
+    return null;
   return (
     <div
       ref={panel}
@@ -103,14 +91,15 @@ export function DemandMenu({
       role="region"
       aria-label="Elementmenü"
       data-testid="demand-menu"
-      className="glass-panel-strong fixed z-50 w-44 max-w-[calc(100vw-16px)] overflow-auto rounded-lg border p-2 text-xs shadow-lg"
+      className="glass-panel-strong fixed z-50 w-36 max-w-[calc(100vw-16px)] overflow-auto rounded-lg border p-1 text-[11px] leading-tight shadow-lg"
       style={{ left: visible.x, top: visible.y, maxHeight: "calc(100vh - 16px)" }}
     >
       <button
         type="button"
         aria-label="Menü verschieben"
-        title="Ziehen oder mit Pfeiltasten verschieben"
-        className="mb-2 w-full touch-none cursor-move rounded bg-muted px-2 py-1 text-left font-semibold"
+        title="Ziehen oder Pfeiltasten: Position merken · Doppelklick: wieder am Mauszeiger"
+        onDoubleClick={() => onResetPosition?.()}
+        className="mb-1 w-full touch-none cursor-move truncate rounded bg-muted px-1.5 py-0.5 text-left text-[10px] font-semibold"
         onPointerDown={(event) => {
           if (event.button !== 0) return;
           event.currentTarget.setPointerCapture(event.pointerId);
@@ -162,79 +151,194 @@ export function DemandMenu({
         {summary && pointIndex !== null ? ` · Punkt ${pointIndex + 1}` : ""}
       </button>
 
-      {calibrationControls && <div className="mb-1.5 grid gap-1">{calibrationControls}</div>}
-      <div className="grid grid-cols-4 gap-1">
+      <div className="grid gap-px">
+        {calibrationControls}
         {onMoveSelection && (
-          <IconButton
-            label={selectionCount === 1 ? "Element frei bewegen" : "Auswahl frei bewegen"}
+          <button
+            type="button"
+            className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+            data-command="move-selection"
             onClick={onMoveSelection}
           >
-            <ElementMoveIcon />
-          </IconButton>
+            {selectionCount === 1 ? "Element frei bewegen" : "Auswahl frei bewegen"}
+          </button>
         )}
-        {selection && selection.kind !== "reference" && summary && (
+        {onReferences && selection?.kind !== "dimension" && (
+          <button
+            type="button"
+            className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+            data-command="references"
+            onClick={onReferences}
+          >
+            Referenzen auswählen
+          </button>
+        )}
+        {selection?.kind === "dimension" && summary && onChainAction && (
           <>
-            {selection.kind !== "window" && pointIndex !== null && (
-              <>
-                <IconButton label="Punkt frei bewegen" onClick={() => onAction("point")}>
-                  <PointMoveIcon />
-                </IconButton>
-              </>
-            )}
-            {selection.kind !== "window" && (
-              <IconButton label="Element frei bewegen" onClick={() => onAction("move")}>
-                <ElementMoveIcon />
-              </IconButton>
-            )}
-            {edgeIndex == null && (
-              <IconButton
-                label={selection.kind === "window" ? "Fenster entlang Wand" : "Element entlang Achse"}
-                onClick={() => onAction("axis")}
+            {(
+              [
+                ["add", "chain-add", "Punkt hinzufügen"],
+                ["remove", "chain-remove", "Punkt entfernen"],
+                ["line", "chain-line", "Maßlinie verschieben"],
+              ] as const
+            ).map(([action, command, label]) => (
+              <button
+                key={action}
+                type="button"
+                className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+                data-command={command}
+                onClick={() => onChainAction(action)}
               >
-                <AlongAxisIcon window={selection.kind === "window"} />
-              </IconButton>
-            )}
-            {selection.kind !== "window" && (
-              <>
-                <IconButton label="Element auf X-Achse" onClick={() => onAction("x")}>
-                  <AxisIcon axis="x" />
-                </IconButton>
-                <IconButton label="Element auf Y-Achse" onClick={() => onAction("y")}>
-                  <AxisIcon axis="y" />
-                </IconButton>
-              </>
-            )}
-            {closedContour(project, selection) && (
-              <IconButton label="Kontur versetzen (Offset)" onClick={() => onAction("offset")}>
-                <OffsetIcon />
-              </IconButton>
-            )}
-            {edgeIndex != null && (
-              <>
-                <IconButton label="Knicken" onClick={() => onAction("insert")}>
-                  <KinkIcon />
-                </IconButton>
-                <IconButton label="Seite strecken" onClick={() => onAction("edge")}>
-                  <EdgeStretchIcon />
-                </IconButton>
-              </>
-            )}
-            {selection.kind !== "window" && pointIndex !== null && (
-              <>
-                <IconButton label="Punkt in Flucht strecken" onClick={() => onAction("stretch")}>
-                  <PointStretchIcon />
-                </IconButton>
-              </>
-            )}
-            <IconButton label="Werkzeugeigenschaften" onClick={onInfo}>
-              <PropertiesIcon />
-            </IconButton>
+                {label}
+              </button>
+            ))}
+            <button
+              type="button"
+              className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+              data-command="move"
+              onClick={() => onAction("move")}
+            >
+              Ganze Kette verschieben
+            </button>
+            <button
+              type="button"
+              data-command="tool-settings"
+              onClick={onInfo}
+              className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+            >
+              Werkzeugeigenschaften
+            </button>
           </>
         )}
-        {onReferences && (
-          <IconButton label="Referenzen auswählen" onClick={onReferences}>
-            <ReferencesIcon />
-          </IconButton>
+        {selection &&
+          selection.kind !== "reference" &&
+          selection.kind !== "dimension" &&
+          summary && (
+            <>
+              {/* Slab outlines are edited in the plan only (docs/SLAB_ELEMENT.md, E1). */}
+              {/* Roof outlines likewise (docs/ROOF_ELEMENT.md, D3). */}
+              {((selection.kind !== "slab" && selection.kind !== "roof") || !solid) && (
+                <>
+                  {closedContour(project, selection) && (
+                    <button
+                      type="button"
+                      className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+                      data-command="offset"
+                      onClick={() => onAction("offset")}
+                    >
+                      Kontur versetzen (Offset)
+                    </button>
+                  )}
+                  {edgeIndex != null && (
+                    <>
+                      <button
+                        type="button"
+                        className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+                        data-command="insert"
+                        onClick={() => onAction("insert")}
+                      >
+                        Knicken
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+                        data-command="edge"
+                        onClick={() => onAction("edge")}
+                      >
+                        Seite strecken
+                      </button>
+                    </>
+                  )}
+                  {!opening && pointIndex !== null && (
+                    <>
+                      <button
+                        type="button"
+                        className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+                        data-command="point"
+                        onClick={() => onAction("point")}
+                      >
+                        Punkt frei bewegen
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+                        data-command="stretch"
+                        onClick={() => onAction("stretch")}
+                      >
+                        Punkt in Flucht strecken
+                      </button>
+                    </>
+                  )}
+                </>
+              )}
+              {!opening && (
+                <button
+                  type="button"
+                  className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+                  data-command="move"
+                  onClick={() => onAction("move")}
+                >
+                  Element frei bewegen
+                </button>
+              )}
+              {edgeIndex == null &&
+                selection.kind !== "slab" &&
+                selection.kind !== "roof" &&
+                selection.kind !== "column" &&
+                selection.kind !== "stair" &&
+                selection.kind !== "text" && (
+                  <button
+                    type="button"
+                    className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+                    data-command="axis"
+                    onClick={() => onAction("axis")}
+                  >
+                    {selection.kind === "window"
+                      ? "Fenster entlang Wand"
+                      : selection.kind === "door"
+                        ? "Tür entlang Wand"
+                        : "Element entlang Achse"}
+                  </button>
+                )}
+              {!opening && (
+                <>
+                  <button
+                    type="button"
+                    className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+                    data-command="x"
+                    onClick={() => onAction("x")}
+                  >
+                    Element auf X-Achse
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+                    data-command="y"
+                    onClick={() => onAction("y")}
+                  >
+                    Element auf Y-Achse
+                  </button>
+                </>
+              )}
+              <button
+                type="button"
+                data-command="tool-settings"
+                onClick={onInfo}
+                className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+              >
+                Werkzeugeigenschaften
+              </button>
+            </>
+          )}
+        {onDeleteSelection && (
+          <button
+            type="button"
+            data-command="delete"
+            className="rounded px-1.5 py-0.5 text-left text-destructive hover:bg-muted"
+            onClick={onDeleteSelection}
+          >
+            {selectionCount > 1 ? "Auswahl löschen" : "Löschen"} (Entf)
+          </button>
         )}
       </div>
     </div>

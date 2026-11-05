@@ -1,3 +1,11 @@
+import { RoofProperties } from "./RoofProperties";
+import { WINDOW_INSERT_DEFAULTS } from "@/domain/elements/window/insert";
+import { RoomProperties } from "./RoomProperties";
+import { ColumnProperties } from "./ColumnProperties";
+import { StairProperties } from "./StairProperties";
+import { DimensionProperties } from "./DimensionProperties";
+import { TextProperties } from "./TextProperties";
+import { openingOverlapHintFor } from "@/application/openings/overlap-hint";
 import { WallHeightProperties } from "./WallHeightProperties";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { PropertyForm } from "./PropertyForm";
@@ -6,20 +14,43 @@ import { HatchInspector } from "./HatchControls";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { addWindow, updateWall, updateWindow, wallLength } from "@/lib/bim/model";
-import type { Project } from "@/lib/bim/model";
+import { addWindow, updateWindow } from "@/application/windows/actions";
+import { wallLength } from "@/domain/project/schema";
+import { updateWall } from "@/application/walls/actions";
+import { setWallRenovation } from "@/application/walls/renovation";
+import {
+  WALL_RENOVATIONS,
+  WALL_RENOVATION_LABELS,
+  wallRenovation,
+  type WallRenovation,
+} from "@/domain/elements/wall/renovation";
+import type { Project } from "@/domain/project/schema";
 import { endAtLength } from "./bim-view";
 import type { Selection } from "./bim-view";
 import { LineInspector } from "./LineControls";
+import { DoorProperties } from "./DoorProperties";
+import { SlabProperties } from "./SlabProperties";
+import { OverlapHint } from "./OverlapHint";
+import { MarkField } from "./MarkField";
+import { newOpeningMark, setOpeningMark } from "@/application/openings/marks";
+import { duplicateMarkHint } from "@/domain/elements/wall/opening-marks";
 
 type Props = {
   project: Project;
   selection: Selection;
   onChange: (project: Project, selection: Selection) => void;
   onWallOffset: (base: Project, wallId: string, offset: number) => void;
+  /** The bar shows the renovation status; the element window has its own tab for it. */
+  renovationField?: boolean;
 };
 
-export function BimInspector({ project, selection, onChange, onWallOffset }: Props) {
+export function BimInspector({
+  project,
+  selection,
+  onChange,
+  onWallOffset,
+  renovationField = true,
+}: Props) {
   const [error, setError] = useState("");
   const hatch =
     selection?.kind === "hatch"
@@ -31,6 +62,80 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
       ? storeyOf(project).lines?.find((item) => item.id === selection.id)
       : undefined;
   if (line) return <LineInspector project={project} line={line} onChange={onChange} />;
+  const door =
+    selection?.kind === "door"
+      ? storeyOf(project).doors?.find((item) => item.id === selection.id)
+      : undefined;
+  if (door)
+    return (
+      <DoorProperties project={project} door={door} selection={selection} onChange={onChange} />
+    );
+  const slab =
+    selection?.kind === "slab"
+      ? storeyOf(project).slabs?.find((item) => item.id === selection.id)
+      : undefined;
+  if (slab)
+    return (
+      <SlabProperties project={project} slab={slab} selection={selection} onChange={onChange} />
+    );
+  const roof =
+    selection?.kind === "roof"
+      ? storeyOf(project).roofs?.find((item) => item.id === selection.id)
+      : undefined;
+  if (roof)
+    return (
+      <RoofProperties project={project} roof={roof} selection={selection} onChange={onChange} />
+    );
+  const text =
+    selection?.kind === "text"
+      ? storeyOf(project).texts?.find((item) => item.id === selection.id)
+      : undefined;
+  if (text)
+    return (
+      <TextProperties project={project} text={text} selection={selection} onChange={onChange} />
+    );
+  const dimension =
+    selection?.kind === "dimension"
+      ? storeyOf(project).dimensions?.find((item) => item.id === selection.id)
+      : undefined;
+  if (dimension)
+    return (
+      <DimensionProperties
+        project={project}
+        dimension={dimension}
+        selection={selection}
+        onChange={onChange}
+      />
+    );
+  const column =
+    selection?.kind === "column"
+      ? storeyOf(project).columns?.find((item) => item.id === selection.id)
+      : undefined;
+  if (column)
+    return (
+      <ColumnProperties
+        project={project}
+        column={column}
+        selection={selection}
+        onChange={onChange}
+      />
+    );
+  const stair =
+    selection?.kind === "stair"
+      ? storeyOf(project).stairs?.find((item) => item.id === selection.id)
+      : undefined;
+  if (stair)
+    return (
+      <StairProperties project={project} stair={stair} selection={selection} onChange={onChange} />
+    );
+  const room =
+    selection?.kind === "room"
+      ? storeyOf(project).rooms?.find((item) => item.id === selection.id)
+      : undefined;
+  if (room)
+    return (
+      <RoomProperties project={project} room={room} selection={selection} onChange={onChange} />
+    );
   const wall =
     selection?.kind === "wall"
       ? storeyOf(project).walls.find((item) => item.id === selection.id)
@@ -53,7 +158,8 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
   if (!wall && !opening)
     return (
       <p className="p-3 text-xs text-muted-foreground">
-        Wand, Fenster, Linie oder Schraffur auswählen, um die Eigenschaften hier zu bearbeiten.
+        Wand, Fenster, Tür, Decke, Dach, Raum, Linie oder Schraffur auswählen, um die Eigenschaften
+        hier zu bearbeiten.
       </p>
     );
   const fields = wall
@@ -92,6 +198,21 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
       {opening && (
         <p className="max-w-48 truncate text-xs text-muted-foreground">Wall: {opening.wallId}</p>
       )}
+      {opening && <OverlapHint text={openingOverlapHintFor(project, opening.id)} />}
+      {opening && (
+        <MarkField
+          value={opening.mark ?? ""}
+          hint={duplicateMarkHint(project, opening.id)}
+          onApply={(mark) =>
+            run(() =>
+              onChange(
+                setOpeningMark(project, { kind: "window", id: opening.id }, mark),
+                selection,
+              ),
+            )
+          }
+        />
+      )}
       <PropertyForm
         onSubmit={(event) => {
           event.preventDefault();
@@ -126,11 +247,42 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
               step="any"
               required
               defaultValue={value}
-              className="mt-1 h-8 w-28"
+              // With a build-up the thickness is the sum of its layers (docs/WANDAUFBAU.md).
+              readOnly={name === "thickness" && !!wall?.assemblyId}
+              title={
+                name === "thickness" && wall?.assemblyId
+                  ? "Aus dem Wandaufbau (Reiter Wandaufbau)"
+                  : undefined
+              }
+              className="mt-1 h-8 w-28 read-only:opacity-60"
             />
           </label>
         ))}
       </PropertyForm>
+      {wall && renovationField && (
+        <label className="block text-xs">
+          Bauzustand
+          <select
+            aria-label="Bauzustand"
+            className="mt-1 block h-8 rounded border bg-background px-1"
+            value={wallRenovation(wall)}
+            onChange={(e) =>
+              run(() =>
+                onChange(
+                  setWallRenovation(project, [wall.id], e.target.value as WallRenovation),
+                  selection,
+                ),
+              )
+            }
+          >
+            {WALL_RENOVATIONS.map((status) => (
+              <option key={status} value={status}>
+                {WALL_RENOVATION_LABELS[status]}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       {wall && (
         <WallHeightProperties
           project={project}
@@ -259,6 +411,8 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
                   wallId: wall.id,
                   ...defaultDrawingWindow,
                   position: 0.5,
+                  mark: newOpeningMark(project, "window"),
+                  insert: WINDOW_INSERT_DEFAULTS,
                 }),
                 { kind: "window", id },
               );

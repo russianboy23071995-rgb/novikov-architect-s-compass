@@ -5,7 +5,8 @@ import {
   createMovementOriginQuery,
   movementCorners,
 } from "../src/rendering/viewport/movement-origin.ts";
-import { buildBuildingSolid, initialCamera } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
+import { initialCamera } from "../src/lib/bim/geometry.ts";
 import { createSolidRenderer } from "../src/rendering/viewport/solid-renderer.ts";
 import { createProjectionFrame } from "../src/geometry/projections/orthographic.ts";
 import { createProjectionState } from "../src/rendering/viewport/projection-state.ts";

@@ -6,9 +6,7 @@ import {
   Layers2,
   Contrast,
   Bot,
-  Box,
   Check,
-  Grid3X3,
   LayoutGrid,
   Menu,
   Mic,
@@ -34,7 +32,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { ViewMode, ViewportLayout } from "./cad-types";
+import type { ViewportLayout } from "./cad-types";
 
 const layouts: { id: ViewportLayout; label: string; cells: string }[] = [
   { id: "single", label: "Single View", cells: "▣" },
@@ -53,16 +51,10 @@ type TopToolbarProps = {
   measuring: boolean;
   onImportImage: () => void;
   onCanvasDisplay: () => void;
-  mode: ViewMode;
   layout: ViewportLayout;
-  grid: boolean;
-  snap: boolean;
   navigatorOpen: boolean;
   demandOpen: boolean;
-  onMode: (mode: ViewMode) => void;
   onLayout: (layout: ViewportLayout) => void;
-  onGrid: () => void;
-  onSnap: () => void;
   onNavigator: () => void;
   onDemand: () => void;
   onAction: (text: string) => void;
@@ -75,7 +67,19 @@ type TopToolbarProps = {
   onRedo: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  /** Older undo steps were dropped to stay within the history memory budget. */
+  historyTrimmed?: boolean;
   onLayers: () => void;
+  onRoomList: () => void;
+  /** Element list with quantities (docs/MENGEN.md, ML2). */
+  onElementList: () => void;
+  /** Modify menu (docs/KONTEXTMENUE.md): only Pipette and trimming, no delete or order. */
+  onPipette: () => void;
+  canPipette: boolean;
+  onTrim: () => void;
+  canTrim: boolean;
+  onUntrim: () => void;
+  canUntrim: boolean;
   canUndoVisibility: boolean;
   canRedoVisibility: boolean;
   selectedLayer: { id: string; name: string } | null;
@@ -88,8 +92,11 @@ function IconControl({
   onClick,
   active,
   disabled,
+  hint,
 }: {
   label: string;
+  /** Second tooltip line, e.g. why a control behaves differently. */
+  hint?: string;
   children: React.ReactNode;
   onClick?: () => void;
   active?: boolean;
@@ -113,7 +120,10 @@ function IconControl({
           {children}
         </Button>
       </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
+      <TooltipContent>
+        {label}
+        {hint && <div className="text-[10px] opacity-80">{hint}</div>}
+      </TooltipContent>
     </Tooltip>
   );
 }
@@ -187,6 +197,34 @@ export function TopToolbar(props: TopToolbarProps) {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+            ) : item === "Modify" ? (
+              <DropdownMenu key={item}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
+                  >
+                    Modify
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem disabled={!props.canPipette} onSelect={props.onPipette}>
+                    Parameter übernehmen (Pipette)
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    disabled={!props.canTrim}
+                    title={props.canTrim ? undefined : "Wände und genau ein Dach auswählen."}
+                    onSelect={props.onTrim}
+                  >
+                    Trimmen…
+                  </DropdownMenuItem>
+                  <DropdownMenuItem disabled={!props.canUntrim} onSelect={props.onUntrim}>
+                    Trimmung aufheben
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : item === "Insert" ? (
               <DropdownMenu key={item}>
                 <DropdownMenuTrigger asChild>
@@ -212,9 +250,7 @@ export function TopToolbar(props: TopToolbarProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem onSelect={props.onCanvasDisplay}>
-                    Canvas-Darstellung…
-                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={props.onCanvasDisplay}>Darstellung…</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
@@ -238,13 +274,20 @@ export function TopToolbar(props: TopToolbarProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem onSelect={props.onLayers}>Ebenen</DropdownMenuItem>
+            <DropdownMenuItem onSelect={props.onRoomList}>Raumliste</DropdownMenuItem>
+            <DropdownMenuItem onSelect={props.onElementList}>Bauteilliste</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         <div className="flex items-center gap-0.5 border-r border-border pr-2">
           <IconControl label="Messen" onClick={props.onMeasure} active={props.measuring}>
             <Ruler className="size-4" />
           </IconControl>
-          <IconControl label="Undo" onClick={props.onUndo} disabled={!props.canUndo}>
+          <IconControl
+            label="Undo"
+            onClick={props.onUndo}
+            disabled={!props.canUndo}
+            {...(props.historyTrimmed ? { hint: "Verlauf gekürzt (Speichergrenze)" } : {})}
+          >
             <Undo2 />
           </IconControl>
           <IconControl label="Redo" onClick={props.onRedo} disabled={!props.canRedo}>
@@ -331,24 +374,6 @@ export function TopToolbar(props: TopToolbarProps) {
           </IconControl>
         </div>
         <div className="ml-auto flex shrink-0 items-center gap-0.5">
-          <div className="flex h-8 items-center rounded-md border border-border bg-background/30 p-0.5 shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-xl">
-            {(["2D", "3D"] as ViewMode[]).map((mode) => (
-              <Button
-                key={mode}
-                variant="ghost"
-                size="sm"
-                onClick={() => props.onMode(mode)}
-                className={cn(
-                  "h-6 rounded-sm px-2 text-[11px]",
-                  props.mode === mode &&
-                    "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground",
-                )}
-              >
-                {mode === "2D" ? <Grid3X3 /> : <Box />}
-                {mode}
-              </Button>
-            ))}
-          </div>
           <DropdownMenu>
             <Tooltip delayDuration={300}>
               <TooltipTrigger asChild>
@@ -384,20 +409,6 @@ export function TopToolbar(props: TopToolbarProps) {
           <IconControl label="Orbit view" onClick={() => props.onAction("Orbit mode")}>
             <Rotate3D />
           </IconControl>
-          <IconControl label="Grid" active={props.grid} onClick={props.onGrid}>
-            <Grid3X3 />
-          </IconControl>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn(
-              "h-8 px-2 text-[11px] text-muted-foreground",
-              props.snap && "bg-primary/15 text-primary",
-            )}
-            onClick={props.onSnap}
-          >
-            SNAP
-          </Button>
           <div className="mx-1 h-5 w-px bg-border" />
           <IconControl
             label="NOVIKOV AI"

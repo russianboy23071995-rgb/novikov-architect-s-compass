@@ -2,18 +2,16 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createEditingState, editingReducer, previewEdit } from "./controller.ts";
-import {
-  createProject,
-  addWall,
-  addWindow,
-  addLine,
-  serializeProject,
-  updateWall,
-} from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
+import { addWindow } from "../windows/actions.ts";
+import { addLine } from "../lines/actions.ts";
+import { addWall, updateWall } from "../walls/actions.ts";
 import { readProjectFile } from "../../lib/bim/history.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
+import { isOwnedProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 
 const wall = { kind: "wall" as const, id: "wall" };
 const initial = () =>
@@ -1031,4 +1029,36 @@ test("window and line properties share the same layer transition without changin
     assert.equal(storeyOf(next.history.present).windows[0]!.wallId, "wall");
     assert.deepEqual(buildSolid(next.history.present), buildSolid(state.history.present));
   }
+});
+
+test("pattern resolution keeps the owned history snapshot so later commits share the model", () => {
+  const wall = (id: string, y: number) => ({
+    id,
+    start: { x: 0, y },
+    end: { x: 5, y },
+    thickness: 0.3,
+    height: 3,
+  });
+  const source = addWall(addWall(createProject("p", "s0"), wall("a", 0)), wall("b", 4));
+  let state = createEditingState(createProject("other", "s0"));
+  // A file opened while the pattern library is known (school acceptance run, 25.10.2026).
+  state = editingReducer(state, {
+    type: "load-project",
+    project: readProjectFile(serializeProject(source)),
+    patternRecords: [],
+  });
+  assert.equal(isOwnedProjectSnapshot(state.history.present), true);
+  const before = state.history.present;
+  state = editingReducer(state, {
+    type: "project",
+    project: updateWall(before, "a", { end: { x: 6, y: 0 } }),
+    patternRecords: [],
+  });
+  assert.equal(isOwnedProjectSnapshot(state.history.present), true);
+  assert.equal(state.history.past.at(-1), before);
+  // The unchanged wall is the same object in both steps: the history shares it.
+  const unchanged = (p: typeof before) => storeyOf(p).walls.find((w) => w.id === "b");
+  assert.equal(unchanged(state.history.present), unchanged(before));
+  state = editingReducer(state, { type: "undo", patternRecords: [] });
+  assert.equal(state.history.present, before);
 });

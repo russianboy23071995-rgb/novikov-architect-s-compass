@@ -1,5 +1,5 @@
 import { deflateSync } from "node:zlib";
-import { createProject } from "../src/lib/bim/model.ts";
+import { createProject } from "../src/application/projects/create.ts";
 import { validateProject } from "../src/domain/project/schema.ts";
 /** Real RGB PNGs with distinct solid colours: compression does not reduce decoded pixels. */
 export function rasterFixture(count: number, duplicate = false) {

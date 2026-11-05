@@ -1,14 +1,16 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
-import { createProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
 import { commitLayerManagement } from "./actions.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { previewLayerAssignment, commitLayerAssignment } from "./actions.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { addLine, serializeProject } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { addLine } from "../lines/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
-import { createHistory, undoProject, redoProject, readProjectFile } from "../../lib/bim/history.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { createHistory, undoProject, redoProject } from "../history/project-history.ts";
+import { readProjectFile } from "../../lib/bim/history.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 
 const fixture = () =>
@@ -144,7 +146,8 @@ test("layer management rejects empty/duplicate names, colliding IDs and stale co
 });
 
 test("existing duplicate display names remain loadable and can be disambiguated by stable ID", () => {
-  const p = fixture().present;
+  // Committed snapshots are frozen; prepare the legacy file content from a mutable copy.
+  const p = structuredClone(fixture().present);
   p.layers[0]!.name = "Bestand";
   p.layers[1]!.name = "Bestand";
   const h = createHistory(readProjectFile(serializeProject(p)));

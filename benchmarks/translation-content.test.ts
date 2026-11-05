@@ -12,9 +12,10 @@ import {
   commitProject,
   undoProject,
   redoProject,
-  readProjectFile,
-} from "../src/lib/bim/history.ts";
-import { serializeProject, validateProject } from "../src/lib/bim/model.ts";
+} from "../src/application/history/project-history.ts";
+import { readProjectFile } from "../src/lib/bim/history.ts";
+import { serializeProject } from "../src/lib/bim/model.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { createProjectRecoveryCodec } from "../src/interop/project-file/recovery-codec.ts";
 import { fullSelectionMove } from "./selection-move-oracle.ts";
 import { sameProjectContent } from "../src/domain/project/model-equality.ts";

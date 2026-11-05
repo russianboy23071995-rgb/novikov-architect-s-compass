@@ -6,7 +6,7 @@ export function LinePattern({
   line,
   pixelsPerMetre,
 }: {
-  line: DrawingLine;
+  line: Pick<DrawingLine, "points" | "pattern" | "repeatLength" | "penWidth" | "color">;
   pixelsPerMetre: number;
 }) {
   const id = useId();

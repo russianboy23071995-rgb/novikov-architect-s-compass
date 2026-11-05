@@ -1,0 +1,138 @@
+{
+  "date": "2026-10-26",
+  "states": {
+    "main": "14f6681",
+    "neu": "perf/picking-per-storey"
+  },
+  "notes": "Browser-Schullauf l mit Bildern, Fenster sichtbar, drei Wechselpaare neu/main. Profil (js-profile, 10 ms, je ein Lauf): buildWorldPicking im 3D-Fenster main 29, neu 23 Stichproben; nach dem Türziehen (Bearbeitung in 3D) neu 1 Stichprobe.",
+  "node": {
+    "s": {
+      "rebuildFullMs": 65.2,
+      "rebuildPerStoreyMs": 11.8,
+      "clickFullScanMs": 4.54,
+      "clickIndexMs": 0.07,
+      "checked": 768,
+      "mismatches": 0
+    },
+    "l": {
+      "rebuildFullMs": 314.4,
+      "rebuildPerStoreyMs": 53.2,
+      "clickFullScanMs": 14.35,
+      "clickIndexMs": 0.03,
+      "checked": 768,
+      "mismatches": 0
+    },
+    "x": {
+      "rebuildFullMs": 3615.2,
+      "rebuildPerStoreyMs": 580.9,
+      "clickFullScanMs": 113.78,
+      "clickIndexMs": 0.25,
+      "checked": 768,
+      "mismatches": 0
+    }
+  },
+  "runs": [
+    {
+      "state": "main",
+      "run": 1,
+      "steps": {
+        "Wandlänge – Übernehmen": 153,
+        "Löschen (Entf)": 285,
+        "2D → 3D": 158,
+        "3D – Szene fertig": 806,
+        "3D: Tür entlang Wand ziehen": 1769,
+        "3D → 2D": 108
+      },
+      "session": 158,
+      "sessionP95": 174,
+      "redo": 108,
+      "undo": 14,
+      "errors": 0
+    },
+    {
+      "state": "main",
+      "run": 2,
+      "steps": {
+        "Wandlänge – Übernehmen": 167,
+        "Löschen (Entf)": 293,
+        "2D → 3D": 167,
+        "3D – Szene fertig": 834,
+        "3D: Tür entlang Wand ziehen": 1753,
+        "3D → 2D": 152
+      },
+      "session": 160,
+      "sessionP95": 176,
+      "redo": 111,
+      "undo": 14,
+      "errors": 0
+    },
+    {
+      "state": "main",
+      "run": 3,
+      "steps": {
+        "Wandlänge – Übernehmen": 159,
+        "Löschen (Entf)": 295,
+        "2D → 3D": 153,
+        "3D – Szene fertig": 832,
+        "3D: Tür entlang Wand ziehen": 1720,
+        "3D → 2D": 138
+      },
+      "session": 161,
+      "sessionP95": 181,
+      "redo": 112,
+      "undo": 14,
+      "errors": 0
+    },
+    {
+      "state": "neu",
+      "run": 1,
+      "steps": {
+        "Wandlänge – Übernehmen": 178,
+        "Löschen (Entf)": 311,
+        "2D → 3D": 166,
+        "3D – Szene fertig": 845,
+        "3D: Tür entlang Wand ziehen": 1599,
+        "3D → 2D": 97
+      },
+      "session": 162,
+      "sessionP95": 193,
+      "redo": 125,
+      "undo": 14,
+      "errors": 0
+    },
+    {
+      "state": "neu",
+      "run": 2,
+      "steps": {
+        "Wandlänge – Übernehmen": 174,
+        "Löschen (Entf)": 296,
+        "2D → 3D": 161,
+        "3D – Szene fertig": 842,
+        "3D: Tür entlang Wand ziehen": 1552,
+        "3D → 2D": 137
+      },
+      "session": 159,
+      "sessionP95": 194,
+      "redo": 111,
+      "undo": 14,
+      "errors": 0
+    },
+    {
+      "state": "neu",
+      "run": 3,
+      "steps": {
+        "Wandlänge – Übernehmen": 160,
+        "Löschen (Entf)": 298,
+        "2D → 3D": 177,
+        "3D – Szene fertig": 853,
+        "3D: Tür entlang Wand ziehen": 1677,
+        "3D → 2D": 126
+      },
+      "session": 156,
+      "sessionP95": 237,
+      "redo": 111,
+      "undo": 14,
+      "errors": 0
+    }
+  ]
+}

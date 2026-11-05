@@ -39,7 +39,7 @@ function resolve(
   embedded: readonly { definition: PatternRevision["definition"]; revision?: number | undefined }[],
   available: readonly PatternRevision[],
 ) {
-  if (base !== current) throw new Error("Projekt wurde geÃ¤ndert. Musterabgleich erneut beginnen.");
+  if (base !== current) throw new Error("Projekt wurde geändert. Musterabgleich erneut beginnen.");
   const project = validateProject(current),
     records = embedded,
     catalog = new Map(validatePatternRevisions(available).map((r) => [r.definition.id, r]));

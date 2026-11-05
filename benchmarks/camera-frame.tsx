@@ -3,7 +3,8 @@ import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import { BimSolidView } from "../src/components/cad/BimSolidView";
 import { createExampleProject } from "../src/components/cad/bim-view";
-import { buildBuildingSolid, initialCamera } from "../src/lib/bim/geometry";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid";
+import { initialCamera } from "../src/lib/bim/geometry";
 import {
   createProjectionFrame,
   projectionDepthRadius,

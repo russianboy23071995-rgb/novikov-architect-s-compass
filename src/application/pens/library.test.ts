@@ -1,11 +1,19 @@
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { assignPenSet, loadPens, savePenSet } from "./library.ts";
 import { defaultPenSet, penSetSchema } from "../../domain/pens/model.ts";
-import { addLine, createProject, serializeProject, updateLine } from "../../lib/bim/model.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { addLine, updateLine } from "../lines/actions.ts";
+import { createProject } from "../projects/create.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../history/project-history.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
 const memory = () => {
   let raw: string | null = null;
@@ -121,7 +129,7 @@ test("strict schema 13 migration retains geometry and rejects future palette fie
   const p = createProject("p", "s");
   const old = { ...p, schemaVersion: 13 };
   const migrated = loadProjectData(legacyProjectFixture(old));
-  assert.equal(migrated.schemaVersion, 26);
+  assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.deepEqual(storeyOf(migrated), storeyOf(p));
   assert.equal(migrated.penSet, undefined);
   assert.throws(() => loadProjectData(legacyProjectFixture({ ...old, penSet: defaultPenSet })));

@@ -1,4 +1,4 @@
-import { assertSameWallBase } from "./heights.ts";
+import { assertWallsOverlapVertically } from "./heights.ts";
 import type { CornerEnd } from "./corner.ts";
 import type { Point2 } from "../../../geometry/primitives/point.ts";
 import { wallBody } from "./body.ts";
@@ -6,12 +6,17 @@ import { intersectLines } from "../../../geometry/intersections/lines.ts";
 import { validateSimplePolygon } from "../../../geometry/polygons/simple-polygon.ts";
 import { coordinatesCompatible, pointsCompatible } from "../../../geometry/tolerances/model.ts";
 
-/** Gross geometry for an explicit, isolated perpendicular T pair only.
+/** Only parallel axes cannot form a T; every other angle is allowed (user decision 26.10.2026,
+ * docs/OBLIQUE_T_JUNCTIONS.md). A very acute angle gives a long contact on the host face, which
+ * the contact checks below still bound by the host ends.
+ */
+export const PARALLEL_T_MESSAGE = "Parallele Wände können keinen T-Anschluss bilden.";
+
+/** Gross geometry for an explicit, isolated T pair, perpendicular or oblique.
  * No project lookup, opening validation, other joins, persistence or mutation.
  * Callers must verify those project-level preconditions before using this result.
  */
-export function deriveRightAngleTJunction(host: CornerEnd["wall"], incoming: CornerEnd) {
-  assertSameWallBase(host, incoming.wall);
+export function deriveTJunction(host: CornerEnd["wall"], incoming: CornerEnd) {
   if (!host.id.trim() || !incoming.wall.id.trim() || host.id === incoming.wall.id)
     throw new Error("Zwei unterschiedliche Wand-IDs erforderlich.");
   if (incoming.endpoint !== 0 && incoming.endpoint !== 1)
@@ -34,8 +39,9 @@ export function deriveRightAngleTJunction(host: CornerEnd["wall"], incoming: Cor
     )
       throw new Error("Ungültige Wandmaße für den T-Anschluss.");
   }
-  if (host.thickness !== incoming.wall.thickness || host.height !== incoming.wall.height)
-    throw new Error("Der T-Anschluss benötigt gleiche Wandstärken und Höhen.");
+  assertWallsOverlapVertically(host, incoming.wall);
+  // Thickness and height may differ (user decision 26.10.2026): the incoming wall ends at the
+  // host side face and each wall keeps its own height (docs/WALL_JUNCTIONS.md).
 
   const local = (p: Point2) => ({ x: p.x - host.start.x, y: p.y - host.start.y });
   const world = (p: Point2) => ({ x: p.x + host.start.x, y: p.y + host.start.y });
@@ -49,8 +55,9 @@ export function deriveRightAngleTJunction(host: CornerEnd["wall"], incoming: Cor
   const far = incoming.endpoint === 0 ? w.end : w.start;
   const length = Math.hypot(far.x - node.x, far.y - node.y);
   const away = { x: (far.x - node.x) / length, y: (far.y - node.y) / length };
-  if (Math.abs(u.x * away.x + u.y * away.y) > 1e-10)
-    throw new Error("Der T-Anschluss benötigt einen rechten Winkel.");
+  // The incoming wall may meet the host obliquely: its near corners are cut along its own axis
+  // on the host face, so the end becomes a slanted cap.
+  if (Math.abs(u.x * away.y - u.y * away.x) <= 1e-9) throw new Error(PARALLEL_T_MESSAGE);
   const along = (p: Point2) => p.x * u.x + p.y * u.y;
   const position = along(node);
   const projected = world({ x: u.x * position, y: u.y * position });
@@ -74,13 +81,10 @@ export function deriveRightAngleTJunction(host: CornerEnd["wall"], incoming: Cor
     const p = intersectLines(contour[index]!, away, sideStart, u);
     if (!p || !interior(along(p)))
       throw new Error("Kontaktbreite berührt oder überschreitet das Hauptwandende.");
+    // A negative trim extends the edge back to the host face: at an oblique angle a body offset
+    // can put the near corner in front of the face (26.10.2026).
     const trim = (p.x - node.x) * away.x + (p.y - node.y) * away.y;
-    if (
-      !Number.isFinite(trim) ||
-      (trim < 0 && !coordinatesCompatible(trim, 0)) ||
-      trim >= length ||
-      coordinatesCompatible(trim, length)
-    )
+    if (!Number.isFinite(trim) || trim >= length || coordinatesCompatible(trim, length))
       throw new Error("Ankommende Wand für den T-Anschluss zu kurz.");
     contour[index] = p;
     return world(p);

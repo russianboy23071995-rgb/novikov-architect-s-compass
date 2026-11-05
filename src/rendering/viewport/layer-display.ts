@@ -6,8 +6,8 @@ import type {
   createLayerVisibilityPolicy,
   LayerVisibilityContext,
 } from "../../application/layers/visibility.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
-import type { Solid } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "./storey-solid.ts";
+import type { Solid } from "./storey-solid.ts";
 
 /** Display surfaces deliberately have no volume: quantities belong to the complete model. */
 export type DisplaySurfaces = Pick<Solid, "min" | "max"> & {
@@ -15,6 +15,17 @@ export type DisplaySurfaces = Pick<Solid, "min" | "max"> & {
     wallId: string;
     vertices: [number, number, number][];
     normal: [number, number, number];
+    /** Ceiling slab face; absent on walls (docs/SLAB_ELEMENT.md, Teil B). */
+    slab?: true;
+    /** Roof face; absent on walls (docs/ROOF_ELEMENT.md, D2). */
+    roof?: true;
+    /** Column face; absent on walls (docs/STUETZEN.md). */
+    column?: true;
+    /** Stair face; absent on walls (docs/TREPPE.md). */
+    stair?: true;
+    /** Window or door element face (docs/FENSTER_TUEREN.md, FT2); glass marks the pane. */
+    opening?: "window" | "door";
+    glass?: true;
   }[];
 };
 
@@ -26,10 +37,19 @@ export function visiblePlanGeometry(project: ModelGeometry, allows: (id: string)
   return {
     walls,
     references: storeyOf(project).references.filter((r) => allows(r.id)),
+    slabs: (storeyOf(project).slabs ?? []).filter((s) => allows(s.id)),
+    roofs: (storeyOf(project).roofs ?? []).filter((r) => allows(r.id)),
+    rooms: (storeyOf(project).rooms ?? []).filter((r) => allows(r.id)),
+    columns: (storeyOf(project).columns ?? []).filter((c) => allows(c.id)),
+    stairs: (storeyOf(project).stairs ?? []).filter((s) => allows(s.id)),
+    dimensions: (storeyOf(project).dimensions ?? []).filter((d) => allows(d.id)),
+    texts: (storeyOf(project).texts ?? []).filter((t) => allows(t.id)),
     hatches: storeyOf(project).hatches.filter((h) => allows(h.id)),
     windows: storeyOf(project).windows.filter((w) => allows(w.id)),
     lines: (storeyOf(project).lines ?? []).filter((l) => allows(l.id)),
     openings: storeyOf(project).windows.filter((w) => wallIds.has(w.wallId)),
+    // Like window openings: present on visible host walls; the symbol itself follows allows().
+    doors: (storeyOf(project).doors ?? []).filter((d) => wallIds.has(d.wallId)),
   };
 }
 export function visibleSurfaces(
@@ -74,10 +94,12 @@ export function drawingWallVisibility(
       .walls.filter((w) => !existing.has(w.id))
       .map((w) => [w.id, w]),
   );
-  const existingWindows = new Set(storeyOf(base).windows.map((w) => w.id));
+  // New hosted openings (windows, doors) follow their host wall and their own layer.
+  const hosted = (p: Project) => [...storeyOf(p).windows, ...(storeyOf(p).doors ?? [])];
+  const existingWindows = new Set(hosted(base).map((w) => w.id));
   const newWindows = new Map(
-    storeyOf(draft)
-      .windows.filter((w) => !existingWindows.has(w.id))
+    hosted(draft)
+      .filter((w) => !existingWindows.has(w.id))
       .map((w) => [w.id, w]),
   );
   return (id: string) => {

@@ -11,7 +11,8 @@ import {
 import { loadPatternLibrary } from "./pattern-library.ts";
 import { removePatternLine } from "./pattern-draft.ts";
 import { validateHatchPattern } from "../../domain/elements/hatch/pattern.ts";
-import { createProject, serializeProject } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
 import { readProjectFile } from "../../lib/bim/history.ts";
 import { createDrawing } from "../drawing/actions.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";

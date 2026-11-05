@@ -1,6 +1,6 @@
 import { buildingViewFixture } from "./building-view-fixture.ts";
 import { selectWorkingStorey } from "../src/application/storeys/working-storey.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 for (const walls of [10, 50, 100]) {
   let p = buildingViewFixture(walls),
     previous = buildBuildingSolid(p);

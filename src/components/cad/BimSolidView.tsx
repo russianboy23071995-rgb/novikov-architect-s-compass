@@ -1,3 +1,4 @@
+import { patchOverlapHint, previewOverlapHint } from "@/application/openings/overlap-hint";
 import { observeNavigationExit } from "@/rendering/viewport/navigation-exit";
 import { prepareDirectEditPreview } from "@/application/direct-edit/prepared-preview";
 import { prepareViewportModel } from "@/rendering/viewport/prepared-model";
@@ -21,6 +22,7 @@ import type { SnapCandidate } from "@/constraints/snapping/engine";
 import { selectedWallAxis, WALL_AXIS_COLOR } from "@/rendering/viewport/wall-axis";
 import { createSolidRenderer as createRenderer } from "@/rendering/viewport/solid-renderer";
 import { cornerPreviewSurfaces } from "@/rendering/viewport/corner-preview";
+import { doorLeafFaces } from "@/rendering/viewport/door-leaf";
 import { defaultGridSettings, gridSpacing } from "@/application/snapping/grid-settings";
 import { visibleSurfaces } from "@/rendering/viewport/layer-display";
 import { isLayerVisible } from "@/application/layers/visibility";
@@ -34,9 +36,9 @@ import {
 } from "@/rendering/viewport/projection-state";
 import type { ProjectionState } from "@/rendering/viewport/projection-state";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { buildBuildingSolid } from "@/lib/bim/geometry";
+import { buildBuildingSolid } from "@/rendering/viewport/building-solid";
 import type { Camera } from "@/lib/bim/geometry";
-import type { Project, Point } from "@/lib/bim/model";
+import type { Project, Point } from "@/domain/project/schema";
 import type { Selection } from "./bim-view";
 import { isSelectionClick } from "@/lib/bim/picking";
 import { SolidSnapPreview } from "./SolidSnapPreview";
@@ -55,6 +57,8 @@ const viewportOf = (canvas: HTMLCanvasElement) => {
 };
 
 export function BimSolidView({
+  onContextMenu,
+  onElementSettings,
   cornerPreview,
   placement,
   project,
@@ -98,6 +102,8 @@ export function BimSolidView({
   | "onEditCommit"
   | "interactive"
   | "cornerPreview"
+  | "onContextMenu"
+  | "onElementSettings"
 >) {
   const editSession =
     requestedEditSession && isLayerVisible(project, visibility, requestedEditSession.target.id)
@@ -221,6 +227,14 @@ export function BimSolidView({
     }
   }, [placement?.geometryPreview, placementTarget]);
   const geometryPatch = placementPatch ?? editPatch;
+  // Overlapping openings stay allowed; the preview only shows a hint.
+  const overlapHint = useMemo(
+    () =>
+      geometryPatch
+        ? patchOverlapHint(project, geometryPatch)
+        : previewOverlapHint(project, previewProject),
+    [geometryPatch, project, previewProject],
+  );
   const visibleBase = useMemo(
     () => visibleSurfaces(baseSolid, (id) => isLayerVisible(project, visibility, id)),
     [baseSolid, project, visibility],
@@ -264,7 +278,12 @@ export function BimSolidView({
     () =>
       new Set(
         (selections ?? (selection ? [selection] : []))
-          .filter((t) => t.kind === "wall" && isLayerVisible(project, visibility, t.id))
+          // Solid elements with own surfaces: walls, ceiling slabs and roofs.
+          .filter(
+            (t) =>
+              (t.kind === "wall" || t.kind === "slab" || t.kind === "roof") &&
+              isLayerVisible(project, visibility, t.id),
+          )
           .map((t) => t.id),
       ),
     [selections, selection, project, visibility],
@@ -287,6 +306,13 @@ export function BimSolidView({
         : windowBase,
     [windowBase, project, visibility, geometryPatch],
   );
+  // Display-only door leaves: drawn, never picked or measured. During a prepared movement
+  // the committed leaves would lag their moving host, so they are left out until commit.
+  const renderSolid = useMemo(() => {
+    if (geometryPatch) return solid;
+    const leaves = doorLeafFaces(previewProject, (id) => isLayerVisible(project, visibility, id));
+    return leaves.length ? { ...solid, faces: [...solid.faces, ...leaves] } : solid;
+  }, [solid, geometryPatch, previewProject, project, visibility]);
   const pickDisplayed = useSolidPicking(
     solid,
     windowSurfaces,
@@ -296,7 +322,7 @@ export function BimSolidView({
     () =>
       new Set(
         (selections ?? (selection ? [selection] : []))
-          .filter((t) => t.kind === "window")
+          .filter((t) => t.kind === "window" || t.kind === "door")
           .map((t) => t.id),
       ),
     [selections, selection],
@@ -315,6 +341,13 @@ export function BimSolidView({
         .flatMap((s) => s.walls)
         .find((w) => w.id === editSession.target.id);
       return wall ? wallBase(wall, workingStoreyElevation(project)) : undefined;
+    }
+    if (editSession?.target.kind === "door") {
+      const door = project.storeys
+        .flatMap((s) => s.doors ?? [])
+        .find((d) => d.id === editSession.target.id);
+      // Doors stand on the storey level plus their own z offset, independent of the wall base.
+      return door ? workingStoreyElevation(project) + door.zOffset + door.height / 2 : undefined;
     }
     if (editSession?.target.kind !== "window") return undefined;
     const opening = project.storeys
@@ -445,14 +478,20 @@ export function BimSolidView({
     displayed.current = null;
     if (renderer.current && previewProjection) {
       try {
-        renderer.current.draw(solid, previewProjection, selectedWalls, outline, windowOutline);
+        renderer.current.draw(
+          renderSolid,
+          previewProjection,
+          selectedWalls,
+          outline,
+          windowOutline,
+        );
         displayed.current = { solid, projection: previewProjection };
       } catch (e) {
         setError(e instanceof Error ? e.message : "3D unavailable");
         setViewProjection(null);
       }
     }
-  }, [solid, previewProjection, selectedWalls, revision, outline, windowOutline]);
+  }, [solid, renderSolid, previewProjection, selectedWalls, revision, outline, windowOutline]);
   return (
     <>
       {previewProjection && !error && (
@@ -505,6 +544,26 @@ export function BimSolidView({
         </svg>
       )}
       <canvas
+        onDoubleClick={(event) => {
+          // Double click on an element opens its settings window (docs/EINSTELLUNGSFENSTER.md).
+          const current = displayed.current;
+          if (!onElementSettings || !interactive || placement || editSession || !current) return;
+          const point = current.projection.toNdc({ x: event.clientX, y: event.clientY });
+          const hit = pickDisplayed(current.projection, point.x, point.y);
+          if (hit) onElementSettings(hit);
+        }}
+        onContextMenu={(event) => {
+          // Right-click menu on the picked element or on empty space (docs/KONTEXTMENUE.md).
+          event.preventDefault();
+          const current = displayed.current;
+          if (!onContextMenu || !interactive || placement || editSession || !current) return;
+          const point = current.projection.toNdc({ x: event.clientX, y: event.clientY });
+          onContextMenu(
+            pickDisplayed(current.projection, point.x, point.y),
+            event.clientX,
+            event.clientY,
+          );
+        }}
         ref={canvasRef}
         aria-label="3D walls with window openings"
         role="img"
@@ -839,6 +898,14 @@ export function BimSolidView({
           className="absolute inset-x-4 top-16 rounded bg-popover p-3 text-sm text-destructive"
         >
           {error}
+        </p>
+      )}
+      {overlapHint && !error && (
+        <p
+          role="status"
+          className="absolute inset-x-4 top-16 rounded bg-popover p-3 text-sm text-amber-700"
+        >
+          {overlapHint}
         </p>
       )}
       {!surfaceFaceCount(solid) && !error && (

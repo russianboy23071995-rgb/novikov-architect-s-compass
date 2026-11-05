@@ -1,4 +1,4 @@
-import type { DrawingLine } from "./model.ts";
+import type { DrawingLine } from "../../domain/project/schema.ts";
 export type LineAppearance = Pick<
   DrawingLine,
   "color" | "penWidth" | "style" | "pattern" | "repeatLength"

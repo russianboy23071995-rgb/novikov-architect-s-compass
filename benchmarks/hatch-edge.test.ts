@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { tamperedState } from "./tampered-state.ts";
 import { hatchPointFixture } from "./hatch-point-fixture.ts";
 import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";
 import {
@@ -8,7 +9,7 @@ import {
   editingReducer,
 } from "../src/application/direct-edit/controller.ts";
 import { boundedEdgeTarget } from "../src/application/direct-edit/contour.ts";
-import { editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
+import { editAtPointer, type EditSession } from "../src/application/direct-edit/session.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
 import { contourEdge, prepareContourEdge } from "../src/geometry/polygons/edit-edge.ts";
 import { derivePlanScene } from "../src/rendering/viewport/plan-scene.ts";
@@ -143,8 +144,14 @@ test("capped side placement is one full commit; cancel and undo preserve the ori
   assert.equal(placed.history.past.length, 1);
   assert.deepEqual(placed.history.present, preview);
   assert.deepEqual(editingReducer(placed, { type: "undo" }).history.present, base);
-  storeyOf(base).hatches[1]!.points[0]!.x = NaN;
-  const invalid = editingReducer(state, { type: "confirm", session, selection: target, point });
+  assert.throws(() => (storeyOf(base).hatches[1]!.points[0]!.x = NaN), TypeError);
+  const tampered = tamperedState(state, (p) => (storeyOf(p).hatches[1]!.points[0]!.x = NaN));
+  const invalid = editingReducer(tampered.state, {
+    type: "confirm",
+    session: tampered.session,
+    selection: target,
+    point,
+  });
   assert.ok(invalid.error);
   assert.equal(invalid.history.past.length, 0);
 });

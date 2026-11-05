@@ -1,5 +1,6 @@
 import {
   migrateRecoveryV1,
+  parseRecoveryV2,
   restoreRecoveryV2,
   type RecoveryV2Codec,
   type RecoveryV2Storage,
@@ -15,6 +16,7 @@ import {
   type Snapshot,
   type RecordData,
 } from "./recovery.ts";
+import { ownRecoveryCommit, rememberOwnRecoveryCommit } from "./own-commits.ts";
 
 export type RecoverySummary = { projectId: string; savedAt: string };
 /** Counts the loaded recovery candidate, independent of active storey and visibility.
@@ -23,11 +25,19 @@ export type RecoverySummary = { projectId: string; savedAt: string };
 export function recoveryContentSummary(project: Project) {
   let walls = 0;
   let windows = 0;
+  let doors = 0;
+  let slabs = 0;
+  let roofs = 0;
+  let rooms = 0;
   for (const storey of project.storeys) {
     walls += storey.walls.length;
     windows += storey.windows.length;
+    doors += storey.doors?.length ?? 0;
+    slabs += storey.slabs?.length ?? 0;
+    roofs += storey.roofs?.length ?? 0;
+    rooms += storey.rooms?.length ?? 0;
   }
-  return { storeys: project.storeys.length, walls, windows };
+  return { storeys: project.storeys.length, walls, windows, doors, slabs, roofs, rooms };
 }
 
 export interface RecoveryCatalog {
@@ -101,14 +111,36 @@ export async function listRecoveryProjects(catalog: RecoveryCatalog) {
   if (migrationWarning) result.warnings.push(migrationWarning);
   return result;
 }
-export async function readProjectRecovery(catalog: RecoveryCatalog, id: string) {
+/** `trustOwnCommit`: the status display only; a record this session wrote itself (same
+ * revision) is confirmed without decoding and hashing its images. Restores never pass it.
+ */
+export async function readProjectRecovery(
+  catalog: RecoveryCatalog,
+  id: string,
+  options: { trustOwnCommit?: boolean } = {},
+) {
   if (catalog.v2) {
     const source = await catalog.v2.project(id).read();
-    if (source.record !== null)
+    const own = options.trustOwnCommit ? ownRecoveryCommit(id, source.record) : undefined;
+    if (own)
       return {
-        ...(await restoreRecoveryV2(source.record, id, catalog.v2.codec)),
+        project: own.project,
+        savedAt: own.savedAt,
+        fallback: own.fallback ?? false,
+        revision: own.revision,
         name: "Lokaler Wiederherstellungsstand",
       };
+    if (source.record !== null) {
+      const result = await restoreRecoveryV2(source.record, id, catalog.v2.codec);
+      // A revision verified in full once in this session counts as checked for the status
+      // display and the autosave writer (docs/performance/RECOVERY_CHECKS.md).
+      const record = parseRecoveryV2(source.record);
+      rememberOwnRecoveryCommit(id, {
+        ...result,
+        current: result.fallback ? record.previous! : record.current,
+      });
+      return { ...result, name: "Lokaler Wiederherstellungsstand" };
+    }
   }
   const storage = catalog.project(id);
   const raw = await storage.read();

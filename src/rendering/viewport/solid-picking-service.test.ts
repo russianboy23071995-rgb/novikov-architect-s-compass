@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createSolidPickingService } from "./solid-picking-service.ts";
 import { connectedFixture } from "../../../benchmarks/connected-fixture.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "./storey-solid.ts";
 import { createProjectionFrame } from "../../geometry/projections/orthographic.ts";
 import { createProjectionState } from "./projection-state.ts";
 import { pickSolidElement, windowSelectionSurfaces } from "./window-selection.ts";

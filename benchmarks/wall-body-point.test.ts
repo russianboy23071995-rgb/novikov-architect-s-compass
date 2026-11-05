@@ -2,16 +2,19 @@ import { wallBody } from "../src/domain/elements/wall/body.ts";
 import { previewEdit } from "../src/application/direct-edit/controller.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
+import { tamperedState } from "./tampered-state.ts";
 import { wallPatchFixture } from "./wall-patch-fixture.ts";
 import { tPairFixture } from "./t-pair-fixture.ts";
 import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";
 import { prepareEndpoint } from "../src/application/direct-edit/prepared-endpoint.ts";
-import { editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
+import { editAtPointer, type EditSession } from "../src/application/direct-edit/session.ts";
 import { connectSnappedT } from "../src/application/walls/t-axis-snap.ts";
-import { addWall, validateProject } from "../src/lib/bim/model.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
+import { addWall } from "../src/application/walls/actions.ts";
 import { createEditingState, editingReducer } from "../src/application/direct-edit/controller.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
-import { buildBuildingSolid, initialCamera } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
+import { initialCamera } from "../src/lib/bim/geometry.ts";
 import {
   selectionMoveSurfaces,
   selectionMoveWindows,
@@ -20,7 +23,7 @@ import { buildingWindowSelectionSurfaces } from "../src/rendering/viewport/windo
 import { selectedWallAxis } from "../src/rendering/viewport/wall-axis.ts";
 import { createProjectionFrame } from "../src/geometry/projections/orthographic.ts";
 import { createProjectionState } from "../src/rendering/viewport/projection-state.ts";
-import type { Project, Point } from "../src/lib/bim/model.ts";
+import type { Project, Point } from "../src/domain/project/schema.ts";
 import type { SnapCandidate } from "../src/constraints/snapping/engine.ts";
 const target = { kind: "wall" as const, id: "wall-1" };
 const sessionOf = (base: Project, index: 0 | 1 = 1, id = "wall-1"): EditSession => ({
@@ -170,9 +173,15 @@ test("wall preview rejects stale context; cancel publishes nothing and commit re
   assert.equal(committed.history.past.length, 1);
   assert.deepEqual(committed.history.present, editAtPointer(session, base, point));
   assert.deepEqual(editingReducer(committed, { type: "undo" }).history.present, base);
-  storeyOf(base).windows[0]!.width = 100;
+  assert.throws(() => (storeyOf(base).windows[0]!.width = 100), TypeError);
+  const tampered = tamperedState(state, (p) => (storeyOf(p).windows[0]!.width = 100));
   assert.notEqual(
-    editingReducer(state, { type: "confirm", session, selection: target, point }).error,
+    editingReducer(tampered.state, {
+      type: "confirm",
+      session: tampered.session,
+      selection: target,
+      point,
+    }).error,
     "",
   );
 });

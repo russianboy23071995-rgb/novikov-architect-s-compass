@@ -4,12 +4,17 @@ import { isDeepStrictEqual } from "node:util";
 import { cpus } from "node:os";
 import { boundHeightFixture } from "./bound-height-fixture.ts";
 import { createProjectSnapshot } from "../src/domain/project/owned-snapshot.ts";
-import { updateWall, updateWindow } from "../src/lib/bim/model.ts";
+import { updateWindow } from "../src/application/windows/actions.ts";
+import { updateWall } from "../src/application/walls/actions.ts";
 import { setStoreyHeight } from "../src/application/storeys/actions.ts";
-import { buildBuildingSolid, type Solid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
+import { type Solid } from "../src/rendering/viewport/storey-solid.ts";
 
 // Diagnostics only: exact anchors, exclusive sibling, cleanup even on failed oracle.
-const generated = new URL("../src/lib/bim/geometry.wall-resource-candidate.ts", import.meta.url);
+const generated = new URL(
+  "../src/rendering/viewport/storey-solid.wall-resource-candidate.ts",
+  import.meta.url,
+);
 const source = await readFile(new URL("./wall-resource-candidate.txt", import.meta.url), "utf8");
 const groups = (solid: Solid) => {
   const result = new Map<string, Solid["faces"]>();

@@ -1,4 +1,5 @@
-import { wallBase, assertSameWallBase } from "./heights.ts";
+import { openingNoun, storeyOpenings } from "./openings.ts";
+import { wallBase, cornerHeightRule } from "./heights.ts";
 import { storeyOf, replaceStorey } from "../../storeys/access.ts";
 import type { WallGeometry } from "../../project/geometry-scope.ts";
 import { tConnectionContours } from "./t-relations.ts";
@@ -8,6 +9,8 @@ import { wallBody } from "./body.ts";
 import { wallContourSolid, createWallContourSolidDeriver } from "./contour-solid.ts";
 import { validateSimplePolygon } from "../../../geometry/polygons/simple-polygon.ts";
 import { measureHalfPlane } from "../../../geometry/projections/half-plane.ts";
+import { createDerivedCache } from "../../project/derived-cache.ts";
+import type { Point2 } from "../../../geometry/primitives/point.ts";
 
 export type WallEnd = { wallId: string; endpoint: 0 | 1 };
 export type WallJoin = { first: WallEnd; second: WallEnd };
@@ -39,7 +42,8 @@ export function reconcileWallJoins(
         (w) =>
           w.id !== changedId &&
           !excludedPartners.includes(w.id) &&
-          wallBase(w) === wallBase(changed),
+          // Only a pair that can form a corner joins (L09 U1); partly overlapping walls stay free.
+          cornerHeightRule(w, changed) !== null,
       )
       .flatMap((w) =>
         ([0, 1] as const)
@@ -68,8 +72,18 @@ export function reconcileWallJoins(
   return { ...replaceStorey(project, { ...storeyOf(project), wallJoins: joins }) };
 }
 
+// Contours of one snapshot or scope, shared by snapping, selection shapes, plan outline and
+// wall solids (docs/performance/EDIT_CYCLE.md, Teil B). Callers only read them.
+const contourCache = createDerivedCache<WallGeometry, ReadonlyMap<string, Point2[]>>();
+
 /** Authoritative disposable contours from persisted endpoint relationships. No schema recursion. */
-export function connectedWallContours(project: WallGeometry) {
+export function connectedWallContours(project: WallGeometry): ReadonlyMap<string, Point2[]> {
+  let contours = contourCache.get(project);
+  if (!contours) contourCache.set(project, (contours = deriveConnectedWallContours(project)));
+  return contours;
+}
+
+function deriveConnectedWallContours(project: WallGeometry) {
   const walls = new Map(storeyOf(project).walls.map((w) => [w.id, w]));
   const counts = new Map<string, number>();
   for (const wall of walls.values())
@@ -83,11 +97,12 @@ export function connectedWallContours(project: WallGeometry) {
     const a = walls.get(join.first.wallId),
       b = walls.get(join.second.wallId);
     if (!a || !b || a.id === b.id) throw new Error("Ungültige Wandverbindung.");
-    assertSameWallBase(a, b);
     const node = point(a, join.first.endpoint);
     if (!same(point(a, join.first.endpoint), point(b, join.second.endpoint)))
       throw new Error("Verbundene Achsenden müssen übereinstimmen.");
-    if (counts.get(JSON.stringify([node.x, node.y, wallBase(a)])) !== 2)
+    // Ends at one point and foot height form a node; a join may link two feet (L09 U1).
+    const nodeKeys = new Set([a, b].map((w) => JSON.stringify([node.x, node.y, wallBase(w)])));
+    if ([...nodeKeys].reduce((n, k) => n + (counts.get(k) ?? 0), 0) !== 2)
       throw new Error("Mehrfachanschluss noch nicht unterstützt.");
     for (const end of [join.first, join.second]) {
       if (occupied.has(key(end))) throw new Error("Ein Achsende darf nur einmal verbunden sein.");
@@ -115,7 +130,7 @@ export function connectedWallContours(project: WallGeometry) {
       throw new Error("Wand zwischen Anschlüssen zu kurz.");
     const wall = walls.get(id)!;
     const length = Math.hypot(wall.end.x - wall.start.x, wall.end.y - wall.start.y);
-    for (const opening of storeyOf(project).windows.filter((w) => w.wallId === id)) {
+    for (const opening of storeyOpenings(storeyOf(project)).filter((w) => w.wallId === id)) {
       const at = (d: number) => ({
         x: wall.start.x + ((wall.end.x - wall.start.x) * d) / length,
         y: wall.start.y + ((wall.end.y - wall.start.y) * d) / length,
@@ -134,7 +149,9 @@ export function connectedWallContours(project: WallGeometry) {
             (i === 3 && occupied.has(key({ wallId: id, endpoint: 0 })))) &&
             relation === "touching")
         )
-          throw new Error("Fenster darf einen Wandabschluss weder berühren noch überschreiten.");
+          throw new Error(
+            `${openingNoun(storeyOf(project), opening.id)} darf einen Wandabschluss weder berühren noch überschreiten.`,
+          );
       }
     }
   }
@@ -142,7 +159,7 @@ export function connectedWallContours(project: WallGeometry) {
   return contours;
 }
 
-const solidCache = new WeakMap<WallGeometry, ReturnType<typeof wallContourSolid>[]>();
+const solidCache = createDerivedCache<WallGeometry, ReturnType<typeof wallContourSolid>[]>();
 function deriveConnectedWallSolids(project: WallGeometry, deriveSolid: typeof wallContourSolid) {
   const cached = solidCache.get(project);
   if (cached) return cached;
@@ -153,7 +170,7 @@ function deriveConnectedWallSolids(project: WallGeometry, deriveSolid: typeof wa
       deriveSolid(
         w,
         contours.get(w.id)!,
-        storeyOf(project).windows,
+        storeyOpenings(storeyOf(project)),
         storeyOf(project).wallTJunctions.some(
           (t) => t.hostWallId === w.id || t.incoming.wallId === w.id,
         ),

@@ -7,11 +7,15 @@ import {
   commitProject,
   undoProject,
   redoProject,
-  readProjectFile,
   HISTORY_LIMIT,
-  PROJECT_FILE_LIMIT,
-} from "./history.ts";
-import { serializeProject, updateWall, addWindow, createProject } from "./model.ts";
+} from "../../application/history/project-history.ts";
+import { readProjectFile, PROJECT_FILE_LIMIT } from "./history.ts";
+import { serializeProject } from "./model.ts";
+import { addWindow } from "../../application/windows/actions.ts";
+import { createProject } from "../../application/projects/create.ts";
+import { validateProject } from "../../domain/project/schema.ts";
+import { updateWall } from "../../application/walls/actions.ts";
+import { isOwnedProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 
 test("JSON file round-trip preserves IDs and remains editable", () => {
@@ -62,7 +66,7 @@ test("invalid files and geometry reject without modifying history", () => {
   for (const text of [
     "oops",
     "{}",
-    before.replace('"schemaVersion":26', '"schemaVersion":99'),
+    before.replace(`"schemaVersion":${PROJECT_SCHEMA_VERSION}`, '"schemaVersion":99'),
     before.replace('"unit":"m"', '"unit":"cm"'),
     before.replace('"width":1.2', '"width":99'),
   ])
@@ -101,10 +105,40 @@ test("caller mutation cannot change initial or committed snapshots", () => {
   const h = createHistory(p);
   storeyOf(p).walls[0]!.height = 99;
   assert.equal(storeyOf(h.present).walls[0]!.height, 2.8);
-  const input = updateWall(h.present, "wall-1", { height: 4 });
+  // A command on an owned snapshot returns an owned, frozen result that the commit adopts.
+  const owned = updateWall(h.present, "wall-1", { height: 4 });
+  assert.throws(() => (storeyOf(owned).walls[0]!.height = 100), TypeError);
+  assert.equal(commitProject(h, owned).present, owned);
+  // A command on caller data stays a mutable copy; the commit owns its own validated copy.
+  const input = updateWall(structuredClone(h.present), "wall-1", { height: 4 });
   const next = commitProject(h, input);
   storeyOf(input).walls[0]!.height = 100;
   assert.equal(storeyOf(next.present).walls[0]!.height, 4);
+});
+
+test("owned commands share unchanged parts and undo with view settings keeps sharing", () => {
+  const p = createExampleProject();
+  p.storeys.push({ ...structuredClone(storeyOf(p)), id: "upper", name: "OG", height: 3 });
+  for (const s of p.storeys.slice(1))
+    for (const list of [s.walls, s.windows]) list.forEach((e) => (e.id = `${s.id}-${e.id}`));
+  storeyOf(p).height = 3;
+  storeyOf(p).windows.forEach((w) => (w.wallId = "wall-1"));
+  p.storeys[1]!.windows.forEach((w) => (w.wallId = "upper-wall-1"));
+  const h = createHistory(p);
+  const changed = commitProject(h, updateWall(h.present, "wall-1", { height: 4 }));
+  assert.equal(changed.present.storeys[1], h.present.storeys[1]);
+  const hidden = commitProject(changed, {
+    ...changed.present,
+    bimVisibility: { hiddenLayerIds: [changed.present.defaultLayerIds.line] },
+  });
+  const undone = undoProject(hidden);
+  assert.equal(isOwnedProjectSnapshot(undone.present), false);
+  const after = commitProject(undone, updateWall(undone.present, "wall-1", { height: 5 }));
+  assert.equal(after.present.storeys[1], h.present.storeys[1]);
+  assert.equal(
+    serializeProject(after.present),
+    serializeProject(validateProject(updateWall(undone.present, "wall-1", { height: 5 }))),
+  );
 });
 
 test("normalized no-op preserves the exact history and redo branch", () => {
@@ -165,6 +199,30 @@ test("commit rechecks geometry and asset data even after an earlier successful c
   assert.throws(() => commitProject(committed, disconnected));
   assert.equal(committed.present.assets[0]!.data, "AAAA");
   assert.equal(committed.past.length, 1);
+});
+
+test("committed snapshots are frozen and share unchanged subtrees with the previous state", () => {
+  const h = createHistory(createExampleProject());
+  const input = addWindow(h.present, { ...storeyOf(h.present).windows[0]!, id: "window-2" });
+  const next = commitProject(h, input);
+  assert.ok(isOwnedProjectSnapshot(h.present) && isOwnedProjectSnapshot(next.present));
+  assert.throws(() => (storeyOf(next.present).walls[0]!.height = 9), TypeError);
+  // Exact content of the fully validated input, including serialized key order.
+  assert.equal(serializeProject(next.present), serializeProject(validateProject(input)));
+  assert.equal(storeyOf(next.present).walls, storeyOf(h.present).walls);
+  assert.equal(next.present.layers, h.present.layers);
+  assert.equal(storeyOf(next.present).windows[0], storeyOf(h.present).windows[0]);
+  assert.notEqual(storeyOf(next.present).windows, storeyOf(h.present).windows);
+  assert.equal(undoProject(next).present, h.present);
+});
+
+test("a present without owned provenance keeps the full previous-state validation", () => {
+  const h = createHistory(createExampleProject());
+  const input = updateWall(h.present, "wall-1", { height: 4 });
+  const foreign = structuredClone(h.present);
+  storeyOf(foreign).walls[0]!.height = -1;
+  assert.throws(() => commitProject({ ...h, present: foreign }, input));
+  assert.equal(commitProject(h, input).past.length, 1);
 });
 
 test("commit retains the UTF-8 file-size boundary without touching history on rejection", () => {

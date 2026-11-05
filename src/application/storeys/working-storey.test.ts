@@ -5,10 +5,12 @@ import { addStorey, setStoreyHeight } from "./actions.ts";
 import { selectWorkingStorey } from "./working-storey.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
-import { addWall, addWindow, serializeProject } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { addWindow } from "../windows/actions.ts";
+import { addWall } from "../walls/actions.ts";
 import { readProjectFile } from "../../lib/bim/history.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import { windowSelectionSurfaces } from "../../rendering/viewport/window-selection.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { changeDrawingDocument } from "../views/documents.ts";
@@ -245,7 +247,7 @@ test("undoing the selected storey's creation returns to EG without a dangling vi
   assert.deepEqual(readProjectFile(serializeProject(state.history.present)), state.history.present);
 });
 
-import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../../rendering/viewport/building-solid.ts";
 import {
   buildingWindowSelectionSurfaces,
   pickSolidElement,

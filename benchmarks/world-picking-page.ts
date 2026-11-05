@@ -1,6 +1,6 @@
 import { prepareWorldPicking } from "./world-picking";
 import { connectedFixture } from "./connected-fixture";
-import { buildSolid } from "../src/lib/bim/geometry";
+import { buildSolid } from "../src/rendering/viewport/storey-solid";
 import { createProjectionFrame } from "../src/geometry/projections/orthographic";
 import { createProjectionState } from "../src/rendering/viewport/projection-state";
 import {

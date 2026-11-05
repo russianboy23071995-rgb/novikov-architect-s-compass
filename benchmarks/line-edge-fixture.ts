@@ -1,6 +1,6 @@
 import { hatchPointFixture } from "./hatch-point-fixture.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
-import { validateProject } from "../src/lib/bim/model.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { defaultLineAppearance } from "../src/lib/bim/lines.ts";
 export function lineEdgeFixture(count = 10, vertices = 100) {
   const base = hatchPointFixture(count, vertices),

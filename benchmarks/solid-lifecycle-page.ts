@@ -1,7 +1,7 @@
 import { diagnosticRenderer } from "./legacy-solid-renderer";
 import { createMatrixRenderer } from "./solid-matrix-renderer";
 import { connectedFixture } from "./connected-fixture";
-import { buildSolid } from "../src/lib/bim/geometry";
+import { buildSolid } from "../src/rendering/viewport/storey-solid";
 import { createProjectionFrame } from "../src/geometry/projections/orthographic";
 import { createProjectionState } from "../src/rendering/viewport/projection-state";
 import { selectionEdges } from "../src/rendering/viewport/selection-outline";

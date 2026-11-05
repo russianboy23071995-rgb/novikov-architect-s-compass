@@ -1,0 +1,336 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { tPairFixture } from "../../../benchmarks/t-pair-fixture.ts";
+import { hatchPointFixture } from "../../../benchmarks/hatch-point-fixture.ts";
+import { addLine } from "../lines/actions.ts";
+import { createProject } from "../projects/create.ts";
+import { validateProject } from "../../domain/project/schema.ts";
+import { addWall } from "../walls/actions.ts";
+import { defaultLineAppearance } from "../../lib/bim/lines.ts";
+import { createHistory, commitProject, undoProject } from "../history/project-history.ts";
+import { normalizeSpeech } from "../../lib/bim/voice.ts";
+import { storeyOf } from "../../domain/storeys/access.ts";
+import { DOOR_DEFAULTS } from "../../domain/elements/door/model.ts";
+import { addDoor } from "../doors/actions.ts";
+import { previewCreateReference } from "../references/actions.ts";
+import { createLayerVisibilityPolicy } from "../layers/visibility.ts";
+import { previewSelectionCommand } from "../commands/selection-command.ts";
+import type { SelectionSet } from "../selection/state.ts";
+import type { Project } from "../../domain/project/schema.ts";
+import { previewDeleteSelection } from "./delete.ts";
+
+const visible = (p: Project) =>
+  createLayerVisibilityPolicy(p, { scope: { kind: "bim-project" }, hiddenLayerIds: [] });
+const remove = (p: Project, targets: SelectionSet) =>
+  previewDeleteSelection(p, targets, visible(p));
+
+/** T pair with two windows, a door on the host and a corner wall at the host's end. */
+function building(): Project {
+  let p = tPairFixture();
+  p = addWall(p, {
+    id: "wall-3",
+    start: { x: 6, y: 0 },
+    end: { x: 6, y: 3 },
+    height: 2.8,
+    thickness: 0.36,
+    bodyOffset: 0.18,
+  });
+  p = validateProject({
+    ...p,
+    storeys: p.storeys.map((s) => ({
+      ...s,
+      wallJoins: [
+        { first: { wallId: "wall-1", endpoint: 1 }, second: { wallId: "wall-3", endpoint: 0 } },
+      ],
+    })),
+  });
+  return addDoor(p, { id: "door", wallId: "wall-1", position: 0.2, ...DOOR_DEFAULTS });
+}
+
+test("deleting a wall takes its windows and doors and dissolves its corner and T", () => {
+  const p = building();
+  const { result, summary } = remove(p, [{ kind: "wall", id: "wall-1" }]);
+  const s = storeyOf(result);
+  assert.deepEqual(
+    s.walls.map((w) => w.id),
+    ["wall-2", "wall-3"],
+  );
+  assert.deepEqual(
+    s.windows.map((w) => w.id),
+    ["window-1"],
+  );
+  assert.deepEqual(s.doors, []);
+  assert.deepEqual(s.wallJoins, []);
+  assert.deepEqual(s.wallTJunctions, []);
+  // Neighbours keep their geometry; only the connection is gone.
+  for (const id of ["wall-2", "wall-3"])
+    assert.deepEqual(
+      s.walls.find((w) => w.id === id),
+      storeyOf(p).walls.find((w) => w.id === id),
+    );
+  assert.equal(
+    summary,
+    "1 Element löschen; 2 Fenster/Türen der Wände werden mitgelöscht; 2 Wandanschlüsse werden gelöst",
+  );
+});
+
+test("each element kind deletes alone; selected openings are not counted twice", () => {
+  const p = addLine(building(), {
+    id: "line",
+    kind: "line",
+    points: [
+      { x: 0, y: 5 },
+      { x: 2, y: 5 },
+    ],
+    ...defaultLineAppearance,
+  });
+  for (const target of [
+    { kind: "window", id: "window-0" },
+    { kind: "door", id: "door" },
+    { kind: "line", id: "line" },
+    { kind: "wall", id: "wall-3" },
+  ] as const) {
+    const { result, summary } = remove(p, [target]);
+    assert.equal(
+      [
+        ...storeyOf(result).walls,
+        ...storeyOf(result).windows,
+        ...storeyOf(result).doors!,
+        ...storeyOf(result).lines!,
+      ].some((e) => e.id === target.id),
+      false,
+    );
+    assert.match(summary, /^1 Element löschen/);
+  }
+  // Wall-3 has no openings: only its corner dissolves; wall-1 keeps its T.
+  const corner = storeyOf(remove(p, [{ kind: "wall", id: "wall-3" }]).result);
+  assert.deepEqual(corner.wallJoins, []);
+  assert.equal(corner.wallTJunctions.length, 1);
+  const both = remove(p, [
+    { kind: "wall", id: "wall-1" },
+    { kind: "door", id: "door" },
+  ]);
+  assert.match(both.summary, /^2 Elemente löschen; 1 Fenster\/Tür der Wand wird mitgelöscht/);
+});
+
+test("unused image assets and hatch patterns leave with their last user", () => {
+  const png =
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=";
+  const base = createProject("p", "s");
+  const one = previewCreateReference(base, base, {
+    projectId: base.id,
+    asset: { id: "asset", mimeType: "image/png", pixelWidth: 1, pixelHeight: 1, data: png },
+    reference: {
+      id: "ref-1",
+      kind: "image-reference",
+      assetId: "asset",
+      layerId: base.defaultLayerIds.line,
+      origin: { x: 0, y: 0 },
+      rotation: 0,
+      metresPerPixel: 1,
+    },
+  });
+  assert.deepEqual(remove(one, [{ kind: "reference", id: "ref-1" }]).result.assets, []);
+  // A second reference keeps the shared image.
+  const two = validateProject({
+    ...one,
+    storeys: one.storeys.map((st) => ({
+      ...st,
+      references: [...st.references, { ...st.references[0]!, id: "ref-2" }],
+    })),
+  });
+  assert.deepEqual(
+    remove(two, [{ kind: "reference", id: "ref-1" }]).result.assets.map((a) => a.id),
+    ["asset"],
+  );
+  const hatches = hatchPointFixture(2, 8);
+  const first = remove(hatches, [{ kind: "hatch", id: "h0" }]).result;
+  assert.deepEqual(
+    first.hatchPatterns.map((h) => h.id),
+    ["pattern"],
+  );
+  const last = remove(first, [{ kind: "hatch", id: "h1" }]).result;
+  assert.deepEqual(last.hatchPatterns, []);
+});
+
+test("stale, foreign-storey and hidden selections are rejected; Undo restores exactly", () => {
+  const p = building();
+  assert.throws(() => remove(p, []), /aktuelle Auswahl/);
+  assert.throws(() => remove(p, [{ kind: "wall", id: "missing" }]), /aktuelle Auswahl/);
+  assert.throws(() => remove(p, [{ kind: "door", id: "window-0" }]), /aktuelle Auswahl/);
+  const hidden = createLayerVisibilityPolicy(p, {
+    scope: { kind: "bim-project" },
+    hiddenLayerIds: [p.defaultLayerIds.wall],
+  });
+  assert.throws(
+    () => previewDeleteSelection(p, [{ kind: "wall", id: "wall-1" }], hidden),
+    /aktuelle Auswahl/,
+  );
+  const twoStoreys = validateProject({
+    ...p,
+    storeys: [
+      ...p.storeys,
+      {
+        ...p.storeys[0]!,
+        id: "upper",
+        name: "OG",
+        walls: [{ ...storeyOf(p).walls[0]!, id: "up" }],
+        windows: [],
+        doors: [],
+        wallJoins: [],
+        wallTJunctions: [],
+      },
+    ],
+  });
+  assert.throws(
+    () =>
+      remove(twoStoreys, [
+        { kind: "wall", id: "wall-2" },
+        { kind: "wall", id: "up" },
+      ]),
+    /einem Geschoss/,
+  );
+  const h = createHistory(p);
+  const committed = commitProject(h, remove(h.present, [{ kind: "wall", id: "wall-1" }]).result);
+  assert.equal(committed.past.length, 1);
+  assert.equal(undoProject(committed).present, h.present);
+});
+
+test("text and voice use the same delete operation", () => {
+  const p = building();
+  const targets = [{ kind: "wall", id: "wall-1" }] as const;
+  const direct = remove(p, targets);
+  for (const text of [
+    "Auswahl löschen",
+    "auswahl entfernen",
+    normalizeSpeech("Auswahl löschen."),
+  ]) {
+    const preview = previewSelectionCommand(p, targets, visible(p), text);
+    assert.deepEqual(preview.result, direct.result, text);
+    assert.equal(preview.summary, direct.summary);
+  }
+  assert.throws(
+    () => previewSelectionCommand(p, targets, visible(p), "Auswahl wegwerfen"),
+    /Auswahl löschen/,
+  );
+});
+
+import { roomAcceptanceProject } from "../../../benchmarks/room-ifc-acceptance.ts";
+import { copySelection, pasteClipboard, clipboardSummary } from "../clipboard/clipboard.ts";
+import { selectWorkingStorey } from "../storeys/working-storey.ts";
+import { storeyOf as storeyOfClip } from "../../domain/storeys/access.ts";
+
+test("clipboard: copy walls with openings, room and slab; paste in place into another storey", () => {
+  // docs/KONTEXTMENUE.md (K1): app-internal clipboard, paste at the same position (decision W).
+  const base = roomAcceptanceProject();
+  const eg = selectWorkingStorey(base, base, "eg");
+  const egStorey = storeyOfClip(eg);
+  const targets = [
+    ...egStorey.walls.map((w) => ({ kind: "wall" as const, id: w.id })),
+    { kind: "room" as const, id: "eg-wohnen" },
+    ...(egStorey.slabs ?? []).map((s) => ({ kind: "slab" as const, id: s.id })),
+  ];
+  const content = copySelection(eg, targets);
+  // Windows come along with their walls; corner connections only between copied walls.
+  assert.equal(content.items.filter((i) => i.kind === "window").length, egStorey.windows.length);
+  assert.equal(content.wallJoins.length, egStorey.wallJoins.length);
+  assert.equal(clipboardSummary(content, "kopiert"), `${content.items.length} Elemente kopiert`);
+  let counter = 0;
+  // In place over identical walls is refused readably (same storey).
+  assert.throws(
+    () => pasteClipboard(eg, content, (kind) => `${kind}-same-${++counter}`),
+    /Einfügen an derselben Stelle nicht möglich/,
+  );
+  // Into the OG after removing its walls (no coinciding wall corners).
+  const ogFull = selectWorkingStorey(eg, eg, "og");
+  const og = previewDeleteSelection(
+    ogFull,
+    storeyOfClip(ogFull).walls.map((w) => ({ kind: "wall" as const, id: w.id })),
+    undefined,
+  ).result;
+  const before = storeyOfClip(og);
+  const pasted = pasteClipboard(og, content, (kind) => `${kind}-copy-${++counter}`);
+  const after = storeyOfClip(pasted.project);
+  assert.equal(after.walls.length, before.walls.length + egStorey.walls.length);
+  assert.equal(after.windows.length, before.windows.length + egStorey.windows.length);
+  assert.equal(pasted.targets.length, content.items.length);
+  // New ids everywhere, windows on their new walls, joins remapped, same positions.
+  const newWalls = after.walls.filter((w) => w.id.startsWith("wall-copy-"));
+  assert.equal(newWalls.length, egStorey.walls.length);
+  assert.deepEqual(
+    newWalls.map((w) => [w.start, w.end]),
+    egStorey.walls.map((w) => [w.start, w.end]),
+  );
+  const newIds = new Set(newWalls.map((w) => w.id));
+  for (const win of after.windows.filter((w) => w.id.startsWith("window-copy-")))
+    assert.ok(newIds.has(win.wallId));
+  const newJoins = after.wallJoins.filter((j) => newIds.has(j.first.wallId));
+  assert.equal(newJoins.length, egStorey.wallJoins.length);
+  assert.ok(newJoins.every((j) => newIds.has(j.second.wallId)));
+  // The pasted room gets the next free number; pasting twice gives distinct numbers.
+  const room = after.rooms!.find((r) => r.id.startsWith("room-copy-"))!;
+  assert.equal(room.number, "R-003");
+  assert.equal(room.name, "Wohnen");
+  const roomOnly = copySelection(eg, [{ kind: "room", id: "eg-wohnen" }]);
+  const twice = pasteClipboard(pasted.project, roomOnly, (kind) => `${kind}-copy-${++counter}`);
+  assert.deepEqual(
+    storeyOfClip(twice.project)
+      .rooms!.map((r) => r.number)
+      .sort(),
+    ["R-002", "R-003", "R-004"],
+  );
+  // The source storey is untouched; the clipboard keeps its own copy.
+  assert.deepEqual(
+    storeyOfClip(selectWorkingStorey(pasted.project, pasted.project, "eg")),
+    egStorey,
+  );
+  // A window alone is not copied (it would duplicate in place); nothing selected is refused.
+  const window = egStorey.windows[0]!;
+  assert.throws(
+    () => copySelection(eg, [{ kind: "window", id: window.id }]),
+    /nur zusammen mit ihrer Wand/,
+  );
+  assert.throws(() => copySelection(eg, []), /zuerst Elemente auswählen/);
+  const mixed = copySelection(eg, [
+    { kind: "window", id: window.id },
+    { kind: "room", id: "eg-wohnen" },
+  ]);
+  assert.equal(mixed.skippedHosted, 1);
+  assert.match(clipboardSummary(mixed, "kopiert"), /1 Fenster\/Türen ohne ihre Wand/);
+});
+
+import { changeDisplayOrder, canChangeDisplayOrder } from "./order.ts";
+import { addRoom as addRoomForOrder } from "../rooms/actions.ts";
+
+test("display order: front, forward, backward, back within the own kind", () => {
+  // docs/DARSTELLUNGSREIHENFOLGE.md (K2): later in the stored list = drawn on top.
+  let p = roomAcceptanceProject();
+  p = selectWorkingStorey(p, p, "eg");
+  const square = (x: number) => [
+    { x, y: 1 },
+    { x: x + 2, y: 1 },
+    { x: x + 2, y: 3 },
+  ];
+  for (const id of ["a", "b", "c"]) p = addRoomForOrder(p, { id, points: square(1) });
+  const ids = (q: typeof p) => storeyOfClip(q).rooms!.map((r) => r.id);
+  assert.deepEqual(ids(p), ["eg-wohnen", "a", "b", "c"]);
+  const a = [{ kind: "room" as const, id: "a" }];
+  assert.deepEqual(ids(changeDisplayOrder(p, a, "front")), ["eg-wohnen", "b", "c", "a"]);
+  assert.deepEqual(ids(changeDisplayOrder(p, a, "forward")), ["eg-wohnen", "b", "a", "c"]);
+  assert.deepEqual(ids(changeDisplayOrder(p, a, "backward")), ["a", "eg-wohnen", "b", "c"]);
+  assert.deepEqual(ids(changeDisplayOrder(p, a, "back")), ["a", "eg-wohnen", "b", "c"]);
+  // A block keeps its inner order; only the own kind moves, other lists stay as they are.
+  const ab = [
+    { kind: "room" as const, id: "a" },
+    { kind: "room" as const, id: "b" },
+  ];
+  assert.deepEqual(ids(changeDisplayOrder(p, ab, "forward")), ["eg-wohnen", "c", "a", "b"]);
+  const front = changeDisplayOrder(p, ab, "front");
+  assert.equal(storeyOfClip(front).walls, storeyOfClip(p).walls);
+  // Nothing to move returns the same snapshot; the menu check says so cheaply.
+  const c = [{ kind: "room" as const, id: "c" }];
+  assert.equal(changeDisplayOrder(p, c, "front"), p);
+  assert.equal(canChangeDisplayOrder(p, c, "front"), false);
+  assert.equal(canChangeDisplayOrder(p, c, "back"), true);
+  assert.equal(canChangeDisplayOrder(p, [], "back"), false);
+});

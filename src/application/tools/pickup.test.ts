@@ -3,7 +3,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { createDrawing } from "../drawing/actions.ts";
-import { createHistory, commitProject, undoProject } from "../../lib/bim/history.ts";
+import { createHistory, commitProject, undoProject } from "../history/project-history.ts";
 import { pickupToolDefaults } from "./pickup.ts";
 import { createLayerVisibilityPolicy, ALL_LAYERS_VISIBLE } from "../layers/visibility.ts";
 import { rectangleContour, prepareHatchBoundaries } from "../hatches/construction.ts";
@@ -89,7 +89,8 @@ test("double secondary requires same target/context, nearby rapid clicks and res
   assert.equal(g.click({ ...click, time: 1400, x: 30 }), false);
 });
 import { placeWindow, windowPlacementInteraction } from "../drawing/window-placement.ts";
-import { addWall, updateWindow } from "../../lib/bim/model.ts";
+import { updateWindow } from "../windows/actions.ts";
+import { addWall } from "../walls/actions.ts";
 
 test("window pickup copies creation defaults including layer, never host or position; new host and atomic undo", () => {
   let p = createExampleProject();
@@ -189,7 +190,7 @@ test("window placement checks chosen layer, host visibility and changed draft; p
     placeWindow(p, p, visibility, "wide", point, { width: 10, height: 1, sillHeight: 0.8 }),
   );
 });
-import { addLine } from "../../lib/bim/model.ts";
+import { addLine } from "../lines/actions.ts";
 
 test("line and polyline pickup transfer style and layer into independent new geometry, with one undo", () => {
   for (const sourceKind of ["line", "polyline"] as const) {
@@ -275,7 +276,7 @@ import {
   finishWallChain,
   previewWallChain,
 } from "../drawing/wall-chain.ts";
-import { updateWall } from "../../lib/bim/model.ts";
+import { updateWall } from "../walls/actions.ts";
 
 test("wall pickup pins owned defaults through prepared preview and whole-chain history", () => {
   let p = createExampleProject();
@@ -294,7 +295,7 @@ test("wall pickup pins owned defaults through prepared preview and whole-chain h
   if (preset.tool !== "wall") throw new Error("Expected wall");
   assert.deepEqual(
     Object.keys(preset.values).sort(),
-    ["thickness", "height", "bodyOffset", "layerId"].sort(),
+    ["thickness", "height", "bodyOffset", "layerId", "renovation"].sort(),
   );
   let chain = beginWallChain(p, { x: 10, y: 10 }, null, preset.values);
   preset.values.height = 8;

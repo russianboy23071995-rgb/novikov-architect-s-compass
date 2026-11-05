@@ -1,3 +1,4 @@
+import { storeyOpenings } from "./openings.ts";
 import { storeyOf, replaceStorey } from "../../storeys/access.ts";
 import { validateProject, type Project } from "../../project/schema.ts";
 import type { CornerTarget } from "./corner-openings.ts";
@@ -30,7 +31,7 @@ export function resolveIsolatedTPair(input: Project, hostId: string, incoming: C
   return {
     host,
     incoming: { wall, endpoint: incoming.endpoint },
-    windows: storeyOf(project).windows,
+    windows: storeyOpenings(storeyOf(project)),
   };
 }
 

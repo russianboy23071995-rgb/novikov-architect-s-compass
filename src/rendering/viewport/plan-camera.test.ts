@@ -3,6 +3,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   fitPlan,
+  fitPlanInset,
   planViewBox,
   screenToPlan,
   zoomPlan,
@@ -64,4 +65,21 @@ test("saved framing captures pan and zoom as metric extents independent of outpu
   camera.center.x = 99;
   assert.equal(frame.center.x, 7);
   assert.throws(() => capturePlanFraming(camera, { width: 0, height: 800 }));
+});
+
+test("fitting between palettes puts the bounds into the free part of the surface", () => {
+  // docs/GLAS_PALETTEN.md: 10 × 5 m bounds, palettes left 100 px, top 150 px, right 300 px.
+  const insets = { left: 100, top: 150, right: 300, bottom: 0 };
+  const camera = fitPlanInset("0 -5 10 5", { width: 1400, height: 650 }, insets);
+  assert.equal(camera.pixelsPerMetre, 100);
+  const topLeft = { x: 0, y: 5 };
+  const bottomRight = { x: 10, y: 0 };
+  const screen = (p: { x: number; y: number }) => ({
+    x: (p.x - camera.center.x) * camera.pixelsPerMetre + 700,
+    y: (camera.center.y - p.y) * camera.pixelsPerMetre + 325,
+  });
+  assert.deepEqual(screen(topLeft), { x: 100, y: 150 });
+  assert.deepEqual(screen(bottomRight), { x: 1100, y: 650 });
+  const plain = fitPlanInset("0 -5 10 5", size, { left: 0, top: 0, right: 0, bottom: 0 });
+  assert.deepEqual(plain, fitPlan("0 -5 10 5", size));
 });

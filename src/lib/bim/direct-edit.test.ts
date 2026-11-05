@@ -3,8 +3,10 @@ import { stretchOffset, directionOffset } from "../../geometry/projections/direc
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { addLine, updateWall, serializeProject, deserializeProject } from "./model.ts";
-import { buildSolid } from "./geometry.ts";
+import { serializeProject, deserializeProject } from "./model.ts";
+import { addLine } from "../../application/lines/actions.ts";
+import { updateWall } from "../../application/walls/actions.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import {
   createEditingState,
   editingReducer,
@@ -12,9 +14,13 @@ import {
 } from "../../application/direct-edit/controller.ts";
 import { previewMovementInput } from "../../application/direct-edit/numeric.ts";
 import { defaultLineAppearance } from "./lines.ts";
-import { editAtPointer, editAnchor } from "./direct-edit.ts";
-import type { EditSession } from "./direct-edit.ts";
-import { createHistory, commitProject, undoProject } from "./history.ts";
+import { editAtPointer, editAnchor } from "../../application/direct-edit/session.ts";
+import type { EditSession } from "../../application/direct-edit/session.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+} from "../../application/history/project-history.ts";
 const base = createExampleProject();
 
 test("shared stretch preserves original arithmetic and neighbour boundary exactly", () => {

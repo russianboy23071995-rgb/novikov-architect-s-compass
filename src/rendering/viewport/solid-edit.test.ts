@@ -2,8 +2,10 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { buildSolid, initialCamera } from "../../lib/bim/geometry.ts";
-import { addWall, serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import { initialCamera } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "./storey-solid.ts";
+import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import { addWall } from "../../application/walls/actions.ts";
 import { createProjectionFrame } from "../../geometry/projections/orthographic.ts";
 import { createProjectionState } from "./projection-state.ts";
 import { createWallPreviewContext } from "./wall-preview-context.ts";
@@ -18,7 +20,8 @@ import { evaluateInteraction, confirmInteraction } from "../../application/tools
 import { resolveToolSnap } from "../../application/tools/snapping.ts";
 import { sameHoverSession } from "../../constraints/inference/hover-reference.ts";
 import { exportIfc, stepReal } from "../../lib/bim/ifc.ts";
-import { updateWall, wallLength } from "../../lib/bim/model.ts";
+import { wallLength } from "../../domain/project/schema.ts";
+import { updateWall } from "../../application/walls/actions.ts";
 import {
   projectSnapPrimitives,
   wallEndpointIndex,
@@ -230,7 +233,11 @@ test("3D picking maps axis ends and all physical corners to their stable wall en
     assert.equal(plane.status, "ok");
     if (plane.status !== "ok") throw Error("plane");
     const adapter = createWallPointCandidates(rotated, view);
-    for (const ref of projectSnapPrimitives(rotated).references) {
+    // Wall points only; window jambs (docs/MASSKETTE.md, M1) are no wall endpoints.
+    const wallIds = new Set(storeyOf(rotated).walls.map((w) => w.id));
+    for (const ref of projectSnapPrimitives(rotated).references.filter((r) =>
+      wallIds.has(r.entityId),
+    )) {
       const screen = plane.value.toScreen(ref.point);
       if (screen.status !== "ok") throw Error("screen");
       const found = adapter.query(rotated, view, screen.value, 10);

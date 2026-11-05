@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { buildSolid, initialCamera } from "../../lib/bim/geometry.ts";
-import { updateWall } from "../../lib/bim/model.ts";
+import { initialCamera } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "./storey-solid.ts";
+import { updateWall } from "../../application/walls/actions.ts";
 import { createProjectionState } from "./projection-state.ts";
 import { createProjectionFrame } from "../../geometry/projections/orthographic.ts";
 import { orientationFloor } from "./orientation-floor.ts";

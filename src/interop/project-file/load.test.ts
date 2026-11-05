@@ -1,18 +1,25 @@
+import { withoutOpeningMarks } from "../../test/legacy-project-fixture.ts";
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { loadProjectData, deserializeProject } from "./load.ts";
-import {
-  createProject,
-  addWall,
-  addWindow,
-  addLine,
-  validateProject,
-  serializeProject,
-} from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../../application/projects/create.ts";
+import { addWindow } from "../../application/windows/actions.ts";
+import { addLine } from "../../application/lines/actions.ts";
+import { validateProject } from "../../domain/project/schema.ts";
+import { addWall } from "../../application/walls/actions.ts";
 import { readProjectFile } from "../../lib/bim/history.ts";
 import { createDrawing } from "../../application/drawing/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
+import { createStandardProject } from "../../application/projects/create.ts";
+import { addRoof } from "../../application/roofs/actions.ts";
+import { addRoom, nextProjectRoomNumber, updateRoom } from "../../application/rooms/actions.ts";
+import { nextRoomNumber, roomArea } from "../../domain/elements/room/model.ts";
+import { clearHeightLine } from "../../domain/elements/room/height-line.ts";
+import { selectWorkingStorey } from "../../application/storeys/working-storey.ts";
+import { boundHeightFixture } from "../../../benchmarks/bound-height-fixture.ts";
 
 function legacy(withLines = true) {
   return {
@@ -54,12 +61,15 @@ for (const withLines of [false, true])
       const { layerId, ...rest } = e;
       return rest;
     };
-    assert.equal(migrated.schemaVersion, 26);
+    assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
     assert.deepEqual(
       storeyOf(migrated).walls.map(strip),
       storeyOf(input).walls.map((w) => ({ ...w, bodyOffset: 0 })),
     );
-    assert.deepEqual(storeyOf(migrated).windows.map(strip), storeyOf(input).windows);
+    assert.deepEqual(
+      storeyOf(withoutOpeningMarks(migrated)).windows.map(strip),
+      storeyOf(input).windows,
+    );
     assert.deepEqual(storeyOf(migrated).lines?.map(strip), storeyOf(input).lines);
     assert.equal(migrated.id, input.id);
     assert.equal(storeyOf(migrated).id, storeyOf(input).id);
@@ -154,6 +164,8 @@ test("all creation paths use the same stable defaults even after a layer rename"
       "Innenwand",
       "Dach",
       "Decke",
+      "Stütze",
+      "Treppe",
       "Fenster",
       "Tür",
       "Möblierung",
@@ -214,4 +226,152 @@ test("both file entry points preserve UTF-8 budget precedence and normal invalid
   }
   assert.throws(() => readProjectFile("{"), /Ungültige Projektdatei/);
   assert.throws(() => readProjectFile("{}"), /Ungültige Projektdatei/);
+});
+
+test("schema 31 adds roofs: v30 files load unchanged, smuggled roofs are refused, roofs round-trip", () => {
+  // docs/ROOF_ELEMENT.md, D1.
+  assert.ok(PROJECT_SCHEMA_VERSION >= 31);
+  const current = createStandardProject("p", "eg", "og");
+  const v30 = { ...JSON.parse(serializeProject(current)), schemaVersion: 30 };
+  const migrated = loadProjectData(v30);
+  assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
+  assert.deepEqual({ ...migrated, schemaVersion: 30 }, { ...current, schemaVersion: 30 });
+  const roof = {
+    id: "dach",
+    points: [
+      { x: 0, y: 0 },
+      { x: 6, y: 0 },
+      { x: 6, y: 4 },
+      { x: 0, y: 4 },
+    ],
+    referenceLine: { start: { x: 0, y: 0 }, end: { x: 6, y: 0 } },
+    rise: "left" as const,
+    referenceHeight: 0.5,
+    pitch: 35,
+    thickness: 0.24,
+    eaveCut: "horizontal" as const,
+    topCut: "perpendicular" as const,
+  };
+  const withRoof = addRoof(current, roof);
+  const smuggled = { ...JSON.parse(serializeProject(withRoof)), schemaVersion: 30 };
+  assert.throws(() => loadProjectData(smuggled));
+  // Walls bound to their storey store no height in the file; they load unchanged too.
+  const bound = boundHeightFixture();
+  assert.ok(bound.storeys.some((s) => s.walls.some((w) => w.topBinding)));
+  const boundV30 = { ...JSON.parse(serializeProject(bound)), schemaVersion: 30 };
+  assert.deepEqual(
+    { ...loadProjectData(boundV30), schemaVersion: 30 },
+    { ...bound, schemaVersion: 30 },
+  );
+  const reread = readProjectFile(serializeProject(withRoof));
+  assert.deepEqual(reread, withRoof);
+  assert.deepEqual(storeyOf(reread).roofs![0], {
+    ...roof,
+    layerId: storeyOf(withRoof).roofs![0]!.layerId,
+  });
+});
+
+test("schema 32 adds rooms: numbers R-001…, optional floor build-up, unique numbers, migration", () => {
+  // docs/ROOM_ELEMENT.md, R1.
+  assert.equal(PROJECT_SCHEMA_VERSION, 43);
+  const base = createStandardProject("p", "eg", "og");
+  const square = [
+    { x: 0, y: 0 },
+    { x: 4, y: 0 },
+    { x: 4, y: 3 },
+    { x: 0, y: 3 },
+  ];
+  // Numbers: the first room is R-001, the next one continues after the highest R-number.
+  let p = addRoom(base, { id: "r1", points: square });
+  let room = storeyOf(p).rooms![0]!;
+  assert.deepEqual([room.number, room.name, "floorBuildUp" in room], ["R-001", "", false]);
+  assert.equal(p.layers.find((l) => l.id === room.layerId)!.name, "Raum");
+  assert.equal(roomArea(room), 12);
+  p = addRoom(p, { id: "r2", points: square, name: "Bad", floorBuildUp: 0.12 });
+  assert.equal(storeyOf(p).rooms![1]!.number, "R-002");
+  assert.equal(storeyOf(p).rooms![1]!.floorBuildUp, 0.12);
+  p = addRoom(p, { id: "r3", points: square, number: "R-010" });
+  assert.equal(nextProjectRoomNumber(p), "R-011");
+  assert.equal(nextRoomNumber([{ number: "Küche" }, { number: "r-007" }]), "R-008");
+  // Numbers are unique in the whole project, also across storeys and in any letter case.
+  const og = selectWorkingStorey(p, p, "og");
+  assert.throws(
+    () => addRoom(og, { id: "r4", points: square, number: " r-001 " }),
+    /bereits vergeben/,
+  );
+  const ogRoom = addRoom(og, { id: "r4", points: square });
+  assert.equal(storeyOf(ogRoom).rooms![0]!.number, "R-011");
+  // The floor build-up is optional: it can be set and removed again.
+  p = updateRoom(p, "r1", { floorBuildUp: 0.1, name: "Wohnen" });
+  room = storeyOf(p).rooms![0]!;
+  assert.deepEqual([room.floorBuildUp, room.name], [0.1, "Wohnen"]);
+  p = updateRoom(p, "r1", { floorBuildUp: undefined });
+  assert.equal("floorBuildUp" in storeyOf(p).rooms![0]!, false);
+  for (const bad of [
+    { floorBuildUp: -0.1 },
+    { number: "" },
+    { number: "R-002" },
+    { points: [square[0]!, square[2]!, square[1]!, square[3]!] },
+  ])
+    assert.throws(() => updateRoom(p, "r1", bad));
+  assert.throws(() => updateRoom(p, "unbekannt", { name: "x" }), /Unbekannter Raum/);
+  // File: rooms round-trip; schema 31 files load unchanged, smuggled rooms are refused.
+  assert.deepEqual(readProjectFile(serializeProject(ogRoom)), ogRoom);
+  const v31 = { ...JSON.parse(serializeProject(base)), schemaVersion: 31 };
+  assert.deepEqual({ ...loadProjectData(v31), schemaVersion: 31 }, { ...base, schemaVersion: 31 });
+  assert.throws(() =>
+    loadProjectData({ ...JSON.parse(serializeProject(ogRoom)), schemaVersion: 31 }),
+  );
+  const bound = boundHeightFixture();
+  for (const version of [30, 31])
+    assert.deepEqual(
+      {
+        ...loadProjectData({ ...JSON.parse(serializeProject(bound)), schemaVersion: version }),
+        schemaVersion: 0,
+      },
+      { ...bound, schemaVersion: 0 },
+      `bound walls from schema ${version}`,
+    );
+});
+
+test("schema 34 height lines: objects with style and references; 32/33 files load", () => {
+  // docs/ROOM_ELEMENT.md, R3/R3b.
+  const square = [
+    { x: 0, y: 0 },
+    { x: 4, y: 0 },
+    { x: 4, y: 3 },
+  ];
+  const base = addRoom(createStandardProject("p", "eg", "og"), { id: "r1", points: square });
+  assert.equal("heightLines" in storeyOf(base).rooms![0]!, false);
+  const proof = { ...clearHeightLine("h1", 2.3), upper: "outerSkin" as const, color: "#dc2626" };
+  const set = updateRoom(base, "r1", { heightLines: [proof] });
+  assert.deepEqual(storeyOf(set).rooms![0]!.heightLines, [proof]);
+  assert.deepEqual(readProjectFile(serializeProject(set)), set);
+  assert.deepEqual(
+    storeyOf(updateRoom(base, "r1", { heightLines: [] })).rooms![0]!.heightLines,
+    [],
+  );
+  for (const bad of [
+    { ...proof, height: 0.05 },
+    { ...proof, height: 11 },
+    { ...proof, color: "rot" },
+    { ...proof, upper: "dach" },
+    { ...proof, style: { ...proof.style, period: -1 } },
+  ])
+    assert.throws(() => updateRoom(base, "r1", { heightLines: [bad as typeof proof] }));
+  // Schema 33 stored clear heights as numbers: they become clear-height lines (default look).
+  const v33 = JSON.parse(serializeProject(base));
+  v33.schemaVersion = 33;
+  v33.storeys[0].rooms[0].heightLines = [1.2, 2.3];
+  assert.deepEqual(storeyOf(loadProjectData(v33)).rooms![0]!.heightLines, [
+    clearHeightLine("h1", 1.2),
+    clearHeightLine("h2", 2.3),
+  ]);
+  // Rooms without lines and schema 32 files keep the defaults; objects in older files are refused.
+  const plain = JSON.parse(serializeProject(base));
+  assert.deepEqual(loadProjectData({ ...plain, schemaVersion: 33 }), base);
+  assert.deepEqual(loadProjectData({ ...plain, schemaVersion: 32 }), base);
+  const withObjects = JSON.parse(serializeProject(set));
+  assert.throws(() => loadProjectData({ ...withObjects, schemaVersion: 33 }));
+  assert.throws(() => loadProjectData({ ...withObjects, schemaVersion: 32 }));
 });

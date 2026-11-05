@@ -1,4 +1,5 @@
-import type { Wall, BimWindow } from "../../project/schema.ts";
+import type { Wall } from "../../project/schema.ts";
+import type { WallOpening } from "./openings.ts";
 import type { Point2 } from "../../../geometry/primitives/point.ts";
 import { wallBody } from "./body.ts";
 import {
@@ -6,11 +7,13 @@ import {
   type Vertex3,
 } from "../../../geometry/solids/profile-openings.ts";
 import { coordinatesCompatible } from "../../../geometry/tolerances/model.ts";
+import { trimExtrusionBelowPlane } from "../../../geometry/solids/plane-trim.ts";
+import { localTrimPlane } from "./roof-trim.ts";
 
 function deriveWallContourSolid(
   wall: Wall,
   points: Point2[],
-  windows: BimWindow[],
+  windows: readonly WallOpening[],
   clipOpeningsToProfile = false,
   extrude: typeof extrudeProfileWithOpenings = extrudeProfileWithOpenings,
 ) {
@@ -53,7 +56,14 @@ function deriveWallContourSolid(
       bottom: w.sillHeight,
       top: w.sillHeight + w.height,
     }));
-  const solid = extrude(profile, wall.height, openings, clipOpeningsToProfile);
+  // Roof trim (L04b): the plane in local coordinates; the body is raised to the highest plane
+  // point over the profile and cut there (decision R: the wall reaches up to the roof).
+  const trim = wall.trimPlane && localTrimPlane(wall.trimPlane, body.start, ux, uy);
+  const height = trim
+    ? Math.max(...profile.map((p) => trim.a + trim.b * p.x + trim.c * p.y))
+    : wall.height;
+  const extruded = extrude(profile, height, openings, clipOpeningsToProfile);
+  const solid = trim ? trimExtrusionBelowPlane(extruded, profile, trim) : extruded;
   const world = ([x, y, z]: Vertex3): Vertex3 => [
     body.start.x + ux * x - uy * y,
     body.start.y + uy * x + ux * y,
@@ -79,14 +89,47 @@ function deriveWallContourSolid(
   };
 }
 
+// The local extrusion depends on its arguments only (profile, height, openings, clipping): an
+// equal key yields an equal solid for any project or snapshot that asks. Validation of a
+// preview, of its commit and the plan display then extrude only walls whose inputs changed.
+// One entry per wall and clipping mode; past the limit the cache starts over
+// (docs/performance/EDIT_CYCLE.md).
+const EXTRUSION_LIMIT = 65536;
+const extrusions = new Map<
+  string,
+  { key: string; solid: ReturnType<typeof extrudeProfileWithOpenings> }
+>();
+let extruded = 0;
+/** Diagnostic count of extrusions actually computed, for tests and measurements. */
+export const wallExtrusionCount = () => extruded;
+function sharedExtrusion(wallId: string): typeof extrudeProfileWithOpenings {
+  return (...args) => {
+    const slot = `${wallId}|${args[3] ? 1 : 0}`,
+      key = JSON.stringify(args);
+    const previous = extrusions.get(slot);
+    if (previous?.key === key) return previous.solid;
+    if (extrusions.size >= EXTRUSION_LIMIT) extrusions.clear();
+    const solid = extrudeProfileWithOpenings(...args);
+    extruded++;
+    extrusions.set(slot, { key, solid });
+    return solid;
+  };
+}
+
 /** Public derivation remains independent of any prepared session. */
 export function wallContourSolid(
   wall: Wall,
   points: Point2[],
-  windows: BimWindow[],
+  windows: readonly WallOpening[],
   clipOpeningsToProfile = false,
 ) {
-  return deriveWallContourSolid(wall, points, windows, clipOpeningsToProfile);
+  return deriveWallContourSolid(
+    wall,
+    points,
+    windows,
+    clipOpeningsToProfile,
+    sharedExtrusion(wall.id),
+  );
 }
 
 /** One private entry per pinned wall; exact local inputs only, never ID-only reuse. */
@@ -96,7 +139,12 @@ export function createWallContourSolidDeriver(wallIds: readonly string[]) {
     string,
     { key: string; solid: ReturnType<typeof extrudeProfileWithOpenings> }
   >();
-  return (wall: Wall, points: Point2[], windows: BimWindow[], clipOpeningsToProfile = false) =>
+  return (
+    wall: Wall,
+    points: Point2[],
+    windows: readonly WallOpening[],
+    clipOpeningsToProfile = false,
+  ) =>
     deriveWallContourSolid(wall, points, windows, clipOpeningsToProfile, (...args) => {
       if (!allowed.has(wall.id)) return extrudeProfileWithOpenings(...args);
       const key = JSON.stringify(args);

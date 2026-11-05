@@ -1,0 +1,202 @@
+{
+  "date": "2026-10-27",
+  "state": "main 2e7c4b9 (nach PR473), Diagnose-Build render-profile",
+  "notes": "benchmarks/school-acceptance.html?drag=1, images=1: Tür auswählen, 2D→3D, Szene ruhig, dann fünfmal „Tür entlang Wand“ mit je 30 Mausbewegungen (je ein Bild Abstand). fresh=1 löscht vorher den Speicher der Messseite (keine Sicherungsprüfung älterer Läufe). gpu=1: nach jedem Zeichnen ein 1-Pixel-Lesen, erzwingt das Warten auf die Grafikkarte (eigener Lauf, verlangsamt). Medianwerte je Bewegung über alle 150 Bewegungen eines Laufs. Dev-Rechner, Fenster sichtbar, 60 Hz.",
+  "runs": [
+    {
+      "size": "s",
+      "fresh": true,
+      "gpu": false,
+      "dragMedianMs": 495.8,
+      "dragMaxMs": 921,
+      "perMove": {
+        "moveMs": 13.9,
+        "toDrawMs": 13.5,
+        "evaluateMs": 2.6,
+        "updateMs": 0.7,
+        "drawMs": 0.1,
+        "uploadBytes": 11808
+      },
+      "fullUploads": 40,
+      "triangles": 7192,
+      "note": "erster Lauf, noch ohne Fang-Messpunkte"
+    },
+    {
+      "size": "s",
+      "fresh": true,
+      "gpu": false,
+      "dragMedianMs": 531.5,
+      "dragMaxMs": 1206.3,
+      "perMove": {
+        "moveMs": 16,
+        "handlerMs": 0.5,
+        "resolveMs": 0.2,
+        "toDrawMs": 15.2,
+        "evaluateMs": 2.6,
+        "updateMs": 0.7,
+        "drawMs": 0.1,
+        "uploadBytes": 11808
+      },
+      "fullUploads": 40,
+      "fullUploadUpdateMs": 1.6,
+      "slowResolveMoves": 0,
+      "longTaskMsPerDrag": [0, 343, 0, 0, 0]
+    },
+    {
+      "size": "s",
+      "fresh": true,
+      "gpu": false,
+      "dragMedianMs": 548.8,
+      "dragMaxMs": 1246.1,
+      "perMove": {
+        "moveMs": 16.1,
+        "handlerMs": 0.5,
+        "resolveMs": 0.2,
+        "toDrawMs": 15.4,
+        "evaluateMs": 2.7,
+        "updateMs": 0.7,
+        "drawMs": 0.1,
+        "uploadBytes": 11808
+      },
+      "fullUploads": 40,
+      "fullUploadUpdateMs": 1.6,
+      "slowResolveMoves": 0,
+      "longTaskMsPerDrag": [0, 437, 0, 0, 0],
+      "background": "Bewegung 17 des 2. Durchgangs: 380 ms Arbeit nach dem Zeichnen, danach 9 Bewegungen mit je ~40 ms nach dem Zeichnen (Hintergrundarbeit nach dem Öffnen, nicht dem Ziehen zugeordnet)"
+    },
+    {
+      "size": "s",
+      "fresh": true,
+      "gpu": true,
+      "dragMedianMs": 615.5,
+      "dragMaxMs": 1340.1,
+      "perMove": {
+        "moveMs": 20.8,
+        "toDrawMs": 15.1,
+        "evaluateMs": 2.7,
+        "drawMs": 0.1,
+        "gpuMs": 3,
+        "gpuMaxMs": 8.4,
+        "afterDrawMs": 4.1
+      }
+    },
+    {
+      "size": "l",
+      "fresh": true,
+      "gpu": false,
+      "dragMedianMs": 714.9,
+      "dragMaxMs": 1388.9,
+      "perMove": {
+        "moveMs": 16.1,
+        "toDrawMs": 15.3,
+        "evaluateMs": 2.3,
+        "updateMs": 0.5,
+        "drawMs": 0.1,
+        "uploadBytes": 0
+      },
+      "fullUploads": 5,
+      "triangles": 21584,
+      "longTaskMsPerDrag": [582, 0, 0, 50, 0],
+      "note": "noch ohne Fang-Messpunkte"
+    },
+    {
+      "size": "l",
+      "fresh": true,
+      "gpu": false,
+      "dragMedianMs": 729.2,
+      "dragMaxMs": 1547.2,
+      "perMove": {
+        "moveMs": 16.7,
+        "toDrawMs": 15.8,
+        "evaluateMs": 2.4,
+        "updateMs": 0.5,
+        "drawMs": 0.1,
+        "uploadBytes": 0
+      },
+      "fullUploads": 5,
+      "longTaskMsPerDrag": [580, 0, 0, 0, 0],
+      "slowMoves": "in jedem Durchgang Bewegung 14, 20, 21, 26, 27 mit 45–67 ms; Türberechnung dort 1,6–2,9 ms"
+    },
+    {
+      "size": "l",
+      "fresh": true,
+      "gpu": false,
+      "dragMedianMs": 694.2,
+      "dragMaxMs": 1745.5,
+      "perMove": {
+        "moveMs": 16.4,
+        "handlerMs": 0.5,
+        "resolveMs": 0.2,
+        "toDrawMs": 15.6,
+        "evaluateMs": 2.2,
+        "updateMs": 0.6,
+        "drawMs": 0.2,
+        "uploadBytes": 0
+      },
+      "longTaskMsPerDrag": [803, 0, 0, 0, 0],
+      "slowResolve": {
+        "moves": 25,
+        "of": 150,
+        "positions": [14, 20, 21, 26, 27],
+        "medianMs": {
+          "resolve": 16.6,
+          "resolveToRender": 6.8,
+          "renderToDraw": 23.8,
+          "move": "45–66"
+        },
+        "normalMedianMs": { "resolve": 0.2, "resolveToRender": 6.1, "renderToDraw": 7.7 }
+      }
+    },
+    {
+      "size": "l",
+      "fresh": false,
+      "gpu": false,
+      "dragMedianMs": 639.3,
+      "dragMaxMs": 713.8,
+      "perMove": {
+        "moveMs": 14.9,
+        "toDrawMs": 14.4,
+        "evaluateMs": 2.1,
+        "updateMs": 0.5,
+        "drawMs": 0.1
+      },
+      "longTaskMsPerDrag": [73, 0, 0, 0, 0],
+      "note": "Sicherungsprüfung des vorigen Laufs lag im Schritt „Szene fertig“ (1082 ms statt ~500 ms)"
+    },
+    {
+      "size": "l",
+      "fresh": true,
+      "gpu": true,
+      "dragMedianMs": 877.4,
+      "dragMaxMs": 1793.3,
+      "perMove": {
+        "moveMs": 21.3,
+        "toDrawMs": 15.8,
+        "evaluateMs": 2.3,
+        "drawMs": 0.2,
+        "gpuMs": 5.5,
+        "gpuMaxMs": 9.8,
+        "afterDrawMs": 5.9
+      }
+    }
+  ],
+  "fullAcceptanceRun": {
+    "size": "l",
+    "fresh": false,
+    "steps": {
+      "2D → 3D": 294.6,
+      "3D – Szene fertig": 1763.6,
+      "3D: Tür entlang Wand ziehen": 1112.6,
+      "3D → 2D": 144.9
+    },
+    "dragStepLongTaskMs": 245,
+    "drawsInDrag": 30,
+    "drawSpanMs": 805,
+    "drawGapsMs": [
+      17, 79, 34, 17, 16, 21, 18, 19, 15, 14, 14, 21, 61, 33, 18, 15, 14, 15, 49, 62, 34, 16, 15,
+      16, 51, 66, 31, 14, 17
+    ],
+    "evaluateMsRange": [1.6, 4.2],
+    "note": "Die langen Abstände liegen an denselben Mauspositionen wie die langsamen Fang-Bewegungen im Ziehlauf."
+  }
+}

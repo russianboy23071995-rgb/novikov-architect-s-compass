@@ -1,10 +1,13 @@
+import { withoutOpeningMarks } from "../../test/legacy-project-fixture.ts";
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
-import { updateWall, serializeProject } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { updateWall } from "../walls/actions.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
 import { createLayerVisibilityPolicy } from "./visibility.ts";
 import { createLayerDisplay } from "../../rendering/viewport/layer-display.ts";
@@ -88,8 +91,8 @@ test("strict version-2 migration preserves geometry and membership and defaults 
     schemaVersion: 2,
   };
   const migrated = loadProjectData(legacyProjectFixture(v2));
-  assert.equal(migrated.schemaVersion, 26);
-  assert.deepEqual(storeyOf(migrated), {
+  assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
+  assert.deepEqual(withoutOpeningMarks(storeyOf(migrated)), {
     ...oldStorey,
     references: [],
     hatches: [],

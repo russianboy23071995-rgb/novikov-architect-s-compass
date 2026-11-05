@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 import { cpus } from "node:os";
 import { hatchPointFixture } from "./hatch-point-fixture.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
-import { validateProject } from "../src/lib/bim/model.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { createProjectSnapshot } from "../src/domain/project/owned-snapshot.ts";
 import { defaultLineAppearance } from "../src/lib/bim/lines.ts";
-import { editAnchor, type EditSession } from "../src/lib/bim/direct-edit.ts";
+import { editAnchor, type EditSession } from "../src/application/direct-edit/session.ts";
 import { previewEdit } from "../src/application/direct-edit/controller.ts";
 import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";
 import {

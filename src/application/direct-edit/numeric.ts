@@ -1,8 +1,8 @@
 import { boundedEdgeTarget } from "./contour.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import { resolvePolarInput } from "../../constraints/input/polar.ts";
-import type { EditSession } from "../../lib/bim/direct-edit.ts";
-import type { Point, Project } from "../../lib/bim/model.ts";
+import type { EditSession } from "./session.ts";
+import type { Point, Project } from "../../domain/project/schema.ts";
 import { parseMetres } from "../../core/units/metres.ts";
 import { precisionTarget } from "../input/precision.ts";
 import { editDirection } from "./snapping.ts";
@@ -12,6 +12,7 @@ import { previewEdit } from "./controller.ts";
 export function numericMoveAxis(session: EditSession) {
   if (
     session.target.kind === "window" ||
+    session.target.kind === "door" ||
     !["x", "y", "axis", "stretch", "edge", "offset"].includes(session.action)
   )
     return null;
@@ -86,6 +87,7 @@ export function previewMovementInput(
     };
   }
   if (session.target.kind === "window") throw new Error("Fenster bleiben an ihre Wand gebunden.");
+  if (session.target.kind === "door") throw new Error("Türen bleiben an ihre Wand gebunden.");
   const result = precisionTarget(session.anchor, aim, angleText, lengthText);
   return { ...result, project: previewEdit(session, project, selection, result.point) };
 }

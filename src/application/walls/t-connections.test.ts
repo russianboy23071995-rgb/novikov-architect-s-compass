@@ -1,3 +1,4 @@
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import { wallPlanOutlines } from "../../rendering/viewport/wall-plan-outline.ts";
@@ -14,24 +15,24 @@ import { getLocalSnapSources } from "../snapping/local-sources.ts";
 import { segmentKey } from "../snapping/reference-selection.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  createProject,
-  addWall,
-  addWindow,
-  updateWall,
-  updateWindow,
-  validateProject,
-  serializeProject,
-  deserializeProject,
-} from "../../lib/bim/model.ts";
+import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
+import { addWindow, updateWindow } from "../windows/actions.ts";
+import { validateProject } from "../../domain/project/schema.ts";
+import { addWall, updateWall } from "./actions.ts";
 import { previewTConnection, commitTConnection } from "./t-connections.ts";
 import { moveElement, moveWindowAlongWall } from "../direct-edit/transforms.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../history/project-history.ts";
 import {
   connectedWallContours,
   connectedWallSolids,
 } from "../../domain/elements/wall/connections.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
 import {
@@ -129,7 +130,7 @@ test("schema 8 roundtrip and strict V7 migration retain geometry without discove
   const { assets, hatchPatterns, ...legacyRoot } = p;
   const old = { ...legacyRoot, schemaVersion: 7, storey };
   const migrated = loadProjectData(legacyProjectFixture(old));
-  assert.equal(migrated.schemaVersion, 26);
+  assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.deepEqual(storeyOf(migrated), { ...storey, references: [], wallTJunctions: [] });
   assert.throws(() => loadProjectData(legacyProjectFixture({ ...p, schemaVersion: 7 })));
   assert.throws(() => loadProjectData(legacyProjectFixture({ ...old, schemaVersion: 8 })));
@@ -227,8 +228,10 @@ test("invalid persisted identities, duplicate incoming relations fail atomically
     ).wallTJunctions.length,
     2,
   );
-  for (const changes of [{ thickness: 0.4 }, { height: 3 }, { bodyOffset: 0.5 }])
-    assert.throws(() => updateWall(p, "host", changes));
+  // Thickness and height may differ (26.10.2026); a body offset beyond the axis still fails.
+  for (const changes of [{ thickness: 0.4 }, { height: 3 }])
+    assert.equal(storeyOf(updateWall(p, "host", changes)).wallTJunctions.length, 1);
+  assert.throws(() => updateWall(p, "host", { bodyOffset: 0.5 }));
   assert.equal(serializeProject(p), before);
 });
 
@@ -403,16 +406,16 @@ test("ambiguous local hosts never choose by list order; reference selection disa
   assert.equal(result.candidate?.sourceFeature, "t-axis");
 });
 
-test("plain numeric target never discovers a T; invalid or stale snapped commit leaves model unchanged", () => {
+test("plain numeric target exactly on the axis connects automatically; invalid or stale snapped commit leaves model unchanged", () => {
   const a = aiming();
   const result = resolveToolSnap(a.adapter.snapping, { x: 3, y: 0 }, a.context, snapOptions);
   assert.equal(
     storeyOf(previewEdit(a.session, a.session.base, a.target, result.point)).wallTJunctions.length,
-    0,
+    1,
   );
   const changed = updateWall(a.session.base, "host", { height: 3 });
   assert.throws(() => previewEdit(a.session, changed, a.target, result.point, result.candidate));
-  const invalid = aiming(updateWall(pair(), "host", { height: 3 }));
+  const invalid = aiming(updateWall(pair(), "host", { baseOffset: 3 }));
   const snap = resolveToolSnap(
     invalid.adapter.snapping,
     { x: 3, y: 0 },

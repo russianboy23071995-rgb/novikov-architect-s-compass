@@ -1,7 +1,11 @@
 import { buildingViewFixture } from "./building-view-fixture.ts";
-import { prepareWindowAxisPreview } from "../src/application/direct-edit/prepared-window.ts";
-import { editAnchor, editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { prepareOpeningAxisPreview } from "../src/application/direct-edit/prepared-opening.ts";
+import {
+  editAnchor,
+  editAtPointer,
+  type EditSession,
+} from "../src/application/direct-edit/session.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import { selectionMoveSurfaces } from "../src/rendering/viewport/selection-move-preview.ts";
 const p = buildingViewFixture(100),
   target = { kind: "window" as const, id: p.storeys[0]!.windows[0]!.id };
@@ -14,7 +18,7 @@ const session: EditSession = {
   },
   solid = buildBuildingSolid(p);
 const t = performance.now(),
-  prepared = prepareWindowAxisPreview(session),
+  prepared = prepareOpeningAxisPreview(session),
   preparationMs = performance.now() - t;
 const runs = [];
 for (let i = 0; i < 7; i++) {

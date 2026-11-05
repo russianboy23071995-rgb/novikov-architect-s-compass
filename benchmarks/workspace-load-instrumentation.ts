@@ -46,7 +46,7 @@ export function workspaceLoadInstrumentation(productionCalls = false): Plugin {
           map: null,
         };
       }
-      if (productionCalls && path.endsWith("/src/lib/bim/history.ts")) {
+      if (productionCalls && path.endsWith("/src/application/history/project-history.ts")) {
         const marker = "export function commitProject(";
         if (source.split(marker).length !== 2)
           throw new Error("History profiler no longer matches");

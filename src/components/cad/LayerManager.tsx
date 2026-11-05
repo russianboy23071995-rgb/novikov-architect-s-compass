@@ -1,7 +1,7 @@
 import type { VisibilityAction } from "@/application/layers/visibility-actions";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import type { Project } from "@/lib/bim/model";
+import type { Project } from "@/domain/project/schema";
 import { layerDeletionBlock } from "@/application/layers/actions";
 import type { ManageLayerRequest } from "@/application/layers/actions";
 import { FloatingPanel } from "./FloatingPanel";

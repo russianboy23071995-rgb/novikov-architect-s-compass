@@ -1,0 +1,153 @@
+{
+  "date": "2026-10-26",
+  "states": {
+    "main": "29f8ea6",
+    "neu": "perf/recovery-check-callers"
+  },
+  "notes": "Browser-Schullauf l mit Bildern, Fenster sichtbar, ein Aufwärmlauf (main) verworfen, dann drei Wechselpaare neu/main. Diagnose (Build-Modus recovery-profile): vollständige Prüfungen im Lauf main 4 (status 1223 ms, writer-prepare 535/713/513 ms), neu 1 (status 935 ms).",
+  "diagnosis": {
+    "main": [
+      ["status", "nach Öffnen, Stand des vorigen Laufs", 1223],
+      ["writer-prepare", "nach Öffnen, derselbe Stand", 535],
+      ["writer-prepare", "Redo nach Undo über das Datei-Öffnen hinweg", 713],
+      ["writer-prepare", "nach Neu öffnen derselben Datei", 513]
+    ],
+    "neu": [["status", "nach Öffnen, Stand des vorigen Laufs", 935]]
+  },
+  "runs": [
+    {
+      "state": "main",
+      "run": 0,
+      "warmup": true,
+      "steps": {
+        "Wandlänge – Übernehmen": 200,
+        "2D → 3D": 148,
+        "3D – Szene fertig": 831,
+        "3D: Tür entlang Wand ziehen": 1649,
+        "Neu öffnen – Datei prüfen": 350,
+        "Neu öffnen – Projekt laden": 310,
+        "Autosicherung aktuell": 5
+      },
+      "session": 160,
+      "sessionP95": 231,
+      "redo": 153,
+      "redoP95": 327,
+      "undo": 14,
+      "errors": 0
+    },
+    {
+      "state": "main",
+      "run": 1,
+      "steps": {
+        "Wandlänge – Übernehmen": 190,
+        "2D → 3D": 159,
+        "3D – Szene fertig": 883,
+        "3D: Tür entlang Wand ziehen": 1624,
+        "Neu öffnen – Datei prüfen": 389,
+        "Neu öffnen – Projekt laden": 320,
+        "Autosicherung aktuell": 7
+      },
+      "session": 156,
+      "sessionP95": 258,
+      "redo": 143,
+      "redoP95": 481,
+      "undo": 14,
+      "errors": 0
+    },
+    {
+      "state": "main",
+      "run": 2,
+      "steps": {
+        "Wandlänge – Übernehmen": 257,
+        "2D → 3D": 150,
+        "3D – Szene fertig": 818,
+        "3D: Tür entlang Wand ziehen": 1676,
+        "Neu öffnen – Datei prüfen": 398,
+        "Neu öffnen – Projekt laden": 313,
+        "Autosicherung aktuell": 5
+      },
+      "session": 160,
+      "sessionP95": 178,
+      "redo": 145,
+      "redoP95": 251,
+      "undo": 14,
+      "errors": 0
+    },
+    {
+      "state": "main",
+      "run": 3,
+      "steps": {
+        "Wandlänge – Übernehmen": 192,
+        "2D → 3D": 158,
+        "3D – Szene fertig": 724,
+        "3D: Tür entlang Wand ziehen": 1568,
+        "Neu öffnen – Datei prüfen": 345,
+        "Neu öffnen – Projekt laden": 290,
+        "Autosicherung aktuell": 8
+      },
+      "session": 162,
+      "sessionP95": 247,
+      "redo": 160,
+      "redoP95": 303,
+      "undo": 14,
+      "errors": 0
+    },
+    {
+      "state": "neu",
+      "run": 1,
+      "steps": {
+        "Wandlänge – Übernehmen": 160,
+        "2D → 3D": 156,
+        "3D – Szene fertig": 978,
+        "3D: Tür entlang Wand ziehen": 1667,
+        "Neu öffnen – Datei prüfen": 401,
+        "Neu öffnen – Projekt laden": 291,
+        "Autosicherung aktuell": 3
+      },
+      "session": 155,
+      "sessionP95": 178,
+      "redo": 111,
+      "redoP95": 257,
+      "undo": 14,
+      "errors": 0
+    },
+    {
+      "state": "neu",
+      "run": 2,
+      "steps": {
+        "Wandlänge – Übernehmen": 140,
+        "2D → 3D": 142,
+        "3D – Szene fertig": 867,
+        "3D: Tür entlang Wand ziehen": 1708,
+        "Neu öffnen – Datei prüfen": 394,
+        "Neu öffnen – Projekt laden": 350,
+        "Autosicherung aktuell": 4
+      },
+      "session": 158,
+      "sessionP95": 192,
+      "redo": 112,
+      "redoP95": 263,
+      "undo": 14,
+      "errors": 0
+    },
+    {
+      "state": "neu",
+      "run": 3,
+      "steps": {
+        "Wandlänge – Übernehmen": 153,
+        "2D → 3D": 154,
+        "3D – Szene fertig": 835,
+        "3D: Tür entlang Wand ziehen": 1619,
+        "Neu öffnen – Datei prüfen": 342,
+        "Neu öffnen – Projekt laden": 289,
+        "Autosicherung aktuell": 8
+      },
+      "session": 159,
+      "sessionP95": 203,
+      "redo": 110,
+      "redoP95": 254,
+      "undo": 14,
+      "errors": 0
+    }
+  ]
+}

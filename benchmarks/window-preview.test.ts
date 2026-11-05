@@ -2,21 +2,28 @@ import { derivePlanScene } from "../src/rendering/viewport/plan-scene.ts";
 import { hatchPointFixture } from "./hatch-point-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
+import { tamperedState } from "./tampered-state.ts";
 import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";
 function prepareWindowAxisPreview(session: EditSession) {
   const prepared = prepareDirectEditPreview(session);
   assert.ok(prepared, "window-axis capability must be registered in the common entry");
   return prepared;
 }
-import { editAnchor, editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
-import { createProject, addWall, addWindow } from "../src/lib/bim/model.ts";
+import {
+  editAnchor,
+  editAtPointer,
+  type EditSession,
+} from "../src/application/direct-edit/session.ts";
+import { createProject } from "../src/application/projects/create.ts";
+import { addWindow } from "../src/application/windows/actions.ts";
+import { addWall } from "../src/application/walls/actions.ts";
 import { previewTConnection } from "../src/application/walls/t-connections.ts";
 import {
   previewEdit,
   createEditingState,
   editingReducer,
 } from "../src/application/direct-edit/controller.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import {
   selectionMoveSurfaces,
   selectionMoveWindows,
@@ -183,9 +190,15 @@ test("window preview never commits; confirmation validates whole project and cre
   assert.equal(committed.history.past.length, 1);
   assert.deepEqual(committed.history.present, editAtPointer(session, base, point));
   assert.deepEqual(editingReducer(committed, { type: "undo" }).history.present, base);
-  storeyOf(base).walls[0]!.height = -1;
+  assert.throws(() => (storeyOf(base).walls[0]!.height = -1), TypeError);
+  const tampered = tamperedState(state, (p) => (storeyOf(p).walls[0]!.height = -1));
   assert.notEqual(
-    editingReducer(state, { type: "confirm", session, selection: target, point }).error,
+    editingReducer(tampered.state, {
+      type: "confirm",
+      session: tampered.session,
+      selection: target,
+      point,
+    }).error,
     "",
   );
 });

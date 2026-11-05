@@ -29,9 +29,33 @@ import {
   projectV23Schema,
   projectV24Schema,
   projectV25Schema,
+  projectV26Schema,
+  projectV27Schema,
+  projectV28Schema,
+  projectV29Schema,
+  projectV30Schema,
+  projectV31Schema,
+  projectV32Schema,
+  projectV33Schema,
+  projectV34Schema,
+  projectV35Schema,
+  projectV36Schema,
+  projectV37Schema,
+  projectV38Schema,
+  projectV39Schema,
+  projectV40Schema,
+  projectV41Schema,
+  projectV42Schema,
 } from "../../domain/project/schema.ts";
+import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
+import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
 import type { Project } from "../../domain/project/schema.ts";
-import { createStandardLayers } from "../../domain/layers/model.ts";
+import {
+  createStandardLayers,
+  withColumnLayer,
+  withStandardLayer,
+} from "../../domain/layers/model.ts";
+import { clearHeightLine } from "../../domain/elements/room/height-line.ts";
 
 /** Own and fully storage-validate incoming assets once, before versioned project validation.
  * File inputs acquire handles here; recovery supplies its independently checked handles.
@@ -53,7 +77,22 @@ export function loadProjectData(value: unknown): Project {
   return migrateProjectData(value);
 }
 
-/** Fully validating version migration for file/recovery boundaries; runtime edits stay schema 26. */
+/** Parsing resolves a bound wall height to a placeholder 0; a chained step parses again, so the
+ * disposable height is dropped as in stored files (gap found 29.10.2026 for schema 26/27).
+ */
+function withoutBoundHeights<
+  T extends { storeys: { walls: { height: number; topBinding?: unknown }[] }[] },
+>(project: T) {
+  return {
+    ...project,
+    storeys: project.storeys.map((s) => ({
+      ...s,
+      walls: s.walls.map(({ height, ...w }) => (w.topBinding ? w : { ...w, height })),
+    })),
+  };
+}
+
+/** Fully validating version migration for file/recovery boundaries; runtime edits stay schema 34. */
 export function migrateProjectData(value: unknown): Project {
   if (typeof value !== "object" || value === null || !("schemaVersion" in value))
     throw new Error("Missing project version");
@@ -136,7 +175,138 @@ export function migrateProjectData(value: unknown): Project {
     return migrateProjectData({ ...old, schemaVersion: 25, storeys: old.storeys });
   }
   if (value.schemaVersion === 25)
-    return validateProject({ ...projectV25Schema.parse(value), schemaVersion: 26 });
+    return migrateProjectData({ ...projectV25Schema.parse(value), schemaVersion: 26 });
+  if (value.schemaVersion === 26)
+    return migrateProjectData(
+      withoutBoundHeights({ ...projectV26Schema.parse(value), schemaVersion: 27 }),
+    );
+  // Existing windows and doors receive position numbers in stored order (user decision 25.10.2026).
+  if (value.schemaVersion === 27)
+    return migrateProjectData(
+      withoutBoundHeights(
+        withOpeningMarks({ ...projectV27Schema.parse(value), schemaVersion: 28 }),
+      ),
+    );
+  // Schema 28 files carry no slabs; the strict v28 schema rejects smuggled slab lists.
+  if (value.schemaVersion === 28)
+    return migrateProjectData(
+      withoutBoundHeights({ ...projectV28Schema.parse(value), schemaVersion: 29 }),
+    );
+  // Walls bound to an assumed raw slab keep their top as storey binding (29.10.2026).
+  // Goes straight to the current format: bound walls carry no stored height here, and schema
+  // 29 files have no roofs, so the v30 step (roofs added in 31) has nothing to add.
+  if (value.schemaVersion === 29)
+    return validateProject({
+      ...withStoreyBindings({ ...projectV29Schema.parse(value), schemaVersion: 30 }),
+      schemaVersion: PROJECT_SCHEMA_VERSION,
+    });
+  // Schema 30 files carry no roofs; the strict v30 schema rejects smuggled roof lists.
+  if (value.schemaVersion === 30)
+    return migrateProjectData(
+      withoutBoundHeights({ ...projectV30Schema.parse(value), schemaVersion: 31 }),
+    );
+  // Schema 31 files carry no rooms; the strict v31 schema rejects smuggled room lists.
+  // Straight to the current format: rooms (32) and their height lines (33) are both absent.
+  if (value.schemaVersion === 31)
+    return validateProject(
+      withoutBoundHeights({
+        ...projectV31Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
+    );
+  // Schema 32 rooms carry no height lines; they keep the defaults (absent field).
+  if (value.schemaVersion === 32)
+    return validateProject(
+      withoutBoundHeights({
+        ...projectV32Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
+    );
+  // Schema 33 height lines were clear heights only; they keep that meaning with the default look.
+  if (value.schemaVersion === 33) {
+    const old = projectV33Schema.parse(value);
+    return validateProject(
+      withoutBoundHeights({
+        ...old,
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+        storeys: old.storeys.map((storey) => ({
+          ...storey,
+          ...(storey.rooms
+            ? {
+                rooms: storey.rooms.map(({ heightLines, ...room }) =>
+                  heightLines
+                    ? {
+                        ...room,
+                        heightLines: heightLines.map((h, i) => clearHeightLine(`h${i + 1}`, h)),
+                      }
+                    : room,
+                ),
+              }
+            : {}),
+        })),
+      }),
+    );
+  }
+  // Schema 34 walls carry no roof trims; the strict v34 schema rejects smuggled ones.
+  if (value.schemaVersion === 34)
+    return validateProject(
+      withoutBoundHeights({
+        ...projectV34Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
+    );
+  // Schema 35 walls carry no renovation status (= Bestand); the strict v35 schema rejects one.
+  if (value.schemaVersion === 35)
+    return migrateProjectData(
+      withoutBoundHeights({ ...projectV35Schema.parse(value), schemaVersion: 36 }),
+    );
+  // Schema 36 files carry no columns; they get the standard Stütze layer (docs/STUETZEN.md).
+  if (value.schemaVersion === 36)
+    return migrateProjectData(
+      withColumnLayer(withoutBoundHeights({ ...projectV36Schema.parse(value), schemaVersion: 37 })),
+    );
+  // Schema 42 files carry no wall build-ups; the strict v42 schema rejects smuggled ones.
+  if (value.schemaVersion === 42)
+    return validateProject(
+      withoutBoundHeights({
+        ...projectV42Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
+    );
+  // Schema 41 openings carry no window or door elements; the strict v41 schema rejects them.
+  if (value.schemaVersion === 41)
+    return validateProject(
+      withoutBoundHeights({
+        ...projectV41Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
+    );
+  // Schema 40 files carry no sections; the strict v40 schema rejects smuggled ones.
+  if (value.schemaVersion === 40)
+    return validateProject(
+      withoutBoundHeights({
+        ...projectV40Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
+    );
+  // Schema 39 files carry no stairs; they get the standard Treppe layer (docs/TREPPE.md).
+  if (value.schemaVersion === 39)
+    return migrateProjectData(
+      withStandardLayer(
+        withoutBoundHeights({ ...projectV39Schema.parse(value), schemaVersion: 40 }),
+        "stair",
+      ),
+    );
+  // Schema 38 files carry no texts; the strict v38 schema rejects smuggled ones.
+  if (value.schemaVersion === 38)
+    return migrateProjectData(
+      withoutBoundHeights({ ...projectV38Schema.parse(value), schemaVersion: 39 }),
+    );
+  // Schema 37 files carry no dimension chains; the strict v37 schema rejects smuggled ones.
+  if (value.schemaVersion === 37)
+    return migrateProjectData(
+      withoutBoundHeights({ ...projectV37Schema.parse(value), schemaVersion: 38 }),
+    );
   if (value.schemaVersion === PROJECT_SCHEMA_VERSION) return validateProject(value);
   if (value.schemaVersion === 8) {
     const old = validateProjectV8(value);

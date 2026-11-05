@@ -6,11 +6,18 @@ export type SettingsSection = { id: string; label: string; content: ReactNode };
 /** Shared settings body; the existing FloatingPanel owns window movement and closing. */
 export function SettingsSections({
   sections,
+  initial,
 }: {
   sections: [SettingsSection, ...SettingsSection[]];
+  /** Section shown when the window opens; the first one otherwise. */
+  initial?: string | undefined;
 }) {
   return (
-    <Tabs defaultValue={sections[0].id} orientation="vertical" className="flex min-h-0 flex-1">
+    <Tabs
+      defaultValue={sections.find((s) => s.id === initial)?.id ?? sections[0].id}
+      orientation="vertical"
+      className="flex min-h-0 flex-1"
+    >
       <TabsList
         aria-label="Einstellungsbereiche"
         className="h-auto w-40 shrink-0 flex-col items-stretch justify-start gap-1 rounded-none border-r bg-muted/30 p-3"

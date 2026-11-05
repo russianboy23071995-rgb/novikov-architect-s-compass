@@ -1,11 +1,15 @@
+import { withoutOpeningMarks } from "../../test/legacy-project-fixture.ts";
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON, legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { previewHatch, commitHatch } from "./actions.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { validateProject, serializeProject } from "../../lib/bim/model.ts";
-import { createHistory, undoProject, redoProject, readProjectFile } from "../../lib/bim/history.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { validateProject } from "../../domain/project/schema.ts";
+import { createHistory, undoProject, redoProject } from "../history/project-history.ts";
+import { readProjectFile } from "../../lib/bim/history.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
 import {
   previewLayerAssignment,
@@ -160,8 +164,8 @@ test("strict V3 migration preserves visibility and model IDs and never repairs i
   };
   const before = structuredClone(v3);
   const migrated = loadProjectData(legacyProjectFixture(v3));
-  assert.equal(migrated.schemaVersion, 26);
-  assert.deepEqual(storeyOf(migrated), {
+  assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
+  assert.deepEqual(withoutOpeningMarks(storeyOf(migrated)), {
     ...storey,
     references: [],
     hatches: [],
@@ -256,7 +260,7 @@ test("V4-V6 hatch migration preserves old fill, contours, layers and appearance 
       });
     const before = legacyFixtureJSON(old);
     const loaded = loadProjectData(legacyProjectFixture(old));
-    assert.equal(loaded.schemaVersion, 26);
+    assert.equal(loaded.schemaVersion, PROJECT_SCHEMA_VERSION);
     assert.deepEqual(storeyOf(loaded).hatches, storeyOf(current).hatches);
     assert.equal(legacyFixtureJSON(old), before);
     storeyOf(old).hatches[0].contour = { visible: true, color: "#ffffff" };
