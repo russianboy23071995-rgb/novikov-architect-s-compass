@@ -11,6 +11,12 @@ import { coordinatesCompatible, pointsCompatible } from "../../../geometry/toler
  * the contact checks below still bound by the host ends.
  */
 export const PARALLEL_T_MESSAGE = "Parallele Wände können keinen T-Anschluss bilden.";
+const CONTACT_T_MESSAGE = "Kontaktbreite berührt oder überschreitet das Hauptwandende.";
+const SHORT_T_MESSAGE = "Ankommende Wand für den T-Anschluss zu kurz.";
+/** The wall lies too flat or ends too short for a T: while drawing that means no T, no error. */
+export const isTShapeRefusal = (error: unknown) =>
+  error instanceof Error &&
+  [PARALLEL_T_MESSAGE, CONTACT_T_MESSAGE, SHORT_T_MESSAGE].includes(error.message);
 
 /** Gross geometry for an explicit, isolated T pair, perpendicular or oblique.
  * No project lookup, opening validation, other joins, persistence or mutation.
@@ -79,13 +85,12 @@ export function deriveTJunction(host: CornerEnd["wall"], incoming: CornerEnd) {
   const contour = wb.corners.map((p) => ({ ...p }));
   const contact = nearIndices.map((index) => {
     const p = intersectLines(contour[index]!, away, sideStart, u);
-    if (!p || !interior(along(p)))
-      throw new Error("Kontaktbreite berührt oder überschreitet das Hauptwandende.");
+    if (!p || !interior(along(p))) throw new Error(CONTACT_T_MESSAGE);
     // A negative trim extends the edge back to the host face: at an oblique angle a body offset
     // can put the near corner in front of the face (26.10.2026).
     const trim = (p.x - node.x) * away.x + (p.y - node.y) * away.y;
     if (!Number.isFinite(trim) || trim >= length || coordinatesCompatible(trim, length))
-      throw new Error("Ankommende Wand für den T-Anschluss zu kurz.");
+      throw new Error(SHORT_T_MESSAGE);
     contour[index] = p;
     return world(p);
   });

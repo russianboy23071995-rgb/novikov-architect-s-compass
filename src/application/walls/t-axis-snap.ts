@@ -1,3 +1,4 @@
+import { isTShapeRefusal } from "../../domain/elements/wall/t-junction.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { querySnap } from "../../constraints/snapping/engine.ts";
 import type { EditSession } from "../direct-edit/session.ts";
@@ -235,11 +236,18 @@ export function connectWallAtTAxis(
     )
   )
     return proposed;
-  return previewTConnection(proposed, proposed, {
-    projectId: proposed.id,
-    kind: "connect",
-    relation,
-  });
+  // A T that cannot form (parallel or nearly so, contact past the host end) leaves a free wall,
+  // like the automatic T: no message, and the wall being drawn stays visible.
+  try {
+    return previewTConnection(proposed, proposed, {
+      projectId: proposed.id,
+      kind: "connect",
+      relation,
+    });
+  } catch (error) {
+    if (isTShapeRefusal(error)) return proposed;
+    throw error;
+  }
 }
 
 /** Shared candidate transport for drawing and direct editing. */

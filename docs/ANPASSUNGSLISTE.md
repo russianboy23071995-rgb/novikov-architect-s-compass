@@ -131,3 +131,9 @@ Nutzerauftrag 05.11.2026: 15 Punkte zur Bedienung, vor den weiteren Möbeln. Än
 | Ansichtslinie, Shift, Maus schräg nach unten          | Linie bleibt bei 0°                     |
 
 **Grenzen:** Steht die Maus beim Shift-Druck nicht an einer Ecke, gilt weiter die nächste 45°-Achse. Wird Shift schon vor dem ersten Klick gehalten, entscheidet die erste Mausbewegung über die Richtung.
+
+**Meldung „Parallele Wände können keinen T-Anschluss bilden“ (Nachtrag):** Sie und die verwandte Meldung „Kontaktbreite berührt oder überschreitet das Hauptwandende“ erscheinen beim Zeichnen und Bearbeiten nicht mehr, und die Wand verschwindet nicht mehr aus der Vorschau. Kann kein T entstehen, bleibt die Wand frei. Ein T über den Befehl im Menü lehnt das Programm weiter mit der Meldung ab.
+
+## Offene Fehlermeldungen
+
+- **Gerade Wandkette (Meldung des Nutzers, 05.11.2026):** Eine gerade Wandserie mit einem Zwischenpunkt lässt sich nicht zeichnen. Nach dem ersten Punkt bei 0° erwartet das Programm einen Richtungswechsel, im seltenen Fall läuft die Wand aber in derselben Richtung weiter. Noch nicht behoben.
