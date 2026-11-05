@@ -1790,7 +1790,9 @@ export function BimPlan({
             vectorEffect="non-scaling-stroke"
           />
         )}
-        {sceneRuns.filter((run) => run.kind !== "line").map(renderRun)}
+        {sceneRuns
+          .filter((run) => run.band === "back" || (!run.band && run.kind !== "line"))
+          .map(renderRun)}
         {selection?.kind === "wall" &&
           plan.walls
             .filter((wall) => wall.id === selection.id)
@@ -1854,7 +1856,8 @@ export function BimPlan({
                 pointerEvents="none"
               />
             ))}
-        {sceneRuns.filter((run) => run.kind === "line").map(renderRun)}
+        {sceneRuns.filter((run) => !run.band && run.kind === "line").map(renderRun)}
+        {sceneRuns.filter((run) => run.band === "front").map(renderRun)}
         {!drawing &&
           !editSession &&
           selection &&

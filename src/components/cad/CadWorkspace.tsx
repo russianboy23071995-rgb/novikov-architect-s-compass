@@ -2108,14 +2108,13 @@ export function CadWorkspace({
       {
         id: "order",
         label: "Darstellungsreihenfolge",
-        submenu: (["front", "forward", "backward", "back"] as const).map((step) => ({
+        submenu: (["front", "forward", "backward", "back", "reset"] as const).map((step) => ({
           id: `order-${step}`,
           label: DISPLAY_ORDER_LABELS[step],
           disabled:
             none ||
             (!canEditSelection && "Gerade nicht möglich.") ||
-            (!canChangeDisplayOrder(project, selections, step) &&
-              "Liegt schon so. Die Reihenfolge gilt innerhalb einer Elementart."),
+            (!canChangeDisplayOrder(project, selections, step) && "Liegt schon so."),
           run: () => {
             try {
               const next = changeDisplayOrder(project, selections, step);

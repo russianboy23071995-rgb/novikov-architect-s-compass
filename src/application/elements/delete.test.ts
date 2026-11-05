@@ -3,7 +3,14 @@ import assert from "node:assert/strict";
 import { tPairFixture } from "../../../benchmarks/t-pair-fixture.ts";
 import { hatchPointFixture } from "../../../benchmarks/hatch-point-fixture.ts";
 import { addLine } from "../lines/actions.ts";
-import { createProject } from "../projects/create.ts";
+import { createProject, createStandardProject } from "../projects/create.ts";
+import { addText } from "../texts/actions.ts";
+import { TEXT_DEFAULTS } from "../../domain/elements/text/model.ts";
+import type { ElementTarget } from "../selection/target.ts";
+import { derivePlanScene, planSceneRuns } from "../../rendering/viewport/plan-scene.ts";
+import { planSelectionShapes, shapesAt } from "../../rendering/viewport/selection-shapes.ts";
+import { deserializeProject, serializeProject } from "../../lib/bim/model.ts";
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { validateProject } from "../../domain/project/schema.ts";
 import { addWall } from "../walls/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
@@ -329,8 +336,70 @@ test("display order: front, forward, backward, back within the own kind", () => 
   assert.equal(storeyOfClip(front).walls, storeyOfClip(p).walls);
   // Nothing to move returns the same snapshot; the menu check says so cheaply.
   const c = [{ kind: "room" as const, id: "c" }];
-  assert.equal(changeDisplayOrder(p, c, "front"), p);
-  assert.equal(canChangeDisplayOrder(p, c, "front"), false);
+  const lifted = changeDisplayOrder(p, c, "front");
+  assert.equal(changeDisplayOrder(lifted, c, "front"), lifted);
+  assert.equal(canChangeDisplayOrder(lifted, c, "front"), false);
   assert.equal(canChangeDisplayOrder(p, c, "back"), true);
   assert.equal(canChangeDisplayOrder(p, [], "back"), false);
+});
+
+test("display bands: above and below all kinds, steps, reset, drawing and picking follow", () => {
+  let p = createStandardProject("p", "eg", "og");
+  p = addWall(p, {
+    id: "w",
+    start: { x: 0, y: 0 },
+    end: { x: 4, y: 0 },
+    thickness: 0.24,
+    height: 2.5,
+  });
+  p = addText(p, { id: "t", position: { x: 1, y: 0 }, content: "A", ...TEXT_DEFAULTS });
+  const wall: ElementTarget[] = [{ kind: "wall", id: "w" }];
+  const text: ElementTarget[] = [{ kind: "text", id: "t" }];
+  const bands = (q: Project) => storeyOf(q).displayBands;
+  const runs = (q: Project) =>
+    planSceneRuns(
+      derivePlanScene(q, () => true),
+      [],
+    )
+      .filter((r) => r.ids.includes("w") || r.ids.includes("t"))
+      .map((r) => r.ids.join());
+  assert.deepEqual(runs(p), ["w", "t"]);
+  // Wall above the text: its run moves behind all the others.
+  const up = changeDisplayOrder(p, wall, "front");
+  assert.deepEqual(bands(up), { front: ["w"], back: [] });
+  assert.deepEqual(runs(up), ["t", "w"]);
+  assert.equal(changeDisplayOrder(up, wall, "front"), up);
+  // Text below the wall by the other side.
+  const down = changeDisplayOrder(p, text, "back");
+  assert.deepEqual(bands(down), { front: [], back: ["t"] });
+  assert.deepEqual(runs(down), ["t", "w"]);
+  // One step: out of the band, and at the end of its kind into the band.
+  assert.equal(bands(changeDisplayOrder(down, text, "forward")), undefined);
+  assert.deepEqual(bands(changeDisplayOrder(p, wall, "forward"))?.front.includes("w"), true);
+  // Reset, undoing nothing else; picking follows the drawing.
+  assert.equal(bands(changeDisplayOrder(up, wall, "reset")), undefined);
+  assert.equal(canChangeDisplayOrder(p, wall, "reset"), false);
+  const at = { x: 1, y: 0 };
+  const shapes = (q: Project) => shapesAt(planSelectionShapes(q), at, 0.2).map((s) => s.target.id);
+  assert.equal(shapes(p)[0], "t");
+  assert.equal(shapes(up)[0], "w");
+  // A deleted element is ignored by drawing and leaves at the next change.
+  const stale = {
+    ...up,
+    storeys: up.storeys.map((s, i) =>
+      i === 0 ? { ...s, displayBands: { front: ["fehlt", "w"], back: [] } } : s,
+    ),
+  };
+  assert.deepEqual(runs(stale), ["t", "w"]);
+  assert.deepEqual(bands(changeDisplayOrder(stale, text, "front")), {
+    front: ["w", "t"],
+    back: [],
+  });
+  // File: survives saving; a file of format 62 with bands is refused.
+  assert.deepEqual(bands(deserializeProject(serializeProject(up))), { front: ["w"], back: [] });
+  const old = JSON.parse(serializeProject(up));
+  old.schemaVersion = 62;
+  assert.throws(() => deserializeProject(JSON.stringify(old)));
+  delete old.storeys[0].displayBands;
+  assert.equal(deserializeProject(JSON.stringify(old)).schemaVersion, PROJECT_SCHEMA_VERSION);
 });

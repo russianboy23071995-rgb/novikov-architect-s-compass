@@ -59,7 +59,7 @@ test("slab opening: own element on the Decke layer, found slab, file round trip,
   assert.deepEqual(loadProjectData(JSON.parse(serializeProject(drawn))), drawn);
   // Schema 50 files load without openings and cannot smuggle one in.
   const stored = JSON.parse(serializeProject(b));
-  assert.equal(stored.schemaVersion, 62);
+  assert.equal(stored.schemaVersion, 63);
   assert.deepEqual(loadProjectData({ ...stored, schemaVersion: 50 }), b);
   const smuggled = JSON.parse(serializeProject(drawn));
   assert.throws(() => loadProjectData({ ...smuggled, schemaVersion: 50 }));
@@ -289,7 +289,7 @@ test("round slab opening (schema 52): half black, hole, quantities, IFC circle, 
   assert.deepEqual(loadProjectData(JSON.parse(serializeProject(drawn))), drawn);
   // Schema 51 files stay outlines; a circle cannot be smuggled into one.
   const stored = JSON.parse(serializeProject(drawn));
-  assert.equal(stored.schemaVersion, 62);
+  assert.equal(stored.schemaVersion, 63);
   assert.throws(() => loadProjectData({ ...stored, schemaVersion: 51 }));
   const outlined = JSON.parse(serializeProject(withHole()));
   assert.deepEqual(loadProjectData({ ...outlined, schemaVersion: 51 }), withHole());
