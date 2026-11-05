@@ -19,6 +19,7 @@ import { roofBody } from "./roof-solid.ts";
 import { columnBody } from "./column-solid.ts";
 import { railingBody } from "./railing-solid.ts";
 import { objectBody } from "./object-solid.ts";
+import { terrainBody } from "./terrain-solid.ts";
 import { roofWindowSolid } from "./roof-solid.ts";
 import { openingInsertBodies } from "./opening-insert-solid.ts";
 
@@ -41,6 +42,7 @@ export type Face = {
   roofWindow?: true;
   /** Placed object face (docs/OBJEKTBIBLIOTHEK.md). */
   object?: true;
+  terrain?: true;
   /** Own colour, red green blue 0–1 (docs/OBJEKTBIBLIOTHEK.md, M2). */
   color?: Vec3;
   /** Facet of a curved surface (round slab opening): no drawn edge to a smooth neighbour. */
@@ -267,6 +269,9 @@ export function buildPreviewSolid(project: ModelGeometry, elevation: number): So
   // Placed objects (docs/OBJEKTBIBLIOTHEK.md): relative to the storey floor only.
   for (const object of "objects" in storey ? (storey.objects ?? []) : [])
     bodies.push(objectBody(object, elevation));
+  // The terrain lies in the ground storey, its heights count from ±0,00 (docs/GELAENDE.md).
+  for (const terrain of "terrains" in storey ? (storey.terrains ?? []) : [])
+    bodies.push(terrainBody(terrain));
   // Window and door elements in their openings (docs/FENSTER_TUEREN.md, FT2).
   if ("walls" in storey) bodies.push(...openingInsertBodies(storey, elevation));
   if (bodies.length) {

@@ -65,6 +65,7 @@ import {
   projectV60Schema,
   projectV61Schema,
   projectV62Schema,
+  projectV63Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
@@ -283,6 +284,14 @@ export function migrateProjectData(value: unknown): Project {
   if (value.schemaVersion === 36)
     return migrateProjectData(
       withColumnLayer(withoutBoundHeights({ ...projectV36Schema.parse(value), schemaVersion: 37 })),
+    );
+  // Schema 63 files carry no terrain; the strict v63 schema rejects one.
+  if (value.schemaVersion === 63)
+    return validateProject(
+      withoutBoundHeights({
+        ...projectV63Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
     );
   // Schema 62 files carry no display bands; the strict v62 schema rejects them.
   if (value.schemaVersion === 62)
