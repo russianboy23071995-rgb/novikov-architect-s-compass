@@ -15,6 +15,13 @@ export const TABLE_TOP_LABELS: Record<(typeof TABLE_TOPS)[number], string> = {
   rounded: "Abgerundet",
   oval: "Oval",
 };
+export const SOFA_ARMS = ["both", "left", "right", "none"] as const;
+export const SOFA_ARM_LABELS: Record<(typeof SOFA_ARMS)[number], string> = {
+  both: "Beidseitig",
+  left: "Links",
+  right: "Rechts",
+  none: "Keine",
+};
 /** Most chairs one table may carry. */
 export const MAX_TABLE_CHAIRS = 40;
 
@@ -28,6 +35,8 @@ export const objectOptionsSchema = z
     chairs: z.union([z.literal("auto"), z.number().int().min(0).max(MAX_TABLE_CHAIRS)]).optional(),
     /** Chairs also at both ends of the table. */
     headChairs: z.boolean().optional(),
+    /** Armrests of a sofa, seen from the front; absent = both. */
+    sofaArms: z.enum(SOFA_ARMS).optional(),
   })
   .strict();
 export type ObjectOptions = z.infer<typeof objectOptionsSchema>;
@@ -35,6 +44,7 @@ export type ObjectOptions = z.infer<typeof objectOptionsSchema>;
 /** Colour or material of the named parts of an object. */
 export const OBJECT_SLOT_LABELS = {
   top: "Platte",
+  body: "Korpus",
   frame: "Gestell",
   seat: "Polster",
 } as const;
@@ -50,6 +60,7 @@ export type ObjectFinish = z.infer<typeof finishSchema>;
 export const objectFinishesSchema = z
   .object({
     top: finishSchema.optional(),
+    body: finishSchema.optional(),
     frame: finishSchema.optional(),
     seat: finishSchema.optional(),
   })
@@ -226,7 +237,102 @@ function tableShape(o: Sized): ObjectShape {
   };
 }
 
+/** Width of one seat of a sofa; the cushions divide the space between the armrests. */
+const SOFA_SEAT = 0.7;
+const sofaArmWidth = (w: number) => Math.min(0.2, w / 6);
+function sofaSpan(o: Pick<Sized, "width" | "options">) {
+  const arms = o.options?.sofaArms ?? "both";
+  const arm = sofaArmWidth(o.width);
+  const left = arms === "both" || arms === "left",
+    right = arms === "both" || arms === "right";
+  return {
+    arm,
+    left,
+    right,
+    from: -o.width / 2 + (left ? arm : 0),
+    to: o.width / 2 - (right ? arm : 0),
+  };
+}
+/** Seats a sofa shows: its cushions follow the length. */
+export function sofaSeats(o: Pick<Sized, "width" | "options">) {
+  const { from, to } = sofaSpan(o);
+  return Math.max(1, Math.round((to - from) / SOFA_SEAT));
+}
+
+/** A sofa with its back towards +y: base, back, armrests, seat and back cushions, feet. */
+function sofaShape(o: Sized): ObjectShape {
+  const { width: w, depth: d, height: h } = o;
+  const foot = Math.min(0.08, h * 0.1);
+  const baseTop = Math.min(0.24, h * 0.3);
+  const seatTop = Math.min(0.44, h * 0.55);
+  const armTop = Math.min(0.62, h * 0.78);
+  const back = Math.min(0.2, d / 4);
+  const { arm, left, right, from, to } = sofaSpan(o);
+  const base = rounded(w, d, 0.04);
+  const backRing = rounded(w, back, back / 3, 0, d / 2 - back / 2);
+  const armRing = (x: number) => rounded(arm, d - back, arm / 3, x, -back / 2);
+  const arms = [
+    ...(left ? [armRing(-w / 2 + arm / 2)] : []),
+    ...(right ? [armRing(w / 2 - arm / 2)] : []),
+  ];
+  const seats = sofaSeats(o);
+  const each = (to - from) / seats;
+  const centres = Array.from({ length: seats }, (_, i) => from + each * (i + 0.5));
+  const gap = Math.min(0.01, each / 8);
+  const seatDepth = d - back - gap;
+  const backCushion = Math.min(0.14, seatDepth / 3);
+  const seatRings = centres.map((x) =>
+    rounded(each - gap, seatDepth, 0.04, x, -back / 2 - gap / 2),
+  );
+  const backRings = centres.map((x) =>
+    rounded(each - gap, backCushion, backCushion / 2, x, d / 2 - back - backCushion / 2),
+  );
+  const fx = w / 2 - 0.07,
+    fy = d / 2 - 0.07;
+  const r = Math.min(0.025, w / 8, d / 8);
+  return {
+    parts: [
+      ...[
+        [-fx, -fy],
+        [fx, -fy],
+        [fx, fy],
+        [-fx, fy],
+      ].map(([x, y]) => ({
+        slot: "frame" as const,
+        ring: ellipse(r, r, x, y, 10),
+        bottom: 0,
+        top: foot,
+      })),
+      { slot: "body", ring: base, bottom: foot, top: baseTop },
+      { slot: "body", ring: backRing, bottom: baseTop, top: h },
+      ...arms.map((ring) => ({ slot: "body" as const, ring, bottom: baseTop, top: armTop })),
+      ...seatRings.map((ring) => ({
+        slot: "seat" as const,
+        ring,
+        bottom: baseTop,
+        top: seatTop,
+      })),
+      ...backRings.map((ring) => ({
+        slot: "seat" as const,
+        ring,
+        bottom: seatTop,
+        top: Math.max(seatTop, h - 0.04),
+      })),
+    ],
+    lines: [backRing, ...arms, ...seatRings, ...backRings].map((points) => ({
+      points,
+      closed: true,
+    })),
+  };
+}
+
 const RULES: Partial<Record<ObjectCatalogId, Rule>> = {
+  sofa: {
+    slots: ["body", "seat", "frame"],
+    colors: { body: "#7f8a96", seat: "#98a3ae", frame: "#4a3b2e" },
+    options: { sofaArms: "both" },
+    shape: sofaShape,
+  },
   chair: {
     slots: ["frame", "seat"],
     colors: { frame: "#7d6248", seat: "#8f9aa6" },

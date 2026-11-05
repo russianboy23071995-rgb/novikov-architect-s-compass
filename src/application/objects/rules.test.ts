@@ -7,6 +7,7 @@ import { objectOutline, objectSolids, objectSymbol } from "../../domain/elements
 import {
   objectRule,
   tableChairCounts,
+  sofaSeats,
   tableChairTotal,
   type ObjectOptions,
 } from "../../domain/elements/object/rules.ts";
@@ -83,6 +84,44 @@ test("every outline is convex and counterclockwise, also mirrored and turned", (
           assert.ok(cross > -1e-9, `${tableTop} ${mirrored}`);
         });
     }
+});
+
+test("sofa: armrests and back keep their size, cushions follow the length", () => {
+  const sofa = (width: number, options: ObjectOptions = {}) => ({
+    catalogId: "sofa" as const,
+    position: { x: 0, y: 0 },
+    rotation: 0,
+    width,
+    depth: 0.9,
+    height: 0.8,
+    baseOffset: 0,
+    options,
+  });
+  assert.equal(sofaSeats(sofa(2)), 2);
+  assert.equal(sofaSeats(sofa(3)), 4);
+  assert.equal(sofaSeats(sofa(0.8)), 1);
+  const shape = (o: ReturnType<typeof sofa>) => objectRule("sofa")!.shape(o);
+  const arms = (o: ReturnType<typeof sofa>) =>
+    shape(o).parts.filter((p) => p.slot === "body" && p.top < 0.7);
+  // Base plus two arms; the arm stays 20 cm on a longer sofa.
+  assert.equal(arms(sofa(2)).length, 3);
+  assert.ok(Math.abs(extent(arms(sofa(3))[1]!.ring) - 0.2) < 1e-9);
+  assert.equal(arms(sofa(2, { sofaArms: "left" })).length, 2);
+  assert.equal(arms(sofa(2, { sofaArms: "none" })).length, 1);
+  // Without arms the cushions reach further: three seats instead of two on 1,8 m.
+  assert.equal(sofaSeats(sofa(1.8)), 2);
+  assert.equal(sofaSeats(sofa(1.8, { sofaArms: "none" })), 3);
+  for (const { ring, bottom, top } of objectSolids(sofa(2.4, { sofaArms: "right" }))) {
+    assert.ok(top > bottom);
+    ring.forEach((a, i) => {
+      const b = ring[(i + 1) % ring.length]!,
+        c = ring[(i + 2) % ring.length]!;
+      assert.ok((b.x - a.x) * (c.y - b.y) - (b.y - a.y) * (c.x - b.x) > -1e-9);
+    });
+  }
+  // Every part stays inside the box at the smallest sizes too.
+  const tiny = { ...sofa(0.1), depth: 0.1, height: 0.02 };
+  assert.ok(objectBody({ ...tiny, id: "s" }, 0).volume > 0);
 });
 
 test("the click outline holds the chairs; a chair on its own follows its size", () => {

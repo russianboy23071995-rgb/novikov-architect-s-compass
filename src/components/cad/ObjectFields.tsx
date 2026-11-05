@@ -5,6 +5,9 @@ import {
   MAX_TABLE_CHAIRS,
   OBJECT_SLOT_LABELS,
   objectRule,
+  SOFA_ARM_LABELS,
+  SOFA_ARMS,
+  sofaSeats,
   TABLE_TOP_LABELS,
   TABLE_TOPS,
   tableChairTotal,
@@ -222,6 +225,31 @@ export function ObjectFields({
           </label>
           <span role="status" className="py-1 text-xs text-muted-foreground">
             {tableChairTotal(value)} Stühle
+          </span>
+        </fieldset>
+      )}
+      {!compact && value.catalogId === "sofa" && (
+        <fieldset className="flex w-full flex-wrap items-end gap-3 border-t pt-2">
+          <legend className="sr-only">Sofa</legend>
+          <label className="text-xs">
+            Armlehnen
+            <select
+              aria-label="Armlehnen"
+              value={options.sofaArms ?? "both"}
+              onChange={(e) =>
+                setOptions({ sofaArms: e.target.value as (typeof SOFA_ARMS)[number] })
+              }
+              className="block rounded border bg-background p-1"
+            >
+              {SOFA_ARMS.map((arms) => (
+                <option key={arms} value={arms}>
+                  {SOFA_ARM_LABELS[arms]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <span role="status" className="py-1 text-xs text-muted-foreground">
+            {sofaSeats(value)} Sitze
           </span>
         </fieldset>
       )}
