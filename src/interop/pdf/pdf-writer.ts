@@ -1,7 +1,8 @@
 /**
  * A small PDF 1.4 writer for plan sheets (docs/PDF_EXPORT.md, PDF1): one page in exact paper
  * size, vector paths with stroke, fill, dashes and opacity, clipping, coloured tiling patterns
- * for hatches, and text in the built-in Helvetica (WinAnsi, so German umlauts and ß work).
+ * for hatches, JPEG pictures, and text in the built-in Helvetica (WinAnsi, so German umlauts and
+ * ß work).
  * No fonts or libraries are downloaded; the output is plain ASCII apart from the header line.
  * Coordinates are PDF points with the origin at the lower left of the page.
  */
@@ -42,8 +43,13 @@ export type PdfFill =
   | { kind: "color"; color: PdfColor; alpha: number; evenOdd?: boolean }
   | { kind: "pattern"; pattern: PdfPattern; alpha: number; evenOdd?: boolean };
 
+/** A JPEG in hex digits, which keeps the file ASCII; `width` and `height` are its pixels. */
+export type PdfImage = { width: number; height: number; hex: string };
+
 export type PdfCommand =
   | { kind: "path"; subpaths: readonly PdfSubpath[]; fill?: PdfFill; stroke?: PdfStroke }
+  /** `matrix` maps the unit square of the picture (y up) to the page. */
+  | { kind: "image"; image: PdfImage; matrix: PdfMatrix; alpha: number }
   | { kind: "clip"; subpaths: readonly PdfSubpath[] }
   | { kind: "unclip" }
   | {
@@ -69,6 +75,8 @@ const num = (value: number) => {
   const rounded = Math.round(value * 1000) / 1000;
   return Object.is(rounded, -0) ? "0" : String(rounded);
 };
+/** Unit-square matrices carry the whole size of a picture, so they keep more digits. */
+const exact = (value: number) => (Number.isFinite(value) ? String(+value.toFixed(5)) : "0");
 const channel = (value: number) => num(Math.max(0, Math.min(1, value)));
 const rgb = (c: PdfColor) => `${channel(c.r)} ${channel(c.g)} ${channel(c.b)}`;
 
@@ -120,6 +128,7 @@ export function writePdf(page: PdfPage): Uint8Array<ArrayBuffer> {
     if (!name) alphas.set(key, (name = `GS${alphas.size + 1}`));
     return name;
   };
+  const images = new Map<string, { name: string; image: PdfImage }>();
   const ops: string[] = [];
   let usesBold = false;
   for (const command of page.commands) {
@@ -129,6 +138,20 @@ export function writePdf(page: PdfPage): Uint8Array<ArrayBuffer> {
     }
     if (command.kind === "unclip") {
       ops.push("Q");
+      continue;
+    }
+    if (command.kind === "image") {
+      // The same picture twice is stored once.
+      const { image } = command;
+      let entry = images.get(image.hex);
+      if (!entry) images.set(image.hex, (entry = { name: `Im${images.size + 1}`, image }));
+      ops.push(
+        "q",
+        `/${alphaName(command.alpha, 1)} gs`,
+        `${command.matrix.map(exact).join(" ")} cm`,
+        `/${entry.name} Do`,
+        "Q",
+      );
       continue;
     }
     if (command.kind === "text") {
@@ -210,10 +233,20 @@ export function writePdf(page: PdfPage): Uint8Array<ArrayBuffer> {
     patternRefs.push(`/${name} ${next} 0 R`);
     next++;
   }
+  const imageRefs: string[] = [];
+  for (const { name, image } of images.values()) {
+    objects[next] =
+      `<< /Type /XObject /Subtype /Image /Width ${image.width} /Height ${image.height}` +
+      ` /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter [/ASCIIHexDecode /DCTDecode]` +
+      ` /Length ${image.hex.length + 1} >>\nstream\n${image.hex}>\nendstream`;
+    imageRefs.push(`/${name} ${next} 0 R`);
+    next++;
+  }
   objects[3] =
     `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${num(page.width)} ${num(page.height)}]` +
     ` /Contents 4 0 R /Resources << /Font << /F1 5 0 R${usesBold ? " /F2 6 0 R" : ""} >>` +
-    ` /ExtGState << ${gsRefs.join(" ")} >> /Pattern << ${patternRefs.join(" ")} >> >> >>`;
+    ` /ExtGState << ${gsRefs.join(" ")} >> /Pattern << ${patternRefs.join(" ")} >>` +
+    ` /XObject << ${imageRefs.join(" ")} >> >> >>`;
 
   const encoder = new TextEncoder();
   const chunks: Uint8Array[] = [];

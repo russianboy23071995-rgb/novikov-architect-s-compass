@@ -9,7 +9,7 @@ Entscheidungen (Empfehlungen übernommen): eigener PDF-Schreiber ohne neues Pake
 - **Bedienung:** „PDF exportieren“ in der Leiste eines Layouts, Masterlayouts oder Plankopfs; „Als PDF exportieren“ im Rechtsklickmenü der Layoutsammlung (Layouts, Masterlayouts, Planköpfe). Aus dem Menü wird das Blatt erst geöffnet. Der Browser lädt „Name.pdf“ herunter; die Meldung nennt Dateiname und Papiergröße.
 - **Seite:** eine Seite in exakter Papiergröße (A3 quer = 420 × 297 mm = 1190,55 × 841,89 pt), Ursprung unten links am Papier.
 - **Inhalt:** alles, was auf dem Papier liegt: eigene Linien, Texte und Schraffuren des Blatts, Zeichnung und Plankopf des Masterlayouts (automatische Texte aufgelöst), platzierte Zeichnungen maßstäblich und auf ihre Maske beschnitten. Ausgeblendete Ebenen bleiben ausgeblendet.
-- **Nicht im PDF:** Raster, graue Arbeitsfläche, gestrichelter Randrahmen, gestrichelter Maskenrahmen der Zeichnungen, Auswahl, Griffe, Fangmarken, Vorschauen (Elemente mit `data-export="skip"` und Entwürfe). Bildreferenzen fehlen noch; die Meldung nennt ihre Anzahl.
+- **Nicht im PDF:** Raster, graue Arbeitsfläche, gestrichelter Randrahmen, gestrichelter Maskenrahmen der Zeichnungen, Auswahl, Griffe, Fangmarken, Vorschauen (Elemente mit `data-export="skip"` und Entwürfe). Bilder stehen seit P3 im PDF.
 - **Wie es zeichnet:** Das Blatt wird einmal unsichtbar bei 100 % Papierzoom gezeichnet (ohne Auswahl und Entwürfe) und Element für Element übertragen: Linien, Polylinien, Polygone, Rechtecke, Kreise und Pfade (auch Bögen) als Vektoren; Flächen mit Deckkraft; Strichmuster; Beschnitt über `clipPath`; Schraffurmuster als echte PDF-Kachelmuster. Texte setzt es an die Stelle, die der Browser für das erste Zeichen berechnet; Umlaute und ß über WinAnsi. Die Helvetica ist etwas anders gesetzt als die Bildschirmschrift, zentrierte Texte können daher um Bruchteile eines Millimeters versetzt sein.
 - **Code:** `src/interop/pdf/pdf-writer.ts` (PDF 1.4, unkomprimiert, ASCII), `src/interop/pdf/svg-path.ts` (Pfade und Matrizen), `src/interop/pdf/svg-capture.ts` (SVG → Seite), `CadViewport.tsx` (unsichtbares Blatt, `PdfRequest`), Bedienung in `CadWorkspace.tsx`, `LayoutBar.tsx`, `TitleBlockBar.tsx`, `LayoutNavigator.tsx`.
 
@@ -51,3 +51,13 @@ Die Zeichnungen nennen ihren Stift mit `data-pen`, `src/interop/pdf/pens.ts` leg
 Verhältnisse innerhalb einer Grafik bleiben, eine Hilfslinie mit 0,8 px im Objekt ergibt 0,144 mm. Eigene Linien haben schon ihre Stiftbreite in mm und tragen keinen Stift. Strichmuster bleiben unverändert.
 
 Nachweis im Browser, Layout A3 mit Wand, Möbeln und Gelände: Wandkontur 1,417 pt = 0,50 mm, Höhenlinien 0,369 pt = 0,13 mm, Möbellinien 0,408 pt = 0,144 mm.
+
+### P3 – Bilder im PDF
+
+Eingefügte Bilder stehen jetzt im PDF, an ihrer Stelle, in ihrer Größe, Drehung und Deckkraft und in der Reihenfolge der Zeichnung. `src/interop/pdf/svg-images.ts` lädt jedes Bild des Blatts und legt es als JPEG (Qualität 90) ab, `pdf-writer.ts` schreibt es als Bildobjekt in Hexziffern, die Datei bleibt ASCII. Dasselbe Bild steht nur einmal in der Datei.
+
+- **Auflösung:** 200 dpi auf dem Papier, längste Seite höchstens 4000 Pixel, nie mehr als das Original.
+- **Transparenz:** JPEG kennt keine; durchsichtige Stellen einer PNG werden weiß und decken, was darunter liegt.
+- **Bild lädt nicht:** Das PDF entsteht trotzdem, die Meldung nennt die Zahl der fehlenden Bilder.
+
+Nachweis im Browser, Layout A3 1:100 mit Bild 64 × 48 Pixel zu 0,05 m je Pixel: Größe 90,71 × 68,03 pt = 32 × 24 mm, also genau 3,2 × 2,4 m im Maßstab; Lage 160 mm vom linken Rand wie gerechnet; die vier Farbfelder liegen im JPEG wie am Bildschirm.
