@@ -389,7 +389,8 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
   );
   const onOpenTitleBlock = useCallback((id: string) => latest.current.onOpenTitleBlock?.(id), []);
   const onExportPdf = useCallback(
-    (kind: "layout" | "block", id: string) => latest.current.onExportPdf?.(kind, id),
+    (...args: Parameters<NonNullable<ProjectNavigatorProps["onExportPdf"]>>) =>
+      latest.current.onExportPdf?.(...args),
     [],
   );
   const onRefreshLayout = useCallback((id: string) => latest.current.onRefreshLayout?.(id), []);

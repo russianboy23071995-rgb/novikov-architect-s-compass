@@ -130,3 +130,35 @@ test("pictures: an image object in ASCII, placed by its matrix, stored once", ()
   assert.ok(/\/XObject << \/Im1 \d+ 0 R >>/.test(pdf));
   assert.ok(bytes.every((b) => b < 128));
 });
+
+test("several sheets: one page each in its own size, resources shared, xref exact", () => {
+  const line = (x: number): PdfCommand => ({
+    kind: "path",
+    subpaths: [
+      {
+        start: { x, y: 0 },
+        segments: [{ kind: "line", to: { x, y: 10 } }],
+        closed: false,
+      },
+    ],
+    stroke: { color: { r: 0, g: 0, b: 0 }, alpha: 1, width: 1 },
+  });
+  const pdf = new TextDecoder().decode(
+    writePdf([
+      { width: 100, height: 200, commands: [line(1)] },
+      { width: 300, height: 400, commands: [line(2)] },
+      { width: 500, height: 600, commands: [line(3)] },
+    ]),
+  );
+  assert.ok(/\/Kids \[3 0 R \d+ 0 R \d+ 0 R\] \/Count 3/.test(pdf));
+  for (const box of ["0 0 100 200", "0 0 300 400", "0 0 500 600"])
+    assert.ok(pdf.includes(`/MediaBox [${box}]`));
+  for (const x of [1, 2, 3]) assert.ok(pdf.includes(`${x} 0 m`));
+  assert.equal(pdf.split("/Type /ExtGState").length, 2);
+  const start = Number(/startxref\n(\d+)/.exec(pdf)![1]);
+  const entries = pdf.slice(start).match(/^\d{10} 00000 n /gm)!;
+  entries.forEach((e, i) =>
+    assert.ok(pdf.slice(Number(e.slice(0, 10))).startsWith(`${i + 1} 0 obj\n`)),
+  );
+  assert.throws(() => writePdf([]));
+});

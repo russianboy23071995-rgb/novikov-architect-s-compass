@@ -12,6 +12,7 @@ import type { Project } from "@/domain/project/schema";
 import {
   LAYOUT_COLLECTION_ID,
   layoutFolderTree,
+  layoutsInFolder,
   projectLayoutFolders,
   projectLayouts,
   projectMasterLayouts,
@@ -41,7 +42,7 @@ export type LayoutNavigation = {
   onOpenTitleBlock?: (id: string) => void;
   activeTitleBlockId?: string | null;
   /** Opens the sheet and exports it as PDF (docs/PDF_EXPORT.md). */
-  onExportPdf?: (kind: "layout" | "block", id: string) => void;
+  onExportPdf?: (kind: "layout" | "block" | "folder", id: string, mode?: "save" | "print") => void;
   /**
    * Layouts whose placed drawings no longer show the current model or document, one id per line
    * (a string keeps the memoised navigator stable; docs/LAYOUTBUCH.md).
@@ -354,6 +355,11 @@ export function LayoutNavigator({
               >
                 Als PDF exportieren
               </ContextMenuItem>
+              <ContextMenuItem
+                onSelect={() => onExportPdf(kind === "block" ? "block" : "layout", id, "print")}
+              >
+                Drucken
+              </ContextMenuItem>
               <ContextMenuSeparator />
             </>
           )}
@@ -401,6 +407,7 @@ export function LayoutNavigator({
     const open = !closed.includes(folder.id);
     const fixed = folder.id === LAYOUT_COLLECTION_ID;
     const empty = !childrenOf(folder.id).length && !layouts.some((l) => l.folderId === folder.id);
+    const sheets = layoutsInFolder(project, folder.id).length;
     return (
       <div key={folder.id}>
         {row(
@@ -409,6 +416,23 @@ export function LayoutNavigator({
           "folder",
           depth,
           <>
+            {onExportPdf && (
+              <>
+                <ContextMenuItem
+                  disabled={!sheets}
+                  onSelect={() => onExportPdf("folder", folder.id)}
+                >
+                  Layouts als ein PDF exportieren ({sheets})
+                </ContextMenuItem>
+                <ContextMenuItem
+                  disabled={!sheets}
+                  onSelect={() => onExportPdf("folder", folder.id, "print")}
+                >
+                  Layouts drucken ({sheets})
+                </ContextMenuItem>
+                <ContextMenuSeparator />
+              </>
+            )}
             {createItems(folder.id)}
             {!fixed && (
               <>

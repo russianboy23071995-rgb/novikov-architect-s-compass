@@ -1,6 +1,5 @@
 /**
- * A small PDF 1.4 writer for plan sheets (docs/PDF_EXPORT.md, PDF1): one page in exact paper
- * size, vector paths with stroke, fill, dashes and opacity, clipping, coloured tiling patterns
+ * A small PDF 1.4 writer for plan sheets (docs/PDF_EXPORT.md, PDF1): pages in exact paper size, vector paths with stroke, fill, dashes and opacity, clipping, coloured tiling patterns
  * for hatches, JPEG pictures, and text in the built-in Helvetica (WinAnsi, so German umlauts and
  * ß work).
  * No fonts or libraries are downloaded; the output is plain ASCII apart from the header line.
@@ -118,8 +117,10 @@ function pathOps(subpaths: readonly PdfSubpath[]): string[] {
   return ops;
 }
 
-/** The PDF file of one page, as bytes. */
-export function writePdf(page: PdfPage): Uint8Array<ArrayBuffer> {
+/** The PDF file of one or several pages, each in its own size, as bytes. */
+export function writePdf(input: PdfPage | readonly PdfPage[]): Uint8Array<ArrayBuffer> {
+  const pages = "commands" in input ? [input] : input;
+  if (!pages.length) throw new Error("Ein PDF braucht mindestens ein Blatt.");
   const alphas = new Map<string, string>();
   const patterns: { name: string; pattern: PdfPattern }[] = [];
   const alphaName = (fill: number, stroke: number) => {
@@ -129,80 +130,81 @@ export function writePdf(page: PdfPage): Uint8Array<ArrayBuffer> {
     return name;
   };
   const images = new Map<string, { name: string; image: PdfImage }>();
-  const ops: string[] = [];
   let usesBold = false;
-  for (const command of page.commands) {
-    if (command.kind === "clip") {
-      ops.push("q", ...pathOps(command.subpaths), "W n");
-      continue;
-    }
-    if (command.kind === "unclip") {
-      ops.push("Q");
-      continue;
-    }
-    if (command.kind === "image") {
-      // The same picture twice is stored once.
-      const { image } = command;
-      let entry = images.get(image.hex);
-      if (!entry) images.set(image.hex, (entry = { name: `Im${images.size + 1}`, image }));
-      ops.push(
-        "q",
-        `/${alphaName(command.alpha, 1)} gs`,
-        `${command.matrix.map(exact).join(" ")} cm`,
-        `/${entry.name} Do`,
-        "Q",
-      );
-      continue;
-    }
-    if (command.kind === "text") {
-      if (!command.text.trim() || command.size <= 0) continue;
-      usesBold ||= !!command.bold;
-      const cos = Math.cos(command.angle),
-        sin = Math.sin(command.angle);
-      ops.push(
-        "q",
-        `/${alphaName(command.alpha, 1)} gs`,
-        `${rgb(command.color)} rg`,
-        "BT",
-        `/${command.bold ? "F2" : "F1"} ${num(command.size)} Tf`,
-        `${num(cos)} ${num(sin)} ${num(-sin)} ${num(cos)} ${num(command.at.x)} ${num(command.at.y)} Tm`,
-        `${winAnsiHex(command.text)} Tj`,
-        "ET",
-        "Q",
-      );
-      continue;
-    }
-    const { fill, stroke } = command;
-    const filled = fill && fill.alpha > 0;
-    const stroked = stroke && stroke.alpha > 0 && stroke.width > 0;
-    if (!filled && !stroked) continue;
-    ops.push("q", `/${alphaName(filled ? fill.alpha : 1, stroked ? stroke.alpha : 1)} gs`);
-    if (filled) {
-      if (fill.kind === "color") ops.push(`${rgb(fill.color)} rg`);
-      else {
-        const name = `P${patterns.length + 1}`;
-        patterns.push({ name, pattern: fill.pattern });
-        ops.push("/Pattern cs", `/${name} scn`);
+  const contents = pages.map((page) => {
+    const ops: string[] = [];
+    for (const command of page.commands) {
+      if (command.kind === "clip") {
+        ops.push("q", ...pathOps(command.subpaths), "W n");
+        continue;
       }
+      if (command.kind === "unclip") {
+        ops.push("Q");
+        continue;
+      }
+      if (command.kind === "image") {
+        // The same picture twice is stored once.
+        const { image } = command;
+        let entry = images.get(image.hex);
+        if (!entry) images.set(image.hex, (entry = { name: `Im${images.size + 1}`, image }));
+        ops.push(
+          "q",
+          `/${alphaName(command.alpha, 1)} gs`,
+          `${command.matrix.map(exact).join(" ")} cm`,
+          `/${entry.name} Do`,
+          "Q",
+        );
+        continue;
+      }
+      if (command.kind === "text") {
+        if (!command.text.trim() || command.size <= 0) continue;
+        usesBold ||= !!command.bold;
+        const cos = Math.cos(command.angle),
+          sin = Math.sin(command.angle);
+        ops.push(
+          "q",
+          `/${alphaName(command.alpha, 1)} gs`,
+          `${rgb(command.color)} rg`,
+          "BT",
+          `/${command.bold ? "F2" : "F1"} ${num(command.size)} Tf`,
+          `${num(cos)} ${num(sin)} ${num(-sin)} ${num(cos)} ${num(command.at.x)} ${num(command.at.y)} Tm`,
+          `${winAnsiHex(command.text)} Tj`,
+          "ET",
+          "Q",
+        );
+        continue;
+      }
+      const { fill, stroke } = command;
+      const filled = fill && fill.alpha > 0;
+      const stroked = stroke && stroke.alpha > 0 && stroke.width > 0;
+      if (!filled && !stroked) continue;
+      ops.push("q", `/${alphaName(filled ? fill.alpha : 1, stroked ? stroke.alpha : 1)} gs`);
+      if (filled) {
+        if (fill.kind === "color") ops.push(`${rgb(fill.color)} rg`);
+        else {
+          const name = `P${patterns.length + 1}`;
+          patterns.push({ name, pattern: fill.pattern });
+          ops.push("/Pattern cs", `/${name} scn`);
+        }
+      }
+      if (stroked) {
+        ops.push(`${rgb(stroke.color)} RG`, `${num(stroke.width)} w`);
+        ops.push(`${{ butt: 0, round: 1, square: 2 }[stroke.cap ?? "butt"]} J`);
+        ops.push(`${{ miter: 0, round: 1, bevel: 2 }[stroke.join ?? "miter"]} j`);
+        const dash = stroke.dash?.filter((d) => d > 0) ?? [];
+        ops.push(dash.length ? `[${dash.map(num).join(" ")}] 0 d` : "[] 0 d");
+      }
+      ops.push(...pathOps(command.subpaths));
+      const even = filled && fill.evenOdd ? "*" : "";
+      ops.push(filled && stroked ? `B${even}` : filled ? `f${even}` : "S", "Q");
     }
-    if (stroked) {
-      ops.push(`${rgb(stroke.color)} RG`, `${num(stroke.width)} w`);
-      ops.push(`${{ butt: 0, round: 1, square: 2 }[stroke.cap ?? "butt"]} J`);
-      ops.push(`${{ miter: 0, round: 1, bevel: 2 }[stroke.join ?? "miter"]} j`);
-      const dash = stroke.dash?.filter((d) => d > 0) ?? [];
-      ops.push(dash.length ? `[${dash.map(num).join(" ")}] 0 d` : "[] 0 d");
-    }
-    ops.push(...pathOps(command.subpaths));
-    const even = filled && fill.evenOdd ? "*" : "";
-    ops.push(filled && stroked ? `B${even}` : filled ? `f${even}` : "S", "Q");
-  }
+    return ops.join("\n");
+  });
 
-  // Objects: 1 catalog, 2 pages, 3 page, 4 content, 5–6 fonts, then states and patterns.
+  // Objects: 1 catalog, 2 pages, 3 first page, 4 its content, 5–6 fonts, then states, patterns,
+  // pictures and further pages; all pages share the resources.
   const objects: string[] = [];
-  const content = ops.join("\n");
   objects[1] = "<< /Type /Catalog /Pages 2 0 R >>";
-  objects[2] = "<< /Type /Pages /Kids [3 0 R] /Count 1 >>";
-  objects[4] = `<< /Length ${content.length} >>\nstream\n${content}\nendstream`;
   objects[5] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>";
   objects[6] =
     "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>";
@@ -242,11 +244,23 @@ export function writePdf(page: PdfPage): Uint8Array<ArrayBuffer> {
     imageRefs.push(`/${name} ${next} 0 R`);
     next++;
   }
-  objects[3] =
-    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${num(page.width)} ${num(page.height)}]` +
-    ` /Contents 4 0 R /Resources << /Font << /F1 5 0 R${usesBold ? " /F2 6 0 R" : ""} >>` +
+  const resources =
+    `<< /Font << /F1 5 0 R${usesBold ? " /F2 6 0 R" : ""} >>` +
     ` /ExtGState << ${gsRefs.join(" ")} >> /Pattern << ${patternRefs.join(" ")} >>` +
-    ` /XObject << ${imageRefs.join(" ")} >> >> >>`;
+    ` /XObject << ${imageRefs.join(" ")} >> >>`;
+  const pageIds = pages.map((page, i) => {
+    const pageId = i ? next++ : 3,
+      contentId = i ? next++ : 4,
+      content = contents[i]!;
+    objects[contentId] = `<< /Length ${content.length} >>\nstream\n${content}\nendstream`;
+    objects[pageId] =
+      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${num(page.width)} ${num(page.height)}]` +
+      ` /Contents ${contentId} 0 R /Resources ${resources} >>`;
+    return pageId;
+  });
+  objects[2] =
+    `<< /Type /Pages /Kids [${pageIds.map((id) => `${id} 0 R`).join(" ")}]` +
+    ` /Count ${pages.length} >>`;
 
   const encoder = new TextEncoder();
   const chunks: Uint8Array[] = [];

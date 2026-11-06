@@ -21,15 +21,14 @@ import { cn } from "@/lib/utils";
 import type { ViewMode } from "./cad-types";
 import { BimPlan } from "./BimPlan";
 import type { BimPlanProps } from "./BimPlan";
-import { captureSheet } from "@/interop/pdf/svg-capture";
+import { captureSheet, type SheetCapture } from "@/interop/pdf/svg-capture";
 import { sheetImages } from "@/interop/pdf/svg-images";
-import { writePdf } from "@/interop/pdf/pdf-writer";
 
-/** A request to export the open sheet as PDF (docs/PDF_EXPORT.md, PDF1); `id` makes it new. */
+/** A request to capture the open sheet for a PDF (docs/PDF_EXPORT.md, PDF1); `id` makes it new. */
 export type PdfRequest = {
   id: number;
-  filename: string;
-  onDone: (result: { ok: boolean; message: string }) => void;
+  onSheet: (capture: SheetCapture) => void;
+  onFail: (message: string) => void;
 };
 
 /** CSS pixels per metre of paper at the browser's reference 96 dpi. */
@@ -188,8 +187,7 @@ export function CadViewport({
   useEffect(() => {
     if (!pdfRequest || takenPdf.current === pdfRequest.id || !active || is3D) return;
     takenPdf.current = pdfRequest.id;
-    if (!model.underlay)
-      return pdfRequest.onDone({ ok: false, message: "PDF gibt es für Layouts und Planköpfe." });
+    if (!model.underlay) return pdfRequest.onFail("PDF gibt es für Layouts und Planköpfe.");
     setPdfJob(pdfRequest);
   }, [pdfRequest, active, is3D, model.underlay]);
   useEffect(() => {
@@ -201,27 +199,9 @@ export function CadViewport({
       const svg = exportBox.current?.querySelector("svg");
       try {
         if (!svg) throw new Error("Das Blatt ließ sich nicht zeichnen.");
-        const { page, skippedImages } = captureSheet(svg, paper, await sheetImages(svg));
-        const bytes = writePdf(page);
-        const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
-        const anchor = document.createElement("a");
-        anchor.href = url;
-        anchor.download = pdfJob.filename;
-        document.body.appendChild(anchor);
-        anchor.click();
-        anchor.remove();
-        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-        pdfJob.onDone({
-          ok: true,
-          message:
-            `PDF „${pdfJob.filename}“ angefordert · ${Math.round((paper.x1 - paper.x0) * 1000)} × ${Math.round((paper.y1 - paper.y0) * 1000)} mm` +
-            (skippedImages ? ` · ${skippedImages} Bild(er) ließen sich nicht laden` : ""),
-        });
+        pdfJob.onSheet(captureSheet(svg, paper, await sheetImages(svg)));
       } catch (error) {
-        pdfJob.onDone({
-          ok: false,
-          message: error instanceof Error ? error.message : "PDF nicht möglich.",
-        });
+        pdfJob.onFail(error instanceof Error ? error.message : "PDF nicht möglich.");
       } finally {
         setPdfJob(null);
       }

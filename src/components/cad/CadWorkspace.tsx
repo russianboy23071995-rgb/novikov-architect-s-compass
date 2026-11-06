@@ -286,11 +286,15 @@ import {
   projectLayouts,
   projectMasterLayouts,
   sheetSize,
+  layoutsInFolder,
+  projectLayoutFolders,
 } from "@/domain/views/layouts";
 import { changeLayouts, layoutUnderlay } from "@/application/views/layouts";
 import { spaceBackdrop, spaceLens } from "@/application/views/title-block-space";
 import { LayoutBar } from "./LayoutBar";
 import type { PdfRequest } from "./CadViewport";
+import { PT_PER_MM, writePdf, type PdfPage } from "@/interop/pdf/pdf-writer";
+import { printPdf, savePdf } from "@/interop/pdf/deliver";
 import type { PlacedDrawingView } from "./BimPlan";
 import { placeDrawing, setDrawing } from "@/application/drawings/actions";
 import { DrawingElementFields, DrawingToolFields } from "./DrawingFields";
@@ -329,6 +333,18 @@ import {
 } from "@/application/sections/height-marks";
 
 /** What a placed drawing shows, kept at its last update (docs/LAYOUTBUCH.md). */
+/** One PDF on its way: its sheets, those captured so far and what happens with the file. */
+type PdfRun = {
+  sheets: readonly { kind: "layout" | "block"; id: string }[];
+  pages: PdfPage[];
+  skippedImages: number;
+  refreshed: boolean;
+  mode: "save" | "print";
+  filename: string;
+  /** Where a folder export comes back to; a single sheet stays open. */
+  returnTo: CanvasView | null;
+};
+
 type FrozenDrawing = Pick<
   PlacedDrawingView,
   "documentId" | "limit" | "center" | "denominator" | "content"
@@ -401,6 +417,7 @@ export function CadWorkspace({
   const [projectInfoOpen, setProjectInfoOpen] = useState(false);
   // PDF export of a layout, master layout or Plankopf (docs/PDF_EXPORT.md, PDF1).
   const [pdfRequest, setPdfRequest] = useState<(PdfRequest & { target: string }) | null>(null);
+  const nextSheet = useRef<(run: PdfRun) => void>(() => {});
   const [lastTitleBlockId, setLastTitleBlockId] = useState<string | null>(null);
   // A section or elevation document open in its section tab (docs/ABBILDER.md, AB2).
   const [sectionDocumentId, setSectionDocumentId] = useState<string | null>(null);
@@ -509,33 +526,85 @@ export function CadWorkspace({
       />
     );
   };
-  /** Opens the sheet (if needed) and exports it as PDF; the open view draws it at 100 %. */
-  const exportPdf = (kind: "layout" | "block", id: string) => {
-    const name =
-      kind === "block"
-        ? realProject.titleBlocks?.find((t) => t.id === id)?.name
-        : (
-            projectLayouts(realProject).find((l) => l.id === id) ??
-            projectMasterLayouts(realProject).find((m) => m.id === id)
-          )?.name;
-    if (!name) return;
-    const target = `${kind === "block" ? "title-block" : "layout"}:${id}`;
+  /** Opens the next sheet of a PDF; the open view captures it at 100 % and hands it back. */
+  const captureNextSheet = (run: PdfRun) => {
+    const sheet = run.sheets[run.pages.length]!;
+    const target = `${sheet.kind === "block" ? "title-block" : "layout"}:${sheet.id}`;
     if (!space || `${space.kind}:${space.id}` !== target)
-      selectCanvasTab(kind === "block" ? titleBlockTab(id) : layoutTab(id));
+      selectCanvasTab(sheet.kind === "block" ? titleBlockTab(sheet.id) : layoutTab(sheet.id));
     // Paper always shows the current state: an out-of-date layout is drawn anew first.
-    const refreshed = kind === "layout" && staleLayouts.split("\n").includes(id);
-    if (kind === "layout") refreshLayout(id);
+    if (sheet.kind === "layout") {
+      run.refreshed ||= staleLayouts.split("\n").includes(sheet.id);
+      refreshLayout(sheet.id);
+    }
     setPdfRequest({
       id: Date.now(),
       target,
-      filename: `${name.replace(/[\\/:*?"<>|]+/g, "-").trim() || "Blatt"}.pdf`,
-      onDone: (result) => {
-        setPdfRequest(null);
-        if (result.ok) {
-          setModelError("");
-          showNotice(refreshed ? `Plan aktualisiert · ${result.message}` : result.message);
-        } else setModelError(result.message);
+      onSheet: ({ page, skippedImages }) => {
+        run.pages.push(page);
+        run.skippedImages += skippedImages;
+        if (run.pages.length < run.sheets.length) nextSheet.current(run);
+        else finishPdf(run);
       },
+      onFail: (message) => {
+        setPdfRequest(null);
+        setModelError(message);
+      },
+    });
+  };
+  nextSheet.current = captureNextSheet;
+  const finishPdf = (run: PdfRun) => {
+    setPdfRequest(null);
+    if (run.returnTo) selectCanvasTab(run.returnTo);
+    try {
+      const bytes = writePdf(run.pages);
+      if (run.mode === "print") printPdf(bytes);
+      else savePdf(bytes, run.filename);
+      const first = run.pages[0]!;
+      const size =
+        run.pages.length > 1
+          ? `${run.pages.length} Blätter`
+          : `${Math.round(first.width / PT_PER_MM)} × ${Math.round(first.height / PT_PER_MM)} mm`;
+      setModelError("");
+      showNotice(
+        (run.refreshed ? "Plan aktualisiert · " : "") +
+          (run.mode === "print" ? "Druck angefordert" : `PDF „${run.filename}“ angefordert`) +
+          ` · ${size}` +
+          (run.skippedImages ? ` · ${run.skippedImages} Bild(er) ließen sich nicht laden` : ""),
+      );
+    } catch (error) {
+      setModelError(error instanceof Error ? error.message : "PDF nicht möglich.");
+    }
+  };
+  /** A sheet or all layouts of a folder as one PDF, saved or printed. */
+  const exportPdf = (
+    kind: "layout" | "block" | "folder",
+    id: string,
+    mode: "save" | "print" = "save",
+  ) => {
+    const name =
+      kind === "block"
+        ? realProject.titleBlocks?.find((t) => t.id === id)?.name
+        : kind === "folder"
+          ? projectLayoutFolders(realProject).find((f) => f.id === id)?.name
+          : (
+              projectLayouts(realProject).find((l) => l.id === id) ??
+              projectMasterLayouts(realProject).find((m) => m.id === id)
+            )?.name;
+    if (!name) return;
+    const sheets: PdfRun["sheets"] =
+      kind === "folder"
+        ? layoutsInFolder(realProject, id).map((l) => ({ kind: "layout", id: l.id }))
+        : [{ kind, id }];
+    if (!sheets.length) return setModelError(`Im Ordner „${name}“ liegt kein Layout.`);
+    captureNextSheet({
+      sheets,
+      pages: [],
+      skippedImages: 0,
+      refreshed: false,
+      mode,
+      filename: `${name.replace(/[\\/:*?"<>|]+/g, "-").trim() || "Blatt"}.pdf`,
+      returnTo: kind === "folder" ? activeView : null,
     });
   };
   /**
@@ -4276,6 +4345,7 @@ export function CadWorkspace({
                 <TitleBlockBar
                   block={activeBlock}
                   onPdf={() => exportPdf("block", activeBlock.id)}
+                  onPrint={() => exportPdf("block", activeBlock.id, "print")}
                   onSheet={(sheet) => {
                     const action = { kind: "sheet" as const, id: activeBlock.id, sheet };
                     try {
@@ -4312,6 +4382,7 @@ export function CadWorkspace({
               {layoutSpace && (
                 <LayoutBar
                   onPdf={() => exportPdf("layout", layoutSpace.id)}
+                  onPrint={() => exportPdf("layout", layoutSpace.id, "print")}
                   name={(layoutSpace.layout ?? layoutSpace.master)!.name}
                   kind={layoutSpace.layout ? "Layout" : "Masterlayout"}
                   sheet={layoutSpace.sheet}

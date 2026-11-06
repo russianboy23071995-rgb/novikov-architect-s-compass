@@ -204,6 +204,19 @@ export function layoutLibraryProblem(project: LayoutLibrary): string | null {
 }
 
 /** Folders in tree order with their depth below „Layoutsammlung“ (depth 0). */
+/** The layouts of a folder and its subfolders, in the order of the navigator. */
+export function layoutsInFolder(project: LayoutLibrary, folderId: string): Layout[] {
+  const folders = projectLayoutFolders(project);
+  const layouts = projectLayouts(project);
+  const walk = (id: string): Layout[] => [
+    ...folders
+      .filter((f) => f.id !== LAYOUT_COLLECTION_ID && (f.parentId ?? LAYOUT_COLLECTION_ID) === id)
+      .flatMap((f) => walk(f.id)),
+    ...layouts.filter((l) => l.folderId === id),
+  ];
+  return walk(folderId);
+}
+
 export function layoutFolderTree(
   project: LayoutLibrary,
 ): { folder: LayoutFolder; depth: number }[] {
