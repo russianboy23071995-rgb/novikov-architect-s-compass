@@ -106,7 +106,7 @@ export const SectionGraphic = memo(function SectionGraphic({
   const picked = (id: string) => selectedIds?.has(id) ?? false;
   const ink = (id: string) => (picked(id) ? CAD_TURQUOISE : "var(--foreground)");
   return (
-    <>
+    <g data-pen="section">
       <g aria-label="Ansicht">
         {drawing.views.map((v, i) => (
           <g key={i} data-element-id={v.id} data-selected={picked(v.id) || undefined}>
@@ -234,6 +234,6 @@ export const SectionGraphic = memo(function SectionGraphic({
           ))}
         </g>
       )}
-    </>
+    </g>
   );
 });
