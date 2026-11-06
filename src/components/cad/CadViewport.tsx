@@ -22,6 +22,7 @@ import type { ViewMode } from "./cad-types";
 import { BimPlan } from "./BimPlan";
 import type { BimPlanProps } from "./BimPlan";
 import { captureSheet } from "@/interop/pdf/svg-capture";
+import { sheetImages } from "@/interop/pdf/svg-images";
 import { writePdf } from "@/interop/pdf/pdf-writer";
 
 /** A request to export the open sheet as PDF (docs/PDF_EXPORT.md, PDF1); `id` makes it new. */
@@ -196,35 +197,33 @@ export function CadViewport({
     const paper = model.underlay.paper;
     // The sheet is in the DOM once React committed it; a timer (not an animation frame) also
     // runs in a background tab.
-    const timer = window.setTimeout(() => {
-      {
-        const svg = exportBox.current?.querySelector("svg");
-        try {
-          if (!svg) throw new Error("Das Blatt ließ sich nicht zeichnen.");
-          const { page, skippedImages } = captureSheet(svg, paper);
-          const bytes = writePdf(page);
-          const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
-          const anchor = document.createElement("a");
-          anchor.href = url;
-          anchor.download = pdfJob.filename;
-          document.body.appendChild(anchor);
-          anchor.click();
-          anchor.remove();
-          window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-          pdfJob.onDone({
-            ok: true,
-            message:
-              `PDF „${pdfJob.filename}“ angefordert · ${Math.round((paper.x1 - paper.x0) * 1000)} × ${Math.round((paper.y1 - paper.y0) * 1000)} mm` +
-              (skippedImages ? ` · ${skippedImages} Bildreferenz(en) noch nicht im PDF` : ""),
-          });
-        } catch (error) {
-          pdfJob.onDone({
-            ok: false,
-            message: error instanceof Error ? error.message : "PDF nicht möglich.",
-          });
-        } finally {
-          setPdfJob(null);
-        }
+    const timer = window.setTimeout(async () => {
+      const svg = exportBox.current?.querySelector("svg");
+      try {
+        if (!svg) throw new Error("Das Blatt ließ sich nicht zeichnen.");
+        const { page, skippedImages } = captureSheet(svg, paper, await sheetImages(svg));
+        const bytes = writePdf(page);
+        const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = pdfJob.filename;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+        pdfJob.onDone({
+          ok: true,
+          message:
+            `PDF „${pdfJob.filename}“ angefordert · ${Math.round((paper.x1 - paper.x0) * 1000)} × ${Math.round((paper.y1 - paper.y0) * 1000)} mm` +
+            (skippedImages ? ` · ${skippedImages} Bild(er) ließen sich nicht laden` : ""),
+        });
+      } catch (error) {
+        pdfJob.onDone({
+          ok: false,
+          message: error instanceof Error ? error.message : "PDF nicht möglich.",
+        });
+      } finally {
+        setPdfJob(null);
       }
     }, 0);
     return () => window.clearTimeout(timer);

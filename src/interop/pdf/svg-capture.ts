@@ -3,6 +3,7 @@ import {
   type PdfColor,
   type PdfCommand,
   type PdfFill,
+  type PdfImage,
   type PdfMatrix,
   type PdfPage,
   type PdfPattern,
@@ -71,12 +72,13 @@ function colorReader() {
  * Captures a plan sheet drawn as SVG at 100 % paper zoom (docs/PDF_EXPORT.md, PDF1) into one PDF
  * page of the paper's size. Geometry keeps its true size; widths that the plan draws in screen
  * pixels become 0.75 pt per pixel (96 dpi), exactly what 100 % shows. Elements marked
- * `data-export="skip"` (paper surface, margin frame, grid, on-screen aids) stay out; images do
- * not reach the PDF yet and are counted.
+ * `data-export="skip"` (paper surface, margin frame, grid, on-screen aids) stay out. Pictures come
+ * prepared in `images` (svg-images.ts); one without an entry is left out and counted.
  */
 export function captureSheet(
   svg: SVGSVGElement,
   paper: { x0: number; y0: number; x1: number; y1: number },
+  images: ReadonlyMap<Element, PdfImage> = new Map(),
 ): SheetCapture {
   const color = colorReader();
   const box = svg.viewBox.baseVal;
@@ -237,14 +239,23 @@ export function captureSheet(
   const visit = (element: Element, opacity: number) => {
     if (SKIPPED_TAGS.has(element.tagName)) return;
     if (element.getAttribute("data-export") === "skip") return;
-    if (element.tagName === "image") {
-      skippedImages++;
-      return;
-    }
     const style = getComputedStyle(element);
     if (style.display === "none") return;
     const alpha = opacity * Number(style.opacity || 1);
     if (alpha <= 0) return;
+    if (element instanceof SVGImageElement) {
+      const image = images.get(element);
+      if (!image) skippedImages++;
+      else if (style.visibility !== "hidden") {
+        const x = element.x.baseVal.value,
+          y = element.y.baseVal.value,
+          width = element.width.baseVal.value,
+          height = element.height.baseVal.value;
+        const matrix = multiply(toPage(element), [width, 0, 0, -height, x, y + height]);
+        commands.push({ kind: "image", image, matrix, alpha });
+      }
+      return;
+    }
     const clip = style.clipPath && style.clipPath !== "none" ? style.clipPath : null;
     const clipId = clip ? /url\(["']?#([^"')]+)["']?\)/.exec(clip)?.[1] : undefined;
     const clipElement = clipId ? document.getElementById(clipId) : null;

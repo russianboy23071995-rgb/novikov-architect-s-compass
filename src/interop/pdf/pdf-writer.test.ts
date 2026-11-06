@@ -109,3 +109,24 @@ test("pens: one pixel of a pen gives its millimetres on paper, unknown pens stay
   assert.equal(penFactor(null), 1);
   assert.equal(penFactor("unbekannt"), 1);
 });
+
+test("pictures: an image object in ASCII, placed by its matrix, stored once", () => {
+  const image = { width: 2, height: 1, hex: "ffd8ffd9" };
+  const matrix = [100, 0, 0, 50, 10, 20] as const;
+  const bytes = writePdf({
+    width: 200,
+    height: 200,
+    commands: [
+      { kind: "image", image, matrix, alpha: 1 },
+      { kind: "image", image, matrix: [50, 0, 0, 25, 0, 0], alpha: 0.5 },
+    ],
+  });
+  const pdf = new TextDecoder().decode(bytes);
+  assert.ok(pdf.includes("100 0 0 50 10 20 cm\n/Im1 Do"));
+  assert.ok(pdf.includes("50 0 0 25 0 0 cm\n/Im1 Do"));
+  assert.equal(pdf.split("/Subtype /Image").length, 2);
+  assert.ok(pdf.includes("/Width 2 /Height 1"));
+  assert.ok(pdf.includes("/Filter [/ASCIIHexDecode /DCTDecode] /Length 9 >>\nstream\nffd8ffd9>\n"));
+  assert.ok(/\/XObject << \/Im1 \d+ 0 R >>/.test(pdf));
+  assert.ok(bytes.every((b) => b < 128));
+});
