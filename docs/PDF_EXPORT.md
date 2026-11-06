@@ -61,3 +61,19 @@ Eingefügte Bilder stehen jetzt im PDF, an ihrer Stelle, in ihrer Größe, Drehu
 - **Bild lädt nicht:** Das PDF entsteht trotzdem, die Meldung nennt die Zahl der fehlenden Bilder.
 
 Nachweis im Browser, Layout A3 1:100 mit Bild 64 × 48 Pixel zu 0,05 m je Pixel: Größe 90,71 × 68,03 pt = 32 × 24 mm, also genau 3,2 × 2,4 m im Maßstab; Lage 160 mm vom linken Rand wie gerechnet; die vier Farbfelder liegen im JPEG wie am Bildschirm.
+
+### P4 – Mehrere Blätter in einem PDF
+
+Rechtsklick auf die Layoutsammlung oder einen Ordner: „Layouts als ein PDF exportieren (n)“. Das PDF heißt wie der Ordner und enthält alle Layouts des Ordners und seiner Unterordner, in der Reihenfolge des Navigators: erst die Unterordner, dann die eigenen Layouts. Jede Seite behält ihre Papiergröße. Ohne Layout ist der Eintrag gesperrt.
+
+Die Arbeitsfläche öffnet jedes Blatt kurz, aktualisiert es wenn nötig und nimmt es auf; danach steht wieder die Ansicht von vorher offen. Dasselbe Bild steht auch über mehrere Seiten nur einmal in der Datei. Masterlayouts und Planköpfe gehören nicht dazu, sie lassen sich einzeln exportieren.
+
+Nachweis im Browser, Layoutsammlung mit EG und OG: eine Datei mit `/Count 2`, zwei Seiten A3 quer, ein Bildobjekt.
+
+### P5 – Drucken
+
+„Drucken“ steht in der Leiste von Layout und Plankopf, im Rechtsklickmenü der Blätter und als „Layouts drucken (n)“ am Ordner. Gedruckt wird dasselbe PDF wie beim Export, so bleibt das Papier maßhaltig, solange im Druckdialog 100 % oder „Tatsächliche Größe“ eingestellt ist. Das Programm gibt das PDF an den Druckdialog des Browsers (`src/interop/pdf/deliver.ts`); lässt ein Browser das nicht zu, öffnet es sich in einem eigenen Tab.
+
+Nachweis im Browser: Knopf erzeugt das PDF, der Druckaufruf kommt nach dem Laden genau einmal, beim zweiten Druck wird das alte Druckfenster ersetzt, keine Konsolenfehler.
+
+Grenze: Der Druckaufruf wurde im Test abgefangen. Der echte Druckdialog und ein Blatt auf Papier sind noch nicht geprüft, das geht nur am echten Drucker.

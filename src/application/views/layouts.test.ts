@@ -7,6 +7,7 @@ import { validateProject, type Project } from "../../domain/project/schema.ts";
 import {
   DEFAULT_MASTER_ID,
   LAYOUT_COLLECTION_ID,
+  layoutsInFolder,
   layoutFolderTree,
   layoutSheet,
   projectLayoutFolders,
@@ -198,4 +199,23 @@ test("schema 43 files load without layouts; smuggled layouts are refused", () =>
     layouts: [{ id: "l", name: "L", folderId: "missing", masterId: DEFAULT_MASTER_ID }],
   };
   assert.throws(() => validateProject(raw), /Ordner fehlt/);
+});
+
+test("a folder gives its layouts with those of its subfolders, in navigator order", () => {
+  const library = {
+    layoutFolders: [
+      { id: LAYOUT_COLLECTION_ID, name: "Sammlung" },
+      { id: "a", name: "A" },
+      { id: "b", name: "B", parentId: "a" },
+    ],
+    layouts: [
+      { id: "top", folderId: LAYOUT_COLLECTION_ID },
+      { id: "in-a", folderId: "a" },
+      { id: "in-b", folderId: "b" },
+    ],
+  } as unknown as Parameters<typeof layoutsInFolder>[0];
+  const ids = (id: string) => layoutsInFolder(library, id).map((l) => l.id);
+  assert.deepEqual(ids("b"), ["in-b"]);
+  assert.deepEqual(ids("a"), ["in-b", "in-a"]);
+  assert.deepEqual(ids(LAYOUT_COLLECTION_ID), ["in-b", "in-a", "top"]);
 });

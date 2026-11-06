@@ -18,11 +18,13 @@ export function TitleBlockBar({
   block,
   onSheet,
   onPdf,
+  onPrint,
 }: {
   block: TitleBlock;
   onSheet: (sheet: Sheet) => void;
   /** Exports the Plankopf on its underlay as PDF (docs/PDF_EXPORT.md). */
   onPdf?: (() => void) | undefined;
+  onPrint?: (() => void) | undefined;
 }) {
   const sheet = block.sheet;
   const { width, height } = sheetSize(sheet);
@@ -71,6 +73,15 @@ export function TitleBlockBar({
       {onPdf && (
         <button type="button" className="rounded border bg-background px-2 py-0.5" onClick={onPdf}>
           PDF exportieren
+        </button>
+      )}
+      {onPrint && (
+        <button
+          type="button"
+          className="rounded border bg-background px-2 py-0.5"
+          onClick={onPrint}
+        >
+          Drucken
         </button>
       )}
     </div>

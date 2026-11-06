@@ -9,6 +9,7 @@ export function LayoutBar({
   master,
   onSettings,
   onPdf,
+  onPrint,
 }: {
   name: string;
   kind: "Layout" | "Masterlayout";
@@ -18,6 +19,7 @@ export function LayoutBar({
   onSettings: () => void;
   /** Exports the sheet as PDF in its paper size (docs/PDF_EXPORT.md). */
   onPdf?: (() => void) | undefined;
+  onPrint?: (() => void) | undefined;
 }) {
   const { width, height } = sheetSize(sheet);
   const m = sheet.margins;
@@ -48,6 +50,15 @@ export function LayoutBar({
       {onPdf && (
         <button type="button" className="rounded border bg-background px-2 py-0.5" onClick={onPdf}>
           PDF exportieren
+        </button>
+      )}
+      {onPrint && (
+        <button
+          type="button"
+          className="rounded border bg-background px-2 py-0.5"
+          onClick={onPrint}
+        >
+          Drucken
         </button>
       )}
     </div>
