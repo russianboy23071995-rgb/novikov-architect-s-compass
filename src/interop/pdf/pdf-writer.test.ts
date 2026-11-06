@@ -1,4 +1,5 @@
 import test from "node:test";
+import { penFactor, PDF_PENS } from "./pens.ts";
 import assert from "node:assert/strict";
 import { PT_PER_MM, winAnsiHex, writePdf, type PdfCommand } from "./pdf-writer.ts";
 
@@ -98,4 +99,13 @@ test("text in WinAnsi, fills with opacity, clipping and tiling patterns", () => 
   assert.match(pdf, /\/F2 3\.5 Tf\n0 1 -1 0 5 5 Tm/);
   assert.match(pdf, /\/BaseFont \/Helvetica-Bold/);
   checkXref(pdf);
+});
+
+test("pens: one pixel of a pen gives its millimetres on paper, unknown pens stay", () => {
+  const mm = (pen: string | null) => (0.75 * penFactor(pen) * 25.4) / 72;
+  assert.ok(Math.abs(mm("cut") - PDF_PENS.cut) < 1e-9);
+  assert.ok(Math.abs(mm("fine") - 0.13) < 1e-9);
+  assert.ok(Math.abs(1.75 * mm("section") - 0.5) < 0.001);
+  assert.equal(penFactor(null), 1);
+  assert.equal(penFactor("unbekannt"), 1);
 });

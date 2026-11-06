@@ -14,6 +14,7 @@ import { memo } from "react";
 import type { ElementTarget } from "@/application/selection/target";
 import type { Point } from "@/domain/project/schema";
 import { planRunJoints, type PlanScene, type PlanRun } from "@/rendering/viewport/plan-scene";
+import type { PdfPen } from "@/interop/pdf/pens";
 import type { CornerPreview } from "@/application/walls/corner-preview";
 import { checkedImageUrl } from "@/interop/images/import";
 import { wallLength } from "@/domain/project/schema";
@@ -468,6 +469,21 @@ const PlanLineChunk = memo(function PlanLineChunk({ lines, ...rest }: LineChunkP
   );
 }, sameLineChunk);
 
+/** Pen of each kind on paper (docs/PDF_EXPORT.md, P2); lines bring their own width. */
+const PLAN_PENS: Partial<Record<PlanRun["kind"], PdfPen>> = {
+  wall: "cut",
+  column: "cut",
+  slab: "view",
+  slabOpening: "view",
+  roof: "view",
+  object: "symbol",
+  stair: "symbol",
+  railing: "symbol",
+  roofWindow: "symbol",
+  dimension: "symbol",
+  terrain: "fine",
+};
+
 /** A contiguous paint-order run. Unaffected runs retain every prop across pointer updates. */
 export function PlanSceneContent({
   kind,
@@ -514,7 +530,7 @@ export function PlanSceneContent({
   // A T joint is drawn once, above both of its walls (not repeated in every run).
   const runJoints = kind === "wall" ? planRunJoints(scene, ids) : [];
   return (
-    <>
+    <g data-pen={PLAN_PENS[kind]}>
       {plan.references.map((r) => {
         const a = scene.assets.get(r.assetId)!;
         return (
@@ -1239,7 +1255,7 @@ export function PlanSceneContent({
           handlers={handlers}
         />
       ))}
-    </>
+    </g>
   );
 }
 export const PlanSceneRun = memo(PlanSceneContent);

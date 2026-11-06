@@ -10,6 +10,7 @@ import {
   type PdfSubpath,
 } from "./pdf-writer.ts";
 import { apply, multiply, parsePath, parsePoints, polySubpath, scaleOf } from "./svg-path.ts";
+import { penFactor } from "./pens.ts";
 
 /** What the paper shows, in plan metres (y up), and what the capture had to leave out. */
 export type SheetCapture = { page: PdfPage; skippedImages: number };
@@ -289,7 +290,9 @@ export function captureSheet(
           stroke = {
             color: s.color,
             alpha: s.alpha * alpha * Number(style.strokeOpacity || 1),
-            width: width(strokeWidth),
+            width:
+              width(strokeWidth) *
+              penFactor(element.closest("[data-pen]")?.getAttribute("data-pen")),
             ...(dash?.length ? { dash } : {}),
             cap: (style.strokeLinecap as PdfStroke["cap"]) || "butt",
             join: (style.strokeLinejoin as PdfStroke["join"]) || "miter",

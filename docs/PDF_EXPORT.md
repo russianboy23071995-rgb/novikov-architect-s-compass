@@ -16,6 +16,7 @@ Entscheidungen (Empfehlungen übernommen): eigener PDF-Schreiber ohne neues Pake
 Nachweis PDF1: 1519 Tests grün (neu `pdf-writer.test.ts`: Seitengröße A3 in pt, 100-mm-Linie misst 100 mm, Strichmuster, Querverweistabelle trifft jedes Objekt, Streamlänge, WinAnsi mit ß/Ä/„“/€ und „?“ für Unbekanntes, Deckkraft, Beschnitt, Kachelmuster, gedrehter fetter Text; `svg-path.test.ts`: Pfade mit relativen Befehlen, Schließen, Viertel- und Halbkreisbögen, quadratische Kurven, Matrizen). Typprüfung, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert.
 
 Browser: 10-m-Wand im Grundriss, Abbild 1:100, Layout A3 quer, Zeichnung platziert, Text „Maßstab Prüfung“ aufs Layout. „PDF exportieren“ (Download für den Test im Browser abgefangen) ergab „Layout.pdf“:
+
 - Seite 420,0 × 297,0 mm
 - Wand 283,465 pt = **100,0 mm**, Wandstärke 3,6 mm, Fenster 12,0 mm
 - Zeichnung beschnitten (ein Beschnittpfad)
@@ -25,4 +26,28 @@ Browser: 10-m-Wand im Grundriss, Abbild 1:100, Layout A3 quer, Zeichnung platzie
 
 Gefunden und behoben: Das Bildschirmfoto-Fenster der Testumgebung lässt `requestAnimationFrame` nicht laufen; der Export wartet deshalb mit einem Timer statt auf einen Animationsframe (läuft so auch in einem Hintergrund-Tab).
 
-Grenzen: Strichstärken folgen dem Bildschirm (dünne Linien 0,26 mm), echte Stiftstärken in mm sind ein eigener Schritt. Das PDF selbst im PDF-Programm geöffnet hat im Test niemand; geprüft wurden die Bytes der Datei.
+Grenzen: Das PDF selbst im PDF-Programm geöffnet hat im Test niemand; geprüft wurden die Bytes der Datei.
+
+## L14 – Prüfung und Ausbau (06.11.2026)
+
+Die Anpassungsliste führte L14 als offen, der Export gab es aber seit PDF1. Offen waren nur die Lücken unten.
+
+### P1 – Prüfung mit den neuen Funktionen
+
+Layout A3 quer mit Wand, Sofa, Doppelbett und Gelände exportiert: Seite 1190,55 × 841,89 pt, Wandfüllung deckend, Geländefarbe da, Höhenkote „+0,00“ als Helvetica-Text. Kein Fehler, nichts zu ändern.
+
+### P2 – Stiftstärken in mm
+
+Die Zeichnungen nennen ihren Stift mit `data-pen`, `src/interop/pdf/pens.ts` legt fest, wie viele Millimeter ein Bildschirmpixel dieses Stifts auf dem Papier ergibt. Am Bildschirm ändert sich nichts.
+
+| Stift     | Gilt für                                                            | mm je Pixel |
+| --------- | ------------------------------------------------------------------- | ----------- |
+| `cut`     | Wände, Stützen                                                      | 0,50        |
+| `view`    | Decken, Deckenöffnungen, Dächer                                     | 0,25        |
+| `symbol`  | Objekte, Treppen, Geländer, Dachfenster, Bemaßung                   | 0,18        |
+| `fine`    | Gelände                                                             | 0,13        |
+| `section` | Schnitte und Ansichten; die Schnittkante mit 1,75 px ergibt 0,50 mm | 0,286       |
+
+Verhältnisse innerhalb einer Grafik bleiben, eine Hilfslinie mit 0,8 px im Objekt ergibt 0,144 mm. Eigene Linien haben schon ihre Stiftbreite in mm und tragen keinen Stift. Strichmuster bleiben unverändert.
+
+Nachweis im Browser, Layout A3 mit Wand, Möbeln und Gelände: Wandkontur 1,417 pt = 0,50 mm, Höhenlinien 0,369 pt = 0,13 mm, Möbellinien 0,408 pt = 0,144 mm.
