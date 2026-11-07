@@ -174,3 +174,19 @@ Jetzt: Anfang, Ende und Mitte jedes Stücks einer Höhenlinie sind Fangpunkte, m
 Grenze: Ein beliebiger Punkt mitten auf einer Linie ist kein Fangziel. Das kennt der Fang heute für keine Linie und wäre eine eigene Erweiterung.
 
 Nachweis im Browser, Raum 5 × 4 m unter einem Pultdach 45° mit Höhenlinien bei y = 0,5 und 1,5 m: Linienwerkzeug, Maus an das linke Ende der 1,00-m-Linie (0 | 0,5). Der Fang zeigt den Punkt, an dieser Stelle der Raumkante gibt es sonst keinen. In der Mitte der 2,00-m-Linie (2,5 | 1,5) zeigt er „Mittelpunkt“. Die Fangbeschriftung heißt jetzt „Raum · Höhenlinie“ statt „Raum · Punkt“.
+
+### E2 – Längeneingabe für Schnitt, Ansicht, Treppe und Bemaßung
+
+Vorher: Diese Werkzeuge nahmen nur Klicks, das Eingabefenster erschien bei ihnen nicht.
+
+Jetzt: Nach dem ersten Punkt erscheint das Eingabefenster wie bei der Wand, und eine getippte Zahl (E1) ist die Länge in Mausrichtung:
+
+- **Schnitt und Ansicht:** Länge der Linie vom Anfang. Danach zeigt ein Klick wie bisher die Blickrichtung.
+- **Treppe:** Länge des Laufs vom Antritt. Daraus folgt der Auftritt wie beim Klick, die Zahl der Steigungen bleibt. Bei L und U legt die Eingabe die Laufrichtung fest, danach wählt ein Klick die Seite der Wendung.
+- **Bemaßung:** Abstand des nächsten Messpunkts vom letzten. Die Maßlinie und der erste Messpunkt werden wie bisher geklickt, ab dem zweiten Messpunkt geht die Eingabe. Beim Bearbeiten einer vorhandenen Kette gibt es keine Eingabe.
+
+Code: `typedOrigin` in `CadWorkspace.tsx`; die Eingabe nutzt dieselbe `drawingInteraction` wie die übrigen Werkzeuge und setzt den Punkt wie ein Klick.
+
+Nachweis im Browser: Treppe, Antritt geklickt, „3“ und Enter: Treppe gesetzt, Lauflänge 3,01 m (16 Auftritte à 18,8 cm, der Auftritt wird wie beim Klicken auf den Millimeter gerundet). Schnitt, Anfang geklickt, „5“ und Enter, Klick für die Blickrichtung: Schnitt A-A genau 5,000 m. Bemaßung, Maßlinie und erster Messpunkt geklickt, „2“ und Enter, dann „3“ und Enter: zwei Ketten mit 2,00 und 3,00.
+
+Gefunden und behoben: Kam Enter im selben Augenblick wie die Ziffer, ging es verloren, weil das Fenster den neuen Wert noch nicht kannte. Enter wartet jetzt einen Takt und nimmt dann den aktuellen Stand. Nachweis: „4⏎“ in einem Zug setzt beim Linienwerkzeug den zweiten Punkt, die Linie misst 4,000 m.
