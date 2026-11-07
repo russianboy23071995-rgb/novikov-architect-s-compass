@@ -1,3 +1,4 @@
+import { ColorField } from "./PenColors";
 import { useEffect, useState } from "react";
 import { validateLineStyle, type LineStyleDefinition } from "@/application/lines/style-library";
 import { formatMetres, withAddedHeightLine } from "@/application/rooms/height-lines";
@@ -72,6 +73,7 @@ function HeightInput({ value, onValue }: { value: number; onValue: (h: number) =
 
 /** Colour of one line; previews while choosing, commits once when the picker closes, so a
  * room change stays one undo step. */
+/** The colour of one height line, in the shared colour window (docs/FARBEN.md, F3). */
 function ColorInput({
   value,
   fixed,
@@ -81,24 +83,17 @@ function ColorInput({
   fixed: boolean;
   onValue: (color: string) => void;
 }) {
-  const [draft, setDraft] = useState(value);
-  useEffect(() => setDraft(value), [value]);
-  const commit = () => {
-    if (draft.toLowerCase() !== value.toLowerCase()) onValue(draft);
-  };
   return (
-    <input
-      type="color"
-      aria-label="Farbe der Höhenlinie"
-      value={draft}
+    <ColorField
+      compact
+      label="Farbe der Höhenlinie"
+      value={value}
       disabled={fixed}
       title={fixed ? "Diese Linienart hat eine feste Farbe." : undefined}
-      onChange={(e) => setDraft(e.target.value)}
-      onBlur={commit}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") commit();
+      onChange={(color) => {
+        if (color.toLowerCase() !== value.toLowerCase()) onValue(color);
       }}
-      className="h-7 w-9 rounded border bg-background disabled:opacity-50"
+      className="block h-7 w-9 rounded border bg-background p-0.5 disabled:opacity-50"
     />
   );
 }

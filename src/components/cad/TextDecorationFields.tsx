@@ -1,3 +1,4 @@
+import { ColorField } from "./PenColors";
 import { TEXT_DECORATION_DEFAULTS } from "@/domain/elements/text/model";
 import type { TextDefaults } from "./TextFields";
 
@@ -58,12 +59,12 @@ export function TextDecorationFields({
           {LABELS[field]}
         </label>
         {current && (
-          <input
-            type="color"
-            aria-label={`${LABELS[field]} Farbe`}
+          <ColorField
+            compact
+            label={`${LABELS[field]} Farbe`}
             value={current.color}
-            onChange={(e) => onChoose({ ...value, [field]: { ...current, color: e.target.value } })}
-            className="h-6 w-8 rounded border bg-background"
+            onChange={(color) => onChoose({ ...value, [field]: { ...current, color } })}
+            className="block h-6 w-8 rounded border bg-background p-0.5"
           />
         )}
         {field === "frame" && value.frame && (

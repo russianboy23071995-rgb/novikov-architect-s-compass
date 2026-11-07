@@ -1,54 +1,8 @@
-import { useEffect, useRef } from "react";
+import { ColorField } from "./PenColors";
 import { FloatingPanel } from "./FloatingPanel";
 import { CUT_FILL_MODES, cutPaint, type CutFill } from "./cut-fill";
 import { Pictogram } from "./Pictogram";
 import { PICTOGRAM_DUOTONE, PICTOGRAM_SCALE, type PictogramSettings } from "./pictogram-settings";
-
-/**
- * A colour field that the page does not write back while the picker is open: the picker owns its
- * value then, the field follows only changes from elsewhere (reset). A picker sends many values in
- * a row; the last of a burst goes on one task later, so the renders never pile up (React stopped
- * them with "Maximum update depth exceeded"; docs/WERKZEUGLEISTE.md, WL4).
- */
-function ColorField({
-  label,
-  value,
-  onValue,
-}: {
-  label: string;
-  value: string;
-  onValue: (value: string) => void;
-}) {
-  const field = useRef<HTMLInputElement>(null);
-  const sent = useRef(value);
-  const latest = useRef<string | null>(null);
-  useEffect(() => {
-    if (value === sent.current) return;
-    sent.current = value;
-    if (field.current && field.current.value !== value) field.current.value = value;
-  }, [value]);
-  return (
-    <input
-      ref={field}
-      type="color"
-      aria-label={label}
-      defaultValue={value}
-      onChange={(e) => {
-        if (e.target.value === sent.current) return;
-        const first = latest.current === null;
-        latest.current = e.target.value;
-        if (!first) return;
-        window.setTimeout(() => {
-          const next = latest.current;
-          latest.current = null;
-          if (next === null || next === sent.current) return;
-          sent.current = next;
-          onValue(next);
-        });
-      }}
-    />
-  );
-}
 
 export function CanvasDisplaySettings({
   open,
@@ -127,12 +81,12 @@ export function CanvasDisplaySettings({
           </div>
           <label className="flex items-center justify-between gap-4 text-sm">
             Eigene Farbe
-            <input
-              type="color"
-              aria-label="Eigene Schnittfarbe"
-              className="h-8 w-14 rounded border bg-background"
+            <ColorField
+              compact
+              label="Eigene Schnittfarbe"
               value={cutFill.color}
-              onChange={(e) => onCutFill({ mode: "custom", color: e.target.value })}
+              onChange={(color) => onCutFill({ mode: "custom", color })}
+              className="block h-8 w-14 rounded border bg-background p-0.5"
             />
           </label>
           <svg viewBox="0 0 120 24" className="h-6 w-full" aria-label="Vorschau Schnittfarbe">
@@ -197,17 +151,19 @@ export function CanvasDisplaySettings({
           <label className="flex items-center justify-between gap-4 text-sm">
             Farbe aktiv, helle Oberfläche
             <ColorField
+              compact
               label="Aktivfarbe hell"
               value={pictograms.activeLight}
-              onValue={(activeLight) => onPictograms({ ...pictograms, activeLight })}
+              onChange={(activeLight) => onPictograms({ ...pictograms, activeLight })}
             />
           </label>
           <label className="flex items-center justify-between gap-4 text-sm">
             Farbe aktiv, dunkle Oberfläche
             <ColorField
+              compact
               label="Aktivfarbe dunkel"
               value={pictograms.activeDark}
-              onValue={(activeDark) => onPictograms({ ...pictograms, activeDark })}
+              onChange={(activeDark) => onPictograms({ ...pictograms, activeDark })}
             />
           </label>
           <div className="flex items-center justify-between gap-4 text-sm">
@@ -224,9 +180,10 @@ export function CanvasDisplaySettings({
             </label>
             {pictograms.line !== null && (
               <ColorField
+                compact
                 label="Linienfarbe"
                 value={pictograms.line}
-                onValue={(line) => onPictograms({ ...pictograms, line })}
+                onChange={(line) => onPictograms({ ...pictograms, line })}
               />
             )}
           </div>

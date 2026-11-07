@@ -34,3 +34,23 @@ Escape schließt, ohne etwas zu ändern. Die gewählte Farbe ist in der Palette 
 ## Nachweis F1, F2, F4
 
 Browser, Linienwerkzeug → Farbfeld: Das Fenster „Farbe · Linienfarbe“ zeigt Vorschau, neun Palettenreihen von „Schwarz bis Weiß“ bis „Braun“, „Meine Farben“, Stifteset-Inventar und Farbfläche. Klick auf „Rot 3“ übernimmt #e31c1c und schließt das Fenster. Beim nächsten Öffnen ist Rot 3 markiert und steht unter „Zuletzt verwendet“. HEX #12ab34 und „Neue Farbe merken“ legt sie unter „Meine Farben“ ab. Die Vorschau zeigt „Bisher #e31c1c · Neu #12ab34“. Escape schließt, die Linienfarbe bleibt #e31c1c. Danach habe ich die Linienfarbe auf #334155 zurückgesetzt und die Testfarben gelöscht.
+
+## F3 – Ein Farbfenster für alle Farbfelder
+
+Der Windows-Farbwähler ist ersetzt. Alle zehn Farbfelder, die ihn noch nutzten, öffnen jetzt das Farbfenster des Programms (`ColorField` aus `PenColors.tsx`, schmale Form `compact`):
+
+| Stelle                | Feld                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------ |
+| Ansicht → Darstellung | Eigene Schnittfarbe, Aktivfarbe hell, Aktivfarbe dunkel, Linienfarbe der Piktogramme |
+| Raum → Höhenlinien    | Farbe der Höhenlinie                                                                 |
+| Objekt                | Farbe je Bauteil (Gestell, Polster …)                                                |
+| Gelände               | Geländefarbe                                                                         |
+| Text                  | Textfarbe, Farbe von Rahmen und Hintergrund                                          |
+| Transparenzpause      | Eigene Farbe                                                                         |
+| Wandaufbau            | Farbe je Material                                                                    |
+
+Damit ist auch die Ursache des Fehlers aus PR674 (Endlosschleife beim Ziehen im Windows-Wähler) ganz weg. Das Feld aus PR674 ist entfallen.
+
+Neu: Beim Öffnen liegt der Fokus im HEX-Feld. Escape schließt das Fenster sofort, und ein HEX-Wert lässt sich direkt tippen. Vorher blieb der Fokus auf dem Farbfeld, und Escape wirkte erst nach einem Klick ins Fenster.
+
+Nachweis im Browser: Darstellung, „Aktivfarbe hell“ öffnet „Farbe · Aktivfarbe hell“, „Blau 3“ setzt die Piktogrammfarbe auf #206dc5. Danach habe ich deine Farbe #087d46 zurückgesetzt. „Eigene Schnittfarbe“ öffnet das Fenster ebenfalls. Text, „Textfarbe“: Fenster offen, Fokus im HEX-Feld, Escape schließt. Gelände: Das Feld ist das neue. Höhenlinien, Objekt, Transparenzpause, Wandaufbau und Textrahmen sind über Typprüfung und Tests abgedeckt, im Browser einzeln geöffnet habe ich sie nicht.

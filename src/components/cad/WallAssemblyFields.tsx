@@ -1,3 +1,4 @@
+import { ColorField } from "./PenColors";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { Project } from "@/domain/project/schema";
@@ -402,12 +403,11 @@ function MaterialList({
                 />
               </td>
               <td>
-                <input
-                  type="color"
-                  aria-label={`Farbe Material ${m.name}`}
-                  className="h-7 w-10"
+                <ColorField
+                  compact
+                  label={`Farbe Material ${m.name}`}
                   value={m.color}
-                  onChange={(e) => set(m.id, { color: e.target.value })}
+                  onChange={(color) => set(m.id, { color })}
                 />
               </td>
               <td>
