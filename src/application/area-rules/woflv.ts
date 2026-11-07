@@ -61,7 +61,13 @@ const BLOCKER_AREA = 0.1;
 const STAIR_RISERS = 3;
 
 /** A part of the model whose plan area does not count (§ 3 Abs. 3). */
-export type AreaBlocker = { label: string; rule: string; points: Point2[] };
+export type AreaBlocker = {
+  label: string;
+  rule: string;
+  points: Point2[];
+  /** Left out only when its part inside the room is larger than this (§ 3 Abs. 3 Nr. 1). */
+  minArea?: number;
+};
 
 /**
  * What the model knows to leave out on a storey: columns and stairs. A column without a known
@@ -78,8 +84,8 @@ export function storeyAreaBlockers(storey: {
     const levels = columnLevels(column, height);
     const points = columnOutline(column);
     if (levels && levels.top - levels.bottom <= BLOCKER_HEIGHT) return [];
-    if (ringArea(points) <= BLOCKER_AREA) return [];
-    return [{ label: "Stütze", rule: "§ 3 Abs. 3 Nr. 1", points }];
+    // The area counts inside the room: a column half in the wall shows only its other half.
+    return [{ label: "Stütze", rule: "§ 3 Abs. 3 Nr. 1", points, minArea: BLOCKER_AREA }];
   });
   const stairs = (storey.stairs ?? []).flatMap((stair): AreaBlocker[] => {
     const geometry = stairGeometry(stair, height);
@@ -146,7 +152,10 @@ export function roomLivingResult(
     notes.push("Ein Teil hat keine Decke oder kein Dach darüber und zählt deshalb voll.");
   for (const blocker of blockers) {
     const parts = new Map<number, number>();
-    for (const piece of overlapPieces(room.points, blocker.points))
+    const pieces = overlapPieces(room.points, blocker.points);
+    const inside = pieces.reduce((sum, piece) => sum + ringArea(piece), 0);
+    if (blocker.minArea !== undefined && inside <= blocker.minArea) continue;
+    for (const piece of pieces)
       for (const part of shares(piece))
         parts.set(part.share, (parts.get(part.share) ?? 0) + part.area);
     for (const [share, area] of parts)
