@@ -323,6 +323,9 @@ export type BimPlanProps = {
   sections?: readonly Section[] | undefined;
   /** Double click on a section line opens its window. */
   onSectionSettings?: ((id: string) => void) | undefined;
+  /** A wall of another storey through the cut plane (docs/MEHRGESCHOSS.md, M3): a click names
+   * it, a double click opens it in its own storey. */
+  onGuestWall?: ((id: string, open: boolean) => void) | undefined;
   /** Transparency trace (S4): outlines of another storey under the plan, optional snapping. */
   tracing?:
     | {
@@ -458,6 +461,7 @@ export function BimPlan({
   stairDraft,
   sections,
   onSectionSettings,
+  onGuestWall,
   selectedSectionId,
   onSectionSelect,
   onSectionLine,
@@ -1404,6 +1408,10 @@ export function BimPlan({
           if (target && raw) onArmedPick(target, resolvePointer(raw, false).point);
           return;
         }
+        // A guest wall under the cursor and nothing of this storey above it: name it (M3).
+        const guest = (event.target as Element).closest("[data-guest-wall]");
+        if (guest && onGuestWall && !drawing && event.detail === 1)
+          onGuestWall(guest.getAttribute("data-guest-wall")!, false);
         // Overlapping elements: the click selects the Tab pre-selection, not the topmost one.
         const chosen = overlap.preselected;
         overlap.clear();
@@ -1597,6 +1605,15 @@ export function BimPlan({
           keptUnder(event) ??
           hit?.target ??
           (kind && id ? ({ kind, id } as NonNullable<Selection>) : null);
+        const guestId = (event.target as Element)
+          .closest("[data-guest-wall]")
+          ?.getAttribute("data-guest-wall");
+        if (!picked && guestId && onGuestWall) {
+          // Opens in its own storey: the workspace switches there (M3).
+          event.preventDefault();
+          onGuestWall(guestId, true);
+          return;
+        }
         if (!picked) return;
         event.preventDefault();
         onElementSettings(picked);
