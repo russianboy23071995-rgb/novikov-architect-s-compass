@@ -8,6 +8,8 @@ import { SettingsSections } from "./SettingsSections";
 import type { RoomDefaults } from "./useToolDefaults";
 import { heightLineLabel } from "@/application/rooms/height-lines";
 import { HeightLineEditor } from "./HeightLineEditor";
+import { ROOM_AREA_USES, type RoomAreaUse } from "@/domain/elements/room/model";
+import { AREA_USE_LABELS } from "@/application/area-rules/woflv";
 
 export type RoomConstruction = HatchConstruction | "walls";
 
@@ -80,6 +82,21 @@ function RoomDefaultFields({
           }}
           className="block w-20 rounded border bg-background p-1 disabled:opacity-50"
         />
+      </label>
+      <label className="text-xs">
+        Wohnfläche
+        <select
+          aria-label="Raumart für die Wohnfläche"
+          value={value.areaUse}
+          onChange={(e) => onChange({ ...value, areaUse: e.target.value as RoomAreaUse })}
+          className="block max-w-44 rounded border bg-background p-1"
+        >
+          {ROOM_AREA_USES.map((use) => (
+            <option key={use} value={use}>
+              {AREA_USE_LABELS[use]}
+            </option>
+          ))}
+        </select>
       </label>
       <label className="text-xs">
         Ebene

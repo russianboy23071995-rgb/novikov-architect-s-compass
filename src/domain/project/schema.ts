@@ -38,7 +38,13 @@ import {
   roofWindowV55Schema,
 } from "../elements/roof/window.ts";
 import { sectionSchema } from "../views/sections.ts";
-import { roomNumberKey, roomSchema, roomV32Schema, roomV33Schema } from "../elements/room/model.ts";
+import {
+  roomNumberKey,
+  roomSchema,
+  roomV32Schema,
+  roomV33Schema,
+  roomV64Schema,
+} from "../elements/room/model.ts";
 import {
   legacyWallTopBindingSchema,
   resolveBoundWallHeights,
@@ -483,7 +489,7 @@ export const projectV34Schema = projectV33Schema.extend({
         doors: z.array(doorSchema).optional(),
         slabs: z.array(slabSchema).optional(),
         roofs: z.array(roofSchema).optional(),
-        rooms: z.array(roomSchema).optional(),
+        rooms: z.array(roomV64Schema).optional(),
       }),
     )
     .min(1),
@@ -499,7 +505,7 @@ export const projectV35Schema = projectV34Schema.extend({
         doors: z.array(doorSchema).optional(),
         slabs: z.array(slabSchema).optional(),
         roofs: z.array(roofSchema).optional(),
-        rooms: z.array(roomSchema).optional(),
+        rooms: z.array(roomV64Schema).optional(),
       }),
     )
     .min(1),
@@ -515,7 +521,7 @@ export const projectV36Schema = projectV35Schema.extend({
         doors: z.array(doorSchema).optional(),
         slabs: z.array(slabSchema).optional(),
         roofs: z.array(roofSchema).optional(),
-        rooms: z.array(roomSchema).optional(),
+        rooms: z.array(roomV64Schema).optional(),
       }),
     )
     .min(1),
@@ -531,7 +537,7 @@ export const projectV37Schema = projectV36Schema.extend({
         doors: z.array(doorSchema).optional(),
         slabs: z.array(slabSchema).optional(),
         roofs: z.array(roofSchema).optional(),
-        rooms: z.array(roomSchema).optional(),
+        rooms: z.array(roomV64Schema).optional(),
         columns: z.array(columnSchema).optional(),
       }),
     )
@@ -548,7 +554,7 @@ export const projectV38Schema = projectV37Schema.extend({
         doors: z.array(doorSchema).optional(),
         slabs: z.array(slabSchema).optional(),
         roofs: z.array(roofSchema).optional(),
-        rooms: z.array(roomSchema).optional(),
+        rooms: z.array(roomV64Schema).optional(),
         columns: z.array(columnSchema).optional(),
         dimensions: z.array(dimensionSchema).optional(),
       }),
@@ -566,7 +572,7 @@ export const projectV39Schema = projectV38Schema.extend({
         doors: z.array(doorSchema).optional(),
         slabs: z.array(slabSchema).optional(),
         roofs: z.array(roofSchema).optional(),
-        rooms: z.array(roomSchema).optional(),
+        rooms: z.array(roomV64Schema).optional(),
         columns: z.array(columnSchema).optional(),
         dimensions: z.array(dimensionSchema).optional(),
         texts: z.array(textSchema).optional(),
@@ -585,7 +591,7 @@ export const projectV40Schema = projectV39Schema.extend({
         doors: z.array(doorSchema).optional(),
         slabs: z.array(slabSchema).optional(),
         roofs: z.array(roofSchema).optional(),
-        rooms: z.array(roomSchema).optional(),
+        rooms: z.array(roomV64Schema).optional(),
         columns: z.array(columnSchema).optional(),
         dimensions: z.array(dimensionSchema).optional(),
         texts: z.array(textSchema).optional(),
@@ -610,7 +616,7 @@ export const projectV42Schema = projectV41Schema.extend({
         doors: z.array(insertedDoorSchema).optional(),
         slabs: z.array(slabSchema).optional(),
         roofs: z.array(roofSchema).optional(),
-        rooms: z.array(roomSchema).optional(),
+        rooms: z.array(roomV64Schema).optional(),
         columns: z.array(columnSchema).optional(),
         dimensions: z.array(dimensionSchema).optional(),
         texts: z.array(textSchema).optional(),
@@ -632,7 +638,7 @@ export const projectV43Schema = projectV42Schema.extend({
         doors: z.array(insertedDoorSchema).optional(),
         slabs: z.array(slabSchema).optional(),
         roofs: z.array(roofSchema).optional(),
-        rooms: z.array(roomSchema).optional(),
+        rooms: z.array(roomV64Schema).optional(),
         columns: z.array(columnSchema).optional(),
         dimensions: z.array(dimensionSchema).optional(),
         texts: z.array(textSchema).optional(),
@@ -895,15 +901,30 @@ export const projectV63Schema = projectV45Schema.extend({
   hotkeys: hotkeysSchema.optional(),
 });
 /** Schema 64: the terrain of the project, in its ground storey (docs/GELAENDE.md). */
-const storeySchema = storeyV63Schema.extend({
+const storeyV64Schema = storeyV63Schema.extend({
   terrains: z.array(terrainSchema).max(1).optional(),
 });
-const layoutDrawingV64Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
+const layoutDrawingV64Schema = z.object({ layoutId: id, storey: storeyV64Schema }).strict();
+export const projectV64Schema = projectV45Schema.extend({
+  schemaVersion: z.literal(64),
+  storeys: z.array(storeyV64Schema).min(1),
+  modelViews: z.array(anyModelViewSchema).optional(),
+  layoutDrawings: z.array(layoutDrawingV64Schema).max(5000).optional(),
+  masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
+  layouts: z.array(layoutV49Schema).max(5000).optional(),
+  projectInfo: projectInfoSchema.optional(),
+  hotkeys: hotkeysSchema.optional(),
+});
+/** Schema 65: how a room counts for the living area (docs/WOHNFLAECHE.md). */
+const storeySchema = storeyV64Schema.extend({
+  rooms: z.array(roomSchema).optional(),
+});
+const layoutDrawingV65Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
 const projectSchema = projectV45Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z.array(storeySchema).min(1),
   modelViews: z.array(anyModelViewSchema).optional(),
-  layoutDrawings: z.array(layoutDrawingV64Schema).max(5000).optional(),
+  layoutDrawings: z.array(layoutDrawingV65Schema).max(5000).optional(),
   masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
   layouts: z.array(layoutV49Schema).max(5000).optional(),
   projectInfo: projectInfoSchema.optional(),

@@ -12,6 +12,7 @@ import type { Hatch } from "../../domain/elements/hatch/model.ts";
 import type { Slab } from "../../domain/elements/slab/model.ts";
 import type { Roof } from "../../domain/elements/roof/model.ts";
 import { defaultHeightLines, type HeightLine } from "../../domain/elements/room/height-line.ts";
+import type { RoomAreaUse } from "../../domain/elements/room/model.ts";
 import type { Dimension } from "../../domain/elements/dimension/model.ts";
 import type { DoorSettingsDraft } from "../drawing/door-placement.ts";
 import type { ElementTarget } from "../selection/target.ts";
@@ -47,6 +48,7 @@ export type ToolDefaults =
         floorBuildUpEnabled: boolean;
         floorBuildUp: number;
         heightLines: HeightLine[];
+        areaUse: RoomAreaUse;
         layerId: string;
       };
     }
@@ -203,6 +205,7 @@ export function pickupToolDefaults(
         floorBuildUpEnabled: source.floorBuildUp !== undefined,
         floorBuildUp: source.floorBuildUp ?? 0,
         heightLines: structuredClone(source.heightLines ?? defaultHeightLines()),
+        areaUse: source.livingArea?.use ?? "living",
         layerId: source.layerId,
       },
     };

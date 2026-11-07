@@ -1,6 +1,16 @@
 import { useState } from "react";
 import { ELEMENT_KINDS } from "@/domain/elements/registry";
-import { roomArea, type Room } from "@/domain/elements/room/model";
+import {
+  compactLivingArea,
+  MAX_OUTDOOR_SHARE,
+  OUTDOOR_SHARE,
+  ROOM_AREA_USES,
+  roomArea,
+  type Room,
+  type RoomAreaUse,
+  type RoomLivingArea,
+} from "@/domain/elements/room/model";
+import { AREA_USE_LABELS, areaUseOf } from "@/application/area-rules/woflv";
 import {
   updateRoom,
   workingRoomClearHeights,
@@ -78,6 +88,9 @@ export function RoomProperties({
     }
   };
   const withBuildUp = room.floorBuildUp !== undefined;
+  const use = areaUseOf(room.livingArea);
+  const changeLiving = (changes: Partial<RoomLivingArea>) =>
+    apply({ livingArea: compactLivingArea({ use, ...room.livingArea, ...changes }) });
   return (
     <section className="flex flex-wrap items-end gap-x-4 gap-y-2" aria-label="Element properties">
       <h2 className="text-sm font-semibold">{ELEMENT_KINDS.room.label}</h2>
@@ -148,6 +161,44 @@ export function RoomProperties({
         />
         Fußbodenaufbau
       </label>
+      <label className="block text-xs">
+        Wohnfläche
+        <select
+          aria-label="Raumart für die Wohnfläche"
+          value={use}
+          onChange={(e) => changeLiving({ use: e.target.value as RoomAreaUse })}
+          className="mt-1 block h-8 max-w-44 rounded border bg-background px-1"
+        >
+          {ROOM_AREA_USES.map((item) => (
+            <option key={item} value={item}>
+              {AREA_USE_LABELS[item]}
+            </option>
+          ))}
+        </select>
+      </label>
+      {use === "outdoor" && (
+        <label className="block text-xs">
+          Anrechnung (%)
+          <Input
+            key={room.livingArea?.outdoorShare ?? OUTDOOR_SHARE}
+            aria-label="Anrechnung in Prozent"
+            type="number"
+            step="any"
+            min={0}
+            max={MAX_OUTDOOR_SHARE * 100}
+            defaultValue={(room.livingArea?.outdoorShare ?? OUTDOOR_SHARE) * 100}
+            onBlur={(e) => {
+              const current = room.livingArea?.outdoorShare ?? OUTDOOR_SHARE;
+              const share = Number(e.target.value) / 100;
+              if (!(share >= 0 && share <= MAX_OUTDOOR_SHARE)) {
+                e.target.value = String(current * 100);
+                setError("Die Anrechnung liegt zwischen 0 und 50 % (WoFlV § 4 Nr. 4).");
+              } else if (share !== current) changeLiving({ outdoorShare: share });
+            }}
+            className="mt-1 h-8 w-20"
+          />
+        </label>
+      )}
       <label className="block text-xs">
         Ebene
         <select

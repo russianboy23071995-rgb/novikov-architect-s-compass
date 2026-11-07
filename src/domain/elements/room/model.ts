@@ -57,11 +57,56 @@ export const roomV33Schema = z
   .superRefine(refineOutline);
 /** heightLines (schema 34, R3b): each line with height, colour, line style and its lower and
  * upper reference; absent = the defaults 1,00/2,00 m clear height, empty = no lines. */
+const roomV64Shape = { ...roomShape, heightLines: heightLineListSchema.optional() };
+/** Room of schemas 34 to 64 (without living area data); only for reading. */
+export const roomV64Schema = z.object(roomV64Shape).strict().superRefine(refineOutline);
+
+/** How a room counts for the living area (docs/WOHNFLAECHE.md, WoFlV § 2 and § 4). */
+export const ROOM_AREA_USES = ["living", "unheated", "outdoor", "none"] as const;
+export type RoomAreaUse = (typeof ROOM_AREA_USES)[number];
+/** WoFlV § 4 Nr. 4: as a rule a quarter, at most a half. */
+export const OUTDOOR_SHARE = 0.25;
+export const MAX_OUTDOOR_SHARE = 0.5;
+/**
+ * Schema 65, absent = a living room without corrections. outdoorShare only for "outdoor", absent =
+ * a quarter. corrections: entered areas in m² with their reason, deductions negative.
+ */
+export const roomLivingAreaSchema = z
+  .object({
+    use: z.enum(ROOM_AREA_USES),
+    outdoorShare: z.number().finite().min(0).max(MAX_OUTDOOR_SHARE).optional(),
+    corrections: z
+      .array(
+        z
+          .object({
+            note: z.string().trim().min(1).max(120),
+            area: z.number().finite().min(-10000).max(10000),
+          })
+          .strict(),
+      )
+      .max(100)
+      .optional(),
+  })
+  .strict();
+export type RoomLivingArea = z.infer<typeof roomLivingAreaSchema>;
 export const roomSchema = z
-  .object({ ...roomShape, heightLines: heightLineListSchema.optional() })
+  .object({ ...roomV64Shape, livingArea: roomLivingAreaSchema.optional() })
   .strict()
   .superRefine(refineOutline);
 export type Room = z.infer<typeof roomSchema>;
+
+/** The stored form: nothing where the defaults apply, so untouched rooms stay as they are. */
+export function compactLivingArea(value: RoomLivingArea): RoomLivingArea | undefined {
+  const corrections = value.corrections?.length ? { corrections: value.corrections } : {};
+  const share =
+    value.use === "outdoor" &&
+    value.outdoorShare !== undefined &&
+    value.outdoorShare !== OUTDOOR_SHARE
+      ? { outdoorShare: value.outdoorShare }
+      : {};
+  if (value.use === "living" && !value.corrections?.length) return undefined;
+  return { use: value.use, ...share, ...corrections };
+}
 
 /** Plan area of the outline in square metres (Grundfläche; no WoFlV rules). */
 export function roomArea(room: Pick<Room, "points">): number {

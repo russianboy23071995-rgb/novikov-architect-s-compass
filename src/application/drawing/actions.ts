@@ -1,3 +1,4 @@
+import type { RoomLivingArea } from "../../domain/elements/room/model.ts";
 import type { WallRenovation } from "../../domain/elements/wall/renovation.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import type { ViewIdentity } from "../../domain/views/scale.ts";
@@ -74,6 +75,7 @@ export type DrawingRequest =
       name?: string;
       floorBuildUp?: number;
       heightLines?: HeightLine[];
+      livingArea?: RoomLivingArea;
       layerId?: string;
     };
 export function assertDrawingContext(base: Project, current: Project) {
@@ -150,6 +152,7 @@ export function createDrawing(
       ...(request.name ? { name: request.name } : {}),
       ...(request.floorBuildUp !== undefined ? { floorBuildUp: request.floorBuildUp } : {}),
       ...(request.heightLines ? { heightLines: request.heightLines } : {}),
+      ...(request.livingArea ? { livingArea: request.livingArea } : {}),
       ...(request.layerId ? { layerId: request.layerId } : {}),
     });
   if (request.kind === "roof") {
