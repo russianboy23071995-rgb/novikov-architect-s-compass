@@ -35,3 +35,11 @@ test("property drafts follow immutable revisions, selection and undo/redo withou
   ])
     assert.notEqual(propertyFormKey(next, s), initial);
 });
+
+test("a room keeps its form through changes, so its open windows stay", () => {
+  const project = createExampleProject();
+  const other = structuredClone(project);
+  const room = { kind: "room", id: "r" } as const;
+  assert.equal(propertyFormKey(project, room), propertyFormKey(other, room));
+  assert.notEqual(propertyFormKey(project, room), propertyFormKey(project, { ...room, id: "s" }));
+});

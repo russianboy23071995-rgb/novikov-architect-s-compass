@@ -221,6 +221,7 @@
     "src/application/drawing/draft-corners.test.ts",
     "src/application/drawing/hatch-workflow.test.ts",
     "src/application/hatches/actions.test.ts",
+    "src/geometry/polygons/overlap.test.ts",
     "src/geometry/polygons/simple-polygon.test.ts",
     "src/lib/bim/model.test.ts",
     "src/lib/bim/geometry.test.ts",

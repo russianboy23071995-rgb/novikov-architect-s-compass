@@ -8,7 +8,10 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import { compactLivingArea } from "../../domain/elements/room/model.ts";
 import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { deserializeProject, serializeProject } from "../../lib/bim/model.ts";
-import { areaUseOf, fixedShare, roomLivingResult } from "./woflv.ts";
+import { areaUseOf, fixedShare, roomLivingResult, storeyAreaBlockers } from "./woflv.ts";
+import { addColumn } from "../columns/actions.ts";
+import { addStair } from "../stairs/actions.ts";
+import { workingRoomLiving } from "../rooms/actions.ts";
 import type { CeilingSource } from "../../domain/elements/room/heights.ts";
 
 // docs/WOHNFLAECHE.md, W1.
@@ -131,4 +134,71 @@ test("fixed shares ignore the height; a part without ceiling counts in full and 
   const open = roomLivingResult({ points: square }, []);
   near(open.livingArea, 12);
   assert.equal(open.notes.length, 1);
+});
+
+// W3, by hand.
+const box = (x: number, y: number, w: number, h: number) => [
+  { x, y },
+  { x: x + w, y },
+  { x: x + w, y: y + h },
+  { x, y: y + h },
+];
+const blocker = (points: ReturnType<typeof box>) => ({ label: "Stütze", rule: "§ 3", points });
+
+test("a blocker comes off where it stands, only its part inside the room", () => {
+  near(
+    roomLivingResult({ points: square }, [flat(2.5)], [blocker(box(1, 1, 0.5, 0.5))]).livingArea,
+    11.75,
+  );
+  near(
+    roomLivingResult({ points: square }, [flat(2.5)], [blocker(box(3, 1, 2, 1))]).livingArea,
+    11,
+  );
+  // Under 1,50 m everything counts at a half, the column too.
+  near(
+    roomLivingResult({ points: square }, [flat(1.5)], [blocker(box(1, 1, 0.5, 0.5))]).livingArea,
+    5.875,
+  );
+  // On the roof slope: 1 m² at x from 1 to 2 at a half, half a square metre comes off.
+  near(roomLivingResult({ points: square }, [slope], [blocker(box(1, 1, 1, 1))]).livingArea, 7);
+});
+
+test("§ 3 Abs. 3: columns above 1,50 m and 0,1 m², stairs above three risers", () => {
+  const shape = (width: number) => ({ kind: "rectangle" as const, width, depth: width });
+  let p = addRoom(createStandardProject("p", "eg", "og"), { id: "r", points: square });
+  const base = { position: { x: 1, y: 1 }, rotation: 0, baseOffset: 0 };
+  p = addColumn(p, { ...base, id: "gross", shape: shape(0.5), height: 2.5 });
+  p = addColumn(p, { ...base, id: "klein", shape: shape(0.3), height: 2.5 });
+  p = addColumn(p, { ...base, id: "niedrig", shape: shape(0.5), height: 1.5 });
+  const labels = () => storeyAreaBlockers(storeyOf(p)).map((b) => b.label);
+  assert.deepEqual(labels(), ["Stütze"]);
+  p = addStair(p, { id: "kurz", start: { x: 3, y: 1 }, height: 0.5, riserCount: 3 });
+  assert.deepEqual(labels(), ["Stütze"]);
+  p = addStair(p, { id: "lang", start: { x: 3, y: 1 }, height: 0.7, riserCount: 4 });
+  assert.deepEqual(labels(), ["Stütze", "Treppe"]);
+  const result = workingRoomLiving(p, room(p));
+  assert.ok(result.steps.some((s) => s.rule === "§ 3 Abs. 3 Nr. 2" && s.area < 0));
+});
+
+test("corrections: at the fixed share, in a living room in full; never below zero", () => {
+  const corrections = [
+    { note: "Schornstein", area: -0.5 },
+    { note: "Nische", area: 0.25 },
+  ];
+  const living = roomLivingResult({ points: square, livingArea: { use: "living", corrections } }, [
+    flat(2.5),
+  ]);
+  near(living.livingArea, 11.75);
+  assert.equal(living.steps.at(-1)!.label, "Nische");
+  near(
+    roomLivingResult({ points: square, livingArea: { use: "outdoor", corrections } }, [])
+      .livingArea,
+    2.9375,
+  );
+  const tooMuch = roomLivingResult(
+    { points: square, livingArea: { use: "living", corrections: [{ note: "x", area: -20 }] } },
+    [flat(2.5)],
+  );
+  near(tooMuch.livingArea, 0);
+  assert.equal(tooMuch.notes.length, 1);
 });

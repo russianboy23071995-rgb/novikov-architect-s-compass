@@ -40,3 +40,22 @@ Nachweis im Browser, Raum „Wohnen“ 20 m²: Raumart steht auf Wohnraum; auf B
 Rechenbeispiel im Test, von Hand: Raum 4 × 3 m unter einem Dach, das je Meter um 1 m steigt. 3 m² unter 1 m zählen nicht, 3 m² zwischen 1 und 2 m zur Hälfte, 6 m² voll, zusammen 7,50 m². Mit 0,50 m Fußbodenaufbau sind es 6,00 m².
 
 Nachweis im Browser, Pultdach 45° mit Unterseite 0,50 m an der Traufe, das den Raum nicht ganz deckt: Raum „Wohnen“ 5 × 4 m zeigt Grundfläche 20,00 m², Wohnfläche 15,00 m² (2,50 m² unter 1 m zählen nicht, 5,00 m² zur Hälfte, 10,00 m² voll, 2,50 m² ohne Dach voll). Balkon 8,00 m² zu 25 % zeigt 2,00 m² und bleibt von der Dachschräge unberührt.
+
+## W3 – Abzüge und Korrekturen
+
+- **Automatisch (`storeyAreaBlockers`):** Stützen über 1,50 m Höhe und 0,1 m² Fläche, Treppen mit mehr als drei Steigungen samt Podest. Abgezogen wird nur der Teil im Raum, und zwar mit dem Anteil der Stelle, an der das Bauteil steht: auf einer Fläche zur Hälfte also die Hälfte.
+- **Von Hand:** Knopf „Rechenweg und Korrekturen…“ in den Raumeigenschaften. Das Fenster zeigt den Rechenweg des Raums und nimmt Korrekturen mit Begründung und Fläche an, Abzüge mit Minus. Eine Korrektur zählt im Wohnraum voll, sonst mit dem festen Anteil des Raums.
+- **Überschneidung:** `src/geometry/polygons/overlap.ts` zerlegt beide Umrisse in Dreiecke und schneidet sie, das geht auch bei L-Räumen und Treppen mit Podest.
+- **Nie unter 0:** Sind die Abzüge größer als der Raum, bleibt die Wohnfläche bei 0, und der Rechenweg sagt das.
+
+Grenzen:
+
+- Das Modell kennt keine Schornsteine und Vormauerungen, sie sind Korrekturen.
+- Eine Treppe gehört zu ihrem Geschoss. Das Treppenloch im Geschoss darüber zieht das Programm nicht ab, es ist als Korrektur einzutragen oder der Raum spart es im Umriss aus.
+- Überlappen sich zwei abgezogene Bauteile, zählt die Überlappung doppelt.
+- „Freistehend“ prüft das Programm nicht: Auch eine Stütze an der Wand zählt als Abzug, wenn sie im Raum steht.
+- Der Raumumriss endet an den Wandseiten aus dem Modell. Putz und Bekleidung zieht das Programm nicht ab (§ 3 Abs. 1), sie gehen nur über die Wandstärke oder eine Korrektur ein.
+
+Nachweis im Browser, Raum wie bei W2 mit Stütze 0,50 × 0,50 m: Rechenweg 10,00 + 2,50 + 0 + 2,50 − 0,25 = 14,75 m²; Korrektur „Schornstein“ −0,50 ergibt 14,25 m²; „Nische“ +0,25 ergibt 14,50 m², Entfernen wieder 14,25 m². Ohne Begründung kommt eine Meldung.
+
+Gefunden und behoben: Das Fenster schloss sich nach jeder Eingabe, weil die Eigenschaften bei jeder Projektänderung neu aufgebaut wurden. Raumeigenschaften bleiben jetzt stehen und folgen ihren Werten selbst (`property-form-key.ts`); damit bleibt auch das Fenster „Höhenlinien“ offen.

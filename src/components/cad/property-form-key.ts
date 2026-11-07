@@ -5,6 +5,8 @@ import type { Selection } from "./bim-view.ts";
 const revisions = new WeakMap<Project, number>();
 let nextRevision = 0;
 export function propertyFormKey(project: Project, selection: Selection): string {
+  // The room form follows its values by itself and holds windows that must survive a change.
+  if (selection?.kind === "room") return `room:${selection.id}`;
   let revision = revisions.get(project);
   if (revision === undefined) {
     revision = ++nextRevision;
