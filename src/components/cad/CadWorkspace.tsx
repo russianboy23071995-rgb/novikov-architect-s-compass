@@ -3,6 +3,7 @@ import { enclosedRoomOutline } from "@/application/rooms/enclosure";
 import { nextProjectRoomNumber } from "@/application/rooms/actions";
 import { isDefaultHeightLineList } from "@/domain/elements/room/height-line";
 import { RoomListPanel } from "./RoomListPanel";
+import { LivingAreaPanel } from "./LivingAreaPanel";
 import { ElementListPanel } from "./ElementListPanel";
 import { FilterWindow, type FilterPlace } from "./FilterWindow";
 import { placedDrawingKey, sameDrawingKey } from "@/rendering/viewport/placed-freshness";
@@ -394,6 +395,7 @@ export function CadWorkspace({
   const [hatchLibraryOpen, setHatchLibraryOpen] = useState(false);
   const [layersOpen, setLayersOpen] = useState(false);
   const [roomListOpen, setRoomListOpen] = useState(false);
+  const [livingListOpen, setLivingListOpen] = useState(false);
   const [elementListOpen, setElementListOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [measurementMode, setMeasurementMode] = useState<MeasurementMode>("distance");
@@ -3957,6 +3959,12 @@ export function CadWorkspace({
         project={realProject}
         onSelectRoom={(id) => selectElement({ kind: "room", id })}
       />
+      <LivingAreaPanel
+        open={livingListOpen}
+        onOpenChange={setLivingListOpen}
+        project={realProject}
+        onSelectRoom={(id) => selectElement({ kind: "room", id })}
+      />
       <FilterWindow
         open={filterOpen}
         onClose={() => setFilterOpen(false)}
@@ -4122,6 +4130,12 @@ export function CadWorkspace({
             setDemandOpen(false);
             setModelError("");
             setRoomListOpen(true);
+          }}
+          onLivingList={() => {
+            cancelInteraction();
+            setDemandOpen(false);
+            setModelError("");
+            setLivingListOpen(true);
           }}
           onElementList={() => {
             cancelInteraction();

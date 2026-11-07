@@ -61,6 +61,7 @@ type TopToolbarProps = {
   historyTrimmed?: boolean;
   onLayers: () => void;
   onRoomList: () => void;
+  onLivingList: () => void;
   /** Element list with quantities (docs/MENGEN.md, ML2). */
   onElementList: () => void;
   /** Opens the Plankopfplaner (docs/PLANKOPF.md). */
@@ -285,6 +286,7 @@ export const TopToolbar = withStableHandlers(function TopToolbar(props: TopToolb
           <DropdownMenuContent>
             <DropdownMenuItem onSelect={props.onLayers}>Ebenen</DropdownMenuItem>
             <DropdownMenuItem onSelect={props.onRoomList}>Raumliste</DropdownMenuItem>
+            <DropdownMenuItem onSelect={props.onLivingList}>Wohnflächenliste</DropdownMenuItem>
             <DropdownMenuItem onSelect={props.onElementList}>Bauteilliste</DropdownMenuItem>
             <DropdownMenuItem onSelect={props.onTitleBlockPlanner}>Plankopfplaner</DropdownMenuItem>
             <DropdownMenuItem onSelect={props.onProjectInfo}>Projektinformationen</DropdownMenuItem>

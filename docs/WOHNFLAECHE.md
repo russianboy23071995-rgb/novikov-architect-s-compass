@@ -59,3 +59,11 @@ Grenzen:
 Nachweis im Browser, Raum wie bei W2 mit Stütze 0,50 × 0,50 m: Rechenweg 10,00 + 2,50 + 0 + 2,50 − 0,25 = 14,75 m²; Korrektur „Schornstein“ −0,50 ergibt 14,25 m²; „Nische“ +0,25 ergibt 14,50 m², Entfernen wieder 14,25 m². Ohne Begründung kommt eine Meldung.
 
 Gefunden und behoben: Das Fenster schloss sich nach jeder Eingabe, weil die Eigenschaften bei jeder Projektänderung neu aufgebaut wurden. Raumeigenschaften bleiben jetzt stehen und folgen ihren Werten selbst (`property-form-key.ts`); damit bleibt auch das Fenster „Höhenlinien“ offen.
+
+## W4 – Wohnflächenliste
+
+Menü Organisation → „Wohnflächenliste“ (neben der Raumliste). Das Fenster zeigt je Geschoss alle Räume in der Reihenfolge ihrer Nummern mit Raumart, Grundfläche, Wohnfläche und Rechenweg, dazu Summen je Geschoss und fürs Projekt. Ein Klick wählt den Raum. „Als CSV speichern“ schreibt eine Zeile je Rechenschritt und die Summen, Format wie die Raumliste (Semikolon, Dezimalkomma, BOM).
+
+Liste, CSV und Bericht lesen dasselbe Ergebnis `livingSchedule` (`src/application/area-rules/schedule.ts`), es gibt keine zweite Berechnung. Summen entstehen aus den exakten Werten. Deshalb kann die Summe gerundeter Zeilen um 0,01 m² von der angezeigten Summe abweichen.
+
+Nachweis im Browser, Projekt wie bei W3: Menü Organisation zeigt „Wohnflächenliste“. Liste: R-001 Wohnen 20,00 → 14,75 m² mit fünf Rechenschritten und Hinweis auf die Teilfläche ohne Dach, R-002 Balkon 8,00 → 2,00 m², Summe 28,00 → 16,75 m².
