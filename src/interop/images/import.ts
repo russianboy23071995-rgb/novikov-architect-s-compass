@@ -106,7 +106,7 @@ export type ImportedImage = {
  * most 16 million pixels and stored as PNG, or as JPEG when the PNG data would pass 10 MiB,
  * smaller still if needed.
  */
-export async function importImage(file: File, id: string): Promise<ImportedImage> {
+export async function importFittedImage(file: File, id: string): Promise<ImportedImage> {
   if (file.size > IMAGE_IMPORT_FILE_LIMIT) throw new Error("Bilddatei zu groß (maximal 64 MiB).");
   const header = sourceImageHeader(new Uint8Array(await file.arrayBuffer()));
   const first = storedScale(header.width, header.height);
@@ -230,4 +230,9 @@ function checkImageUrl(asset: ImageAsset): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+/** The stored asset of an import alone, for callers that need no fit information. */
+export async function importImage(file: File, id: string): Promise<ImageAsset> {
+  return (await importFittedImage(file, id)).asset;
 }

@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { importImage } from "@/interop/images/import";
+import { importFittedImage } from "@/interop/images/import";
 import { imageDpi } from "@/interop/images/dpi";
 import {
   underlayMetresPerPixel,
@@ -49,7 +49,10 @@ export function useImageImport(
     setBusy(true);
     try {
       const fileDpi = imageDpi(new Uint8Array(await file.slice(0, 256 * 1024).arrayBuffer()));
-      const { asset, source, scale } = await importImage(file, `asset-${crypto.randomUUID()}`);
+      const { asset, source, scale } = await importFittedImage(
+        file,
+        `asset-${crypto.randomUUID()}`,
+      );
       if (
         token !== epoch.current ||
         latest.current.project !== base ||
