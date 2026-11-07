@@ -142,3 +142,15 @@ Nutzerauftrag 05.11.2026: 15 Punkte zur Bedienung, vor den weiteren Möbeln. Än
 **Abnahme im Browser (05.11.2026):** Drei Punkte auf einer Linie, Enter: zwei Wände, keine Meldung, die Fuge ist nicht sichtbar.
 
 **Grenzen:** Stärkenwechsel im geraden Stoß und schräge Fluchten sind nur teils über Tests belegt, im Browser lief nur die waagerechte Wand gleicher Stärke.
+
+## Nachträge 07.11.2026
+
+Nutzerauftrag 07.11.2026, vier Punkte: Höhenlinien fangen, Zahl tippen als Länge, Tab-Wahl beim Doppelklick, Stützen in der Wohnfläche.
+
+### T1 – Tab-Wahl bleibt beim Doppelklick
+
+Vorher: Mit Tab ließ sich unter mehreren Elementen das untere wählen, ein Doppelklick öffnete trotzdem das Fenster des obersten. Der erste Klick des Doppelklicks löste die Tab-Wahl auf, der zweite wählte wieder das oberste Element.
+
+Jetzt: Liegt das gewählte Element unter der Maus, behält der zweite Klick des Doppelklicks die Wahl, und das Fenster gehört zu ihm (`selectedUnder` in `src/application/selection/cycle.ts`, `BimPlan.tsx`). Ohne Tab ändert sich nichts: Der erste Klick wählt das oberste Element, der Doppelklick öffnet dessen Fenster.
+
+Nachweis im Browser, Wand quer durch einen Raum: Maus auf die Überlappung, zweimal Tab wählt den Raum, Doppelklick öffnet „Raum R-001 Raum – Einstellungen“. Gegenprobe ohne Tab: Doppelklick auf die Wand wählt die Wand.
