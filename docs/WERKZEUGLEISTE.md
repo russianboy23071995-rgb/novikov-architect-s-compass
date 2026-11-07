@@ -122,3 +122,13 @@ Nutzerhinweis: Die Piktogramme waren zu klein und saßen in den Knöpfen nicht m
   - Keine Konsolenfehler.
 
 **Grenze:** Die Zentrierung ist für die Werkzeugleiste nachgemessen; Zeichenarten und Navigator nutzen denselben Rahmen, sind aber nicht einzeln vermessen.
+
+## Korrektur 07.11.2026 – Farbwahl der Piktogramme
+
+Fehler: Beim Ziehen im Farbwähler von „Darstellung“ → Piktogramme (z. B. „Aktivfarbe hell“) brach React mit „Maximum update depth exceeded“ ab. Das Feld war fest an den Zustand gebunden. Bei jeder Änderung schrieb die Seite den Wert zurück, der offene Wähler meldete ihn erneut, und die Darstellungen stapelten sich. Im Browser nachgestellt: 120 schnelle Farbwerte hintereinander lösten den Fehler zweimal aus.
+
+Behoben: Die drei Farbfelder (`ColorField` in `CanvasDisplaySettings.tsx`) schreiben ihren Wert nicht zurück, solange der Wähler ihn führt, und folgen nur Änderungen von außen, etwa „Zurücksetzen“. Von einer schnellen Folge geht nur der letzte Wert weiter, einen Takt später. Ein gleicher Wert löst keine neue Darstellung aus (`usePictogramSettings`). Die Schieberegler bleiben unverändert.
+
+Nachweis im Browser: 120 schnelle Farbwerte ohne Fehler, gespeichert ist der letzte. „Zurücksetzen“ setzt Feld und Speicher auf die Vorgabe #0e9aa0. Fünf Werte nacheinander enden beim fünften.
+
+Grenze: Den echten Farbwähler des Systems kann die Testumgebung nicht bedienen. Geprüft ist die gleiche Folge von Eingabe-Ereignissen, die er auslöst.
