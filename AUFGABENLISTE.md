@@ -11,7 +11,7 @@ So benutzt du sie:
 
 Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus dieser Liste wird beim Auftrag dort eingetragen.
 
-**Stand:** 06.11.2026 · main nach PR663
+**Stand:** 07.11.2026 · main nach PR664
 
 ## Deine Wünsche
 
