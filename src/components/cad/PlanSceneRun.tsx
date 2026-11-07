@@ -907,6 +907,32 @@ export function PlanSceneContent({
           <title>{`Wand aus ${guest.storeyName}`}</title>
         </polygon>
       ))}
+      {plan.guests.flatMap((guest) =>
+        guest.openings.map((opening) => (
+          // A window of the guest wall in this cut plane (M4): opening with a glass line.
+          <g
+            key={opening.id}
+            opacity={0.45}
+            pointerEvents="none"
+            aria-label={`Fenster aus ${guest.storeyName}`}
+          >
+            <polygon
+              points={opening.ring.map((p) => `${p.x},${-p.y}`).join(" ")}
+              fill="var(--background)"
+              stroke="var(--primary)"
+              strokeWidth={wallOutlineWidth / pixelsPerMetre}
+            />
+            <line
+              x1={opening.centre[0].x}
+              y1={-opening.centre[0].y}
+              x2={opening.centre[1].x}
+              y2={-opening.centre[1].y}
+              stroke="var(--primary)"
+              strokeWidth={(0.5 * wallOutlineWidth) / pixelsPerMetre}
+            />
+          </g>
+        )),
+      )}
       {plan.walls.map((wall) => (
         <PlanWall
           key={wall.id}

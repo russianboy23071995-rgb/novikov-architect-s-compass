@@ -42,3 +42,15 @@ Nachweis im Browser, Projekt wie bei M1, die Frontwand im EG bis OK Rohfußboden
 Abweichung von der Karte: Dort stand, ein Klick wähle die Gastwand an. Das hätte entweder ins Heimatgeschoss gewechselt, schon beim einfachen Klick und damit störend, oder eine Auswahl über Geschosse hinweg gebraucht, die die Bearbeitung nicht kennt. Deshalb nennt ein Klick die Wand, und der Doppelklick öffnet sie.
 
 Nachweis im Browser, 1. OG mit der Frontwand aus dem EG als Gast: Klick auf den Gast zeigt „Wand aus Erdgeschoss · Doppelklick öffnet sie dort“, das 1. OG bleibt offen. Doppelklick wechselt ins Erdgeschoss, die Wand ist gewählt, „Wand – Einstellungen“ ist offen.
+
+## M4 – Fenster über Geschosse
+
+Ein Fenster in einer hohen Wand darf über der Geschosshöhe sitzen, zum Beispiel mit 3,90 m Brüstung in einer Wand vom EG bis zum 2. OG. Das ließ das Modell schon zu, die Brüstung zählt ab dem Wandfuß. Neu ist die Darstellung:
+
+- **Im Heimatgeschoss** erscheint ein Fenster, das ganz über der Geschosshöhe liegt, nicht mehr als geschnittene Öffnung. Es gehört zu einem höheren Geschoss.
+- **Im Geschoss, dessen Schnittebene es durchstößt,** erscheint es im Gast als Öffnung mit Glaslinie, ebenso blass wie die Gastwand.
+- Fenster mit Brüstung über 1 m, die noch im Heimatgeschoss liegen, etwa ein Badfenster, zeigt der Grundriss wie bisher.
+
+Grenzen: Ein Fenster für ein oberes Geschoss setzt man im Heimatgeschoss der Wand (Werkzeug Fenster, Brüstung über der Geschosshöhe), nicht im oberen Geschoss. Türen in hohen Wänden zeigt der Gast nicht. Ein Gastfenster ist nicht anwählbar, Doppelklick auf die Wand öffnet sie im Heimatgeschoss.
+
+Nachweis im Browser, Frontwand vom EG bis OK Rohfußboden 2. OG mit Fenster „unten“ (Brüstung 0,90 m) und „oben“ (Brüstung 3,90 m): Das EG zeigt nur „unten“. Das 1. OG zeigt „oben“ als blasse Öffnung mit Glaslinie im Gast.

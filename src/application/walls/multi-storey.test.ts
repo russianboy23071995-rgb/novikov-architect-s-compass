@@ -13,6 +13,7 @@ import { derivePlanScene, planSceneRuns } from "../../rendering/viewport/plan-sc
 import { projectSnapReferences } from "../snapping/project-references.ts";
 import { selectWorkingStorey } from "../storeys/working-storey.ts";
 import { snapPointLabel } from "../snapping/point-label.ts";
+import { addWindow } from "../windows/actions.ts";
 
 // docs/MEHRGESCHOSS.md, M1.
 const wallOf = (p: Project) => p.storeys.flatMap((s) => s.walls).find((w) => w.id === "w")!;
@@ -128,4 +129,41 @@ test("guests: a fixed tall wall counts too; corners of a guest are snap targets"
   const refs = projectSnapReferences(og).filter((r) => r.entityId === "w");
   assert.ok(refs.some((r) => r.feature === "vertex-0"));
   assert.equal(snapPointLabel(og, "w", "vertex-0"), `Wand aus ${p.storeys[0]!.name} · Ecke 1`);
+});
+
+// M4: windows over storeys.
+test("windows: one above the home storey shows as a guest opening upstairs, not at home", () => {
+  let p = bind(threeStoreys(), 2);
+  const eg = p.storeys[0]!.height!;
+  p = addWindow(p, {
+    id: "unten",
+    wallId: "w",
+    position: 0.25,
+    width: 1,
+    height: 1.3,
+    sillHeight: 0.9,
+  });
+  p = addWindow(p, {
+    id: "oben",
+    wallId: "w",
+    position: 0.75,
+    width: 1.2,
+    height: 1.4,
+    sillHeight: eg + 0.9,
+  });
+  const home = derivePlanScene(working(p, 0), () => true);
+  assert.deepEqual(
+    (home.openings.get("w") ?? []).map((o) => o.id),
+    ["unten"],
+  );
+  const og = derivePlanScene(working(p, 1), () => true);
+  const guest = og.guests.get("w")!;
+  assert.deepEqual(
+    guest.openings.map((o) => o.id),
+    ["oben"],
+  );
+  // 1,2 m wide along the wall, as thick as the wall.
+  const [a, b, , d] = guest.openings[0]!.ring;
+  assert.ok(Math.abs(Math.hypot(b!.x - a!.x, b!.y - a!.y) - 1.2) < 1e-9);
+  assert.ok(Math.abs(Math.hypot(d!.x - a!.x, d!.y - a!.y) - 0.3) < 1e-9);
 });
