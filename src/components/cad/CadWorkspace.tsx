@@ -970,7 +970,33 @@ export function CadWorkspace({
       ? "polyline"
       : "none";
   const pathOrigin = pathDrawing ? (pathPoints.at(-1) ?? null) : null;
-  const drawingOrigin = tool === "wall" ? wallStart : pathOrigin;
+  const [dimensionDraft, setDimensionDraft] = useState<{
+    line: Point | null;
+    points: Point[];
+    lastAt: number;
+    /** Editing an existing chain (docs/MASSKETTE.md, M2–M4) instead of drawing a new one. */
+    edit?: {
+      id: string;
+      mode: "add" | "remove" | "line";
+      orientation: "horizontal" | "vertical";
+      count: number;
+    };
+  } | null>(null);
+  // Stair tool (docs/TREPPE.md, TR2): first click on the drawing axis; session state only.
+  const [stairStart, setStairStart] = useState<Point | null>(null);
+  // L and U: run direction fixed by click 2; click 3 chooses the side of the turn (TR3).
+  const [stairDirection, setStairDirection] = useState<number | null>(null);
+  // E2 (docs/ANPASSUNGSLISTE.md): section and elevation line, stair run and the next point of
+  // a dimension chain take a typed length from their last point as well.
+  const typedOrigin =
+    (tool === "section" || tool === "elevation") && sectionStart && !sectionEnd
+      ? sectionStart
+      : tool === "stair" && stairStart && stairDirection === null
+        ? stairStart
+        : tool === "dimension" && dimensionDraft?.line && !dimensionDraft.edit
+          ? (dimensionDraft.points.at(-1) ?? null)
+          : null;
+  const drawingOrigin = tool === "wall" ? wallStart : (pathOrigin ?? typedOrigin);
   const [referenceEpoch, setReferenceEpoch] = useState(0);
   const referenceScope = useMemo(
     () => ({
@@ -998,22 +1024,6 @@ export function CadWorkspace({
     content: string;
   } | null>(null);
   // Running dimension chain (docs/MASSKETTE.md); session state, never model history.
-  const [dimensionDraft, setDimensionDraft] = useState<{
-    line: Point | null;
-    points: Point[];
-    lastAt: number;
-    /** Editing an existing chain (docs/MASSKETTE.md, M2–M4) instead of drawing a new one. */
-    edit?: {
-      id: string;
-      mode: "add" | "remove" | "line";
-      orientation: "horizontal" | "vertical";
-      count: number;
-    };
-  } | null>(null);
-  // Stair tool (docs/TREPPE.md, TR2): first click on the drawing axis; session state only.
-  const [stairStart, setStairStart] = useState<Point | null>(null);
-  // L and U: run direction fixed by click 2; click 3 chooses the side of the turn (TR3).
-  const [stairDirection, setStairDirection] = useState<number | null>(null);
   // TR4: the tread the second click drew (run length by mouse); null: the calculated one.
   const [stairTread, setStairTread] = useState<number | null>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -2776,6 +2786,7 @@ export function CadWorkspace({
       const defaults = elevation ? elevationDefaults : sectionDefaults;
       if (!sectionStart) {
         setSectionStart({ x: point.x, y: point.y });
+        setDemandPosition({ x: lastPointer.current.x + 16, y: lastPointer.current.y + 16 });
         return;
       }
       if (!sectionEnd) {
@@ -2816,6 +2827,7 @@ export function CadWorkspace({
     if (tool === "stair") {
       if (!stairStart) {
         setStairStart({ x: point.x, y: point.y });
+        setDemandPosition({ x: lastPointer.current.x + 16, y: lastPointer.current.y + 16 });
         return;
       }
       const values = stairValues(toolDefaults.stair);
@@ -3145,9 +3157,9 @@ export function CadWorkspace({
             },
             cancelInteraction,
           )
-        : drawingOrigin && drawingBase
+        : drawingOrigin && (drawingBase || typedOrigin)
           ? drawingInteraction(
-              drawingBase,
+              typedOrigin ? project : drawingBase!,
               project,
               drawingOrigin,
               drawPoint,

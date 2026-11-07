@@ -54,6 +54,14 @@ export function PrecisionInput({
     if (focusLengthToken) (angleOnly ? angleField : lengthField).current?.focus();
   }, [focusLengthToken, angleOnly]);
   const panel = useRef<HTMLFormElement>(null);
+  // Enter right after a typed key arrives before React has the new value: confirm one tick
+  // later with the then current state, so a quickly typed "3⏎" is not lost (E1/E2).
+  const latest = useRef({ canConfirm, onConfirm });
+  latest.current = { canConfirm, onConfirm };
+  const confirmSoon = () =>
+    window.setTimeout(() => {
+      if (latest.current.canConfirm) latest.current.onConfirm();
+    });
   useEffect(() => {
     const tab = (event: KeyboardEvent) => {
       const typed = startsTypedValue(event);
@@ -143,7 +151,7 @@ export function PrecisionInput({
       style={{ left: visible.x, top: visible.y, maxHeight: "calc(100vh - 16px)", overflow: "auto" }}
       onSubmit={(e) => {
         e.preventDefault();
-        if (canConfirm) onConfirm();
+        confirmSoon();
       }}
       onKeyDown={(e) => {
         if (e.key === "Escape") {
@@ -154,7 +162,7 @@ export function PrecisionInput({
         // Enter confirms (there is no button any more; Enter, Tab and Esc replace them).
         if (e.key === "Enter" && e.target instanceof HTMLInputElement) {
           e.preventDefault();
-          if (canConfirm) onConfirm();
+          confirmSoon();
         }
       }}
     >
