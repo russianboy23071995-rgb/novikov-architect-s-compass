@@ -332,7 +332,7 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 
 ### N35 – Wohnfläche mit Nischen, Schornstein- und Vorwandabzügen
 
-- **Stand:** Geplant: versionierter WoFlV-Regelservice, Abzüge/Korrekturen, unabhängige Fachprüfung.
+- **Stand:** Umgesetzt (W1–W3, PR664–666, 07.11.2026): versionierter WoFlV-Regelsatz, Raumart, Höhenregel, Abzüge und Korrekturen, docs/WOHNFLAECHE.md; unabhängige Fachprüfung offen.
 - **Zuständigkeit:** Ziel application/area-rules, domain/corrections
 - **Altzuordnung:** Guide-F01/F02/F22
 - **Abnahme/Abhängigkeiten:** N31–N34; amtliche WoFlV erst vor Umsetzung prüfen, Korrekturen/Rundung versionieren. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
@@ -341,7 +341,7 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 
 ### N36 – Berichtsvorlage und PDF mit nachvollziehbarem Rechenweg
 
-- **Stand:** Geplant: Wohnflächen-PDF mit Rechenweg; IFC ist kein Bericht.
+- **Stand:** Umgesetzt (W5, PR668, 07.11.2026): Wohnflächen-PDF mit Rechenweg aus dem einen Ergebnis `livingSchedule`; IFC ist kein Bericht.
 - **Zuständigkeit:** Ziel interop/reports/pdf
 - **Altzuordnung:** Guide-F03
 - **Abnahme/Abhängigkeiten:** N35/N37, unabhängige Berichtsdaten ohne zweite Berechnung, Renderprüfung. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.

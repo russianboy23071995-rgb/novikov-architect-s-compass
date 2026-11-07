@@ -2,6 +2,9 @@ import { useMemo } from "react";
 import type { Project } from "@/domain/project/schema";
 import { livingSchedule, livingScheduleCsv } from "@/application/area-rules/schedule";
 import { browserTextDownload } from "@/interop/project-file/browser-download";
+import { writePdf } from "@/interop/pdf/pdf-writer";
+import { savePdf } from "@/interop/pdf/deliver";
+import { livingAreaReport } from "@/interop/reports/woflv-report";
 import { FloatingPanel } from "./FloatingPanel";
 
 const m2 = (value: number) =>
@@ -38,6 +41,29 @@ export function LivingAreaPanel({
             {schedule?.rules.name}, Regelstand {schedule?.rules.version}. Keine geprüfte
             Fachaussage.
           </p>
+          <button
+            type="button"
+            disabled={!schedule?.storeys.length}
+            onClick={() => {
+              if (!schedule) return;
+              const info = project.projectInfo;
+              savePdf(
+                writePdf(
+                  livingAreaReport(schedule, {
+                    project: info?.name,
+                    client: info?.client,
+                    address: info?.address,
+                    author: info?.author,
+                    date: new Date().toLocaleDateString("de-DE"),
+                  }),
+                ),
+                "Wohnflaechenberechnung.pdf",
+              );
+            }}
+            className="ml-auto shrink-0 rounded border px-2 py-1 hover:bg-muted disabled:opacity-50"
+          >
+            Bericht als PDF
+          </button>
           <button
             type="button"
             disabled={!schedule?.storeys.length}
