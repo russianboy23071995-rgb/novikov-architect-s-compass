@@ -80,6 +80,7 @@ import {
   modelViewSchema,
   type ModelView,
   drawingDocumentSchema,
+  drawingDocumentV68Schema,
   drawingDocumentV17Schema,
   documentFolderSchema,
 } from "../views/documents.ts";
@@ -955,8 +956,20 @@ const storeySchema = storeyV66Schema.extend({
   references: z.array(imageReferenceV67Schema),
 });
 const layoutDrawingV67Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
+export const projectV67Schema = projectV45Schema.extend({
+  schemaVersion: z.literal(67),
+  storeys: z.array(storeySchema).min(1),
+  modelViews: z.array(anyModelViewSchema).optional(),
+  layoutDrawings: z.array(layoutDrawingV67Schema).max(5000).optional(),
+  masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
+  layouts: z.array(layoutV49Schema).max(5000).optional(),
+  projectInfo: projectInfoSchema.optional(),
+  hotkeys: hotkeysSchema.optional(),
+});
+/** Schema 68: underlays on layouts per drawing document (docs/BILDUNTERLAGE.md, B6). */
 const projectSchema = projectV45Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+  drawingDocuments: z.array(drawingDocumentV68Schema).optional(),
   storeys: z.array(storeySchema).min(1),
   modelViews: z.array(anyModelViewSchema).optional(),
   layoutDrawings: z.array(layoutDrawingV67Schema).max(5000).optional(),

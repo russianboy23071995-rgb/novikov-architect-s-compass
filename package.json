@@ -204,6 +204,7 @@
     "src/application/references/align.test.ts",
     "src/interop/images/dpi.test.ts",
     "src/interop/images/import-fit.test.ts",
+    "src/application/views/layout-underlays.test.ts",
     "src/application/selection/state.test.ts",
     "src/application/selection/filter.test.ts",
     "src/application/slabs/openings.test.ts",

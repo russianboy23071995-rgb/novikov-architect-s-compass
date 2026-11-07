@@ -74,7 +74,7 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 | --- | ------------------------------------------------------------------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
 | L21 | Fenster/Türen im IFC mit Maßen, damit Archicad Breite/Höhe erkennt |      | Fenster-/Türelemente mit Körper und Laibung im IFC (FT4, PR547), in Archicad dargestellt; Glas durchsichtig (G1, PR548); Beschriftung Breite/Höhe zeigt in Archicad weiter 0,00 (G2 offen) | T_IFC_ACCEPTANCE.md |
 | L22 | IFC-Import bzw. IFC als Referenz                                   |      | offen                                                                                                                                                                                      | §6 Abschnitt 7      |
-| L23 | PDF- und Bild-Unterlagen als Referenz, DXF/DWG                     |      | offen                                                                                                                                                                                      | §6 Abschnitt 7      |
+| L23 | PDF- und Bild-Unterlagen als Referenz, DXF/DWG                     |      | teilweise: Bildunterlage erledigt (Teil 1, B1–B6, PR682–686), docs/BILDUNTERLAGE.md; PDF als Unterlage (pdf.js, Zustimmung nötig) und DXF/DWG offen | §6 Abschnitt 7      |
 
 ## Bedienung
 

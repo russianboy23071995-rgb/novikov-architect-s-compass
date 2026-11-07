@@ -535,6 +535,9 @@ export function DocumentNavigator({
               return draft.kind === "document" && draft.id ? (
                 <DocumentSettingsSections
                   project={project}
+                  onUnderlaysChange={(show) =>
+                    draft.id && onDocumentAction(project, { kind: "underlays", id: draft.id, show })
+                  }
                   onVisibilityChange={(hidden) => {
                     const before =
                       project.drawingDocuments?.find((d) => d.id === draft.id)?.hiddenLayerIds ??

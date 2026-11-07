@@ -58,4 +58,12 @@ export const drawingDocumentSchema = drawingDocumentV17Schema.extend({
   framing: framingSchema.optional(),
   folderId: id.optional(),
 });
-export type DrawingDocument = z.infer<typeof drawingDocumentSchema>;
+/**
+ * Schema 68 (docs/BILDUNTERLAGE.md, B6): whether the image underlays of the storey show where
+ * this drawing lies on a layout, and so in its PDF. Absent means no: a scan to trace is not
+ * printed by accident.
+ */
+export const drawingDocumentV68Schema = drawingDocumentSchema.extend({
+  showUnderlays: z.boolean().optional(),
+});
+export type DrawingDocument = z.infer<typeof drawingDocumentV68Schema>;

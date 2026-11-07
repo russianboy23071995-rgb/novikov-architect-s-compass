@@ -58,6 +58,7 @@ Nutzervorlage: das Paket „Piktogramme – Navigator und Werkzeuge“ mit 28 Pi
   | Linie                                                                   | Line                   |
   | Schraffur, Text                                                         | gleichnamige Werkzeuge |
   | Technische Zeichnung                                                    | Zeichnung              |
+  | Bildunterlage (eigenes Piktogramm im Stil des Pakets, L23)              | Bildunterlage          |
   | Bemaßung                                                                | Maßkette               |
   | Schnitt, Ansicht                                                        | gleichnamige Werkzeuge |
 
