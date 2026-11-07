@@ -4970,6 +4970,15 @@ export function CadWorkspace({
                         // Section symbols belong to the building plan, not to a sheet (ZW4).
                         sections={space ? undefined : sections}
                         onSectionSettings={openSectionWindow}
+                        onGuestWall={(id, open) => {
+                          if (open) return openElementSettings({ kind: "wall", id });
+                          const home = project.storeys.find((s) =>
+                            s.walls.some((w) => w.id === id),
+                          );
+                          showNotice(
+                            `Wand aus ${home?.name ?? "anderem Geschoss"} · Doppelklick öffnet sie dort`,
+                          );
+                        }}
                         selectedSectionId={tool === "select" ? selectedSectionId : null}
                         onSectionSelect={tool === "select" ? selectSection : undefined}
                         onSectionLine={moveSectionLine}

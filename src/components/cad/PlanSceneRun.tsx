@@ -900,7 +900,9 @@ export function PlanSceneContent({
           opacity={0.45}
           stroke="var(--primary)"
           strokeWidth={wallOutlineWidth / pixelsPerMetre}
-          pointerEvents="none"
+          // Reachable where no own element lies above it (M3); never while drawing.
+          pointerEvents={drawing || placement ? "none" : "all"}
+          className="cursor-pointer"
         >
           <title>{`Wand aus ${guest.storeyName}`}</title>
         </polygon>

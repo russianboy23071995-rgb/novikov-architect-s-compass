@@ -32,3 +32,13 @@ Grenzen bis M3 und M4: Ein Gast ist noch nicht anwählbar, und seine Fenster und
 Fangbeschriftung: „Wand aus Erdgeschoss · Ecke 1“ oder „… · Kantenmitte“.
 
 Nachweis im Browser, Projekt wie bei M1, die Frontwand im EG bis OK Rohfußboden 2. OG gebunden (6 m): Im 1. OG erscheint die Frontwand als blasser Gast „Wand aus Erdgeschoss“. Die eingeschossige Seitenwand erscheint dort nicht. Im 2. OG gibt es keinen Gast, die Wand endet an dessen Fußboden, seine Schnittebene liegt bei 7 m. Im EG ist die Wand eine eigene Wand, kein Gast. Linienwerkzeug im 1. OG, Klick 3 cm neben der Gastecke: Der Punkt rastet genau auf der Ecke (0 | −0,15) ein.
+
+## M3 – Bedienung der Gastwände
+
+- **Klick** auf einen Gast, über dem nichts aus dem eigenen Geschoss liegt: Die Meldung nennt ihn, etwa „Wand aus Erdgeschoss · Doppelklick öffnet sie dort“. Das Geschoss bleibt.
+- **Doppelklick:** Das Programm wechselt ins Heimatgeschoss, wählt die Wand und öffnet ihr Fenster, dort ist sie wie jede Wand zu bearbeiten.
+- **Beim Zeichnen** reagiert ein Gast nicht auf Klicks. Er bleibt aber Fangziel.
+
+Abweichung von der Karte: Dort stand, ein Klick wähle die Gastwand an. Das hätte entweder ins Heimatgeschoss gewechselt, schon beim einfachen Klick und damit störend, oder eine Auswahl über Geschosse hinweg gebraucht, die die Bearbeitung nicht kennt. Deshalb nennt ein Klick die Wand, und der Doppelklick öffnet sie.
+
+Nachweis im Browser, 1. OG mit der Frontwand aus dem EG als Gast: Klick auf den Gast zeigt „Wand aus Erdgeschoss · Doppelklick öffnet sie dort“, das 1. OG bleibt offen. Doppelklick wechselt ins Erdgeschoss, die Wand ist gewählt, „Wand – Einstellungen“ ist offen.
