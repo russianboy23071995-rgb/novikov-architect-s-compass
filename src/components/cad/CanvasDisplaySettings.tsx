@@ -1,7 +1,54 @@
+import { useEffect, useRef } from "react";
 import { FloatingPanel } from "./FloatingPanel";
 import { CUT_FILL_MODES, cutPaint, type CutFill } from "./cut-fill";
 import { Pictogram } from "./Pictogram";
 import { PICTOGRAM_DUOTONE, PICTOGRAM_SCALE, type PictogramSettings } from "./pictogram-settings";
+
+/**
+ * A colour field that the page does not write back while the picker is open: the picker owns its
+ * value then, the field follows only changes from elsewhere (reset). A picker sends many values in
+ * a row; the last of a burst goes on one task later, so the renders never pile up (React stopped
+ * them with "Maximum update depth exceeded"; docs/WERKZEUGLEISTE.md, WL4).
+ */
+function ColorField({
+  label,
+  value,
+  onValue,
+}: {
+  label: string;
+  value: string;
+  onValue: (value: string) => void;
+}) {
+  const field = useRef<HTMLInputElement>(null);
+  const sent = useRef(value);
+  const latest = useRef<string | null>(null);
+  useEffect(() => {
+    if (value === sent.current) return;
+    sent.current = value;
+    if (field.current && field.current.value !== value) field.current.value = value;
+  }, [value]);
+  return (
+    <input
+      ref={field}
+      type="color"
+      aria-label={label}
+      defaultValue={value}
+      onChange={(e) => {
+        if (e.target.value === sent.current) return;
+        const first = latest.current === null;
+        latest.current = e.target.value;
+        if (!first) return;
+        window.setTimeout(() => {
+          const next = latest.current;
+          latest.current = null;
+          if (next === null || next === sent.current) return;
+          sent.current = next;
+          onValue(next);
+        });
+      }}
+    />
+  );
+}
 
 export function CanvasDisplaySettings({
   open,
@@ -149,20 +196,18 @@ export function CanvasDisplaySettings({
           </label>
           <label className="flex items-center justify-between gap-4 text-sm">
             Farbe aktiv, helle Oberfläche
-            <input
-              type="color"
-              aria-label="Aktivfarbe hell"
+            <ColorField
+              label="Aktivfarbe hell"
               value={pictograms.activeLight}
-              onChange={(e) => onPictograms({ ...pictograms, activeLight: e.target.value })}
+              onValue={(activeLight) => onPictograms({ ...pictograms, activeLight })}
             />
           </label>
           <label className="flex items-center justify-between gap-4 text-sm">
             Farbe aktiv, dunkle Oberfläche
-            <input
-              type="color"
-              aria-label="Aktivfarbe dunkel"
+            <ColorField
+              label="Aktivfarbe dunkel"
               value={pictograms.activeDark}
-              onChange={(e) => onPictograms({ ...pictograms, activeDark: e.target.value })}
+              onValue={(activeDark) => onPictograms({ ...pictograms, activeDark })}
             />
           </label>
           <div className="flex items-center justify-between gap-4 text-sm">
@@ -178,11 +223,10 @@ export function CanvasDisplaySettings({
               Eigene Linienfarbe (sonst wie Text)
             </label>
             {pictograms.line !== null && (
-              <input
-                type="color"
-                aria-label="Linienfarbe"
+              <ColorField
+                label="Linienfarbe"
                 value={pictograms.line}
-                onChange={(e) => onPictograms({ ...pictograms, line: e.target.value })}
+                onValue={(line) => onPictograms({ ...pictograms, line })}
               />
             )}
           </div>
