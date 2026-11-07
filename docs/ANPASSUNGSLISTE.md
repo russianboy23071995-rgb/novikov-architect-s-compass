@@ -164,3 +164,13 @@ Jetzt: Steht ein Werkzeug nach dem ersten Klick, geht eine getippte Ziffer, ein 
 Das gilt an einer Stelle (`PrecisionInput.tsx`, `startsTypedValue`) für alle Werkzeuge mit Eingabefenster: Wand, Linie, Polylinie, Geländer, Schraffur, Decke, Deckenöffnung, Raum als Polygon oder Rechteck, Dach, Geländeumriss, Verschieben, Kopieren, Drehen, Spiegeln und Griffe. Mit Strg, Alt oder Meta bleibt eine Ziffer ein Tastenkürzel. Steht der Cursor in einem anderen Eingabefeld, etwa in der Werkzeugleiste, gehört die Ziffer dorthin.
 
 Nachweis im Browser, Linienwerkzeug: erster Klick, Maus in eine Richtung, Tasten „2“, „,“, „5“ ohne Tab. Das Längenfeld zeigt „2,5“ und hat den Fokus, die Richtung folgt weiter der Maus. Enter setzt den Punkt, Enter auf der Zeichenfläche beendet die Linie. Die gespeicherte Linie misst 2,500 m. Grenze der Testumgebung: Ihr Befehl „Text tippen“ fügt Text ohne Tastendrücke ein und löst die Eingabe daher nicht aus. Echte Tasten tun es.
+
+### H1 – Höhenlinien fangen
+
+Vorher: Die Höhenlinien der Räume (Vorgabe 1,00 und 2,00 m lichte Höhe unter Dachschrägen) waren nur Zeichnung, die Maus fing nicht auf ihnen.
+
+Jetzt: Anfang, Ende und Mitte jedes Stücks einer Höhenlinie sind Fangpunkte, mit der Richtung der Linie für Verlängerungen und Schnitte mit Wänden, Linien und anderen Kanten. Sie folgen dem Schalter „Rasterengine“ in der Statusleiste und der Sichtbarkeit des Raums. Ändern sich Dach oder Decke darüber, rechnet der Fang die Linien neu (`heightLineParts` in `src/application/snapping/project-references.ts`).
+
+Grenze: Ein beliebiger Punkt mitten auf einer Linie ist kein Fangziel. Das kennt der Fang heute für keine Linie und wäre eine eigene Erweiterung.
+
+Nachweis im Browser, Raum 5 × 4 m unter einem Pultdach 45° mit Höhenlinien bei y = 0,5 und 1,5 m: Linienwerkzeug, Maus an das linke Ende der 1,00-m-Linie (0 | 0,5). Der Fang zeigt den Punkt, an dieser Stelle der Raumkante gibt es sonst keinen. In der Mitte der 2,00-m-Linie (2,5 | 1,5) zeigt er „Mittelpunkt“. Die Fangbeschriftung heißt jetzt „Raum · Höhenlinie“ statt „Raum · Punkt“.

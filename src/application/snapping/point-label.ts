@@ -71,5 +71,6 @@ export function snapPointLabel(
   const corner = /^(?:join-)?corner-([01])-/.exec(feature);
   if (corner) return `${name} · Ecke ${corner[1] === "0" ? "Anfang" : "Ende"}`;
   if (feature.startsWith("jamb-")) return `${name} · Laibung`;
+  if (feature.startsWith("height-")) return `${name} · Höhenlinie`;
   return `${name} · Punkt`;
 }

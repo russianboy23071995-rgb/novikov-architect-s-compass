@@ -1,4 +1,5 @@
-import { storeyOf } from "../../domain/storeys/access.ts";
+import { storeyAbove, storeyOf } from "../../domain/storeys/access.ts";
+import { roomHeightLineResults, storeyCeilingSources } from "../../domain/elements/room/heights.ts";
 import { connectedWallContours } from "../../domain/elements/wall/connections.ts";
 import { isOwnedProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
@@ -166,7 +167,54 @@ export function projectSnapParts(project: Project): readonly (readonly SnapPart[
     // Paper and margin frame of a Plankopf or layout: corners, edge midpoints and, through
     // the corner directions, the edges themselves (docs/LAYOUTS.md).
     sheetParts(project),
+    // Room height lines: ends and midpoints of every piece, after all earlier kinds so their
+    // order stays (docs/ANPASSUNGSLISTE.md, H1).
+    heightLineParts(project, owned),
   ];
+}
+
+const heightLineCache = new WeakMap<object, { key: readonly unknown[]; part: Part }>();
+/**
+ * The height lines of the rooms in the working storey as snap targets. They follow the roofs of
+ * the storey and the slabs above it, so a cached part is reused only while those stay the same.
+ */
+function heightLineParts(project: Project, owned: boolean): Part[] {
+  const storey = storeyOf(project);
+  const above = storeyAbove(project, storey.id);
+  const sources = storeyCeilingSources(storey, above);
+  const key = [storey.roofs, above?.slabs, storey.height];
+  return (storey.rooms ?? []).map((room) => {
+    const cached = owned ? heightLineCache.get(room) : undefined;
+    if (cached && cached.key.every((value, i) => value === key[i])) return cached.part;
+    const result = part((midpoint) =>
+      roomHeightLineResults(room, sources).flatMap((line, li) =>
+        line.segments.flatMap((segment, si) => {
+          const direction = {
+            x: segment.end.x - segment.start.x,
+            y: segment.end.y - segment.start.y,
+          };
+          const back = { x: -direction.x, y: -direction.y };
+          return [
+            {
+              point: { ...segment.start },
+              entityId: room.id,
+              feature: `height-${li}-${si}-start`,
+              directions: [direction],
+            },
+            {
+              point: { ...segment.end },
+              entityId: room.id,
+              feature: `height-${li}-${si}-end`,
+              directions: [back],
+            },
+            ...midpoint(room.id, `height-${li}-${si}-midpoint`, segment.start, segment.end),
+          ];
+        }),
+      ),
+    );
+    if (owned) heightLineCache.set(room, { key, part: result });
+    return result;
+  });
 }
 
 function columnPart(column: NonNullable<Project["storeys"][number]["columns"]>[number]): Part {

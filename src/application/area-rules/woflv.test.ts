@@ -11,6 +11,11 @@ import { deserializeProject, serializeProject } from "../../lib/bim/model.ts";
 import { areaUseOf, fixedShare, roomLivingResult, storeyAreaBlockers } from "./woflv.ts";
 import { livingSchedule, livingScheduleCsv } from "./schedule.ts";
 import { addColumn } from "../columns/actions.ts";
+import { addRoof } from "../roofs/actions.ts";
+import { updateRoof } from "../roofs/actions.ts";
+import { ROOF_DEFAULTS } from "../../domain/elements/roof/model.ts";
+import { projectSnapReferences } from "../snapping/project-references.ts";
+import { snapPointLabel } from "../snapping/point-label.ts";
 import { addStair } from "../stairs/actions.ts";
 import { workingRoomLiving } from "../rooms/actions.ts";
 import type { CeilingSource } from "../../domain/elements/room/heights.ts";
@@ -266,4 +271,33 @@ test("S1: the 0,1 m² count inside the room, a column half in the wall is measur
   near(roomLivingResult({ points: square }, [flat(2.5)], [column(3.8)]).livingArea, 12);
   // Three quarters inside: 0,12 m² come off.
   near(roomLivingResult({ points: square }, [flat(2.5)], [column(3.7)]).livingArea, 11.88);
+});
+
+// H1: the height lines of a room are snap targets and follow the roof.
+test("height lines: ends and midpoints snap, a changed roof moves them", () => {
+  let p = addRoom(createStandardProject("p", "eg", "og"), { id: "r", points: box(0, 0, 5, 4) });
+  p = addRoof(p, {
+    id: "dach",
+    points: box(-1, 0, 7, 5),
+    referenceLine: { start: { x: -1, y: 0 }, end: { x: 6, y: 0 } },
+    ...ROOF_DEFAULTS,
+    pitch: 45,
+    rise: "left",
+    referenceHeight: 0.5,
+  });
+  const heightRefs = (project: typeof p) =>
+    projectSnapReferences(project).filter(
+      (r) => r.entityId === "r" && r.feature.startsWith("height-"),
+    );
+  const refs = heightRefs(p);
+  // Lines at 1,00 and 2,00 m clear height run along y = 0,5 and y = 1,5, across the room.
+  const ys = [...new Set(refs.map((r) => Math.round(r.point.y * 1000) / 1000))].sort();
+  assert.deepEqual(ys, [0.5, 1.5]);
+  assert.equal(snapPointLabel(p, "r", refs[0]!.feature), "Raum · Höhenlinie");
+  assert.ok(refs.some((r) => r.feature.includes("-midpoint") && Math.abs(r.point.x - 2.5) < 1e-9));
+  assert.ok([0, 5].every((x) => refs.some((r) => !r.kind && Math.abs(r.point.x - x) < 1e-9)));
+  // A higher eave pushes both lines down the slope.
+  p = updateRoof(p, "dach", { referenceHeight: 0.8 });
+  const moved = [...new Set(heightRefs(p).map((r) => Math.round(r.point.y * 1000) / 1000))].sort();
+  assert.deepEqual(moved, [0.2, 1.2]);
 });
