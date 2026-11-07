@@ -30,3 +30,20 @@ Dateiformat 67. Eine Unterlage hat drei neue, optionale Werte:
 **Fenster der Unterlage**, per Doppelklick oder in der Leiste „Werkzeugeigenschaften“, wenn die Unterlage gewählt ist: Deckkraft (Schieber), Graustufen, Gesperrt, Breite in m (die Höhe folgt dem Seitenverhältnis), Ecke links oben x/y in m, Drehung in Grad um diese Ecke. Jede Änderung ist ein Rückgängig-Schritt. Zahlen gelten mit Enter oder beim Verlassen des Felds, Esc verwirft die Eingabe.
 
 Code: `imageReferenceV67Schema` in `src/domain/elements/reference/model.ts`, `updateImageReference` in `src/application/references/actions.ts`, `ReferenceFields.tsx`, `lockedReferenceAt` in `src/rendering/viewport/image-reference.ts`. Tests: `src/application/references/underlay.test.ts`.
+
+## B3 – Drehen und an Linie ausrichten
+
+- **Drehen** um einen Punkt: das vorhandene Werkzeug Drehen (docs/TASTENKUERZEL.md, B2) dreht auch Bildunterlagen; dazu kein neuer Code. Exakte Werte stehen im Fenster der Unterlage (Drehung in Grad, B2).
+- **An Linie ausrichten** im On-Demand-Menü der Unterlage: zwei Punkte auf einer Linie im Bild anklicken, etwa auf einer Außenwand des Bestandsplans. Schon beim zweiten Punkt dreht das Bild live mit, die Messlinie zeigt die Strecke. Mit dem Klick liegt die Linie waagerecht oder senkrecht, je nachdem, was näher liegt. Der erste Punkt bleibt, wo er ist. Eine Meldung nennt die Drehung vorher und nachher, etwa „Drehung 0° → −5,94°“.
+- Grenze: ausgerichtet wird auf die Achsen des Grundrisses, nicht parallel zu einer gewählten Wand.
+
+Code: `previewAlignment` und `alignmentTurn` in `src/application/references/calibration.ts`, Modus „align“ in `useReferenceCalibration.ts`. Test: `src/application/references/align.test.ts`.
+
+## B4 – Kalibrierung
+
+- Die **Messlinie** ist zu sehen: vom ersten Punkt zum Cursor, mit Länge, wie beim Messen.
+- Nach dem zweiten Punkt steht unter „Im Bild jetzt: 7,96 m“, was die Strecke heute misst, und das Längenfeld hat den Fokus: Eine getippte Ziffer geht direkt hinein, **Enter** übernimmt, Esc bricht ab.
+- Eine **Zahl ohne Einheit** gilt als Meter („8“ = 8 m), mit Einheit wie bisher („800 cm“). Der Modellbefehl „Referenz auf 5 m kalibrieren“ verlangt weiter die Einheit.
+- Danach nennt eine Meldung die Breite vorher und nachher, etwa „Breite 10,05 m → 10,10 m“.
+
+Code: `ReferenceCalibrationControls.tsx`, `parseCalibrationField` in `src/application/references/calibration.ts`.

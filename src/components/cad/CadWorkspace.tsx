@@ -3104,9 +3104,24 @@ export function CadWorkspace({
     setTool("select");
   });
   cancelImage.current = imageTool.cancel;
-  const calibration = useReferenceCalibration(project, selections, visibility, (next, id) =>
-    changeProject(next, { kind: "reference", id }),
-  );
+  const calibration = useReferenceCalibration(project, selections, visibility, (next, id, mode) => {
+    changeProject(next, { kind: "reference", id });
+    // Say what changed (docs/BILDUNTERLAGE.md, B3/B4): the width before and after, or the turn.
+    const before = storeyOf(project).references.find((r) => r.id === id);
+    const after = storeyOf(next).references.find((r) => r.id === id);
+    const asset = after && next.assets.find((a) => a.id === after.assetId);
+    if (before && after && asset) {
+      const m = (v: number) =>
+        v.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const degrees = (r: number) =>
+        ((r * 180) / Math.PI).toLocaleString("de-DE", { maximumFractionDigits: 2 });
+      showNotice(
+        mode === "align"
+          ? `Bildunterlage ausgerichtet: Drehung ${degrees(before.rotation)}° → ${degrees(after.rotation)}°`
+          : `Bildunterlage kalibriert: Breite ${m(asset.pixelWidth * before.metresPerPixel)} m → ${m(asset.pixelWidth * after.metresPerPixel)} m`,
+      );
+    }
+  });
   cancelCalibration.current = calibration.cancel;
   const recoveryBusy =
     !!pendingSession ||
@@ -4631,7 +4646,7 @@ export function CadWorkspace({
                                 measurement:
                                   measurement.adapter && measurementMode === "distance"
                                     ? measurement.value
-                                    : undefined,
+                                    : (calibration.measurement ?? undefined),
                                 angleMeasurement:
                                   measurement.adapter && measurementMode === "angle"
                                     ? measurement.angle
