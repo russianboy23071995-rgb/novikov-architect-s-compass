@@ -4,11 +4,18 @@ import { hsvToHex, hexToHsv } from "@/application/pens/color";
 export function ColorPalette({
   value,
   onChoose,
+  onPreview,
 }: {
   value: string;
   onChoose: (value: string) => void;
+  /** The colour under the pointer while it moves, for a preview. */
+  onPreview?: (value: string) => void;
 }) {
-  const [hsv, setHsv] = useState(() => hexToHsv(value));
+  const [hsv, setState] = useState(() => hexToHsv(value));
+  const setHsv = (next: typeof hsv) => {
+    setState(next);
+    onPreview?.(hsvToHex(next.h, next.s, next.v));
+  };
   const pending = useRef(hsv);
   const active = useRef(false);
   return (

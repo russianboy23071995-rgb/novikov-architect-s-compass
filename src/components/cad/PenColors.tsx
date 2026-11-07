@@ -1,4 +1,6 @@
 import { ColorPalette } from "./ColorPalette";
+import { STANDARD_PALETTE } from "@/application/pens/palette";
+import { useColorMemory } from "./color-memory";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
@@ -33,36 +35,144 @@ export function PenColors({ set, children }: { set: PenSet; children: ReactNode 
     </PickerContext.Provider>
   );
 }
+const HEX = /^#[0-9a-f]{6}$/i;
+
+/** A row of colour buttons; the current colour is ringed. */
+function Swatches({
+  colors,
+  current,
+  onChoose,
+  size = "h-6 w-6",
+  extra,
+}: {
+  colors: readonly { hex: string; name?: string }[];
+  current: string;
+  onChoose: (hex: string) => void;
+  size?: string;
+  extra?: (hex: string) => ReactNode;
+}) {
+  return (
+    <div className="flex flex-wrap gap-1">
+      {colors.map(({ hex, name }) => (
+        <span key={hex} className="group relative">
+          <button
+            type="button"
+            title={name ? `${name} · ${hex}` : hex}
+            aria-label={`${name ?? "Farbe"} ${hex}`}
+            aria-pressed={hex.toLowerCase() === current.toLowerCase()}
+            className={`${size} block rounded border shadow-sm hover:ring-2 hover:ring-primary aria-pressed:ring-2 aria-pressed:ring-primary aria-pressed:ring-offset-1`}
+            style={{ backgroundColor: hex }}
+            onClick={() => onChoose(hex)}
+          />
+          {extra?.(hex)}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * The colour window of every colour field (docs/FARBEN.md, F2): standard palette, own and recent
+ * colours, the inventory of the pen set, a free colour and HEX. A click takes the colour.
+ */
 function ColorPicker({ picker, set, close }: { picker: Picker; set: PenSet; close: () => void }) {
   const [hex, setHex] = useState(picker.value);
+  const memory = useColorMemory();
+  const valid = HEX.test(hex);
   const choose = (color: string) => {
-    picker.choose(color);
+    memory.used(color);
+    picker.choose(color.toLowerCase());
     close();
   };
+  const inventory = set.inventory
+    .map((id) => set.pens.find((p) => p.id === id))
+    .filter((pen) => pen !== undefined)
+    .map((pen) => ({ hex: pen.color, name: pen.name }));
   return (
-    <FloatingPanel open title={`Farbe · ${picker.label}`} onClose={close} width={380} height={470}>
-      <div className="space-y-4 overflow-auto p-4 text-xs">
-        <p className="font-medium">{set.name} · Inventar</p>
-        <div className="flex flex-wrap gap-2">
-          {set.inventory.map((id) => {
-            const pen = set.pens.find((p) => p.id === id)!;
-            return (
-              <button
-                type="button"
-                key={id}
-                title={pen.name}
-                aria-label={`${pen.name} ${pen.color}`}
-                className="h-10 w-10 rounded-lg border shadow-sm hover:ring-2 hover:ring-primary"
-                style={{ backgroundColor: pen.color }}
-                onClick={() => choose(pen.color)}
-              />
-            );
-          })}
+    <FloatingPanel open title={`Farbe · ${picker.label}`} onClose={close} width={420} height={600}>
+      <div className="space-y-3 overflow-auto p-4 text-xs">
+        <div className="flex items-center gap-3" aria-label="Vorschau">
+          <span className="flex items-center gap-1">
+            <span
+              className="inline-block h-8 w-10 rounded-l border"
+              style={{ backgroundColor: picker.value }}
+              title={`Bisher ${picker.value}`}
+            />
+            <span
+              className="inline-block h-8 w-10 rounded-r border"
+              style={{ backgroundColor: valid ? hex : picker.value }}
+              title={`Neu ${hex}`}
+            />
+          </span>
+          <span className="text-muted-foreground">
+            Bisher {picker.value} · Neu {valid ? hex : "–"}
+          </span>
         </div>
-        {!set.inventory.length && (
-          <p>Noch keine Inventarfarben. Unter Tools → Stifteset hinzufügen.</p>
+        <section aria-label="Standardpalette" className="space-y-1">
+          <p className="font-medium">Standardpalette</p>
+          {STANDARD_PALETTE.map((row) => (
+            <div key={row.name} className="flex items-center gap-2" aria-label={row.name}>
+              <Swatches colors={row.colors} current={picker.value} onChoose={choose} />
+              <span className="text-muted-foreground">{row.name}</span>
+            </div>
+          ))}
+        </section>
+        <section aria-label="Meine Farben" className="space-y-1">
+          <p className="flex items-center justify-between font-medium">
+            Meine Farben
+            <button
+              type="button"
+              disabled={!valid || memory.own.includes(hex.toLowerCase())}
+              className="rounded border px-2 py-0.5 font-normal hover:bg-muted disabled:opacity-40"
+              onClick={() => memory.keep(hex)}
+            >
+              Neue Farbe merken
+            </button>
+          </p>
+          {memory.own.length ? (
+            <Swatches
+              colors={memory.own.map((c) => ({ hex: c, name: "Eigene Farbe" }))}
+              current={picker.value}
+              onChoose={choose}
+              extra={(c) => (
+                <button
+                  type="button"
+                  aria-label={`Eigene Farbe ${c} entfernen`}
+                  title="Entfernen"
+                  className="absolute -right-1 -top-1 hidden h-3.5 w-3.5 rounded-full border bg-background text-[9px] leading-none group-hover:block"
+                  onClick={() => memory.forget(c)}
+                >
+                  ×
+                </button>
+              )}
+            />
+          ) : (
+            <p className="text-muted-foreground">
+              Noch keine. Farbe unten mischen oder eingeben, dann „Neue Farbe merken“.
+            </p>
+          )}
+        </section>
+        {memory.recent.length > 0 && (
+          <section aria-label="Zuletzt verwendet" className="space-y-1">
+            <p className="font-medium">Zuletzt verwendet</p>
+            <Swatches
+              colors={memory.recent.map((c) => ({ hex: c, name: "Zuletzt" }))}
+              current={picker.value}
+              onChoose={choose}
+            />
+          </section>
         )}
-        <ColorPalette value={hex} onChoose={choose} />
+        <section aria-label="Stifteset" className="space-y-1">
+          <p className="font-medium">{set.name} · Inventar</p>
+          {inventory.length ? (
+            <Swatches colors={inventory} current={picker.value} onChoose={choose} size="h-8 w-8" />
+          ) : (
+            <p className="text-muted-foreground">
+              Noch keine Inventarfarben. Unter Tools → Stifteset hinzufügen.
+            </p>
+          )}
+        </section>
+        <ColorPalette value={picker.value} onChoose={choose} onPreview={setHex} />
         <label className="block">
           HEX-Farbwert
           <input
@@ -71,19 +181,24 @@ function ColorPicker({ picker, set, close }: { picker: Picker; set: PenSet; clos
             value={hex}
             maxLength={7}
             onChange={(e) => setHex(e.target.value)}
-            onBlur={() => {
-              if (/^#[0-9a-f]{6}$/i.test(hex) && hex !== picker.value) choose(hex);
-            }}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && /^#[0-9a-f]{6}$/i.test(hex)) {
+              if (e.key === "Enter" && HEX.test(hex)) {
                 e.preventDefault();
                 choose(hex);
               }
             }}
           />
+          <button
+            type="button"
+            disabled={!valid}
+            className="ml-2 rounded border px-2 py-1 hover:bg-muted disabled:opacity-40"
+            onClick={() => choose(hex)}
+          >
+            Übernehmen
+          </button>
         </label>
         <p className="text-muted-foreground">
-          Farbe anklicken: direkt verwenden. Escape: schließen.
+          Farbe anklicken: direkt verwenden. Escape: schließen, nichts ändert sich.
         </p>
       </div>
     </FloatingPanel>
