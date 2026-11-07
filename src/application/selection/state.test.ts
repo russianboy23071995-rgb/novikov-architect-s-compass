@@ -159,7 +159,7 @@ test("frame works for thin segments and arbitrary future straight-edge shape ada
 });
 
 import { shapesAt, planElementCaption } from "../../rendering/viewport/selection-shapes.ts";
-import { hoverCycle, stepCycle, cycleTarget } from "./cycle.ts";
+import { hoverCycle, stepCycle, cycleTarget, selectedUnder } from "./cycle.ts";
 import { addSlab } from "../slabs/actions.ts";
 import { addRoof } from "../roofs/actions.ts";
 import { addRoom } from "../rooms/actions.ts";
@@ -265,4 +265,14 @@ test("Tab cycling: every element under a plan point, topmost first, captions, cy
   // Every registered element kind supplies a footprint and a caption (new kinds included).
   for (const kind of Object.keys(ELEMENT_KINDS) as ElementKind[])
     assert.equal(typeof planElementCaption(p, { kind, id: "missing" } as never), "string");
+});
+
+test("a double click keeps the selected element under the cursor, else none", () => {
+  const wall = { kind: "wall", id: "w" } as const;
+  const room = { kind: "room", id: "r" } as const;
+  const slab = { kind: "slab", id: "s" } as const;
+  assert.deepEqual(selectedUnder([room, wall], [wall]), wall);
+  assert.equal(selectedUnder([room, wall], [slab]), null);
+  assert.deepEqual(selectedUnder([room, wall, slab], [slab, room]), room);
+  assert.equal(selectedUnder([], [wall]), null);
 });

@@ -49,3 +49,15 @@ export function stepCycle(cycle: OverlapCycle, backward = false): OverlapCycle {
 export function cycleTarget(cycle: OverlapCycle): ElementTarget {
   return cycle.targets[cycle.index]!;
 }
+
+/**
+ * The selected element among those under the cursor, topmost first; null when none of them is
+ * selected. A double click keeps it (docs/ANPASSUNGSLISTE.md, T1): the choice made with Tab
+ * would otherwise be lost to the topmost element on the first click.
+ */
+export function selectedUnder(
+  under: readonly ElementTarget[],
+  selected: readonly ElementTarget[],
+): ElementTarget | null {
+  return under.find((t) => selected.some((s) => same(s, t))) ?? null;
+}

@@ -1,3 +1,4 @@
+import { selectedUnder } from "@/application/selection/cycle";
 import type { DimensionStyle } from "./DimensionStyleFields";
 import { slabOpeningOutline, slabOpeningSymbol } from "@/domain/elements/slab/opening";
 import { TextGraphic } from "./TextGraphic";
@@ -1140,6 +1141,13 @@ export function BimPlan({
     },
   });
   const listPosition = referenceSelection?.hits.length ? referenceSelection.position : null;
+  /** The selected element under the cursor, when one is (T1). */
+  const keptUnder = (event: { clientX: number; clientY: number }) => {
+    const point = rawPoint(event);
+    if (!point) return null;
+    const under = shapesAt(shapes, point, 6 / camera.pixelsPerMetre).map((s) => s.target);
+    return selectedUnder(under, selectedTargets) as NonNullable<Selection> | null;
+  };
   // The same set while the same elements are selected (also none): a new but equal selection,
   // e.g. after the layout book's tab, re-renders no run of the plan (docs/TABS.md).
   const selectedTargets = selections ?? (selection ? [selection] : []);
@@ -1399,6 +1407,13 @@ export function BimPlan({
         // Overlapping elements: the click selects the Tab pre-selection, not the topmost one.
         const chosen = overlap.preselected;
         overlap.clear();
+        // The second click of a double click keeps the selected element under the cursor, so
+        // the window that opens belongs to the element chosen with Tab (T1).
+        if (!chosen && event.detail > 1 && keptUnder(event)) {
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
         if (chosen) {
           event.preventDefault();
           event.stopPropagation();
@@ -1579,6 +1594,7 @@ export function BimPlan({
         const hit = point ? shapesAt(shapes, point, 6 / camera.pixelsPerMetre)[0] : undefined;
         const picked =
           overlap.preselected ??
+          keptUnder(event) ??
           hit?.target ??
           (kind && id ? ({ kind, id } as NonNullable<Selection>) : null);
         if (!picked) return;
