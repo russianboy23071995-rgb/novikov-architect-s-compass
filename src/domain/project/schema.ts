@@ -92,6 +92,7 @@ import { validateLineGeometry, validateWindowGeometry } from "./geometry-validat
 import {
   imageAssetSchema,
   imageReferenceSchema,
+  imageReferenceV67Schema,
   validateReferenceExtent,
 } from "../elements/reference/model.ts";
 import { connectedWallSolids, type WallSolidReuse } from "../elements/wall/connections.ts";
@@ -935,15 +936,30 @@ export const projectV65Schema = projectV45Schema.extend({
   hotkeys: hotkeysSchema.optional(),
 });
 /** Schema 66: walls through several storeys (docs/MEHRGESCHOSS.md, M1). */
-const storeySchema = storeyV65Schema.extend({
+const storeyV66Schema = storeyV65Schema.extend({
   walls: z.array(multiStoreyWallSchema),
 });
-const layoutDrawingV66Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
+const layoutDrawingV66Schema = z.object({ layoutId: id, storey: storeyV66Schema }).strict();
+export const projectV66Schema = projectV45Schema.extend({
+  schemaVersion: z.literal(66),
+  storeys: z.array(storeyV66Schema).min(1),
+  modelViews: z.array(anyModelViewSchema).optional(),
+  layoutDrawings: z.array(layoutDrawingV66Schema).max(5000).optional(),
+  masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
+  layouts: z.array(layoutV49Schema).max(5000).optional(),
+  projectInfo: projectInfoSchema.optional(),
+  hotkeys: hotkeysSchema.optional(),
+});
+/** Schema 67: opacity, grey and lock of image underlays (docs/BILDUNTERLAGE.md, B2). */
+const storeySchema = storeyV66Schema.extend({
+  references: z.array(imageReferenceV67Schema),
+});
+const layoutDrawingV67Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
 const projectSchema = projectV45Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z.array(storeySchema).min(1),
   modelViews: z.array(anyModelViewSchema).optional(),
-  layoutDrawings: z.array(layoutDrawingV66Schema).max(5000).optional(),
+  layoutDrawings: z.array(layoutDrawingV67Schema).max(5000).optional(),
   masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
   layouts: z.array(layoutV49Schema).max(5000).optional(),
   projectInfo: projectInfoSchema.optional(),

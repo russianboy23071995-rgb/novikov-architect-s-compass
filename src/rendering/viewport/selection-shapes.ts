@@ -202,20 +202,23 @@ export function planSelectionShapes(project: Project): SelectionShape[] {
     (kind, i, all) => all.indexOf(kind) === i,
   );
   return kinds.flatMap((kind) =>
-    [...storeyElements(storey, kind)].map((element) => {
-      const shape = (
-        PLAN_SHAPES[kind] as (
-          e: typeof element,
-          c: ShapeContext,
-        ) => { points: readonly Point[]; closed: boolean }
-      )(element, context);
-      const band = bandOf(element.id);
-      return {
-        target: { kind, id: element.id } as ElementTarget,
-        ...shape,
-        ...(band === undefined ? {} : { band }),
-      };
-    }),
+    [...storeyElements(storey, kind)]
+      // A locked underlay is not picked (docs/BILDUNTERLAGE.md, B2).
+      .filter((element) => !(kind === "reference" && "locked" in element && element.locked))
+      .map((element) => {
+        const shape = (
+          PLAN_SHAPES[kind] as (
+            e: typeof element,
+            c: ShapeContext,
+          ) => { points: readonly Point[]; closed: boolean }
+        )(element, context);
+        const band = bandOf(element.id);
+        return {
+          target: { kind, id: element.id } as ElementTarget,
+          ...shape,
+          ...(band === undefined ? {} : { band }),
+        };
+      }),
   );
 }
 

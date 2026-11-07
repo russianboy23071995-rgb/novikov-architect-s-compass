@@ -540,13 +540,22 @@ export function PlanSceneContent({
             key={r.id}
             transform={`translate(${r.origin.x} ${-r.origin.y}) rotate(${(-r.rotation * 180) / Math.PI})`}
           >
+            {r.grayscale && (
+              <filter id={`grey-${r.id}`}>
+                <feColorMatrix type="saturate" values="0" />
+              </filter>
+            )}
             <image
-              {...selectProps("reference", r.id)}
-              className="cursor-pointer outline-none"
+              {...(r.locked ? {} : selectProps("reference", r.id))}
+              className={r.locked ? "outline-none" : "cursor-pointer outline-none"}
               href={checkedImageUrl(a)}
               width={a.pixelWidth * r.metresPerPixel}
               height={a.pixelHeight * r.metresPerPixel}
-              pointerEvents={placement ? "none" : "all"}
+              // Underlay display (docs/BILDUNTERLAGE.md, B2); a locked one lets clicks through.
+              opacity={r.opacity ?? 1}
+              filter={r.grayscale ? `url(#grey-${r.id})` : undefined}
+              data-locked-reference={r.locked ? r.id : undefined}
+              pointerEvents={placement || r.locked ? "none" : "all"}
             />
             {selectedIds.has(r.id) && (
               <rect

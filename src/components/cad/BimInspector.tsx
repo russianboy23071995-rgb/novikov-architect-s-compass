@@ -16,6 +16,7 @@ import { PropertyForm } from "./PropertyForm";
 import { defaultDrawingWindow } from "@/application/drawing/window-placement";
 import { HatchInspector } from "./HatchControls";
 import { useState } from "react";
+import { ReferenceFields } from "./ReferenceFields";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { addWindow, updateWindow } from "@/application/windows/actions";
@@ -219,17 +220,16 @@ export function BimInspector({
     selection?.kind === "window"
       ? storeyOf(project).windows.find((item) => item.id === selection.id)
       : undefined;
-  if (selection?.kind === "reference") {
-    const r = storeyOf(project).references.find((r) => r.id === selection.id)!;
-    const a = project.assets.find((a) => a.id === r.assetId)!;
+  if (selection?.kind === "reference")
     return (
-      <p className="p-3 text-xs">
-        Bildreferenz · {(a.pixelWidth * r.metresPerPixel).toFixed(3)} ×{" "}
-        {(a.pixelHeight * r.metresPerPixel).toFixed(3)} m · Position {r.origin.x.toFixed(3)},{" "}
-        {r.origin.y.toFixed(3)} m. Kalibrieren über das On-Demand-Menü.
-      </p>
+      <div className="p-3">
+        <ReferenceFields
+          project={project}
+          referenceId={selection.id}
+          onChange={(next) => onChange(next, selection)}
+        />
+      </div>
     );
-  }
   if (!wall && !opening)
     return (
       <p className="p-3 text-xs text-muted-foreground">

@@ -1,6 +1,10 @@
 import { assertProjectRasterBudget } from "../../domain/project/raster-budget.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
-import type { ImageAsset, ImageReference } from "../../domain/elements/reference/model.ts";
+import {
+  validateReferenceExtent,
+  type ImageAsset,
+  type ImageReference,
+} from "../../domain/elements/reference/model.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { validateLike } from "../../domain/project/owned-snapshot.ts";
 import { serializeProject } from "../../lib/bim/model.ts";
@@ -29,6 +33,33 @@ export function previewCreateReference(
   assertProjectRasterBudget(next);
   serializeProject(next); // Never commit a project that its file reader cannot reopen.
   return next;
+}
+/** What the element window of an underlay changes (docs/BILDUNTERLAGE.md, B2). */
+export type ReferencePatch = Partial<
+  Pick<
+    ImageReference,
+    "opacity" | "grayscale" | "locked" | "origin" | "rotation" | "metresPerPixel"
+  >
+>;
+/** One underlay of the working storey with new display or placement values. */
+export function updateImageReference(project: Project, id: string, patch: ReferencePatch): Project {
+  const storey = storeyOf(project);
+  const current = storey.references.find((r) => r.id === id);
+  if (!current) throw new Error("Bildunterlage nicht gefunden.");
+  const next: ImageReference = { ...current, ...patch };
+  // Defaults stay absent, so files stay small and old readers see the old look.
+  if (next.opacity === 1) delete next.opacity;
+  if (!next.grayscale) delete next.grayscale;
+  if (!next.locked) delete next.locked;
+  const asset = project.assets.find((a) => a.id === next.assetId);
+  if (!asset) throw new Error("Bilddaten fehlen.");
+  validateReferenceExtent(next, asset);
+  return validateLike(project, {
+    ...replaceStorey(project, {
+      ...storey,
+      references: storey.references.map((r) => (r.id === id ? next : r)),
+    }),
+  });
 }
 export function commitCreateReference(
   history: ProjectHistory,

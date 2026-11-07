@@ -99,6 +99,7 @@ import { pointsCompatible } from "@/geometry/tolerances/model";
 import type { Hatch } from "@/domain/elements/hatch/model";
 import { assemblyLibraryOf } from "@/rendering/viewport/wall-layers";
 import { isLayerVisible } from "@/application/layers/visibility";
+import { lockedReferenceAt } from "@/rendering/viewport/image-reference";
 import type { ReferenceSelectionBinding } from "./useReferenceSelection";
 import { ReferenceSelectionPanel } from "./ReferenceSelectionPanel";
 import { referenceKey } from "@/constraints/inference/construction-reference";
@@ -1612,6 +1613,16 @@ export function BimPlan({
           // Opens in its own storey: the workspace switches there (M3).
           event.preventDefault();
           onGuestWall(guestId, true);
+          return;
+        }
+        // Nothing else here: a locked underlay opens its window (docs/BILDUNTERLAGE.md, B2).
+        const locked =
+          !picked && point
+            ? lockedReferenceAt(project, point, (id) => isLayerVisible(project, visibility, id))
+            : undefined;
+        if (locked) {
+          event.preventDefault();
+          onElementSettings({ kind: "reference", id: locked });
           return;
         }
         if (!picked) return;
