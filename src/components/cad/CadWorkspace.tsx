@@ -147,6 +147,7 @@ import { propertyFormKey } from "./property-form-key";
 import { ReferenceCalibrationControls } from "./ReferenceCalibrationControls";
 import { useReferenceCalibration } from "./useReferenceCalibration";
 import { useImageImport } from "./useImageImport";
+import { UnderlayList, UnderlayToolFields } from "./UnderlayToolFields";
 import { WindowPlacementFields } from "./WindowPlacementFields";
 import { useWindowPlacement } from "./useWindowPlacement";
 import { useDoorPlacement } from "./useDoorPlacement";
@@ -1244,6 +1245,13 @@ export function CadWorkspace({
     if (next === "window" || next === "door" || next === "measure") setDemandOpen(false);
     // The library opens its catalogue each time it is chosen (docs/OBJEKTBIBLIOTHEK.md, M1).
     setLibraryOpen(next === "library");
+    // The underlay tool asks for the image at once (docs/BILDUNTERLAGE.md, B1).
+    if (next === "underlay") {
+      setSelection(null);
+      setMode("2D");
+      if (activeDocumentId) showNotice("Zum Importieren Arbeitsmodell öffnen.");
+      else imageInput.current?.click();
+    }
     if (next === "library") setDemandOpen(false);
     if (
       next === "window" ||
@@ -1695,6 +1703,7 @@ export function CadWorkspace({
     hatch: "Schraffur",
     line: "Linie",
     drawing: "Zeichnung",
+    underlay: "Bildunterlage",
   };
   const openToolDefaults = (owner: ToolId) => {
     setLibraryOpen(false);
@@ -1782,6 +1791,26 @@ export function CadWorkspace({
         layers={project.layers}
         storeyHeight={storeyOf(project).height ?? null}
       />
+    ) : owner === "underlay" ? (
+      <div className="flex flex-wrap items-end gap-3">
+        <UnderlayToolFields
+          value={imageTool.defaults}
+          onChange={imageTool.setDefaults}
+          pixels={imageTool.pixels}
+          fileDpi={imageTool.fileDpi}
+          onPick={place === "bar" ? () => imageInput.current?.click() : undefined}
+        />
+        {place === "bar" && (
+          <span role="status" className="text-xs text-muted-foreground">
+            {imageTool.busy
+              ? "Bild wird geprüft…"
+              : imageTool.error ||
+                (imageTool.active
+                  ? "Obere linke Ecke anklicken · Esc: Abbruch"
+                  : "Bild wählen (PNG oder JPEG) · Esc: Ende")}
+          </span>
+        )}
+      </div>
     ) : owner === "terrain" ? (
       <div className="flex flex-wrap items-end gap-3">
         <TerrainFields
@@ -3069,9 +3098,11 @@ export function CadWorkspace({
     toolDefaults.door,
     toolDefaults.setDoor,
   );
-  const imageTool = useImageImport(project, visibility, (next, id) =>
-    changeProject(next, { kind: "reference", id }),
-  );
+  const imageTool = useImageImport(project, visibility, (next, id) => {
+    changeProject(next, { kind: "reference", id });
+    // Placed: the tool hands over to selecting, with the new underlay chosen (B1).
+    setTool("select");
+  });
   cancelImage.current = imageTool.cancel;
   const calibration = useReferenceCalibration(project, selections, visibility, (next, id) =>
     changeProject(next, { kind: "reference", id }),
@@ -3540,6 +3571,22 @@ export function CadWorkspace({
                     label: name,
                     content: toolFields(settingsWindow.tool, "window"),
                   },
+                  // The underlays of the storey, a locked one included (B1).
+                  ...(settingsWindow.tool === "underlay"
+                    ? [
+                        {
+                          id: "underlays",
+                          label: "Unterlagen im Geschoss",
+                          content: (
+                            <UnderlayList
+                              project={project}
+                              onChange={(next) => changeProject(next, null)}
+                              onOpen={(id) => openElementSettings({ kind: "reference", id })}
+                            />
+                          ),
+                        },
+                      ]
+                    : []),
                   // Element set into new openings (docs/FENSTER_TUEREN.md, FT1).
                   ...(settingsWindow.tool === "window"
                     ? [
@@ -4113,16 +4160,7 @@ export function CadWorkspace({
           filterOpen={filterOpen}
           filterBlocked={filterPlace.kind === "blocked" ? filterPlace.reason : undefined}
           measuring={tool === "measure"}
-          onImportImage={() => {
-            if (activeDocumentId) {
-              showNotice("Zum Importieren Arbeitsmodell öffnen.");
-              return;
-            }
-            selectTool("select");
-            setSelection(null);
-            setMode("2D");
-            imageInput.current?.click();
-          }}
+          onImportImage={() => selectTool("underlay")}
           onCanvasDisplay={() => setDisplaySettingsOpen(true)}
           onHotkeys={() => setHotkeysOpen(true)}
           onLayers={() => {
@@ -4733,7 +4771,9 @@ export function CadWorkspace({
                           tool === "text" ||
                           tool === "drawing" ||
                           tool === "window" ||
-                          tool === "door"
+                          tool === "door" ||
+                          // The corner of a new underlay snaps like any point (B1).
+                          tool === "underlay"
                         }
                         hoverDwellMs={hoverDwellMs}
                         start={
@@ -5287,26 +5327,8 @@ export function CadWorkspace({
                     />
                   )}
                 </div>
-                {imageTool.active || imageTool.busy || imageTool.error ? (
-                  <div className="flex items-center gap-3 text-xs">
-                    <label>
-                      Bildbreite (m)
-                      <input
-                        aria-label="Bildbreite (m)"
-                        className="ml-2 w-24 rounded border bg-background p-1"
-                        value={imageTool.width}
-                        onChange={(e) => imageTool.setWidth(e.target.value)}
-                      />
-                    </label>
-                    <span>
-                      {imageTool.busy
-                        ? "Bild wird geprüft…"
-                        : imageTool.error || "Obere linke Ecke anklicken · Esc: Abbruch"}
-                    </span>
-                    <Button size="sm" onClick={imageTool.cancel}>
-                      Bildimport abbrechen
-                    </Button>
-                  </div>
+                {tool === "underlay" || imageTool.active || imageTool.busy || imageTool.error ? (
+                  toolFields("underlay")
                 ) : tool === "measure" ? (
                   <div className="flex items-center gap-3 text-xs">
                     <label>

@@ -29,7 +29,7 @@ export const DEFAULT_TOOL_LAYOUT: ToolLayout = {
     "library",
     "terrain",
   ],
-  "2d": ["line", "hatch", "text", "drawing"],
+  "2d": ["line", "hatch", "text", "drawing", "underlay"],
   doc: ["dimension", "section", "elevation"],
 };
 
