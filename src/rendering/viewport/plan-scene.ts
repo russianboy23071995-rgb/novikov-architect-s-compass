@@ -14,6 +14,8 @@ import { TERRAIN_DEFAULTS, terrainContours } from "../../domain/elements/terrain
 import type { HatchPatternDefinition } from "../../domain/elements/hatch/pattern.ts";
 import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
 import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
+import { guestWalls } from "../../domain/elements/wall/guests.ts";
+import type { Project } from "../../domain/project/schema.ts";
 import { visiblePlanGeometry } from "./layer-display.ts";
 import { wallPlanOutlines } from "./wall-plan-outline.ts";
 import {
@@ -62,8 +64,11 @@ export function derivePlanScene(
       return bands ? [[w.id, bands] as const] : [];
     }),
   );
+  // Walls of other storeys through the cut plane (docs/MEHRGESCHOSS.md, M2).
+  const guests = "storeys" in geometry ? guestWalls(geometry as Project, allows) : [];
   return {
     plan,
+    guests: new Map(guests.map((g) => [g.wall.id, g])),
     doors,
     overlapping,
     hatchPatterns: new Map(patterns.map((p) => [p.id, p])),
@@ -196,6 +201,7 @@ export type PlanRun = {
     | "roof"
     | "hatch"
     | "wall"
+    | "guestWall"
     | "column"
     | "stair"
     | "railing"
@@ -254,6 +260,8 @@ export function planSceneRuns(scene: PlanScene, replacedIds: readonly string[]):
     ["hatch", scene.plan.hatches],
     // Furniture lies beneath the walls that bound it (docs/OBJEKTBIBLIOTHEK.md).
     ["object", scene.plan.objects],
+    // Walls of other storeys lie beneath the own ones (docs/MEHRGESCHOSS.md, M2).
+    ["guestWall", [...scene.guests.values()].map((g) => g.wall)],
     ["wall", scene.plan.walls],
     ["column", scene.plan.columns],
     ["stair", scene.plan.stairs],

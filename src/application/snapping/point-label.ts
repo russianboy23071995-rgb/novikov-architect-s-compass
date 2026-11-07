@@ -43,7 +43,14 @@ export function snapPointLabel(
   const match = ELEMENT_NAMES.find(([key]) =>
     (storey[key] ?? []).some((item: { id: string }) => item.id === entityId),
   );
-  if (!match) return null;
+  if (!match) {
+    // A wall of another storey through the cut plane (docs/MEHRGESCHOSS.md, M2).
+    const home = project.storeys.find((s) => s.walls.some((w) => w.id === entityId));
+    if (!home) return null;
+    const corner = /^vertex-(\d+)$/.exec(feature);
+    const where = corner ? `Ecke ${Number(corner[1]) + 1}` : "Kantenmitte";
+    return `Wand aus ${home.name} · ${where}`;
+  }
   const [key, name] = match;
   const vertex = /^vertex-(\d+)$/.exec(feature);
   if (vertex) {
