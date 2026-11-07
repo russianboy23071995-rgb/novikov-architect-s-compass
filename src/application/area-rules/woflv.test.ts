@@ -8,7 +8,8 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import { compactLivingArea } from "../../domain/elements/room/model.ts";
 import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { deserializeProject, serializeProject } from "../../lib/bim/model.ts";
-import { areaUseOf, fixedShare } from "./woflv.ts";
+import { areaUseOf, fixedShare, roomLivingResult } from "./woflv.ts";
+import type { CeilingSource } from "../../domain/elements/room/heights.ts";
 
 // docs/WOHNFLAECHE.md, W1.
 const square = [
@@ -69,4 +70,65 @@ test("file 64: loads without data, living area data is refused", () => {
   assert.throws(() => deserializeProject(JSON.stringify(old)));
   for (const storey of old.storeys) for (const r of storey.rooms ?? []) delete r.livingArea;
   assert.equal(deserializeProject(JSON.stringify(old)).schemaVersion, PROJECT_SCHEMA_VERSION);
+});
+
+// W2, by hand: a room 4 × 3 m under a roof rising 1 m per metre from x = 0.
+const slope: CeilingSource = {
+  id: "dach",
+  points: [
+    { x: -1, y: -1 },
+    { x: 5, y: -1 },
+    { x: 5, y: 4 },
+    { x: -1, y: 4 },
+  ],
+  at: (p) => p.x,
+  levelLine: (z) => ({ point: { x: z, y: 0 }, direction: { x: 0, y: 1 } }),
+};
+const flat = (height: number): CeilingSource => ({
+  ...slope,
+  at: () => height,
+  levelLine: undefined!,
+});
+const near = (a: number, b: number) => assert.ok(Math.abs(a - b) < 1e-9, `${a} ≠ ${b}`);
+
+test("height rule: full from 2 m, half from 1 m, nothing below", () => {
+  const result = roomLivingResult({ points: square }, [slope]);
+  near(result.grossArea, 12);
+  // x < 1: 3 m² at 0, 1 ≤ x < 2: 3 m² at a half, x ≥ 2: 6 m² in full.
+  near(result.livingArea, 7.5);
+  assert.deepEqual(
+    result.steps.map((s) => [s.rule, s.share]),
+    [
+      ["§ 4 Nr. 1", 1],
+      ["§ 4 Nr. 2", 0.5],
+      ["§ 4", 0],
+    ],
+  );
+  near(
+    result.steps.reduce((sum, s) => sum + s.area, 0),
+    12,
+  );
+});
+
+test("the floor build-up lowers the clear height", () => {
+  // Heights shift by 0,5 m: 4,5 m² at 0, 3 m² at a half, 4,5 m² in full.
+  near(roomLivingResult({ points: square, floorBuildUp: 0.5 }, [slope]).livingArea, 6);
+});
+
+test("exactly 2 m counts in full, exactly 1 m at a half", () => {
+  near(roomLivingResult({ points: square }, [flat(2)]).livingArea, 12);
+  near(roomLivingResult({ points: square }, [flat(1)]).livingArea, 6);
+  near(roomLivingResult({ points: square }, [flat(0.99)]).livingArea, 0);
+});
+
+test("fixed shares ignore the height; a part without ceiling counts in full and says so", () => {
+  const under = (livingArea: Parameters<typeof fixedShare>[0]) =>
+    roomLivingResult({ points: square, ...(livingArea ? { livingArea } : {}) }, [flat(1.5)]);
+  near(under({ use: "unheated" }).livingArea, 6);
+  near(under({ use: "outdoor" }).livingArea, 3);
+  near(under({ use: "outdoor", outdoorShare: 0.5 }).livingArea, 6);
+  near(under({ use: "none" }).livingArea, 0);
+  const open = roomLivingResult({ points: square }, []);
+  near(open.livingArea, 12);
+  assert.equal(open.notes.length, 1);
 });
