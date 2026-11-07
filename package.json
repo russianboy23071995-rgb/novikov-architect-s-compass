@@ -166,6 +166,7 @@
     "src/rendering/viewport/hatch-paper-scale.test.ts",
     "src/application/views/scale-input.test.ts",
     "src/application/pens/library.test.ts",
+    "src/application/pens/palette.test.ts",
     "src/application/lines/appearance.test.ts",
     "src/application/lines/style-library.test.ts",
     "src/application/hatches/pattern-draft.test.ts",

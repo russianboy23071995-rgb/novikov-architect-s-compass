@@ -39,3 +39,19 @@ export function hexToHsv(hex: string) {
     d === 0 ? 0 : max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
   return { h: (h * 60 + 360) % 360, s: max === 0 ? 0 : d / max, v: max };
 }
+
+/** HSL (hue in degrees, saturation and lightness 0–1) to #rrggbb. */
+export function hslToHex(h: number, s: number, l: number): string {
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const v = l + c / 2;
+  return hsvToHex(h, v === 0 ? 0 : (2 * (v - l)) / v, v);
+}
+
+/** Relative luminance after WCAG, 0 (black) to 1 (white). */
+export function luminance(hex: string): number {
+  const channel = (i: number) => {
+    const c = parseInt(hex.slice(i, i + 2), 16) / 255;
+    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * channel(1) + 0.7152 * channel(3) + 0.0722 * channel(5);
+}
