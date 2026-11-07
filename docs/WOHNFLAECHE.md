@@ -28,3 +28,15 @@ Festlegung: Bei „Unbeheizt“ und „Balkon“ gilt der feste Anteil ohne Höh
 - **Code:** `src/domain/elements/room/model.ts`, `src/application/area-rules/woflv.ts`.
 
 Nachweis im Browser, Raum „Wohnen“ 20 m²: Raumart steht auf Wohnraum; auf Balkon gestellt erscheint „Anrechnung (%)“ mit 25; 40 wird übernommen; 60 wird abgewiesen, das Feld springt zurück und die Meldung nennt 0 bis 50 %; bei „Keine Wohnfläche“ verschwindet das Feld; zurück auf Wohnraum ist der Raum wieder ohne Daten. Keine Konsolenfehler.
+
+## W2 – Höhenregel
+
+`roomLivingResult` in `src/application/area-rules/woflv.ts` rechnet je Raum aus dem vorhandenen Höhenfeld, vom fertigen Fußboden (mit Fußbodenaufbau) bis zur Unterseite von Decke und Dach. Jede Teilfläche ist eine Zeile des Rechenwegs mit Fläche, Anteil und Paragraf. Intern wird exakt gerechnet, gerundet wird erst in der Anzeige.
+
+- Genau 2,00 m zählt voll, genau 1,00 m zur Hälfte, darunter nichts.
+- Ein Teil ohne Decke oder Dach darüber hat keine Höhe. Er zählt voll, der Rechenweg weist darauf hin.
+- Die Raumeigenschaften zeigen neben der Grundfläche die Wohnfläche.
+
+Rechenbeispiel im Test, von Hand: Raum 4 × 3 m unter einem Dach, das je Meter um 1 m steigt. 3 m² unter 1 m zählen nicht, 3 m² zwischen 1 und 2 m zur Hälfte, 6 m² voll, zusammen 7,50 m². Mit 0,50 m Fußbodenaufbau sind es 6,00 m².
+
+Nachweis im Browser, Pultdach 45° mit Unterseite 0,50 m an der Traufe, das den Raum nicht ganz deckt: Raum „Wohnen“ 5 × 4 m zeigt Grundfläche 20,00 m², Wohnfläche 15,00 m² (2,50 m² unter 1 m zählen nicht, 5,00 m² zur Hälfte, 10,00 m² voll, 2,50 m² ohne Dach voll). Balkon 8,00 m² zu 25 % zeigt 2,00 m² und bleibt von der Dachschräge unberührt.

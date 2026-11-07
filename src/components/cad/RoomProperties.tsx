@@ -14,6 +14,7 @@ import { AREA_USE_LABELS, areaUseOf } from "@/application/area-rules/woflv";
 import {
   updateRoom,
   workingRoomClearHeights,
+  workingRoomLiving,
   workingRoomHeightLines,
 } from "@/application/rooms/actions";
 import { heightLineText } from "@/application/rooms/height-lines";
@@ -101,7 +102,7 @@ export function RoomProperties({
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         })}{" "}
-        m²
+        m² · Wohnfläche {squareMetres(workingRoomLiving(project, room).livingArea)} m²
       </p>
       <PropertyForm
         key={`${room.id}:${room.name}:${room.number}:${room.floorBuildUp}`}
