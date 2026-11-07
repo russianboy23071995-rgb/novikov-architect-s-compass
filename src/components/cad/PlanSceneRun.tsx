@@ -472,6 +472,7 @@ const PlanLineChunk = memo(function PlanLineChunk({ lines, ...rest }: LineChunkP
 /** Pen of each kind on paper (docs/PDF_EXPORT.md, P2); lines bring their own width. */
 const PLAN_PENS: Partial<Record<PlanRun["kind"], PdfPen>> = {
   wall: "cut",
+  guestWall: "cut",
   column: "cut",
   slab: "view",
   slabOpening: "view",
@@ -510,6 +511,7 @@ export function PlanSceneContent({
     roofs: kind === "roof" ? ids.map((id) => scene.roofs.get(id)!) : [],
     hatches: kind === "hatch" ? ids.map((id) => scene.hatches.get(id)!) : [],
     walls: kind === "wall" ? ids.map((id) => scene.walls.get(id)!) : [],
+    guests: kind === "guestWall" ? ids.map((id) => scene.guests.get(id)!) : [],
     columns: kind === "column" ? ids.map((id) => scene.columns.get(id)!) : [],
     stairs: kind === "stair" ? ids.map((id) => scene.stairs.get(id)!) : [],
     railings: kind === "railing" ? ids.map((id) => scene.railings.get(id)!) : [],
@@ -885,6 +887,23 @@ export function PlanSceneContent({
             />
           )}
         </g>
+      ))}
+      {plan.guests.map((guest) => (
+        // A wall of another storey through this cut plane (docs/MEHRGESCHOSS.md, M2): cut like an
+        // own wall, paler, and edited in its own storey.
+        <polygon
+          key={guest.wall.id}
+          data-guest-wall={guest.wall.id}
+          aria-label={`Wand aus ${guest.storeyName}`}
+          points={guest.ring.map((p) => `${p.x},${-p.y}`).join(" ")}
+          {...wallCutPaint(cutFill, showRenovation, guest.wall.renovation)}
+          opacity={0.45}
+          stroke="var(--primary)"
+          strokeWidth={wallOutlineWidth / pixelsPerMetre}
+          pointerEvents="none"
+        >
+          <title>{`Wand aus ${guest.storeyName}`}</title>
+        </polygon>
       ))}
       {plan.walls.map((wall) => (
         <PlanWall

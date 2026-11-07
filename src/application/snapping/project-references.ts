@@ -1,4 +1,5 @@
 import { storeyAbove, storeyOf } from "../../domain/storeys/access.ts";
+import { guestWalls } from "../../domain/elements/wall/guests.ts";
 import { roomHeightLineResults, storeyCeilingSources } from "../../domain/elements/room/heights.ts";
 import { connectedWallContours } from "../../domain/elements/wall/connections.ts";
 import { isOwnedProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
@@ -170,6 +171,9 @@ export function projectSnapParts(project: Project): readonly (readonly SnapPart[
     // Room height lines: ends and midpoints of every piece, after all earlier kinds so their
     // order stays (docs/ANPASSUNGSLISTE.md, H1).
     heightLineParts(project, owned),
+    // Walls of other storeys through the cut plane (docs/MEHRGESCHOSS.md, M2), after all
+    // earlier kinds so their order stays.
+    guestWalls(project).map((g) => hatchPart({ id: g.wall.id, points: g.ring })),
   ];
 }
 

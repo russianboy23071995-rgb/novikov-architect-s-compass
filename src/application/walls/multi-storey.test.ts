@@ -8,6 +8,11 @@ import { addStorey } from "../storeys/actions.ts";
 import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { deserializeProject, serializeProject } from "../../lib/bim/model.ts";
 import type { Project } from "../../domain/project/schema.ts";
+import { guestWalls } from "../../domain/elements/wall/guests.ts";
+import { derivePlanScene, planSceneRuns } from "../../rendering/viewport/plan-scene.ts";
+import { projectSnapReferences } from "../snapping/project-references.ts";
+import { selectWorkingStorey } from "../storeys/working-storey.ts";
+import { snapPointLabel } from "../snapping/point-label.ts";
 
 // docs/MEHRGESCHOSS.md, M1.
 const wallOf = (p: Project) => p.storeys.flatMap((s) => s.walls).find((w) => w.id === "w")!;
@@ -75,4 +80,52 @@ test("file 65: loads unchanged, a wall over several storeys is refused", () => {
   for (const s of old.storeys)
     for (const w of s.walls) if (w.topBinding) delete w.topBinding.storeys;
   assert.equal(deserializeProject(JSON.stringify(old)).schemaVersion, PROJECT_SCHEMA_VERSION);
+});
+
+// M2: guests in the plan of the storeys a wall passes.
+const working = (p: Project, index: number) => selectWorkingStorey(p, p, p.storeys[index]!.id);
+const guestIds = (p: Project) => guestWalls(p).map((g) => g.wall.id);
+
+test("guests: a wall over two storeys shows in the first upper storey, not above or at home", () => {
+  const p = bind(threeStoreys(), 2);
+  assert.deepEqual(guestIds(working(p, 0)), []);
+  assert.deepEqual(guestIds(working(p, 1)), ["w"]);
+  // The cut of the third storey lies 1 m above its floor at 7 m; the wall ends at 6 m.
+  assert.deepEqual(guestIds(working(p, 2)), []);
+  const og = working(p, 1);
+  const scene = derivePlanScene(og, () => true);
+  const runs = planSceneRuns(scene, []);
+  assert.deepEqual(
+    runs.filter((r) => r.kind === "guestWall").flatMap((r) => r.ids),
+    ["w"],
+  );
+  assert.equal(scene.guests.get("w")!.storeyName, p.storeys[0]!.name);
+  // Hidden layers hide guests too.
+  assert.deepEqual(
+    guestWalls(og, (id) => id !== "w").map((g) => g.wall.id),
+    [],
+  );
+});
+
+test("guests: a fixed tall wall counts too; corners of a guest are snap targets", () => {
+  const p = threeStoreys();
+  const tall = setWallHeightRule(p, p, {
+    projectId: p.id,
+    storeyId: p.storeys[0]!.id,
+    wallIds: ["w"],
+    rule: { kind: "fixed", height: p.storeys[0]!.height! + 1.5 },
+  });
+  const og = working(tall, 1);
+  assert.deepEqual(guestIds(og), ["w"]);
+  const exact = setWallHeightRule(p, p, {
+    projectId: p.id,
+    storeyId: p.storeys[0]!.id,
+    wallIds: ["w"],
+    rule: { kind: "fixed", height: p.storeys[0]!.height! + 1 },
+  });
+  // Ending exactly at the cut does not pass it.
+  assert.deepEqual(guestIds(working(exact, 1)), []);
+  const refs = projectSnapReferences(og).filter((r) => r.entityId === "w");
+  assert.ok(refs.some((r) => r.feature === "vertex-0"));
+  assert.equal(snapPointLabel(og, "w", "vertex-0"), `Wand aus ${p.storeys[0]!.name} · Ecke 1`);
 });
