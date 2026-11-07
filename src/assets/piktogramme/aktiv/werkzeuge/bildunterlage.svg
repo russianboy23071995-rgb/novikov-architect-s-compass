@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+<title>Bildunterlage Werkzeug (aktiv)</title>
+<mask id="k-werkzeuge-bildunterlage" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect width="24" height="24" fill="#fff"/><path d="M6.5 16.5L9.75 12.25L12.25 15.25L14 13.5L16.5 16.5M13.25 9.75a1.25 1.25 0 1 0 2.5 0a1.25 1.25 0 1 0 -2.5 0" stroke="#000"/></mask>
+<g mask="url(#k-werkzeuge-bildunterlage)"><path class="accent-voll" d="M5.5 6.5L17.5 6.5Q18.5 6.5 18.5 7.5L18.5 17.5Q18.5 18.5 17.5 18.5L5.5 18.5Q4.5 18.5 4.5 17.5L4.5 7.5Q4.5 6.5 5.5 6.5Z" fill="currentColor" stroke="none"/></g>
+<path d="M5.5 6.5L17.5 6.5Q18.5 6.5 18.5 7.5L18.5 17.5Q18.5 18.5 17.5 18.5L5.5 18.5Q4.5 18.5 4.5 17.5L4.5 7.5Q4.5 6.5 5.5 6.5Z"/>
+<path d="M7 4.5L19.5 4.5Q20.5 4.5 20.5 5.5L20.5 16"/>
+</svg>

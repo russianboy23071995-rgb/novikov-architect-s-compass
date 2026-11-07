@@ -21,6 +21,8 @@ export type ToolId =
   | "drawing"
   // Library of furniture, kitchen and sanitary objects (docs/OBJEKTBIBLIOTHEK.md, M1).
   | "library"
+  // Image underlay: a scan or photo to trace (docs/BILDUNTERLAGE.md, B1).
+  | "underlay"
   // Planned tools, shown greyed in the rail until they exist (docs/WERKZEUGLEISTE.md, WL3):
   // Dachflächenfenster (L41), Geländer (L42), Gelände (L43).
   | "roofWindow"

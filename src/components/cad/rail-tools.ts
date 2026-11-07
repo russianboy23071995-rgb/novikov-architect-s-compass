@@ -8,6 +8,7 @@ import {
   RulerDimensionLine,
   Type,
   Frame,
+  Image as ImageIcon,
 } from "lucide-react";
 import type { CadTool, ToolId } from "./cad-types";
 import { RailingIcon, RoofWindowIcon, TerrainIcon } from "./Pictogram";
@@ -76,6 +77,14 @@ export const RAIL_TOOLS: Partial<Record<ToolId, CadTool>> = {
     shortcut: "",
     icon: Frame,
     pictogram: "technische-zeichnung",
+  },
+  // A scan or photo under the plan, to trace (docs/BILDUNTERLAGE.md, B1).
+  underlay: {
+    id: "underlay",
+    label: "Bildunterlage",
+    shortcut: "",
+    icon: ImageIcon,
+    pictogram: "bildunterlage",
   },
   section: {
     id: "section",
