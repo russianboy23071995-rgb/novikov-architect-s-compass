@@ -56,7 +56,7 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 
 | ID  | Aufgabe                                                        | Prio | Status                                                                                                                             | Bezug          |
 | --- | -------------------------------------------------------------- | ---- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| L15 | Wohnflächenberechnung nach WoFlV mit nachvollziehbarem Bericht |      | offen                                                                                                                              | §6 Abschnitt 4 |
+| L15 | Wohnflächenberechnung nach WoFlV mit nachvollziehbarem Bericht |      | erledigt: W1–W5 (PR664–668), docs/WOHNFLAECHE.md; unabhängige Fachprüfung offen | §6 Abschnitt 4 |
 | L16 | Mengen- und Bauteillisten                                      |      | erledigt: ML1–ML3 (PR572–573), docs/MENGEN.md; Wandmengen über die Achse, Abrechnungsregeln (VOB/DIN 277) und Mengen im IFC später | §6 Abschnitt 4 |
 
 ## AI (Hauptziel)

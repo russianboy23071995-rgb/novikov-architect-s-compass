@@ -146,6 +146,7 @@
     "src/application/views/documents.test.ts",
     "src/application/views/layouts.test.ts",
     "src/application/area-rules/woflv.test.ts",
+    "src/interop/reports/woflv-report.test.ts",
     "src/application/views/title-blocks.test.ts",
     "src/application/views/title-block-space.test.ts",
     "src/application/views/drawing-info.test.ts",

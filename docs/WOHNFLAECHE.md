@@ -67,3 +67,17 @@ Menü Organisation → „Wohnflächenliste“ (neben der Raumliste). Das Fenste
 Liste, CSV und Bericht lesen dasselbe Ergebnis `livingSchedule` (`src/application/area-rules/schedule.ts`), es gibt keine zweite Berechnung. Summen entstehen aus den exakten Werten. Deshalb kann die Summe gerundeter Zeilen um 0,01 m² von der angezeigten Summe abweichen.
 
 Nachweis im Browser, Projekt wie bei W3: Menü Organisation zeigt „Wohnflächenliste“. Liste: R-001 Wohnen 20,00 → 14,75 m² mit fünf Rechenschritten und Hinweis auf die Teilfläche ohne Dach, R-002 Balkon 8,00 → 2,00 m², Summe 28,00 → 16,75 m².
+
+## W5 – Bericht als PDF
+
+„Bericht als PDF“ in der Wohnflächenliste schreibt `Wohnflaechenberechnung.pdf`: A4 hochkant, Kopf mit den Projektinformationen, Datum und Regelstand, Hinweis, Zusammenfassung je Geschoss, dann jeder Raum mit Rechenweg. Ein Raum bleibt auf einer Seite, wenn er passt; jede Seite trägt ihre Nummer.
+
+`src/interop/reports/woflv-report.ts` bekommt das fertige Ergebnis aus `livingSchedule` und rechnet nichts selbst. Der Bericht nutzt den PDF-Schreiber aus L14 und die eingebaute Helvetica. Zeichen außerhalb von WinAnsi werden zu „?“.
+
+Nachweis im Browser: Knopf erzeugt `application/pdf`, im PDF-Betrachter des Browsers geöffnet und angesehen: A4, Kopf mit Projekt und Verfasser, Zusammenfassung 28,00 → 16,75 m², beide Räume mit Rechenweg, Seitenzahl. Zahlen stehen rechtsbündig.
+
+Gefunden und behoben: Die Linie über „Wohnfläche gesamt“ lief durch den Text; die Fußzeile endete ohne Projektnamen auf einem Trennpunkt. Beides fiel erst beim Ansehen auf, nicht in den Tests.
+
+## Stand
+
+L15 ist umgesetzt. Offen bleibt die unabhängige Fachprüfung, die das Anforderungsregister verlangt (N35). Sie kann das Programm nicht ersetzen.
