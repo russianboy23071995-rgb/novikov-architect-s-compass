@@ -14,6 +14,10 @@ import { projectSnapReferences } from "../snapping/project-references.ts";
 import { selectWorkingStorey } from "../storeys/working-storey.ts";
 import { snapPointLabel } from "../snapping/point-label.ts";
 import { addWindow } from "../windows/actions.ts";
+import { addSection } from "../sections/actions.ts";
+import { sectionDrawing } from "../../rendering/viewport/section-drawing.ts";
+import { exportIfc } from "../../lib/bim/ifc.ts";
+import { buildBuildingSolid } from "../../rendering/viewport/building-solid.ts";
 
 // docs/MEHRGESCHOSS.md, M1.
 const wallOf = (p: Project) => p.storeys.flatMap((s) => s.walls).find((w) => w.id === "w")!;
@@ -166,4 +170,52 @@ test("windows: one above the home storey shows as a guest opening upstairs, not 
   const [a, b, , d] = guest.openings[0]!.ring;
   assert.ok(Math.abs(Math.hypot(b!.x - a!.x, b!.y - a!.y) - 1.2) < 1e-9);
   assert.ok(Math.abs(Math.hypot(d!.x - a!.x, d!.y - a!.y) - 0.3) < 1e-9);
+});
+
+// M5: exactly stacked walls meet in one plane, so 3D shows no step between them.
+test("stacked walls: the side faces of both storeys lie in the same planes", () => {
+  let p = createStandardProject("p", "eg", "og");
+  const line = { start: { x: 0, y: 0 }, end: { x: 5, y: 0 }, thickness: 0.3 };
+  p = addWall(p, { id: "unten", ...line, height: p.storeys[0]!.height! });
+  p = selectWorkingStorey(p, p, p.storeys[1]!.id);
+  p = addWall(p, { id: "oben", ...line, height: p.storeys[1]!.height! });
+  const faces = buildBuildingSolid(p).faces;
+  const sides = (id: string) =>
+    faces
+      .filter((f) => f.wallId === id && Math.abs(f.normal[2]) < 1e-9 && Math.abs(f.normal[1]) > 0.5)
+      .map((f) => Math.round(f.vertices[0]![1] * 1e6) / 1e6)
+      .sort();
+  assert.deepEqual(sides("unten"), sides("oben"));
+  const top = Math.max(
+    ...faces.filter((f) => f.wallId === "unten").flatMap((f) => f.vertices.map((v) => v[2])),
+  );
+  const bottom = Math.min(
+    ...faces.filter((f) => f.wallId === "oben").flatMap((f) => f.vertices.map((v) => v[2])),
+  );
+  assert.ok(Math.abs(top - bottom) < 1e-9, `${top} ${bottom}`);
+});
+
+// M6: section and IFC carry the wall through all its storeys.
+test("section and IFC: one cut over the whole height, one IFC wall in its own storey", async () => {
+  let p = bind(threeStoreys(), 2);
+  const height = wallOf(p).height;
+  p = addSection(p, { id: "s", start: { x: 3, y: -2 }, end: { x: 3, y: 2 }, look: "left" });
+  const cut = sectionDrawing(
+    p,
+    p.sections!.find((s) => s.id === "s")!,
+  ).cuts.find((c) => c.id === "w")!;
+  const ys = cut.loops.flat().map((q) => q.y);
+  assert.equal(cut.loops.length, 1);
+  assert.ok(Math.abs(Math.min(...ys)) < 1e-6 && Math.abs(Math.max(...ys) - height) < 1e-6);
+  const ifc = await exportIfc(p, new Date("2026-11-07T12:00:00Z"));
+  const walls = ifc.split("\n").filter((l) => l.includes("=IFCWALL("));
+  assert.equal(walls.length, 1);
+  assert.ok(ifc.includes(`IFCEXTRUDEDAREASOLID(`) && ifc.includes(`,${height}.);`));
+  const ground = /#(\d+)=IFCBUILDINGSTOREY\([^,]*,\$,'Erdgeschoss'/.exec(ifc)![1];
+  const wallRef = /#(\d+)=IFCWALL\(/.exec(ifc)![1];
+  assert.ok(
+    new RegExp(`IFCRELCONTAINEDINSPATIALSTRUCTURE\\([^;]*#${wallRef}[,)][^;]*#${ground}\\);`).test(
+      ifc,
+    ),
+  );
 });
