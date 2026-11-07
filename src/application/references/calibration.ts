@@ -50,6 +50,73 @@ export function previewCalibration(
     }),
   });
 }
+/**
+ * A length typed into the calibration field (docs/BILDUNTERLAGE.md, B4): a bare number is metres,
+ * as in every length field; otherwise the unit is required as in the model command.
+ */
+export function parseCalibrationField(text: string): number {
+  return parseCalibrationLength(
+    /^\s*(\d+(?:[.,]\d+)?|[.,]\d+)\s*$/.test(text) ? `${text} m` : text,
+  );
+}
+
+/** Turn that brings the line first→second onto the nearest axis, in radians (B3). */
+export function alignmentTurn(first: Point, second: Point): number {
+  const angle = Math.atan2(second.y - first.y, second.x - first.x);
+  return Math.round(angle / (Math.PI / 2)) * (Math.PI / 2) - angle;
+}
+
+/**
+ * An Linie ausrichten (docs/BILDUNTERLAGE.md, B3): two points on a line of the image, the
+ * underlay turns about the first so that the line lies horizontal or vertical, whichever is
+ * nearer. The first point stays where it is.
+ */
+export function previewAlignment(
+  base: Project,
+  current: Project,
+  targets: SelectionSet,
+  request: Omit<CalibrationRequest, "metres">,
+  visibility?: LayerVisibilityPolicy,
+): Project {
+  if (base !== current || request.projectId !== current.id)
+    throw new Error("Projekt geändert. Ausrichten erneut beginnen.");
+  if (
+    targets.length !== 1 ||
+    targets[0]?.kind !== "reference" ||
+    targets[0].id !== request.referenceId
+  )
+    throw new Error("Nur eine Bildunterlage lässt sich ausrichten.");
+  const r = storeyOf(current).references.find((r) => r.id === request.referenceId);
+  if (!r || !isLayerVisible(current, visibility, r.id))
+    throw new Error("Bildunterlage nicht verfügbar.");
+  const { first, second } = request;
+  if (Math.hypot(second.x - first.x, second.y - first.y) <= 1e-9)
+    throw new Error("Zweiten Punkt mit Abstand wählen.");
+  const turn = alignmentTurn(first, second);
+  const c = Math.cos(turn),
+    s = Math.sin(turn);
+  const dx = r.origin.x - first.x,
+    dy = r.origin.y - first.y;
+  let rotation = r.rotation + turn;
+  // Kept in (-π, π] so the window shows a short angle.
+  rotation = Math.atan2(Math.sin(rotation), Math.cos(rotation));
+  if (Math.abs(rotation) < 1e-12) rotation = 0;
+  return validateLike(current, {
+    ...replaceStorey(current, {
+      ...storeyOf(current),
+      references: storeyOf(current).references.map((item) =>
+        item === r
+          ? {
+              ...r,
+              origin: { x: first.x + c * dx - s * dy, y: first.y + s * dx + c * dy },
+              rotation,
+            }
+          : item,
+      ),
+    }),
+  });
+}
+
 export function commitCalibration(
   history: ProjectHistory,
   base: Project,
