@@ -20,6 +20,7 @@ import {
 import { heightLineText } from "@/application/rooms/height-lines";
 import { isDefaultHeightLineList, roomHeightLines } from "@/domain/elements/room/height-line";
 import { HeightLineEditor } from "./HeightLineEditor";
+import { RoomLivingPanel } from "./RoomLivingPanel";
 import { FloatingPanel } from "./FloatingPanel";
 import { SETTINGS_WINDOW } from "./settings-window-size";
 import type { Project } from "@/domain/project/schema";
@@ -80,6 +81,7 @@ export function RoomProperties({
 }) {
   const [error, setError] = useState("");
   const [linesOpen, setLinesOpen] = useState(false);
+  const [livingOpen, setLivingOpen] = useState(false);
   const apply = (changes: Partial<Omit<Room, "id" | "points">>) => {
     try {
       onChange(updateRoom(project, room.id, changes), selection);
@@ -215,6 +217,21 @@ export function RoomProperties({
           ))}
         </select>
       </label>
+      <button
+        type="button"
+        onClick={() => setLivingOpen(true)}
+        className="h-8 self-end rounded border px-2 text-xs hover:bg-muted"
+      >
+        Rechenweg und Korrekturen…
+      </button>
+      {livingOpen && (
+        <RoomLivingPanel
+          project={project}
+          room={room}
+          onChange={changeLiving}
+          onClose={() => setLivingOpen(false)}
+        />
+      )}
       <button
         type="button"
         onClick={() => setLinesOpen(true)}

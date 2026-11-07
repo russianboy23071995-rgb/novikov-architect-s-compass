@@ -3,7 +3,11 @@ import { standardLayerId } from "../../domain/layers/model.ts";
 import { validateLike } from "../../domain/project/owned-snapshot.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { nextRoomNumber, type Room } from "../../domain/elements/room/model.ts";
-import { roomLivingResult, type RoomLivingResult } from "../area-rules/woflv.ts";
+import {
+  roomLivingResult,
+  storeyAreaBlockers,
+  type RoomLivingResult,
+} from "../area-rules/woflv.ts";
 import {
   roomClearHeights,
   roomHeightLineResults,
@@ -84,7 +88,7 @@ export function updateRoom(
 
 /** Living area of a room in the working storey with its calculation (docs/WOHNFLAECHE.md). */
 export function workingRoomLiving(project: Project, room: Room): RoomLivingResult {
-  return roomLivingResult(room, ceilingSourcesOf(project));
+  return roomLivingResult(room, ceilingSourcesOf(project), storeyAreaBlockers(storeyOf(project)));
 }
 
 /** Clear heights of a room in the working storey: its slabs and roofs only (R3, A08). */
