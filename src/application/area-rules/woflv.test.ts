@@ -9,6 +9,7 @@ import { compactLivingArea } from "../../domain/elements/room/model.ts";
 import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { deserializeProject, serializeProject } from "../../lib/bim/model.ts";
 import { areaUseOf, fixedShare, roomLivingResult, storeyAreaBlockers } from "./woflv.ts";
+import { livingSchedule, livingScheduleCsv } from "./schedule.ts";
 import { addColumn } from "../columns/actions.ts";
 import { addStair } from "../stairs/actions.ts";
 import { workingRoomLiving } from "../rooms/actions.ts";
@@ -201,4 +202,46 @@ test("corrections: at the fixed share, in a living room in full; never below zer
   );
   near(tooMuch.livingArea, 0);
   assert.equal(tooMuch.notes.length, 1);
+});
+
+// W4.
+const twoStoreys = () => {
+  let p = addRoom(createStandardProject("p", "eg", "og"), {
+    id: "b",
+    number: "R-010",
+    name: "Bad",
+    points: box(0, 0, 2, 2),
+  });
+  p = addRoom(p, { id: "a", number: "R-002", name: "Küche; Essen", points: box(2, 0, 4, 3) });
+  return addRoom(p, {
+    id: "t",
+    number: "R-001",
+    name: "Terrasse",
+    points: box(6, 0, 2, 2),
+    livingArea: { use: "outdoor" },
+  });
+};
+
+test("list: rooms in number order, sums add up, each room with its own result", () => {
+  const schedule = livingSchedule(twoStoreys());
+  assert.equal(schedule.storeys.length, 1);
+  const [storey] = schedule.storeys;
+  assert.deepEqual(
+    storey!.rooms.map((r) => r.number),
+    ["R-001", "R-002", "R-010"],
+  );
+  near(storey!.grossArea, 20);
+  // 4 + 12 in full (no ceiling above), terrace 4 m² at a quarter.
+  near(schedule.livingArea, 17);
+  assert.equal(storey!.rooms[0]!.useLabel, "Balkon, Loggia, Dachgarten, Terrasse");
+  assert.equal(schedule.rules.version, 1);
+});
+
+test("csv: a row per step, sums, rule set; semicolons in names are quoted", () => {
+  const csv = livingScheduleCsv(livingSchedule(twoStoreys()));
+  assert.ok(csv.startsWith("\uFEFFGeschoss;Nr.;Name;Raumart;Teilfläche"));
+  assert.ok(csv.includes('"Küche; Essen"'));
+  assert.ok(csv.includes("Summe Projekt;;;;;;20,00;;17,00"));
+  assert.ok(csv.includes("Regelstand: WoFlV"));
+  assert.ok(csv.includes("Balkon, Terrasse zu 25 %;§ 4 Nr. 4;4,00;25,00;1,00"));
 });
