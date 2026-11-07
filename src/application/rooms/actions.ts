@@ -73,6 +73,8 @@ export function updateRoom(
           delete next.floorBuildUp;
         // Absent height lines mean the defaults 1,00/2,00 m; explicit undefined restores them.
         if ("heightLines" in changes && changes.heightLines === undefined) delete next.heightLines;
+        // Absent means a living room without corrections.
+        if ("livingArea" in changes && changes.livingArea === undefined) delete next.livingArea;
         return next;
       }),
     }),

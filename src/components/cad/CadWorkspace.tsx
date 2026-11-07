@@ -2476,6 +2476,9 @@ export function CadWorkspace({
                       ...(isDefaultHeightLineList(toolDefaults.room.heightLines)
                         ? {}
                         : { heightLines: toolDefaults.room.heightLines }),
+                      ...(toolDefaults.room.areaUse === "living"
+                        ? {}
+                        : { livingArea: { use: toolDefaults.room.areaUse } }),
                       layerId: toolDefaults.room.layerId,
                     }
                   : tool === "roof"

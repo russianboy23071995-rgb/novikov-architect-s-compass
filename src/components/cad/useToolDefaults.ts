@@ -1,3 +1,4 @@
+import type { RoomAreaUse } from "@/domain/elements/room/model";
 import { defaultDoorDraft, type DoorSettingsDraft } from "@/application/drawing/door-placement";
 import { defaultDoorLayerId } from "@/application/doors/actions";
 import { defaultSlabLayerId } from "@/application/slabs/actions";
@@ -65,6 +66,7 @@ export type RoomDefaults = {
   floorBuildUp: number;
   /** Height lines new rooms get (R3); the defaults 1,00/2,00 m are not stored in the room. */
   heightLines: HeightLine[];
+  areaUse: RoomAreaUse;
   layerId: string;
 };
 
@@ -328,6 +330,7 @@ export function useToolDefaults(project: Project) {
           floorBuildUpEnabled: false,
           floorBuildUp: 0.12,
           heightLines: defaultHeightLines(),
+          areaUse: "living",
           layerId: defaultRoomLayerId(project),
         };
   const roomDefaults = {
