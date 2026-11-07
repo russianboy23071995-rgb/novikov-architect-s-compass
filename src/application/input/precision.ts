@@ -17,3 +17,16 @@ export function precisionTarget(
   };
   return resolvePolarInput(origin, aim, parse(angleText, "Winkel"), parse(lengthText, "Länge"));
 }
+
+/**
+ * A key that starts a typed length (docs/ANPASSUNGSLISTE.md, E1): a digit, the decimal comma or
+ * point, or a minus; never with Ctrl, Alt or Meta, which belong to shortcuts.
+ */
+export function startsTypedValue(event: {
+  key: string;
+  ctrlKey: boolean;
+  altKey: boolean;
+  metaKey: boolean;
+}): boolean {
+  return !event.ctrlKey && !event.altKey && !event.metaKey && /^[0-9.,-]$/.test(event.key);
+}
