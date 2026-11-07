@@ -14,7 +14,7 @@ import { TERRAIN_DEFAULTS, terrainContours } from "../../domain/elements/terrain
 import type { HatchPatternDefinition } from "../../domain/elements/hatch/pattern.ts";
 import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
 import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
-import { guestWalls } from "../../domain/elements/wall/guests.ts";
+import { guestWalls, openingAboveStorey } from "../../domain/elements/wall/guests.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { visiblePlanGeometry } from "./layer-display.ts";
 import { wallPlanOutlines } from "./wall-plan-outline.ts";
@@ -42,7 +42,12 @@ export function derivePlanScene(
   const plan = visiblePlanGeometry(geometry, allows);
   const displayBands = storeyOf(geometry).displayBands;
   const openings = new Map<string, typeof plan.openings>();
+  const home = storeyOf(geometry);
+  const hostOf = new Map(plan.walls.map((w) => [w.id, w]));
   for (const opening of plan.openings) {
+    // Wholly above the own storey: shown in the storeys whose cut it passes (M4).
+    const host = hostOf.get(opening.wallId);
+    if (host && openingAboveStorey(host, opening.sillHeight, home.height)) continue;
     if (!openings.has(opening.wallId)) openings.set(opening.wallId, []);
     openings.get(opening.wallId)!.push(opening);
   }
