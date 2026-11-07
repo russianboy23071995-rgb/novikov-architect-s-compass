@@ -67,6 +67,7 @@ import {
   projectV62Schema,
   projectV63Schema,
   projectV64Schema,
+  projectV65Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
@@ -285,6 +286,14 @@ export function migrateProjectData(value: unknown): Project {
   if (value.schemaVersion === 36)
     return migrateProjectData(
       withColumnLayer(withoutBoundHeights({ ...projectV36Schema.parse(value), schemaVersion: 37 })),
+    );
+  // Schema 65 files carry no wall spanning several storeys; the strict v65 schema rejects one.
+  if (value.schemaVersion === 65)
+    return validateProject(
+      withoutBoundHeights({
+        ...projectV65Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
     );
   // Schema 64 files carry no living area data; the strict v64 schema rejects it.
   if (value.schemaVersion === 64)

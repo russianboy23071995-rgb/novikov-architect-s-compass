@@ -28,16 +28,29 @@ export function WallHeightProperties({
   onChange: (project: Project) => void;
 }) {
   const [error, setError] = useState("");
-  const { storey, upperElevation } = useMemo(() => {
+  const binding = wall.topBinding;
+  const span = binding?.storeys ?? 1;
+  const { storey, upperElevation, targets } = useMemo(() => {
     const index = project.storeys.findIndex((s) => s.walls.some((w) => w.id === wall.id));
-    const level = resolveStoreyLevels(project.storeys, project.groundStoreyId)[index];
+    const levels = resolveStoreyLevels(project.storeys, project.groundStoreyId);
+    const level = levels[index];
+    // Every storey above can be the end: OK raw floor of storey index + n (M1).
+    const targets = project.storeys.slice(index + 1).map((s, i) => ({
+      storeys: i + 1,
+      label: `OK Rohfußboden ${s.name}`,
+    }));
+    // The top of the highest storey is an end too, when its height is known.
+    const top = project.storeys.at(-1)!;
+    if (levels.at(-1)?.upperElevation != null)
+      targets.push({ storeys: project.storeys.length - index, label: `Oberkante ${top.name}` });
     return {
       storey: project.storeys[index]!,
-      upperElevation: level?.elevation != null ? level.upperElevation : null,
+      upperElevation:
+        level?.elevation != null ? (levels[index + span - 1]?.upperElevation ?? null) : null,
+      targets,
     };
-  }, [project, wall.id]);
+  }, [project, wall.id, span]);
   const canBind = upperElevation != null;
-  const binding = wall.topBinding;
   const apply = (rule: Parameters<typeof setWallHeightRule>[2]["rule"]) => {
     try {
       const next = setWallHeightRule(project, project, {
@@ -101,6 +114,29 @@ export function WallHeightProperties({
           </option>
         </select>
       </label>
+      {binding && targets.length > 1 && (
+        <label className="text-xs">
+          Höhe bis
+          <select
+            aria-label="Wand reicht bis"
+            value={span}
+            className="mt-1 block h-8 rounded border bg-background px-2 text-xs"
+            onChange={(e) =>
+              apply({
+                kind: "storey",
+                topOffset: binding.topOffset,
+                storeys: Number(e.target.value),
+              })
+            }
+          >
+            {targets.map((t) => (
+              <option key={t.storeys} value={t.storeys}>
+                {t.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       {binding && (
         <PropertyForm
           className="flex items-end gap-2"
@@ -113,7 +149,7 @@ export function WallHeightProperties({
               return;
             }
             if (value === binding.topOffset) return setError("");
-            apply({ kind: "storey", topOffset: value });
+            apply({ kind: "storey", topOffset: value, storeys: span });
           }}
         >
           <label className="text-xs">
@@ -159,7 +195,10 @@ export function WallHeightProperties({
       </PropertyForm>
       {binding ? (
         <p className="text-[11px] text-muted-foreground">
-          Bezug: {storey.name} · OK Rohfußboden darüber{" "}
+          Bezug: {storey.name} ·{" "}
+          {span > 1
+            ? `über ${span} Geschosse bis ${targets[span - 1]?.label ?? ""}`
+            : "OK Rohfußboden darüber"}{" "}
           {upperElevation != null && `${metres(upperElevation)} m`}
           <br />
           Berechnete Höhe: <output aria-label="Berechnete Wandhöhe">{metres(wall.height)} m</output>

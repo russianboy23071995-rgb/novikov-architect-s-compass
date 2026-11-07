@@ -1,3 +1,4 @@
+import { boundUpperElevation } from "../../domain/elements/wall/height-binding.ts";
 import { prepareProjectSnapshot } from "../../domain/project/prepared-snapshot.ts";
 import { validateWindowGeometry } from "../../domain/project/geometry-validation.ts";
 import { doorOpening } from "../../domain/elements/door/model.ts";
@@ -42,13 +43,15 @@ export function prepareZTranslation(
   const selection = targets.map((t) => ({ ...t }));
   const moving = new Set(targets.filter((t) => t.kind === "wall").map((t) => t.id));
   if (!moving.size) throw new Error("Mindestens eine Wand auswählen.");
-  const levels = new Map(
-    resolveStoreyLevels(base.storeys, base.groundStoreyId).map((s) => [s.storeyId, s]),
-  );
+  const levelList = resolveStoreyLevels(base.storeys, base.groundStoreyId);
+  const levels = new Map(levelList.map((s) => [s.storeyId, s]));
   const parts = base.storeys
     .filter((s) => s.walls.some((w) => moving.has(w.id)))
     .map((s) => {
-      const { elevation, upperElevation } = levels.get(s.id)!;
+      const { elevation } = levels.get(s.id)!;
+      const index = base.storeys.indexOf(s);
+      const upperFor = (storeys: number | undefined) =>
+        boundUpperElevation(levelList, index, storeys);
       if (elevation == null) throw new Error("Geschosshöhe nicht aufgelöst.");
       const neighbours = new Map<string, Set<string>>();
       for (const [a, b] of [
@@ -79,7 +82,7 @@ export function prepareZTranslation(
         s,
         closure,
         elevation,
-        upperElevation,
+        upperFor,
         walls,
         windows,
         doors,
@@ -102,7 +105,7 @@ export function prepareZTranslation(
     wall: Project["storeys"][number]["walls"][number],
     delta: number,
     elevation: number,
-    upperElevation: number | null,
+    upperFor: (storeys: number | undefined) => number | null,
   ) => {
     if (!moving.has(wall.id) || delta === 0) return wall;
     // A rigid translation moves both ends, retaining the reference and changing its offset.
@@ -115,6 +118,7 @@ export function prepareZTranslation(
         : {}),
     };
     if (next.topBinding) {
+      const upperElevation = upperFor(next.topBinding.storeys);
       if (upperElevation == null) throw new Error("Der Geschossbezug fehlt.");
       next.height = resolveWallHeightRule(next, elevation, next.topBinding, upperElevation).height;
     }
@@ -131,7 +135,7 @@ export function prepareZTranslation(
     assertContext(current, currentTargets);
     if (!Number.isFinite(delta)) throw new Error("Endlicher Z-Versatz erforderlich.");
     const patches = parts.map((p) => {
-      const walls = p.walls.map((w) => shifted(w, delta, p.elevation, p.upperElevation));
+      const walls = p.walls.map((w) => shifted(w, delta, p.elevation, p.upperFor));
       const before = new Map(p.walls.map((w) => [w.id, w]));
       const after = new Map(walls.map((w) => [w.id, w]));
       const doors = p.doors.map((d) => {
