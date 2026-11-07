@@ -54,3 +54,17 @@ Ein Fenster in einer hohen Wand darf über der Geschosshöhe sitzen, zum Beispie
 Grenzen: Ein Fenster für ein oberes Geschoss setzt man im Heimatgeschoss der Wand (Werkzeug Fenster, Brüstung über der Geschosshöhe), nicht im oberen Geschoss. Türen in hohen Wänden zeigt der Gast nicht. Ein Gastfenster ist nicht anwählbar, Doppelklick auf die Wand öffnet sie im Heimatgeschoss.
 
 Nachweis im Browser, Frontwand vom EG bis OK Rohfußboden 2. OG mit Fenster „unten“ (Brüstung 0,90 m) und „oben“ (Brüstung 3,90 m): Das EG zeigt nur „unten“. Das 1. OG zeigt „oben“ als blasse Öffnung mit Glaslinie im Gast.
+
+## M5 – Gestapelte Wände ohne Fuge
+
+Geprüft statt gebaut: Die 3D-Ansicht zeichnet Flächen ohne Kantenlinien. Zwei Wände, die genau übereinanderstehen (gleiche Achse, gleiche Stärke, die obere beginnt, wo die untere endet), liegen mit ihren Seitenflächen in denselben Ebenen und erscheinen als eine Wand. Ein Test sichert das ab. Im Browser stand das gestapelte Paar fugenlos da, ein um 10 cm versetztes Paar daneben zeigte zu Recht seine Stufe.
+
+Grenze: Die Wände bleiben zwei Bauteile, anwählen lässt sich jede für sich.
+
+## M6 – Schnitt und IFC
+
+Geprüft statt gebaut: Der Schnitt durch eine Wand vom EG bis OK Rohfußboden 2. OG zeigt eine durchgehende Schnittfläche von 0 bis 6 m. Im IFC steht die Wand einmal, im Erdgeschoss, mit 6 m Extrusion. Beides sichern Tests ab.
+
+## Stand
+
+L01 und L02 sind umgesetzt. Offen für später: Gast-Anzeige für Stützen und Treppen, Fenster im oberen Geschoss direkt in einen Gast setzen, Ecken zwischen Gast und eigenen Wänden im Grundriss.
