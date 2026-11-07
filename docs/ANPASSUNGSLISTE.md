@@ -154,3 +154,13 @@ Vorher: Mit Tab ließ sich unter mehreren Elementen das untere wählen, ein Dopp
 Jetzt: Liegt das gewählte Element unter der Maus, behält der zweite Klick des Doppelklicks die Wahl, und das Fenster gehört zu ihm (`selectedUnder` in `src/application/selection/cycle.ts`, `BimPlan.tsx`). Ohne Tab ändert sich nichts: Der erste Klick wählt das oberste Element, der Doppelklick öffnet dessen Fenster.
 
 Nachweis im Browser, Wand quer durch einen Raum: Maus auf die Überlappung, zweimal Tab wählt den Raum, Doppelklick öffnet „Raum R-001 Raum – Einstellungen“. Gegenprobe ohne Tab: Doppelklick auf die Wand wählt die Wand.
+
+### E1 – Zahl tippen ist Länge in Mausrichtung
+
+Vorher: Nach dem ersten Klick musste man Tab drücken oder ins Feld klicken, bevor eine Länge ging.
+
+Jetzt: Steht ein Werkzeug nach dem ersten Klick, geht eine getippte Ziffer, ein Komma, ein Punkt oder ein Minus sofort ins Längenfeld des Eingabefensters und beginnt dort einen neuen Wert. Die Richtung folgt weiter der Maus, Enter setzt den Punkt. Ist ein Winkel eingetragen, bleibt er fest. Bei Werkzeugen mit nur einem Winkelfeld, etwa Drehen, geht die Ziffer dorthin.
+
+Das gilt an einer Stelle (`PrecisionInput.tsx`, `startsTypedValue`) für alle Werkzeuge mit Eingabefenster: Wand, Linie, Polylinie, Geländer, Schraffur, Decke, Deckenöffnung, Raum als Polygon oder Rechteck, Dach, Geländeumriss, Verschieben, Kopieren, Drehen, Spiegeln und Griffe. Mit Strg, Alt oder Meta bleibt eine Ziffer ein Tastenkürzel. Steht der Cursor in einem anderen Eingabefeld, etwa in der Werkzeugleiste, gehört die Ziffer dorthin.
+
+Nachweis im Browser, Linienwerkzeug: erster Klick, Maus in eine Richtung, Tasten „2“, „,“, „5“ ohne Tab. Das Längenfeld zeigt „2,5“ und hat den Fokus, die Richtung folgt weiter der Maus. Enter setzt den Punkt, Enter auf der Zeichenfläche beendet die Linie. Die gespeicherte Linie misst 2,500 m. Grenze der Testumgebung: Ihr Befehl „Text tippen“ fügt Text ohne Tastendrücke ein und löst die Eingabe daher nicht aus. Echte Tasten tun es.

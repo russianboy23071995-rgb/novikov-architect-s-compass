@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Point2 } from "@/geometry/primitives/point";
 import { clampMenuPosition } from "./demand-menu";
+import { startsTypedValue } from "@/application/input/precision";
 
 /** Reusable presentation for polar tool input. It never changes model geometry. */
 export function PrecisionInput({
@@ -55,7 +56,8 @@ export function PrecisionInput({
   const panel = useRef<HTMLFormElement>(null);
   useEffect(() => {
     const tab = (event: KeyboardEvent) => {
-      if (event.key !== "Tab" || event.ctrlKey || event.metaKey || event.altKey) return;
+      const typed = startsTypedValue(event);
+      if (!typed && (event.key !== "Tab" || event.ctrlKey || event.metaKey || event.altKey)) return;
       const active = document.activeElement;
       // Modal workflows own the keyboard while the drawing/edit draft remains suspended.
       if (
@@ -70,7 +72,20 @@ export function PrecisionInput({
         !panel.current?.contains(active)
       )
         return;
+      // Inside the fields a typed key is ordinary input.
+      if (typed && (active === lengthField.current || active === angleField.current)) return;
       event.preventDefault();
+      if (typed) {
+        // E1: the key starts a new value in the length field, the mouse keeps the direction
+        // (the angle stays as it is: empty follows the mouse, a typed angle stays fixed).
+        event.stopPropagation();
+        const field = angleOnly ? angleField.current : lengthField.current;
+        if (angleOnly) onChange(event.key, length);
+        else onChange(angle, event.key);
+        field?.focus();
+        window.setTimeout(() => field?.setSelectionRange(field.value.length, field.value.length));
+        return;
+      }
       if (angleOnly) {
         angleField.current?.focus();
         angleField.current?.select();
@@ -85,7 +100,7 @@ export function PrecisionInput({
     };
     window.addEventListener("keydown", tab, true);
     return () => window.removeEventListener("keydown", tab, true);
-  }, [angle, axisLabel, onCaptureDirection, scalar, angleOnly]);
+  }, [angle, length, axisLabel, onCaptureDirection, onChange, scalar, angleOnly]);
   const drag = useRef<{ pointer: Point2; origin: Point2; id: number } | null>(null);
   const [bounds, setBounds] = useState({
     width: 1024,
