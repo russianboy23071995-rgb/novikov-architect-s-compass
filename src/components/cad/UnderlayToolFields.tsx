@@ -3,7 +3,10 @@ import { MIN_REFERENCE_OPACITY } from "@/domain/elements/reference/model";
 import type { Project } from "@/domain/project/schema";
 import { storeyOf } from "@/domain/storeys/access";
 import { Button } from "@/components/ui/button";
-import { underlayMetresPerPixel, type UnderlayDefaults } from "./useImageImport";
+import {
+  underlayMetresPerPixel,
+  type UnderlayDefaults,
+} from "@/application/references/underlay-size";
 
 const metres = (value: number) =>
   value.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -22,15 +25,23 @@ export function UnderlayToolFields({
 }: {
   value: UnderlayDefaults;
   onChange: (value: UnderlayDefaults) => void;
-  pixels?: { width: number; height: number } | null;
+  pixels?: {
+    width: number;
+    height: number;
+    scale: number;
+    source: { width: number; height: number };
+  } | null;
   fileDpi?: number | null;
   onPick?: (() => void) | undefined;
 }) {
   let size = "";
   if (pixels)
     try {
-      const m = underlayMetresPerPixel(value, pixels.width);
+      const m = underlayMetresPerPixel(value, pixels.width, pixels.scale);
       size = `${metres(pixels.width * m)} × ${metres(pixels.height * m)} m`;
+      // A large scan was fitted on import (B5): say so, the drawing keeps its scale.
+      if (pixels.scale < 1)
+        size += ` · verkleinert von ${pixels.source.width} × ${pixels.source.height} auf ${pixels.width} × ${pixels.height} px`;
     } catch (e) {
       size = e instanceof Error ? e.message : "";
     }

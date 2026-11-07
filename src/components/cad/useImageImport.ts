@@ -1,51 +1,17 @@
 import { useMemo, useRef, useState } from "react";
-import { importImage } from "@/interop/images/import";
-import { imageDpi, metresPerPixelAtScale } from "@/interop/images/dpi";
+import { importFittedImage } from "@/interop/images/import";
+import { imageDpi } from "@/interop/images/dpi";
+import {
+  underlayMetresPerPixel,
+  UNDERLAY_DEFAULTS,
+  type UnderlayDefaults,
+} from "@/application/references/underlay-size";
 import type { ImageAsset } from "@/domain/elements/reference/model";
 import type { Project } from "@/domain/project/schema";
 import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
 import { previewCreateReference } from "@/application/references/actions";
 import type { ToolInteraction } from "@/application/tools/interaction";
 import { querySnap } from "@/constraints/snapping/engine";
-import { parseMetres } from "@/core/units/metres";
-
-/**
- * Defaults of the underlay tool (docs/BILDUNTERLAGE.md, B1): the size of a new underlay from a
- * width in metres or from the plan scale and the scan resolution, and how it shows.
- */
-export type UnderlayDefaults = {
-  size: "width" | "scale";
-  width: string;
-  denominator: string;
-  dpi: string;
-  /** Percent, 5–100. */
-  opacity: number;
-  grayscale: boolean;
-};
-export const UNDERLAY_DEFAULTS: UnderlayDefaults = {
-  size: "width",
-  width: "5",
-  denominator: "100",
-  dpi: "300",
-  opacity: 50,
-  grayscale: false,
-};
-
-/** Metres per pixel of a new underlay from the defaults; throws a message for the bar. */
-export function underlayMetresPerPixel(defaults: UnderlayDefaults, pixelWidth: number): number {
-  if (defaults.size === "width") {
-    const metres = parseMetres(defaults.width);
-    if (!Number.isFinite(metres) || metres <= 0)
-      throw new Error("Positive Bildbreite in Metern eingeben.");
-    return metres / pixelWidth;
-  }
-  const denominator = Number(defaults.denominator.trim().replace(",", "."));
-  const dpi = Number(defaults.dpi.trim().replace(",", "."));
-  if (!Number.isFinite(denominator) || denominator <= 0)
-    throw new Error("Maßstab eingeben, z. B. 100 für 1:100.");
-  if (!Number.isFinite(dpi) || dpi <= 0) throw new Error("Auflösung in dpi eingeben, z. B. 300.");
-  return metresPerPixelAtScale(denominator, dpi);
-}
 
 export function useImageImport(
   project: Project,
@@ -59,6 +25,9 @@ export function useImageImport(
     id: string;
     /** The resolution the file states, if any. */
     fileDpi: number | null;
+    /** Pixels of the source file and the stored scale (B5). */
+    source: { width: number; height: number };
+    scale: number;
   } | null>(null);
   const [defaults, setDefaults] = useState<UnderlayDefaults>(UNDERLAY_DEFAULTS);
   const [error, setError] = useState("");
@@ -80,7 +49,10 @@ export function useImageImport(
     setBusy(true);
     try {
       const fileDpi = imageDpi(new Uint8Array(await file.slice(0, 256 * 1024).arrayBuffer()));
-      const asset = await importImage(file, `asset-${crypto.randomUUID()}`);
+      const { asset, source, scale } = await importFittedImage(
+        file,
+        `asset-${crypto.randomUUID()}`,
+      );
       if (
         token !== epoch.current ||
         latest.current.project !== base ||
@@ -95,6 +67,8 @@ export function useImageImport(
         asset,
         id: `reference-${crypto.randomUUID()}`,
         fileDpi,
+        source,
+        scale,
       });
     } catch (e) {
       if (token === epoch.current)
@@ -115,7 +89,11 @@ export function useImageImport(
         now.defaults !== defaults
       )
         throw new Error("Importkontext geändert.");
-      const metresPerPixel = underlayMetresPerPixel(defaults, active.asset.pixelWidth);
+      const metresPerPixel = underlayMetresPerPixel(
+        defaults,
+        active.asset.pixelWidth,
+        active.scale,
+      );
       const layerId = project.defaultLayerIds.line;
       if (visibility.context.hiddenLayerIds.includes(layerId))
         throw new Error("Ebene 2D-Zeichnungen zuerst einblenden.");
@@ -166,7 +144,14 @@ export function useImageImport(
     busy,
     active: !!active,
     fileDpi: active?.fileDpi ?? null,
-    pixels: active ? { width: active.asset.pixelWidth, height: active.asset.pixelHeight } : null,
+    pixels: active
+      ? {
+          width: active.asset.pixelWidth,
+          height: active.asset.pixelHeight,
+          scale: active.scale,
+          source: active.source,
+        }
+      : null,
     adapter,
   };
 }

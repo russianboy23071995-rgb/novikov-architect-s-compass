@@ -47,3 +47,16 @@ Code: `previewAlignment` und `alignmentTurn` in `src/application/references/cali
 - Danach nennt eine Meldung die Breite vorher und nachher, etwa „Breite 10,05 m → 10,10 m“.
 
 Code: `ReferenceCalibrationControls.tsx`, `parseCalibrationField` in `src/application/references/calibration.ts`.
+
+## B5 – Große Scans
+
+Ein großer Scan wird nicht mehr abgelehnt, sondern beim Import eingepasst:
+
+- **Gelesen** werden PNG und JPEG bis 64 MiB und 150 Millionen Pixel (vorher 10 MiB und 16 Millionen Pixel). Ein A1-Plan mit 300 dpi hat etwa 70 Millionen Pixel.
+- **Gespeichert** wird höchstens, was eine Unterlage im Projekt haben darf: 16 Millionen Pixel, 16384 Pixel je Seite, 10 MiB Bilddaten. Das Bild wird dafür verkleinert, als PNG gespeichert oder als JPEG (Qualität 0,9, dann 0,8), wenn das PNG zu groß würde. Reicht das nicht, wird es in Schritten von 75 % weiter verkleinert.
+- **Maßstab bleibt:** Bei „Maßstab und dpi“ gilt die dpi-Zahl für die Pixel der Originaldatei. Ein Scan mit 6000 Pixeln bei 300 dpi im Maßstab 1:100 ist 50,80 m breit, auch wenn er auf 3673 Pixel verkleinert gespeichert wird.
+- Die Leiste sagt es: „verkleinert von 6000 × 4000 auf 3673 × 2449 px“.
+
+Nachweis im Browser: Scan 6000 × 4000 px, 35 MiB (mit Rauschen, damit er sich schlecht packen lässt): nach 2,3 s eingelesen, verkleinert auf 3673 × 2449 px, platziert mit exakt 50,8 m Breite.
+
+Code: `importImage`, `sourceImageHeader`, `storedScale` in `src/interop/images/import.ts`; `underlayMetresPerPixel` in `src/application/references/underlay-size.ts`. Test: `src/interop/images/import-fit.test.ts`.
