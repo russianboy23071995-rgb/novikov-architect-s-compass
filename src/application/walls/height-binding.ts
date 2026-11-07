@@ -4,7 +4,9 @@ export type SetWallHeight = {
   storeyId: string;
   wallIds: readonly string[];
   /** Fixed height, or bound to the own storey height plus an extra height (29.10.2026). */
-  rule: { kind: "fixed"; height: number } | { kind: "storey"; topOffset: number };
+  rule:
+    | { kind: "fixed"; height: number }
+    | { kind: "storey"; topOffset: number; storeys?: number | undefined };
 };
 /** Explicit shared action: all targets validated and published together, no renderer/AI mutation. */
 export function setWallHeightRule(
@@ -34,7 +36,15 @@ export function setWallHeightRule(
               const { topBinding: _previous, ...fixed } = w;
               const rule = request.rule;
               if (rule.kind === "fixed") return { ...fixed, height: rule.height };
-              return { ...fixed, topBinding: { kind: rule.kind, topOffset: rule.topOffset } };
+              return {
+                ...fixed,
+                topBinding: {
+                  kind: rule.kind,
+                  topOffset: rule.topOffset,
+                  // One storey is the default and stays unwritten (docs/MEHRGESCHOSS.md, M1).
+                  ...(rule.storeys && rule.storeys > 1 ? { storeys: rule.storeys } : {}),
+                },
+              };
             }),
           },
     ),

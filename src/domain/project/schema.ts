@@ -49,6 +49,7 @@ import {
   legacyWallTopBindingSchema,
   resolveBoundWallHeights,
   wallTopBindingSchema,
+  wallStoreysBindingSchema,
 } from "../elements/wall/height-binding.ts";
 import { resolveRoofTrims } from "../elements/wall/roof-trim.ts";
 import { WALL_RENOVATIONS } from "../elements/wall/renovation.ts";
@@ -366,12 +367,15 @@ const renovatedWallSchema = boundWall(wallTopBindingSchema, {
   renovation: z.enum(WALL_RENOVATIONS).optional(),
 });
 /** Schema 43: optional wall build-up reference (docs/WANDAUFBAU.md, SA1). */
-const assembledWallSchema = boundWall(wallTopBindingSchema, {
+const assembledWallShape = {
   ...trimShape,
   renovation: z.enum(WALL_RENOVATIONS).optional(),
   assemblyId: id.optional(),
   assemblyFlipped: z.boolean().optional(),
-});
+};
+const assembledWallSchema = boundWall(wallTopBindingSchema, assembledWallShape);
+/** Schema 66: the binding may span several storeys (docs/MEHRGESCHOSS.md, M1). */
+const multiStoreyWallSchema = boundWall(wallStoreysBindingSchema, assembledWallShape);
 export const projectV26Schema = projectV25Schema.extend({
   schemaVersion: z.literal(26),
   storeys: z
@@ -916,15 +920,30 @@ export const projectV64Schema = projectV45Schema.extend({
   hotkeys: hotkeysSchema.optional(),
 });
 /** Schema 65: how a room counts for the living area (docs/WOHNFLAECHE.md). */
-const storeySchema = storeyV64Schema.extend({
+const storeyV65Schema = storeyV64Schema.extend({
   rooms: z.array(roomSchema).optional(),
 });
-const layoutDrawingV65Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
+const layoutDrawingV65Schema = z.object({ layoutId: id, storey: storeyV65Schema }).strict();
+export const projectV65Schema = projectV45Schema.extend({
+  schemaVersion: z.literal(65),
+  storeys: z.array(storeyV65Schema).min(1),
+  modelViews: z.array(anyModelViewSchema).optional(),
+  layoutDrawings: z.array(layoutDrawingV65Schema).max(5000).optional(),
+  masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
+  layouts: z.array(layoutV49Schema).max(5000).optional(),
+  projectInfo: projectInfoSchema.optional(),
+  hotkeys: hotkeysSchema.optional(),
+});
+/** Schema 66: walls through several storeys (docs/MEHRGESCHOSS.md, M1). */
+const storeySchema = storeyV65Schema.extend({
+  walls: z.array(multiStoreyWallSchema),
+});
+const layoutDrawingV66Schema = z.object({ layoutId: id, storey: storeySchema }).strict();
 const projectSchema = projectV45Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z.array(storeySchema).min(1),
   modelViews: z.array(anyModelViewSchema).optional(),
-  layoutDrawings: z.array(layoutDrawingV65Schema).max(5000).optional(),
+  layoutDrawings: z.array(layoutDrawingV66Schema).max(5000).optional(),
   masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
   layouts: z.array(layoutV49Schema).max(5000).optional(),
   projectInfo: projectInfoSchema.optional(),
@@ -1109,7 +1128,7 @@ export function validateLegacyProject(value: unknown): LegacyProject {
 }
 
 /** All lengths and coordinates are in metres; position is dimensionless. */
-export type Wall = z.infer<typeof assembledWallSchema>;
+export type Wall = z.infer<typeof multiStoreyWallSchema>;
 export type BimWindow = z.infer<typeof insertedWindowSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type Point = z.infer<typeof pointSchema>;

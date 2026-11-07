@@ -11,6 +11,34 @@ export const wallTopBindingSchema = z
   .strict();
 export type WallTopBinding = z.infer<typeof wallTopBindingSchema>;
 
+/** Most storeys a wall may span (docs/MEHRGESCHOSS.md, M1). */
+export const MAX_WALL_STOREYS = 50;
+/**
+ * Schema 66 (docs/MEHRGESCHOSS.md, M1): a wall may run through several storeys. `storeys` counts
+ * them from its own one: 2 ends at OK raw floor two storeys up; absent = 1, the storey above.
+ * The wall stays in its own storey (A08); the storeys it passes only show it.
+ */
+export const wallStoreysBindingSchema = wallTopBindingSchema
+  .extend({ storeys: z.number().int().min(2).max(MAX_WALL_STOREYS).optional() })
+  .strict();
+export type WallStoreysBinding = z.infer<typeof wallStoreysBindingSchema>;
+
+/** Storeys a bound wall spans, its own included; 1 for an unbound one. */
+export const wallStoreySpan = (wall: { topBinding?: { storeys?: number } | undefined }) =>
+  wall.topBinding?.storeys ?? 1;
+
+/** OK raw floor the binding of a wall in storey `index` ends at; null while unknown. */
+export function boundUpperElevation(
+  levels: readonly { upperElevation: number | null }[],
+  index: number,
+  storeys = 1,
+): number | null {
+  const target = levels[index + storeys - 1];
+  if (!target)
+    throw new Error(`Die Wand reicht über das oberste Geschoss hinaus (${storeys} Geschosse).`);
+  return target.upperElevation;
+}
+
 /** Schema 26–29: underside of an assumed raw slab of the storey directly above. */
 export const legacyWallTopBindingSchema = z
   .object({
@@ -69,7 +97,7 @@ export function resolveBoundWallHeights<
       walls: {
         height: number;
         baseOffset?: number | undefined;
-        topBinding?: WallTopBinding | undefined;
+        topBinding?: WallStoreysBinding | undefined;
       }[];
     }[];
   },
@@ -84,7 +112,8 @@ export function resolveBoundWallHeights<
       const walls = storey.walls.map((wall) => {
         const binding = wall.topBinding;
         if (!binding) return wall;
-        const { elevation, upperElevation } = levels[index]!;
+        const { elevation } = levels[index]!;
+        const upperElevation = boundUpperElevation(levels, index, binding.storeys);
         if (elevation == null || upperElevation == null)
           throw new Error("Für die Geschossbindung zuerst die Geschosshöhe festlegen.");
         const height = resolveWallHeightRule(wall, elevation, binding, upperElevation).height;
