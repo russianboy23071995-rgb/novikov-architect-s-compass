@@ -160,7 +160,13 @@ export type PlacedDrawingView = {
   denominator: number;
   content: PlacedPlan | PlacedSection;
 };
-type PlacedPlan = { kind: "plan"; source: Project; hiddenLayerIds: readonly string[] };
+type PlacedPlan = {
+  kind: "plan";
+  source: Project;
+  hiddenLayerIds: readonly string[];
+  /** Image underlays on the layout (docs/BILDUNTERLAGE.md, B6). */
+  showUnderlays?: boolean | undefined;
+};
 type PlacedSection = {
   kind: "section";
   drawing: SectionDrawing;
@@ -224,10 +230,13 @@ const placedScenes = new WeakMap<Project, Map<string, ReturnType<typeof derivePl
 function placedScene(view: PlacedPlan) {
   let byKey = placedScenes.get(view.source);
   if (!byKey) placedScenes.set(view.source, (byKey = new Map()));
-  const key = [...view.hiddenLayerIds].sort().join("|");
+  const key = [...view.hiddenLayerIds].sort().join("|") + (view.showUnderlays ? "|+ref" : "");
   let scene = byKey.get(key);
   if (!scene) {
     const hidden = new Set(view.hiddenLayerIds);
+    const underlays = new Set(
+      view.showUnderlays ? [] : storeyOf(view.source).references.map((r) => r.id),
+    );
     const layerOf = new Map(
       allStoreyElements(storeyOf(view.source)).map((e) => [
         e.id,
@@ -236,7 +245,7 @@ function placedScene(view: PlacedPlan) {
     );
     scene = derivePlanScene(
       view.source,
-      (id) => !hidden.has(layerOf.get(id) ?? ""),
+      (id) => !hidden.has(layerOf.get(id) ?? "") && !underlays.has(id),
       view.source.hatchPatterns,
       assemblyLibraryOf(view.source),
     );

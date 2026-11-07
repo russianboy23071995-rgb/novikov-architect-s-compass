@@ -8,13 +8,16 @@ export function DocumentSettingsSections({
   documentId,
   children,
   onVisibilityChange,
+  onUnderlaysChange,
 }: {
   project: Project;
   documentId?: string;
   children: ReactNode;
   onVisibilityChange: (hidden: string[]) => void;
+  onUnderlaysChange?: ((show: boolean) => void) | undefined;
 }) {
-  const hidden = project.drawingDocuments?.find((d) => d.id === documentId)?.hiddenLayerIds ?? [];
+  const document = project.drawingDocuments?.find((d) => d.id === documentId);
+  const hidden = document?.hiddenLayerIds ?? [];
   return (
     <SettingsSections
       sections={[
@@ -28,6 +31,26 @@ export function DocumentSettingsSections({
               hidden={hidden}
               onChange={onVisibilityChange}
             />
+          ),
+        },
+        // Image underlays on layouts and in the PDF (docs/BILDUNTERLAGE.md, B6).
+        {
+          id: "underlays",
+          label: "Bildunterlagen",
+          content: (
+            <label className="flex items-start gap-2 text-xs">
+              <input
+                type="checkbox"
+                aria-label="Bildunterlagen auf Layouts zeigen"
+                checked={!!document?.showUnderlays}
+                disabled={!onUnderlaysChange}
+                onChange={(e) => onUnderlaysChange?.(e.target.checked)}
+              />
+              <span>
+                Bildunterlagen auf Layouts und im PDF zeigen. Aus: Ein Scan zum Nachzeichnen
+                erscheint nur im Grundriss und im Abbild, nicht auf dem Plan.
+              </span>
+            </label>
           ),
         },
         ...[2, 3, 4, 5].map((number) => ({

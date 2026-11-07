@@ -625,6 +625,7 @@ export function CadWorkspace({
         kind: "plan",
         source: documentSource(realProject, view.storeyId),
         hiddenLayerIds: document.hiddenLayerIds,
+        showUnderlays: !!document.showUnderlays,
       };
       return { document, framing: document.framing, content };
     }

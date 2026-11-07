@@ -69,6 +69,7 @@ import {
   projectV64Schema,
   projectV65Schema,
   projectV66Schema,
+  projectV67Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
@@ -287,6 +288,14 @@ export function migrateProjectData(value: unknown): Project {
   if (value.schemaVersion === 36)
     return migrateProjectData(
       withColumnLayer(withoutBoundHeights({ ...projectV36Schema.parse(value), schemaVersion: 37 })),
+    );
+  // Schema 67 files never show underlays on layouts; the strict v67 schema rejects the switch.
+  if (value.schemaVersion === 67)
+    return validateProject(
+      withoutBoundHeights({
+        ...projectV67Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
     );
   // Schema 66 files carry no underlay display settings; the strict v66 schema rejects them.
   if (value.schemaVersion === 66)

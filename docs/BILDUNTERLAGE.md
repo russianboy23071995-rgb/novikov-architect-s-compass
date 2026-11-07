@@ -60,3 +60,21 @@ Ein großer Scan wird nicht mehr abgelehnt, sondern beim Import eingepasst:
 Nachweis im Browser: Scan 6000 × 4000 px, 35 MiB (mit Rauschen, damit er sich schlecht packen lässt): nach 2,3 s eingelesen, verkleinert auf 3673 × 2449 px, platziert mit exakt 50,8 m Breite.
 
 Code: `importImage`, `sourceImageHeader`, `storedScale` in `src/interop/images/import.ts`; `underlayMetresPerPixel` in `src/application/references/underlay-size.ts`. Test: `src/interop/images/import-fit.test.ts`.
+
+## B6 – Pläne und PDF
+
+**Befund:** Eine Bildunterlage lag bisher auf der Ebene „2D-Zeichnungen“ und erschien damit in jedem Abbild, auf jedem Layout, auf dem dieses Abbild liegt, und im PDF. Ein Scan zum Nachzeichnen wäre also mitgedruckt worden.
+
+**Jetzt:** Dateiformat 68. Jedes Abbild hat im Fenster des Abbilds (Navigator → Abbild → Einstellungen) den Abschnitt **Bildunterlagen** mit dem Schalter „Bildunterlagen auf Layouts und im PDF zeigen“. **Standard: aus.** Ausgeschaltet zeigt die auf einem Layout platzierte Zeichnung die Unterlagen nicht, das PDF also auch nicht. Im Grundriss und im Abbild selbst bleibt die Unterlage sichtbar, dort wird ja nachgezeichnet. Eingeschaltet erscheint sie auf dem Layout mit Deckkraft, Graustufen und Drehung, im PDF als Bild (seit L14 P3).
+
+Wie jede Änderung am Abbild greift der Schalter auf einem Layout erst nach dem Aktualisieren (Layoutbuch, docs/LAYOUTBUCH.md): Das Layout ist im Navigator orange markiert, „aktualisieren“ zeichnet es neu, ein PDF-Export ebenfalls.
+
+Nachweis im Browser: Projekt mit Unterlage, Abbild „Grundriss EG“ auf Layout „EG“. Ohne Schalter zeigt das Layout die Zeichnung ohne Unterlage; Schalter ein, Layout aktualisiert, die Unterlage steht maßstäblich auf dem Blatt.
+
+Ältere Dateien (Format 67 und früher) laden ohne Schalter, ihre Unterlagen stehen danach also nicht mehr auf den Layouts. Wer sie dort braucht, schaltet sie im Abbild ein.
+
+Code: `drawingDocumentV68Schema` in `src/domain/views/documents.ts`, Aktion „underlays“ in `src/application/views/documents.ts`, `placedScene` in `BimPlan.tsx`, `DocumentSettingsSections.tsx`. Test: `src/application/views/layout-underlays.test.ts`.
+
+## Stand L23 Teil 1
+
+B1–B6 umgesetzt (PR682–686). Offen und nicht Teil davon: PDF als Unterlage (braucht pdf.js, nur mit Zustimmung), DXF/DWG, Ausrichten parallel zu einer gewählten Wand, eine eigene Ebene für Unterlagen.

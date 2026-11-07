@@ -44,6 +44,8 @@ export type DocumentAction =
   | { kind: "rename-folder"; id: string; name: string }
   | { kind: "rename"; id: string; name: string }
   | { kind: "scale"; id: string; denominator: number }
+  // Image underlays on layouts (docs/BILDUNTERLAGE.md, B6).
+  | { kind: "underlays"; id: string; show: boolean }
   | { kind: "assign-folder"; id: string; folderId: string | null }
   | { kind: "delete-folder"; id: string }
   | { kind: "settings"; id: string; name: string; denominator: number; folderId: string | null }
@@ -213,6 +215,15 @@ export function changeDrawingDocument(
         : {}),
     });
   }
+  if (action.kind === "underlays")
+    return validateLike(current, {
+      ...current,
+      drawingDocuments: documents.map((d) => {
+        if (d.id !== target.id) return d;
+        const { showUnderlays: _, ...rest } = d;
+        return action.show ? { ...rest, showUnderlays: true } : rest;
+      }),
+    });
   if (action.kind !== "rename" && action.kind !== "scale")
     throw new Error("Unbekannte Abbildaktion.");
   return validateLike(current, {
