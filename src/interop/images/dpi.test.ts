@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { imageDpi, metresPerPixelAtScale } from "./dpi.ts";
+import { imageDpi } from "./dpi.ts";
+import { metresPerPixelAtScale } from "../../application/references/underlay-size.ts";
 
 // docs/BILDUNTERLAGE.md, B1: the resolution a scan states for itself.
 const be = (v: number, n: number) =>

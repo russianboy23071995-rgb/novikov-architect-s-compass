@@ -49,8 +49,3 @@ export function imageDpi(bytes: Uint8Array): number | null {
   }
   return null;
 }
-
-/** Metres per pixel of a scan: plan scale 1:denominator at `dpi` dots per inch. */
-export function metresPerPixelAtScale(denominator: number, dpi: number): number {
-  return (denominator * 0.0254) / dpi;
-}

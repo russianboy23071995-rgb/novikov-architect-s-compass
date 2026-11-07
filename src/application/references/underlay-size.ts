@@ -1,5 +1,4 @@
 import { parseMetres } from "../../core/units/metres.ts";
-import { metresPerPixelAtScale } from "../../interop/images/dpi.ts";
 
 /**
  * Defaults of the underlay tool (docs/BILDUNTERLAGE.md, B1): the size of a new underlay from a
@@ -42,4 +41,9 @@ export function underlayMetresPerPixel(
     throw new Error("Maßstab eingeben, z. B. 100 für 1:100.");
   if (!Number.isFinite(dpi) || dpi <= 0) throw new Error("Auflösung in dpi eingeben, z. B. 300.");
   return metresPerPixelAtScale(denominator, dpi) / scale;
+}
+
+/** Metres per pixel of a scan: plan scale 1:denominator at `dpi` dots per inch. */
+export function metresPerPixelAtScale(denominator: number, dpi: number): number {
+  return (denominator * 0.0254) / dpi;
 }
