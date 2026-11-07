@@ -81,9 +81,13 @@ function candidates(
       shown.map((e) => index.get(e.id)!),
     ).map((t) => t.id),
   );
-  return shown
-    .filter((e) => visible.has(e.id))
-    .map((element) => ({ target: index.get(element.id)!, element }));
+  return (
+    shown
+      .filter((e) => visible.has(e.id))
+      // A locked underlay is not selected by filters or select all (docs/BILDUNTERLAGE.md, B2).
+      .filter((e) => !(index.get(e.id)!.kind === "reference" && "locked" in e && e.locked))
+      .map((element) => ({ target: index.get(element.id)!, element }))
+  );
 }
 
 const matches = (criteria: FilterCriteria) => (entry: Entry) => {

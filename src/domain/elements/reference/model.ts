@@ -61,8 +61,19 @@ export const imageReferenceSchema = z
     metresPerPixel: z.number().finite().positive(),
   })
   .strict();
+/** Least opacity of an underlay: fainter would hide it entirely. */
+export const MIN_REFERENCE_OPACITY = 0.05;
+/**
+ * Schema 67 (docs/BILDUNTERLAGE.md, B2): how an underlay shows. Absent opacity is 1 and keeps
+ * the look of older files; a locked underlay is not picked by click, box or Tab.
+ */
+export const imageReferenceV67Schema = imageReferenceSchema.extend({
+  opacity: z.number().min(MIN_REFERENCE_OPACITY).max(1).optional(),
+  grayscale: z.boolean().optional(),
+  locked: z.boolean().optional(),
+});
 export type ImageAsset = z.infer<typeof storageAssetSchema>;
-export type ImageReference = z.infer<typeof imageReferenceSchema>;
+export type ImageReference = z.infer<typeof imageReferenceV67Schema>;
 export function validateReferenceExtent(reference: ImageReference, asset: ImageAsset): void {
   const w = asset.pixelWidth * reference.metresPerPixel;
   const h = asset.pixelHeight * reference.metresPerPixel;

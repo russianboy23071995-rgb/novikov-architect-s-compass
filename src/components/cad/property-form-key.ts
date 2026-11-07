@@ -7,6 +7,8 @@ let nextRevision = 0;
 export function propertyFormKey(project: Project, selection: Selection): string {
   // The room form follows its values by itself and holds windows that must survive a change.
   if (selection?.kind === "room") return `room:${selection.id}`;
+  // The underlay fields too (docs/BILDUNTERLAGE.md, B2): typing goes on after a change.
+  if (selection?.kind === "reference") return `reference:${selection.id}`;
   let revision = revisions.get(project);
   if (revision === undefined) {
     revision = ++nextRevision;

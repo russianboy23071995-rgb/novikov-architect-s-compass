@@ -81,6 +81,8 @@ export function useImageImport(
           origin: point,
           rotation: 0,
           metresPerPixel: metres / active.asset.pixelWidth,
+          // Half transparent, so the drawing on top stays readable (docs/BILDUNTERLAGE.md, B2).
+          opacity: 0.5,
         },
       });
     };
