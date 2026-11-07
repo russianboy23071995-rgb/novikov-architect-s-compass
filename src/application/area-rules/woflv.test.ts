@@ -172,11 +172,18 @@ test("§ 3 Abs. 3: columns above 1,50 m and 0,1 m², stairs above three risers",
   p = addColumn(p, { ...base, id: "klein", shape: shape(0.3), height: 2.5 });
   p = addColumn(p, { ...base, id: "niedrig", shape: shape(0.5), height: 1.5 });
   const labels = () => storeyAreaBlockers(storeyOf(p)).map((b) => b.label);
-  assert.deepEqual(labels(), ["Stütze"]);
+  // Height decides on the storey; the area is measured inside each room (S1).
+  assert.deepEqual(labels(), ["Stütze", "Stütze"]);
+  near(
+    workingRoomLiving(p, room(p))
+      .steps.filter((s) => s.rule === "§ 3 Abs. 3 Nr. 1")
+      .reduce((sum, s) => sum + s.area, 0),
+    -0.25,
+  );
   p = addStair(p, { id: "kurz", start: { x: 3, y: 1 }, height: 0.5, riserCount: 3 });
-  assert.deepEqual(labels(), ["Stütze"]);
+  assert.deepEqual(labels(), ["Stütze", "Stütze"]);
   p = addStair(p, { id: "lang", start: { x: 3, y: 1 }, height: 0.7, riserCount: 4 });
-  assert.deepEqual(labels(), ["Stütze", "Treppe"]);
+  assert.deepEqual(labels(), ["Stütze", "Stütze", "Treppe"]);
   const result = workingRoomLiving(p, room(p));
   assert.ok(result.steps.some((s) => s.rule === "§ 3 Abs. 3 Nr. 2" && s.area < 0));
 });
@@ -244,4 +251,19 @@ test("csv: a row per step, sums, rule set; semicolons in names are quoted", () =
   assert.ok(csv.includes("Summe Projekt;;;;;;20,00;;17,00"));
   assert.ok(csv.includes("Regelstand: WoFlV"));
   assert.ok(csv.includes("Balkon, Terrasse zu 25 %;§ 4 Nr. 4;4,00;25,00;1,00"));
+});
+
+test("S1: the 0,1 m² count inside the room, a column half in the wall is measured over", () => {
+  const column = (x: number) => ({
+    label: "Stütze",
+    rule: "§ 3 Abs. 3 Nr. 1",
+    points: box(x, 1, 0.4, 0.4),
+    minArea: 0.1,
+  });
+  // 0,4 × 0,4 = 0,16 m² inside: left out.
+  near(roomLivingResult({ points: square }, [flat(2.5)], [column(1)]).livingArea, 11.84);
+  // Half outside the room at x = 4: 0,08 m² inside stays in the living area.
+  near(roomLivingResult({ points: square }, [flat(2.5)], [column(3.8)]).livingArea, 12);
+  // Three quarters inside: 0,12 m² come off.
+  near(roomLivingResult({ points: square }, [flat(2.5)], [column(3.7)]).livingArea, 11.88);
 });

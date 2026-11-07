@@ -81,3 +81,21 @@ Gefunden und behoben: Die Linie über „Wohnfläche gesamt“ lief durch den Te
 ## Stand
 
 L15 ist umgesetzt. Offen bleibt die unabhängige Fachprüfung, die das Anforderungsregister verlangt (N35). Sie kann das Programm nicht ersetzen.
+
+## S1 – Stützen: wann abgezogen, wann übermessen (07.11.2026)
+
+Nutzerfrage 07.11.2026: „prüfe ob und wann Stützen abgezogen oder übermessen werden“. Grundlage ist WoFlV § 3 Abs. 3 Nr. 1.
+
+| Fall                                                 | Ergebnis                                                                               |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Höher als 1,50 m und mehr als 0,1 m² im Raum         | abgezogen, mit dem Anteil der Stelle (unter der Schräge zwischen 1 und 2 m zur Hälfte) |
+| Höchstens 1,50 m hoch                                | übermessen, zählt zur Wohnfläche                                                       |
+| Höchstens 0,1 m² im Raum, z. B. 30 × 30 cm = 0,09 m² | übermessen                                                                             |
+| An das Geschoss gebunden, Höhe unbekannt             | gilt als hoch genug                                                                    |
+| Teils in der Wand oder außerhalb                     | nur der Teil im Raum zählt, für die Schwelle und für den Abzug                         |
+
+Geändert: Bis PR666 maß das Programm die 0,1 m² an der ganzen Stütze. Eine Stütze mit 0,16 m², die zur Hälfte in der Wand steht, wurde mit 0,08 m² abgezogen, obwohl im Raum weniger als 0,1 m² stehen. Jetzt entscheidet die Fläche im Raum. Eine quadratische Stütze wird ab etwa 32 × 32 cm abgezogen, eine runde ab etwa 36 cm Durchmesser.
+
+„Freistehend“ prüft das Programm weiter nicht. Für Vormauerungen und Bekleidungen gilt dieselbe Schwelle, das Ergebnis ist also gleich.
+
+Nachweis im Browser: Stütze 0,40 × 0,40 m genau auf der Grenze zwischen „Wohnen“ und „Balkon“, je 0,08 m² in jedem Raum. Beide Räume behalten ihre Fläche (14,75 und 2,00 m²), nur die freistehende Stütze 0,50 × 0,50 m in „Wohnen“ geht ab. Vor S1 wären bei beiden Räumen je 0,08 m² abgegangen.
