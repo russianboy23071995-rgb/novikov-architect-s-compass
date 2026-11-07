@@ -1,3 +1,4 @@
+import { ColorField } from "./PenColors";
 import { useState } from "react";
 import {
   TEXT_FONTS,
@@ -126,12 +127,11 @@ export function TextFields({
       {number("rotation", "Drehung (°)")}
       <label className="text-xs">
         Farbe
-        <input
-          type="color"
-          aria-label="Textfarbe"
+        <ColorField
+          compact
+          label="Textfarbe"
           value={value.color}
-          onChange={(e) => choose({ ...value, color: e.target.value })}
-          className="block h-7 w-10 rounded border bg-background"
+          onChange={(color) => choose({ ...value, color })}
         />
       </label>
       <label className="text-xs">

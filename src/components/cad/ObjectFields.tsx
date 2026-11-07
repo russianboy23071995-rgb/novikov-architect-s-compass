@@ -1,3 +1,4 @@
+import { ColorField } from "./PenColors";
 import { useState } from "react";
 import type { ObjectToolDefaults } from "@/application/objects/defaults";
 import { objectDefinition } from "@/domain/elements/object/catalog";
@@ -476,13 +477,16 @@ export function ObjectFields({
                     </option>
                   ))}
                 </select>
-                <input
-                  type="color"
-                  aria-label={`Farbe ${name}`}
+                <ColorField
+                  compact
+                  label={`Farbe ${name}`}
                   value={objectSlotColor(value, slot)}
-                  onChange={(e) => onChange(setFinish(slot, { color: e.target.value }))}
-                  onBlur={() => onCommit?.(value)}
-                  className="h-7 w-8 rounded border bg-background p-0.5"
+                  onChange={(color) => {
+                    const next = setFinish(slot, { color });
+                    onChange(next);
+                    onCommit?.(next);
+                  }}
+                  className="block h-7 w-8 rounded border bg-background p-0.5"
                 />
               </div>
             );

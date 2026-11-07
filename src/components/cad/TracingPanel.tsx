@@ -1,3 +1,4 @@
+import { ColorField } from "./PenColors";
 import type { Project } from "@/domain/project/schema";
 import { TRACING_COLORS, type Tracing } from "@/application/views/tracing";
 
@@ -84,13 +85,13 @@ export function TracingPanel({
                   }}
                 />
               ))}
-              <input
-                type="color"
-                aria-label="Eigene Farbe der Transparenzpause"
+              <ColorField
+                compact
+                label="Eigene Farbe der Transparenzpause"
                 title="Eigene Farbe"
                 value={value.color}
-                onChange={(event) => onChange({ ...value, color: event.target.value })}
-                className={`h-5 w-6 cursor-pointer rounded border ${known ? "" : "ring-2 ring-foreground"}`}
+                onChange={(color) => onChange({ ...value, color })}
+                className={`block h-5 w-6 cursor-pointer rounded border p-0.5 ${known ? "" : "ring-2 ring-foreground"}`}
               />
             </div>
           </div>

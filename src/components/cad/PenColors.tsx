@@ -78,6 +78,12 @@ function Swatches({
 function ColorPicker({ picker, set, close }: { picker: Picker; set: PenSet; close: () => void }) {
   const [hex, setHex] = useState(picker.value);
   const memory = useColorMemory();
+  // The window takes the keyboard: Escape closes it at once, a HEX value can be typed.
+  const hexField = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    hexField.current?.focus();
+    hexField.current?.select();
+  }, []);
   const valid = HEX.test(hex);
   const choose = (color: string) => {
     memory.used(color);
@@ -176,6 +182,7 @@ function ColorPicker({ picker, set, close }: { picker: Picker; set: PenSet; clos
         <label className="block">
           HEX-Farbwert
           <input
+            ref={hexField}
             aria-label="HEX-Farbwert"
             className="ml-2 rounded border bg-background p-2"
             value={hex}
@@ -209,11 +216,18 @@ export function ColorField({
   onChange,
   label,
   disabled = false,
+  compact = false,
+  title,
+  className,
 }: {
   value: string;
   onChange: (color: string) => void;
   label: string;
   disabled?: boolean;
+  /** Only the colour, no HEX text: for narrow rows (docs/FARBEN.md, F3). */
+  compact?: boolean;
+  title?: string | undefined;
+  className?: string | undefined;
 }) {
   const open = useContext(PickerContext);
   const commit = useContext(PropertyCommitContext);
@@ -231,8 +245,13 @@ export function ColorField({
       type="button"
       disabled={disabled}
       aria-label={label}
-      title={value}
-      className="block h-8 min-w-20 rounded border bg-background px-2 text-xs disabled:opacity-40"
+      title={title ?? value}
+      className={
+        className ??
+        (compact
+          ? "block h-7 w-10 rounded border bg-background p-0.5 disabled:opacity-40"
+          : "block h-8 min-w-20 rounded border bg-background px-2 text-xs disabled:opacity-40")
+      }
       onClick={() =>
         open({
           value,
@@ -247,11 +266,17 @@ export function ColorField({
         })
       }
     >
-      <span
-        className="mr-2 inline-block h-3 w-4 rounded-sm border align-middle"
-        style={{ backgroundColor: value }}
-      />
-      {value}
+      {compact ? (
+        <span className="block h-full w-full rounded-sm" style={{ backgroundColor: value }} />
+      ) : (
+        <>
+          <span
+            className="mr-2 inline-block h-3 w-4 rounded-sm border align-middle"
+            style={{ backgroundColor: value }}
+          />
+          {value}
+        </>
+      )}
     </button>
   );
 }

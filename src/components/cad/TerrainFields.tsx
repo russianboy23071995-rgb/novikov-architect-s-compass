@@ -1,3 +1,4 @@
+import { ColorField } from "./PenColors";
 import { useState } from "react";
 import type { TerrainDefaults } from "@/application/terrain/actions";
 import type { Layer } from "@/domain/layers/model";
@@ -63,13 +64,14 @@ export function TerrainFields({
       ))}
       <label className="text-xs">
         Farbe
-        <input
-          type="color"
-          aria-label="Geländefarbe"
+        <ColorField
+          compact
+          label="Geländefarbe"
           value={value.color}
-          onChange={(e) => onChange({ ...value, color: e.target.value })}
-          onBlur={() => onCommit?.(value)}
-          className="block h-7 w-10 rounded border bg-background p-0.5"
+          onChange={(color) => {
+            onChange({ ...value, color });
+            onCommit?.({ ...value, color });
+          }}
         />
       </label>
       <label className="text-xs">
